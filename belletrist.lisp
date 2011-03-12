@@ -7,3 +7,7 @@
 
 (defun end-shared-hallucination ()
   (when *server* (stop *server*) (setf *server* nil)))
+
+(define-easy-handler (root :uri "/") ()
+  (setf (content-type*) "text/plain")
+  (format nil "Hello, World!"))
