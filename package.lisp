@@ -1,5 +1,4 @@
 ;;;; package.lisp
 
 (cl:defpackage #:belletrist
-  (:use #:cl #:alexandria))
-
+  (:use #:cl #:alexandria #:hunchentoot))

@@ -1,9 +1,9 @@
 (cl:in-package #:belletrist)
 
-(defvar *acceptor* nil)
+(defvar *server* nil)
 
 (defun begin-shared-hallucination ()
-  (hunchentoot:start (setf *acceptor* (make-instance 'hunchentoot:acceptor :port 8888))))
+  (start (setf *server* (make-instance 'acceptor :port 8888))))
 
 (defun end-shared-hallucination ()
-  (when *acceptor* (hunchentoot:stop *acceptor*) (setf *acceptor* nil)))
+  (when *server* (stop *server*) (setf *server* nil)))
