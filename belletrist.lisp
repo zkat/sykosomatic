@@ -8,15 +8,16 @@
 (defun end-shared-hallucination ()
   (when *server* (stop *server*) (setf *server* nil)))
 
-(defparameter *what-user-has-said* nil)
-
 (define-easy-handler (home :uri "/") (what-user-said start-over)
-  (when start-over (setf *what-user-has-said* nil))
-  (when what-user-said (push what-user-said *what-user-has-said*))
+  (unless *session*
+    (start-session))
+  (when start-over (setf (session-value 'what-user-said) nil))
+  (when what-user-said (push what-user-said (session-value 'what-user-said)))
   (with-yaclml-output-to-string
     (<:html
      (<:body
-      (<:p (<:ah "You are in a dark, fluffy dungeon. " (or (reverse *what-user-has-said*) "That is all.")))
+      (<:p (<:ah "You are in a dark, fluffy dungeon. " (or (reverse (session-value 'what-user-said))
+                                                           "That is all.")))
       (<:form :name "user-story" :action "/" :method "get"
        (<:ah "What do?")
        (<:input :type "text" :name "what-user-said"))
