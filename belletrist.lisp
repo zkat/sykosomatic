@@ -9,5 +9,7 @@
   (when *server* (stop *server*) (setf *server* nil)))
 
 (define-easy-handler (home :uri "/") ()
-  (setf (content-type*) "text/plain")
-  (format nil "You are in a dark, stinky dungeon. That is all."))
+  (with-yaclml-output-to-string
+    (<:html
+     (<:body
+      (<:p (<:ah "You are in a dark, stinky dungeon. That is all."))))))
