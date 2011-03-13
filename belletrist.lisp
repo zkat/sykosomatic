@@ -4,9 +4,15 @@
 (defparameter *current-story* (list "Once upon a time..."))
 (defvar *users* nil)
 
+(defun session-cleanup (session)
+  (let ((username (session-value 'username session)))
+    (when username
+      (deletef *users* username :test #'string-equal))))
+
 (defun begin-shared-hallucination ()
   (when *server* (end-shared-hallucination) (print "Restarting..."))
-  (setf *users* nil)
+  (setf *users* nil
+        *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port 8888)))
   t)
 
