@@ -41,7 +41,7 @@ setInterval(updateChat, 1000);
       (<:div :id "chat-box")
       (<:form :name "user-story" :action "javascript:addMsg()"
        (<:ah "What do?")
-       (<:input :type "text" :id "what-user-said")
+       (<:input :type "textarea" :id "what-user-said")
        (<:input :type "submit" :value "Send"))))))
 
 (define-easy-handler (ajax :uri "/ajax") (f)
