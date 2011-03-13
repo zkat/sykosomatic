@@ -118,6 +118,6 @@ setInterval(updateChat, 1000);
   (prog1
       (with-yaclml-output-to-string
         (mapc (lambda (message)
-                (<:p (<:ai (user-message-user message) " sez: " (user-message-message message))))
+                (<:p (<:ai (user-message-message message) " ("(user-message-user message)")")))
               (get-recent-messages (session-value 'last-message-id))))
     (setf (session-value 'last-message-id) *max-message-id*)))
