@@ -1,14 +1,11 @@
 (cl:in-package #:belletrist)
 
 (defvar *server* nil)
-(defvar *ajax-processor* (make-instance 'ajax-processor :server-uri "/ajax"))
 (defparameter *current-story* (list "Once upon a time..."))
 
 (defun begin-shared-hallucination ()
   (when *server* (end-shared-hallucination) (print "Restarting..."))
   (start (setf *server* (make-instance 'acceptor :port 8888)))
-  (setf *dispatch-table* (list 'dispatch-easy-handlers
-                               (create-ajax-dispatcher *ajax-processor*)))
   t)
 
 (defun end-shared-hallucination ()
@@ -21,16 +18,16 @@
     (<:html
      (<:head
       (<:title "Hello!")
-      (<:ai (generate-prologue *ajax-processor*))
+      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript")
       (<:script :type "text/javascript" (<:ai "
-function callback(response) {
-  var story = response.firstChild.firstChild.nodeValue;
-  document.getElementById('chat-box').innerHTML = story;
+function callback(data) {
+  $('#chat-box').html(data);
 };
 
 function addMsg() {
-  ajax_add_message(document.getElementById('what-user-said').value, callback);
-};
+  var val = $('#what-user-said').val();
+  $.get('ajax', { 'f' : 'ADD-MESSAGE', 'msg' : val }, callback);
+}
 ")))
      (<:body
       (<:div :id "chat-box")
@@ -39,10 +36,31 @@ function addMsg() {
        (<:input :type "text" :id "what-user-said")
        (<:input :type "submit" :value "Send"))))))
 
-(defun-ajax add-message (msg) (*ajax-processor*)
+(define-easy-handler (ajax :uri "/ajax") (f)
+  (let ((func (find-ajax-func f)))
+    (if func
+        (progn
+          (setf (content-type*) "text/html")
+          (no-cache)
+          (apply func (remove f (mapcar #'cdr (get-parameters*)))))
+        (warn "An attempt was made to call undefined AJAX function ~A." f))))
+
+(defparameter *ajax-funcs* (make-hash-table :test #'equalp))
+
+(defun find-ajax-func (name)
+  (gethash name *ajax-funcs*))
+
+(defmacro defajax (name lambda-list &body body)
+  `(progn
+     (when (gethash ,(string name) *ajax-funcs*)
+       (warn "Redefining AJAX function ~A." ,(string name)))
+     (setf (gethash ,(string name) *ajax-funcs*)
+           (lambda ,lambda-list ,@body))))
+
+(defajax add-message (msg)
   (push (format nil "User sez: ~A" msg) *current-story*)
-  (with-yaclml-output-to-string
-    (<:ah
-     (with-yaclml-output-to-string
-       (mapc (lambda (line) (<:p (<:ai line)))
-             (reverse *current-story*))))))
+  (print
+   (with-yaclml-output-to-string
+     (mapc (lambda (message)
+             (<:p (<:ai message)))
+           (reverse *current-story*)))))
