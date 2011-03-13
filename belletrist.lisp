@@ -1,8 +1,20 @@
 (cl:in-package #:belletrist)
 
 (defvar *server* nil)
-(defparameter *current-story* (list "Once upon a time..."))
+(defparameter *current-story* nil)
 (defvar *users* nil)
+(defvar *max-message-id* 0)
+
+(defstruct user-message id user timestamp message)
+
+(defun add-user-message (user message &optional (timestamp (get-universal-time))
+                         &aux (id (incf *max-message-id*)))
+  (push (make-user-message :id id :user user :timestamp timestamp :message message)
+        *current-story*)
+  id)
+
+(defun get-recent-messages (last-message-id)
+  (member (1+ last-message-id) (reverse *current-story*) :key #'user-message-id))
 
 (defun session-cleanup (session)
   (let ((username (session-value 'username session)))
@@ -32,7 +44,8 @@
           (progn
             (<:p (<:ah "Successfully logged in as " username "."))
             (push username *users*)
-            (setf (session-value 'username) username)
+            (setf (session-value 'username) username
+                  (session-value 'last-message-id) *max-message-id*)
             (format t "~&~A logged in.~%" username)
             (redirect "/"))
           (<:div
@@ -53,7 +66,7 @@
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript")
       (<:script :type "text/javascript" (<:ai "
 function callback(data) {
-  $('#chat-box').html(data);
+  $('#chat-box').append(data);
 };
 
 function addMsg() {
@@ -98,12 +111,13 @@ setInterval(updateChat, 1000);
            (defun ,name ,lambda-list ,@body))))
 
 (defajax add-message (msg)
-  (push msg *current-story*)
-  (format t "~&~A entered a new message: ~S~%" (session-value 'username) msg)
+  (add-user-message (session-value 'username) msg)
   (update-chat))
 
 (defajax update-chat ()
-  (with-yaclml-output-to-string
-    (mapc (lambda (message)
-            (<:p (<:ai message)))
-          (reverse *current-story*))))
+  (prog1
+      (with-yaclml-output-to-string
+        (mapc (lambda (message)
+                (<:p (<:ai (user-message-user message) " sez: " (user-message-message message))))
+              (get-recent-messages (session-value 'last-message-id))))
+    (setf (session-value 'last-message-id) *max-message-id*)))
