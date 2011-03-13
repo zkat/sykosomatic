@@ -10,7 +10,7 @@
       (deletef *users* username :test #'string-equal))))
 
 (defun begin-shared-hallucination ()
-  (when *server* (end-shared-hallucination) (print "Restarting..."))
+  (when *server* (end-shared-hallucination) (warn "Restarting server."))
   (setf *users* nil
         *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port 8888)))
@@ -33,6 +33,7 @@
             (<:p (<:ah "Successfully logged in as " username "."))
             (push username *users*)
             (setf (session-value 'username) username)
+            (format t "~&~A logged in.~%" username)
             (redirect "/"))
           (<:div
            (<:form :name "username" :action "/login"
@@ -98,7 +99,7 @@ setInterval(updateChat, 1000);
 
 (defajax add-message (msg)
   (push msg *current-story*)
-  (format t "~A entered a new message: ~S" (session-value 'username) msg)
+  (format t "~&~A entered a new message: ~S~%" (session-value 'username) msg)
   (update-chat))
 
 (defajax update-chat ()
