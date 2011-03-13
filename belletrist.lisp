@@ -2,18 +2,43 @@
 
 (defvar *server* nil)
 (defparameter *current-story* (list "Once upon a time..."))
+(defvar *users* nil)
 
 (defun begin-shared-hallucination ()
   (when *server* (end-shared-hallucination) (print "Restarting..."))
+  (setf *users* nil)
   (start (setf *server* (make-instance 'acceptor :port 8888)))
   t)
 
 (defun end-shared-hallucination ()
   (when *server* (stop *server*) (setf *server* nil)))
 
-(define-easy-handler (home :uri "/") ()
+(define-easy-handler (login :uri "/login") (username)
   (unless *session*
     (start-session))
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Login Page")
+      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+     (<:body
+      (if (and username (not (find username *users* :test #'string-equal)))
+          (progn
+            (<:p (<:ah "Successfully logged in as " username "."))
+            (push username *users*)
+            (setf (session-value 'username) username)
+            (redirect "/"))
+          (<:div
+           (<:form :name "username" :action "/login"
+            (<:label (<:ah "Pick a username: "))
+            (<:input :type "text" :name "username")
+            (<:input :type "submit" :value "Submit"))
+           (when username
+             (<:label (<:ah "Sorry, that username is already being used.")))))))))
+
+(define-easy-handler (home :uri "/") ()
+  (unless (and *session* (session-value 'username))
+    (redirect "/login"))
   (with-yaclml-output-to-string
     (<:html
      (<:head
@@ -67,6 +92,7 @@ setInterval(updateChat, 1000);
 
 (defajax add-message (msg)
   (push msg *current-story*)
+  (format t "~A entered a new message: ~S" (session-value 'username) msg)
   (update-chat))
 
 (defajax update-chat ()
