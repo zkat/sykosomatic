@@ -26,8 +26,16 @@ function callback(data) {
 
 function addMsg() {
   var val = $('#what-user-said').val();
+  $('#what-user-said').val('');
   $.get('ajax', { 'f' : 'ADD-MESSAGE', 'msg' : val }, callback);
 }
+
+function updateChat() {
+  $.get('ajax', { 'f' : 'UPDATE-CHAT' }, callback);
+}
+
+$(document).ready(updateChat);
+setInterval(updateChat, 1000);
 ")))
      (<:body
       (<:div :id "chat-box")
@@ -55,12 +63,14 @@ function addMsg() {
      (when (gethash ,(string name) *ajax-funcs*)
        (warn "Redefining AJAX function ~A." ,(string name)))
      (setf (gethash ,(string name) *ajax-funcs*)
-           (lambda ,lambda-list ,@body))))
+           (defun ,name ,lambda-list ,@body))))
 
 (defajax add-message (msg)
-  (push (format nil "User sez: ~A" msg) *current-story*)
-  (print
-   (with-yaclml-output-to-string
-     (mapc (lambda (message)
-             (<:p (<:ai message)))
-           (reverse *current-story*)))))
+  (push msg *current-story*)
+  (update-chat))
+
+(defajax update-chat ()
+  (with-yaclml-output-to-string
+    (mapc (lambda (message)
+            (<:p (<:ai message)))
+          (reverse *current-story*))))
