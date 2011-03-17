@@ -44,9 +44,7 @@
 ;; Question: Do even minor instances of HTML need to be templated out?
 
 ;; TODO for today:
-;; * Add another input field, 'action'.
-;; * When someone logs in, draw a screenplay-style scene heading.
-;; * Render each entry as screenplay-style Action/Dialogue for the user that spoke.
+;; * Logout button
 
 (defvar *server* nil)
 (defparameter *current-story* nil)
