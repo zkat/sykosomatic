@@ -119,25 +119,30 @@
 .chat-box {
     list-style: none;
     width: 420px;
-    background: #eee;
+    background: #fffffc;
+    color: #000000;
     border: 1px solid #333;
-    padding: 5px 14px;
+    padding: 5px 14px 15px 14px !important;
     margin-left: auto;
     margin-right: auto;
 
 }
 
-.chat-box li { font: 12px/14px Courier, fixed; }
+.chat-box p { font: 14px Courier, monospace, fixed !important;
+              text-align: left !important;
+              letter-spacing: 0 !important;
+              margin-top: 0px !important;
+              margin-bottom: 0px !important; }
 
 .sceneheader, .action, .character { padding-top: 1.5ex; }
 
 .character, .sceneheader { text-transform:uppercase; }
 
-.action { padding-right: 5%; }
+.action { padding-right: 5%; font-size: 12px !important; line-height: 14px !important; }
 
 .character { margin-left: 40%; }
 
-.dialogue { margin-left: 25%; padding-right: 25%; }
+.dialogue { margin-left: 20%; padding-right: 20%; }
 
 .parenthetical { margin-left: 32%; padding-right: 30%; }
 
@@ -177,7 +182,7 @@ $(document).ready(updateChat);
 setInterval(updateChat, 1000);
 ")))
      (<:body
-      (<:ul :class "chat-box" :id "chat-box" (<:li :class "scene-header" (<:ah "EXT. JOSH'S COMPUTER. NIGHT.")))
+      (<:div :class "chat-box" :id "chat-box" (<:p :class "scene-header" (<:ah "EXT. JOSH'S COMPUTER. NIGHT.")))
       (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
        (<:label (<:ah "Action: "))
        (<:input :type "textarea" :id "user-action")
@@ -215,15 +220,15 @@ setInterval(updateChat, 1000);
         (dialogue (user-action-dialogue user-action)))
     (<:div :class "user-entry"
       (if (and (not (emptyp action)) (emptyp dialogue))
-          (<:li :class "action"
+          (<:p :class "action"
                (<:ah action))
           (progn
-            (<:li :class "character"
+            (<:p :class "character"
                  (<:ah (user-action-user user-action)))
             (unless (emptyp action)
-              (<:li :class "parenthetical"
+              (<:p :class "parenthetical"
                    (<:ah "(" action ")")))
-            (<:li :class "dialogue"
+            (<:p :class "dialogue"
                  (<:ah
                   (if (emptyp dialogue)
                       "..."
