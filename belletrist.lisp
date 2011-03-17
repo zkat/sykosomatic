@@ -158,9 +158,9 @@
 .transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
 
 .user-story { margin-right: auto;
-            margin-left: auto;
-            width: 600px;
-          }
+              margin-left: auto;
+              width: 600px
+            }
 .logout-button { margin-right: auto; margin-left: auto; width: 80px;}
 
 "
