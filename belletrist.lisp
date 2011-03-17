@@ -155,8 +155,7 @@
 
 .user-story { margin-right: auto;
             margin-left: auto;
-            width: 45%;
-            background-color: pink
+            width: 600px;
           }
 
 "
