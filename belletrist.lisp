@@ -137,7 +137,9 @@
               margin-top: 0px !important;
               margin-bottom: 0px !important; }
 
-.sceneheader, .action, .character { padding-top: 1.5ex; }
+.sceneheader { background: #d8d8d8; }
+
+.sceneheader-div, .action, .character { padding-top: 1.5ex; }
 
 .character, .sceneheader { text-transform:uppercase; }
 
@@ -187,7 +189,9 @@ $(document).ready(updateChat);
 setInterval(updateChat, 1000);
 ")))
      (<:body
-      (<:div :class "chat-box" :id "chat-box" (<:p :class "scene-header" (<:ah "EXT. JOSH'S COMPUTER. NIGHT.")))
+      (<:div :class "chat-box" :id "chat-box" (<:div :class "sceneheader-div"
+                                                     (<:p :class "sceneheader"
+                                                          (<:ah "ext. josh's computer. night."))))
       (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
        (<:label (<:ah "Action: "))
        (<:input :type "textarea" :id "user-action")
