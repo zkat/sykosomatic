@@ -44,7 +44,10 @@
 ;; Question: Do even minor instances of HTML need to be templated out?
 
 ;; TODO for today:
-
+;; * grey background for slug lines.
+;; * group actions and dialog by user.
+;; * Use (CONT'D.)
+;; * Fix formatting of submission form.
 (defvar *server* nil)
 (defparameter *current-story* nil)
 (defvar *users* nil)
