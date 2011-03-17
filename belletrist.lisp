@@ -120,13 +120,14 @@
 .chat-box {
     list-style: none;
     width: 420px;
+    height: 500px;
     background: #fffffc;
     color: #000000;
     border: 1px solid #333;
     padding: 5px 14px 15px 14px !important;
     margin-left: auto;
     margin-right: auto;
-
+    overflow:auto;
 }
 
 .chat-box p { font: 14px Courier, monospace, fixed !important;
@@ -164,6 +165,8 @@
       (<:script :type "text/javascript" (<:ai "
 function callback(data) {
   $('#chat-box').append(data);
+  var objDiv = document.getElementById('chat-box');
+  objDiv.scrollTop = objDiv.scrollHeight;
 };
 
 function addMsg() {
