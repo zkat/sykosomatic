@@ -116,6 +116,7 @@
       (<:title "Hello!")
       (<:style :type "text/css" "
 
+/* From: http://scrippets.org/ */
 .chat-box {
     list-style: none;
     width: 420px;
