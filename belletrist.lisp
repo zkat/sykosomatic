@@ -46,23 +46,23 @@
 ;; TODO for today:
 ;; * Add another input field, 'action'.
 ;; * When someone logs in, draw a screenplay-style scene heading.
-;; * Render each entry as screenplay-style Action/Dialog for the user that spoke.
+;; * Render each entry as screenplay-style Action/Dialogue for the user that spoke.
 
 (defvar *server* nil)
 (defparameter *current-story* nil)
 (defvar *users* nil)
-(defvar *max-message-id* 0)
+(defvar *max-action-id* 0)
 
-(defstruct user-message id user timestamp message)
+(defstruct user-action id user timestamp action dialogue)
 
-(defun add-user-message (user message &optional (timestamp (get-universal-time))
-                         &aux (id (incf *max-message-id*)))
-  (push (make-user-message :id id :user user :timestamp timestamp :message message)
+(defun add-user-action (user action dialogue &optional (timestamp (get-universal-time))
+                         &aux (id (incf *max-action-id*)))
+  (push (make-user-action :id id :user user :timestamp timestamp :action action :dialogue dialogue)
         *current-story*)
   id)
 
-(defun get-recent-messages (last-message-id)
-  (member (1+ last-message-id) (reverse *current-story*) :key #'user-message-id))
+(defun get-recent-actions (last-action-id)
+  (member (1+ last-action-id) (reverse *current-story*) :key #'user-action-id))
 
 (defun session-cleanup (session)
   (let ((username (session-value 'username session)))
@@ -93,7 +93,7 @@
             (<:p (<:ah "Successfully logged in as " username "."))
             (push username *users*)
             (setf (session-value 'username) username
-                  (session-value 'last-message-id) *max-message-id*)
+                  (session-value 'last-action-id) *max-action-id*)
             (format t "~&~A logged in.~%" username)
             (redirect "/"))
           (<:div
@@ -111,6 +111,47 @@
     (<:html
      (<:head
       (<:title "Hello!")
+      (<:style :type "text/css" "
+
+.chat-box {
+    list-style: none;
+    width: 420px;
+    background: #eee;
+    border: 1px solid #333;
+    padding: 5px 14px;
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
+.chat-box li { font: 12px/14px Courier, fixed; }
+
+.sceneheader, .action, .character { padding-top: 1.5ex; }
+
+.character, .sceneheader { text-transform:uppercase; }
+
+.action { padding-right: 5%; }
+
+.character { margin-left: 40%; }
+
+.dialogue { margin-left: 25%; padding-right: 25%; }
+
+.parenthetical { margin-left: 32%; padding-right: 30%; }
+
+/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
+
+.dialogue + .parenthetical { padding-bottom: 0; }
+
+.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
+
+.user-story { margin-right: auto;
+            margin-left: auto;
+            width: 45%;
+            background-color: pink
+          }
+
+"
+)
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript")
       (<:script :type "text/javascript" (<:ai "
 function callback(data) {
@@ -118,9 +159,11 @@ function callback(data) {
 };
 
 function addMsg() {
-  var val = $('#what-user-said').val();
-  $('#what-user-said').val('');
-  $.get('ajax', { 'f' : 'ADD-MESSAGE', 'msg' : val }, callback);
+  var action = $('#user-action').val();
+  var dialogue = $('#user-dialogue').val();
+  $('#user-action').val('');
+  $('#user-dialogue').val('');
+  $.get('ajax', { 'f' : 'ADD-ACTION', 'action' : action, 'dialogue' : dialogue }, callback);
 }
 
 function updateChat() {
@@ -131,10 +174,12 @@ $(document).ready(updateChat);
 setInterval(updateChat, 1000);
 ")))
      (<:body
-      (<:div :id "chat-box")
-      (<:form :name "user-story" :action "javascript:addMsg()"
-       (<:ah "What do?")
-       (<:input :type "textarea" :id "what-user-said")
+      (<:ul :class "chat-box" :id "chat-box" (<:li :class "scene-header" (<:ah "EXT. JOSH'S COMPUTER. NIGHT.")))
+      (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
+       (<:label (<:ah "Action: "))
+       (<:input :type "textarea" :id "user-action")
+       (<:label (<:ah "Dialogue: "))
+       (<:input :type "textarea" :id "user-dialogue")
        (<:input :type "submit" :value "Send"))))))
 
 (define-easy-handler (ajax :uri "/ajax") (f)
@@ -158,14 +203,31 @@ setInterval(updateChat, 1000);
      (setf (gethash ,(string name) *ajax-funcs*)
            (defun ,name ,lambda-list ,@body))))
 
-(defajax add-message (msg)
-  (add-user-message (session-value 'username) msg)
+(defajax add-action (action dialogue)
+  (add-user-action (session-value 'username) action dialogue)
   (update-chat))
 
+(defun render-user-action (user-action)
+  (let ((action (user-action-action user-action))
+        (dialogue (user-action-dialogue user-action)))
+    (<:div :class "user-entry"
+      (if (and (not (emptyp action)) (emptyp dialogue))
+          (<:li :class "action"
+               (<:ah action))
+          (progn
+            (<:li :class "character"
+                 (<:ah (user-action-user user-action)))
+            (unless (emptyp action)
+              (<:li :class "parenthetical"
+                   (<:ah "(" action ")")))
+            (<:li :class "dialogue"
+                 (<:ah
+                  (if (emptyp dialogue)
+                      "..."
+                      dialogue))))))))
+
 (defajax update-chat ()
-  (prog1
-      (with-yaclml-output-to-string
-        (mapc (lambda (message)
-                (<:p (<:ai (user-message-message message) " ("(user-message-user message)")")))
-              (get-recent-messages (session-value 'last-message-id))))
-    (setf (session-value 'last-message-id) *max-message-id*)))
+  (prog1 (with-yaclml-output-to-string
+           (mapc #'render-user-action
+                 (get-recent-actions (session-value 'last-action-id))))
+    (setf (session-value 'last-action-id) *max-action-id*)))
