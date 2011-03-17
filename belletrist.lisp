@@ -1,5 +1,53 @@
 (cl:in-package #:belletrist)
 
+;; Ideas:
+
+;; Story:
+;; In general, players can hang around and play casually however they want. If/when they have an
+;; idea or want to play out something more seriously, they can choose to start a 'scene' to earn
+;; points.
+
+;; A scene will be recorded, and transcribed to look like a screenplay once it's done. It will then
+;; be posted in a community area, where others can rate the overall scene, as well as individual
+;; characters in it.
+
+;; Scene scores are divided amongst players, and individual achievement scores give individual
+;; players bonuses. Points are awarded based on score, and the points can be used towards something.
+
+;; Templating:
+
+;; All templating systems suck. This one won't. No logic goes into a template, and templates should
+;; be kept small (like functions). Additionally, multiple templates will be kept in a single file,
+;; which will generate either lisp functions or CLOS objects to correspond to each individual
+;; template, which the programmer can compose with the logic (much like pages are strung together
+;; with logic). The template files will basically look like lisp files, and require parameter
+;; declaration for clarity, as well as accept an optional docstring.
+;;
+;; Example:
+;; (deftempl standard-page (title head-contents body-contents)
+;;   "This template renders the standard page thingy."
+;;   <html>
+;;     <head>
+;;       <title>{title}</title>
+;;       {head}
+;;     </head>
+;;     <body>
+;;     {body-contents}
+;;     </body>
+;;   </html>)
+;;
+;; The above can be loaded (probably with a special reader macro), and could then create a function
+;; to be called on a stream, with the required parameters:
+;; (load "page.templ")
+;; (render-template 'standard-page *standard-output* :title "My special page" :body-contents "<p>Hello, World!</p>")
+;;
+;; Question: Do even minor instances of HTML need to be templated out?
+
+;; TODO for today:
+;; * Add another input field, 'action'.
+;; * When someone logs in, draw a screenplay-style scene heading.
+;; * Render each entry as screenplay-style Action/Dialog for the user that spoke.
+
 (defvar *server* nil)
 (defparameter *current-story* nil)
 (defvar *users* nil)
