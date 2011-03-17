@@ -67,7 +67,10 @@
 (defun session-cleanup (session)
   (let ((username (session-value 'username session)))
     (when username
-      (deletef *users* username :test #'string-equal))))
+      (logout username))))
+
+(defun logout (username)
+  (deletef *users* username :test #'string-equal))
 
 (defun begin-shared-hallucination ()
   (when *server* (end-shared-hallucination) (warn "Restarting server."))
