@@ -44,7 +44,6 @@
 ;; Question: Do even minor instances of HTML need to be templated out?
 
 ;; TODO for today:
-;; * Logout button
 
 (defvar *server* nil)
 (defparameter *current-story* nil)
@@ -81,8 +80,9 @@
   (when *server* (stop *server*) (setf *server* nil)))
 
 (define-easy-handler (login :uri "/login") (username)
-  (unless *session*
-    (start-session))
+  (if (and *session* (session-value 'username))
+      (redirect "/")
+      (start-session))
   (with-yaclml-output-to-string
     (<:html
      (<:head
@@ -156,6 +156,7 @@
             margin-left: auto;
             width: 600px;
           }
+.logout-button { margin-right: auto; margin-left: auto; width: 80px;}
 
 "
 )
@@ -189,7 +190,16 @@ setInterval(updateChat, 1000);
        (<:input :type "textarea" :id "user-action")
        (<:label (<:ah "Dialogue: "))
        (<:input :type "textarea" :id "user-dialogue")
-       (<:input :type "submit" :value "Send"))))))
+       (<:input :type "submit" :value "Send"))
+      (<:form :class "logout-button" :action "/logout"
+        (<:input :type "submit" :value "Log Out"))))))
+
+(define-easy-handler (logout-page :uri "/logout") ()
+  (when (and *session* (session-value 'username))
+    (let ((username (session-value 'username)))
+      (logout username)
+      (setf (session-value 'username) nil)))
+  (redirect "/login"))
 
 (define-easy-handler (ajax :uri "/ajax") (f)
   (let ((func (find-ajax-func f)))
