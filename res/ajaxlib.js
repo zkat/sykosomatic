@@ -1,7 +1,25 @@
+WEB_SOCKET_SWF_LOCATION = 'WebSocketMain.swf';
+WEB_SOCKET_DEBUG = true;
+
 function callback(data) {
   $('#chat-box').append(data);
   var objDiv = document.getElementById('chat-box');
   objDiv.scrollTop = objDiv.scrollHeight;
+};
+
+var ws;
+
+function init() {
+    ws = new WebSocket('ws://localhost:12345/chat');
+    ws.onopen = function() {
+        alert('connecting');
+    };
+    ws.onmessage = function(e) {
+        callback(e.data);
+    };
+    ws.onclose = function () {
+        alert('disconnected');
+    };
 };
 
 function addMsg() {
@@ -9,12 +27,26 @@ function addMsg() {
   var dialogue = $('#user-dialogue').val();
   $('#user-action').val('');
   $('#user-dialogue').val('');
-  $.get('ajax', { 'f' : 'ADD-ACTION', 'action' : action, 'dialogue' : dialogue }, callback);
-}
+  ws.send({ 'action' : action, 'dialogue' : dialogue });
+};
 
-function updateChat() {
-  $.get('ajax', { 'f' : 'UPDATE-CHAT' }, callback);
-}
+// function callback(data) {
+//   $('#chat-box').append(data);
+//   var objDiv = document.getElementById('chat-box');
+//   objDiv.scrollTop = objDiv.scrollHeight;
+// };
 
-$(document).ready(updateChat);
-setInterval(updateChat, 1000);
+// function addMsg() {
+//   var action = $('#user-action').val();
+//   var dialogue = $('#user-dialogue').val();
+//   $('#user-action').val('');
+//   $('#user-dialogue').val('');
+//   $.get('ajax', { 'f' : 'ADD-ACTION', 'action' : action, 'dialogue' : dialogue }, callback);
+// }
+
+// function updateChat() {
+//   $.get('ajax', { 'f' : 'UPDATE-CHAT' }, callback);
+// }
+
+// $(document).ready(updateChat);
+// setInterval(updateChat, 1000);
