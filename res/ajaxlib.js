@@ -1,4 +1,4 @@
-WEB_SOCKET_SWF_LOCATION = 'WebSocketMain.swf';
+WEB_SOCKET_SWF_LOCATION = 'res/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
 
 function callback(data) {
@@ -27,7 +27,7 @@ function addMsg() {
   var dialogue = $('#user-dialogue').val();
   $('#user-action').val('');
   $('#user-dialogue').val('');
-  ws.send({ 'action' : action, 'dialogue' : dialogue });
+  ws.send("{ 'action' : '"+action+"', 'dialogue' : '"+dialogue+"'}");
 };
 
 // function callback(data) {

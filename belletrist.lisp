@@ -44,10 +44,13 @@
 ;; Question: Do even minor instances of HTML need to be templated out?
 
 ;; TODO for today:
-;; * grey background for slug lines.
 ;; * group actions and dialog by user.
 ;; * Use (CONT'D.)
-;; * Fix formatting of submission form.
+
+;; WebSockets
+;; * Figure out how to validate http sessions vs websocket connections.
+;; * Handle user input through websockets.
+
 (defvar *server* nil)
 (defparameter *current-story* nil)
 (defvar *users* nil)
@@ -103,8 +106,7 @@
           (progn
             (<:p (<:ah "Successfully logged in as " username "."))
             (push username *users*)
-            (setf (session-value 'username) username
-                  (session-value 'last-action-id) *max-action-id*)
+            (setf (session-value 'username) username)
             (format t "~&~A logged in.~%" username)
             (redirect "/"))
           (<:div
@@ -168,10 +170,6 @@
      (setf (gethash ,(string name) *ajax-funcs*)
            (defun ,name ,lambda-list ,@body))))
 
-(defajax add-action (action dialogue)
-  (add-user-action (session-value 'username) action dialogue)
-  (update-chat))
-
 (defun render-user-action (user-action)
   (let ((action (user-action-action user-action))
         (dialogue (user-action-dialogue user-action)))
@@ -190,9 +188,3 @@
                   (if (emptyp dialogue)
                       "..."
                       dialogue))))))))
-
-(defajax update-chat ()
-  (prog1 (with-yaclml-output-to-string
-           (mapc #'render-user-action
-                 (get-recent-actions (session-value 'last-action-id))))
-    (setf (session-value 'last-action-id) *max-action-id*)))
