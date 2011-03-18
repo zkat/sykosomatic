@@ -59,6 +59,8 @@
 (defvar *max-action-id* 0)
 (defvar *folder-dispatcher-pushed-p* nil)
 (defparameter *belletrist-path* (asdf:system-relative-pathname 'belletrist "res/"))
+(defvar *websocket-thread* nil)
+(defvar *chat-resource-thread* nil)
 
 (defstruct user-action id user timestamp action dialogue)
 
@@ -208,23 +210,29 @@
       (logout username))))
 
 (defun begin-shared-hallucination ()
+  (when *server* (end-shared-hallucination) (warn "Restarting server."))
   (unless *folder-dispatcher-pushed-p*
     (push (create-folder-dispatcher-and-handler
            "/res/" *belletrist-path*)
           *dispatch-table*))
   (register-chat-server)
-  (bordeaux-threads:make-thread
-   (lambda ()
-     (ws:run-server *chat-server-port*))
-   :name "websockets server")
-  (bt:make-thread
-   (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
-   :name "chat resource listener")
-  (when *server* (end-shared-hallucination) (warn "Restarting server."))
+  (setf *websocket-thread*
+        (bordeaux-threads:make-thread
+         (lambda ()
+           (ws:run-server *chat-server-port*))
+         :name "websockets server"))
+  (setf *chat-resource-thread*
+        (bt:make-thread
+         (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
+         :name "chat resource listener"))
   (setf *users* nil
         *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   t)
 
 (defun end-shared-hallucination ()
-  (when *server* (stop *server*) (setf *server* nil)))
+  (when *server* (stop *server*) (setf *server* nil))
+  (when *websocket-thread* (bt:destroy-thread *websocket-thread*)
+        (setf *websocket-thread* nil))
+  (when *chat-resource-thread* (bt:destroy-thread *chat-resource-thread*)
+        (setf *chat-resource-thread* nil)))
