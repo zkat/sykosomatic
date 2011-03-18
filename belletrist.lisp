@@ -121,79 +121,9 @@
     (<:html
      (<:head
       (<:title "Hello!")
-      (<:style :type "text/css" "
-
-/* From: http://scrippets.org/ */
-.chat-box {
-    list-style: none;
-    width: 420px;
-    height: 500px;
-    background: #fffffc;
-    color: #000000;
-    border: 1px solid #333;
-    padding: 5px 14px 15px 14px !important;
-    margin-left: auto;
-    margin-right: auto;
-    overflow:auto;
-}
-
-.chat-box p { font: 14px Courier, monospace, fixed !important;
-              text-align: left !important;
-              letter-spacing: 0 !important;
-              margin-top: 0px !important;
-              margin-bottom: 0px !important; }
-
-.sceneheader { background: #d8d8d8; }
-
-.sceneheader-div, .action, .character { padding-top: 1.5ex; }
-
-.character, .sceneheader { text-transform:uppercase; }
-
-.action { padding-right: 5%; font-size: 12px !important; line-height: 14px !important; }
-
-.character { margin-left: 40%; }
-
-.dialogue { margin-left: 20%; padding-right: 20%; }
-
-.parenthetical { margin-left: 32%; padding-right: 30%; }
-
-/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
-
-.dialogue + .parenthetical { padding-bottom: 0; }
-
-.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
-
-.user-story { margin-right: auto;
-              margin-left: auto;
-              width: 600px
-            }
-.logout-button { margin-right: auto; margin-left: auto; width: 80px;}
-
-"
-)
-      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript")
-      (<:script :type "text/javascript" (<:ai "
-function callback(data) {
-  $('#chat-box').append(data);
-  var objDiv = document.getElementById('chat-box');
-  objDiv.scrollTop = objDiv.scrollHeight;
-};
-
-function addMsg() {
-  var action = $('#user-action').val();
-  var dialogue = $('#user-dialogue').val();
-  $('#user-action').val('');
-  $('#user-dialogue').val('');
-  $.get('ajax', { 'f' : 'ADD-ACTION', 'action' : action, 'dialogue' : dialogue }, callback);
-}
-
-function updateChat() {
-  $.get('ajax', { 'f' : 'UPDATE-CHAT' }, callback);
-}
-
-$(document).ready(updateChat);
-setInterval(updateChat, 1000);
-")))
+      (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
+      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
+      (<:script :type "text/javascript" :src "res/ajaxlib.js"))
      (<:body
       (<:div :class "chat-box" :id "chat-box" (<:div :class "sceneheader-div"
                                                      (<:p :class "sceneheader"

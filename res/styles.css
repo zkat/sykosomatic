@@ -1,0 +1,45 @@
+/* From: http://scrippets.org/ */
+.chat-box {
+    list-style: none;
+    width: 420px;
+    height: 500px;
+    background: #fffffc;
+    color: #000000;
+    border: 1px solid #333;
+    padding: 5px 14px 15px 14px !important;
+    margin-left: auto;
+    margin-right: auto;
+    overflow:auto;
+}
+
+.chat-box p { font: 14px Courier, monospace, fixed !important;
+              text-align: left !important;
+              letter-spacing: 0 !important;
+              margin-top: 0px !important;
+              margin-bottom: 0px !important; }
+
+.sceneheader { background: #d8d8d8; }
+
+.sceneheader-div, .action, .character { padding-top: 1.5ex; }
+
+.character, .sceneheader { text-transform:uppercase; }
+
+.action { padding-right: 5%; font-size: 12px !important; line-height: 14px !important; }
+
+.character { margin-left: 40%; }
+
+.dialogue { margin-left: 20%; padding-right: 20%; }
+
+.parenthetical { margin-left: 32%; padding-right: 30%; }
+
+/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
+
+.dialogue + .parenthetical { padding-bottom: 0; }
+
+.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
+
+.user-story { margin-right: auto;
+              margin-left: auto;
+              width: 600px
+            }
+.logout-button { margin-right: auto; margin-left: auto; width: 80px;}
