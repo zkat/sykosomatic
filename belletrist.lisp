@@ -64,9 +64,9 @@
 
 (defun add-user-action (user action dialogue &optional (timestamp (get-universal-time))
                          &aux (id (incf *max-action-id*)))
-  (push (make-user-action :id id :user user :timestamp timestamp :action action :dialogue dialogue)
-        *current-story*)
-  id)
+  (let ((user-action (make-user-action :id id :user user :timestamp timestamp :action action :dialogue dialogue)))
+    (push user-action *current-story*)
+    user-action))
 
 (defun get-recent-actions (last-action-id)
   (member (1+ last-action-id) (reverse *current-story*) :key #'user-action-id))
@@ -96,9 +96,12 @@
 (defgeneric remove-client (chat-server client))
 (defgeneric find-client (chat-server host port))
 (defun client-key (client)
-  (cons (ws:client-host client) (ws:client-port client)))
+  (cons (ws::client-host client) (ws::client-port client)))
 (defun validating-add-client (chat-server client)
-  (add-client chat-server client))
+  (add-client chat-server client)
+  t)
+(defun client-username (client)
+  (ws::client-host client))
 
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test 'equal))))
@@ -108,7 +111,7 @@
 (defmethod remove-client ((srv chat-server) client)
   (remhash (client-key client) (slot-value srv 'clients)))
 (defmethod find-client ((srv chat-server) host port)
-  (gethash (client-key client) (slot-value srv 'clients)))
+  (gethash (cons host port) (slot-value srv 'clients)))
 
 (defun register-chat-server ()
   (ws:register-global-resource
@@ -116,19 +119,25 @@
    (make-instance 'chat-server)
    #'ws::any-origin))
 
-(defmethod resource-accept-connection ((res chat-server) resource-name headers client)
+(defmethod ws:resource-accept-connection ((res chat-server) resource-name headers client)
   (declare (ignore resource-name headers))
   (validating-add-client res client))
 
-(defmethod resource-client-disconnectod ((res chat-server) client message &aux (client-key (client-key client)))
-  (format t "~&Client @~A:~A disconnected: ~A~%" (car client-key) (cdr client-key) message)
+(defmethod ws:resource-client-disconnected ((res chat-server) client &aux (client-key (client-key client)))
+  (format t "~&Client @~A:~A disconnected.~%" (car client-key) (cdr client-key))
   (remove-client res client))
 
-(defmethod resource-receive-frame ((res chat-server) client message)
-  (process-client-message client message))
+(defmethod ws:resource-received-frame ((res chat-server) client message)
+  (process-client-message res client message))
 
-(defun process-client-message (client message)
-  (format t "~&~A sez: ~S~%" client message))
+(defun process-client-message (res client message)
+  (let* ((action-obj (jsown:parse message))
+         (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
+         (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
+         (user-action (add-user-action (client-username client) action dialogue)))
+    (maphash-values (lambda (c) (ws:write-to-client c (with-yaclml-output-to-string
+                                                        (render-user-action user-action))))
+                    (slot-value res 'clients))))
 
 ;; Handlers
 (defun logout (username)

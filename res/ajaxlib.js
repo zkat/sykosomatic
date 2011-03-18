@@ -27,7 +27,7 @@ function addMsg() {
   var dialogue = $('#user-dialogue').val();
   $('#user-action').val('');
   $('#user-dialogue').val('');
-  ws.send("{ 'action' : '"+action+"', 'dialogue' : '"+dialogue+"'}");
+  ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
 };
 
 // function callback(data) {
