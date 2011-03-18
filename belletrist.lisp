@@ -52,6 +52,8 @@
 (defparameter *current-story* nil)
 (defvar *users* nil)
 (defvar *max-action-id* 0)
+(defvar *folder-dispatcher-pushed-p* nil)
+(defparameter *belletrist-path* (asdf:system-relative-pathname 'belletrist "res/"))
 
 (defstruct user-action id user timestamp action dialogue)
 
@@ -73,6 +75,10 @@
   (deletef *users* username :test #'string-equal))
 
 (defun begin-shared-hallucination ()
+  (unless *folder-dispatcher-pushed-p*
+    (push (create-folder-dispatcher-and-handler
+           "/res/" *belletrist-path*)
+          *dispatch-table*))
   (when *server* (end-shared-hallucination) (warn "Restarting server."))
   (setf *users* nil
         *session-removal-hook* #'session-cleanup)
