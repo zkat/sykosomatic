@@ -52,6 +52,8 @@
 ;; * Handle user input through websockets.
 
 (defvar *server* nil)
+(defparameter *web-server-port* 8888)
+(defparameter *chat-server-port* 12345)
 (defparameter *current-story* nil)
 (defvar *users* nil)
 (defvar *max-action-id* 0)
@@ -69,28 +71,69 @@
 (defun get-recent-actions (last-action-id)
   (member (1+ last-action-id) (reverse *current-story*) :key #'user-action-id))
 
-(defun session-cleanup (session)
-  (let ((username (session-value 'username session)))
-    (when username
-      (logout username))))
+(defun render-user-action (user-action)
+  (let ((action (user-action-action user-action))
+        (dialogue (user-action-dialogue user-action)))
+    (<:div :class "user-entry"
+      (if (and (not (emptyp action)) (emptyp dialogue))
+          (<:p :class "action"
+               (<:ah action))
+          (progn
+            (<:p :class "character"
+                 (<:ah (user-action-user user-action)))
+            (unless (emptyp action)
+              (<:p :class "parenthetical"
+                   (<:ah "(" action ")")))
+            (<:p :class "dialogue"
+                 (<:ah
+                  (if (emptyp dialogue)
+                      "..."
+                      dialogue))))))))
 
+;; clws stuff
+;; TODO - Check all this against HT session.
+(defgeneric add-client (chat-server client))
+(defgeneric remove-client (chat-server client))
+(defgeneric find-client (chat-server host port))
+(defun client-key (client)
+  (cons (ws:client-host client) (ws:client-port client)))
+(defun validating-add-client (chat-server client)
+  (add-client chat-server client))
+
+(defclass chat-server (ws:ws-resource)
+  ((clients :initform (make-hash-table :test 'equal))))
+(defmethod add-client ((srv chat-server) client)
+  (setf (gethash (client-key client) (slot-value srv 'clients))
+        client))
+(defmethod remove-client ((srv chat-server) client)
+  (remhash (client-key client) (slot-value srv 'clients)))
+(defmethod find-client ((srv chat-server) host port)
+  (gethash (client-key client) (slot-value srv 'clients)))
+
+(defun register-chat-server ()
+  (ws:register-global-resource
+   "/chat"
+   (make-instance 'chat-server)
+   #'ws::any-origin))
+
+(defmethod resource-accept-connection ((res chat-server) resource-name headers client)
+  (declare (ignore resource-name headers))
+  (validating-add-client res client))
+
+(defmethod resource-client-disconnectod ((res chat-server) client message &aux (client-key (client-key client)))
+  (format t "~&Client @~A:~A disconnected: ~A~%" (car client-key) (cdr client-key) message)
+  (remove-client res client))
+
+(defmethod resource-receive-frame ((res chat-server) client message)
+  (process-client-message client message))
+
+(defun process-client-message (client message)
+  (format t "~&~A sez: ~S~%" client message))
+
+;; Handlers
 (defun logout (username)
   (format t "~&~A logged out.~%" username)
   (deletef *users* username :test #'string-equal))
-
-(defun begin-shared-hallucination ()
-  (unless *folder-dispatcher-pushed-p*
-    (push (create-folder-dispatcher-and-handler
-           "/res/" *belletrist-path*)
-          *dispatch-table*))
-  (when *server* (end-shared-hallucination) (warn "Restarting server."))
-  (setf *users* nil
-        *session-removal-hook* #'session-cleanup)
-  (start (setf *server* (make-instance 'acceptor :port 8888)))
-  t)
-
-(defun end-shared-hallucination ()
-  (when *server* (stop *server*) (setf *server* nil)))
 
 (define-easy-handler (login :uri "/login") (username)
   (if (and *session* (session-value 'username))
@@ -149,42 +192,30 @@
       (setf (session-value 'username) nil)))
   (redirect "/login"))
 
-(define-easy-handler (ajax :uri "/ajax") (f)
-  (let ((func (find-ajax-func f)))
-    (if func
-        (progn
-          (setf (content-type*) "text/html")
-          (no-cache)
-          (apply func (remove f (mapcar #'cdr (get-parameters*)))))
-        (warn "An attempt was made to call undefined AJAX function ~A." f))))
+;; Server startup/teardown.
+(defun session-cleanup (session)
+  (let ((username (session-value 'username session)))
+    (when username
+      (logout username))))
 
-(defparameter *ajax-funcs* (make-hash-table :test #'equalp))
+(defun begin-shared-hallucination ()
+  (unless *folder-dispatcher-pushed-p*
+    (push (create-folder-dispatcher-and-handler
+           "/res/" *belletrist-path*)
+          *dispatch-table*))
+  (register-chat-server)
+  (bordeaux-threads:make-thread
+   (lambda ()
+     (ws:run-server *chat-server-port*))
+   :name "websockets server")
+  (bt:make-thread
+   (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
+   :name "chat resource listener")
+  (when *server* (end-shared-hallucination) (warn "Restarting server."))
+  (setf *users* nil
+        *session-removal-hook* #'session-cleanup)
+  (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
+  t)
 
-(defun find-ajax-func (name)
-  (gethash name *ajax-funcs*))
-
-(defmacro defajax (name lambda-list &body body)
-  `(progn
-     (when (gethash ,(string name) *ajax-funcs*)
-       (warn "Redefining AJAX function ~A." ,(string name)))
-     (setf (gethash ,(string name) *ajax-funcs*)
-           (defun ,name ,lambda-list ,@body))))
-
-(defun render-user-action (user-action)
-  (let ((action (user-action-action user-action))
-        (dialogue (user-action-dialogue user-action)))
-    (<:div :class "user-entry"
-      (if (and (not (emptyp action)) (emptyp dialogue))
-          (<:p :class "action"
-               (<:ah action))
-          (progn
-            (<:p :class "character"
-                 (<:ah (user-action-user user-action)))
-            (unless (emptyp action)
-              (<:p :class "parenthetical"
-                   (<:ah "(" action ")")))
-            (<:p :class "dialogue"
-                 (<:ah
-                  (if (emptyp dialogue)
-                      "..."
-                      dialogue))))))))
+(defun end-shared-hallucination ()
+  (when *server* (stop *server*) (setf *server* nil)))

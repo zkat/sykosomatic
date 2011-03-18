@@ -12,7 +12,7 @@ var ws;
 function init() {
     ws = new WebSocket('ws://localhost:12345/chat');
     ws.onopen = function() {
-        alert('connecting');
+        send(navigator.userAgent);
     };
     ws.onmessage = function(e) {
         callback(e.data);
