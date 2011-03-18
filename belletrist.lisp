@@ -48,8 +48,15 @@
 ;; * Use (CONT'D.)
 
 ;; WebSockets
-;; * Figure out how to validate http sessions vs websocket connections.
-;; * Handle user input through websockets.
+;; * Figure out how to validate http sessions vs websocket connections.  This can possibly be done
+;;   by grabbing the hunchentoot cookie from the websocket, sending the user-agent in through the
+;;   onopen() event, and then reconstructing a request object and passing it to HT's
+;;   validate-session. http://paste.lisp.org/display/120622
+;;
+;; clws issues
+;; * Doesn't work on CCL.
+;; * client accessors aren't exported.
+;; * No SSL support.
 
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
