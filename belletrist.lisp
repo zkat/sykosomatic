@@ -72,6 +72,7 @@
       (logout username))))
 
 (defun logout (username)
+  (format t "~&~A logged out.~%" username)
   (deletef *users* username :test #'string-equal))
 
 (defun begin-shared-hallucination ()
