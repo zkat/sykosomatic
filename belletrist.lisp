@@ -103,14 +103,13 @@
                       dialogue))))))))
 
 ;; clws stuff
-;; TODO - Check all this against HT session.
 (defgeneric add-client (chat-server client resource-name header))
 (defgeneric remove-client (chat-server client))
 (defgeneric validate-client (chat-server client user-agent))
 
 (defun disconnect-client (client)
-  ;; Chrome doesn't seem to pay attention to :close.
   (ws:write-to-client client :close)
+  ;; Chrome doesn't seem to pay attention to :close.
   (ws::client-disconnect client :abort t))
 
 (defun client-session (client)
@@ -118,8 +117,7 @@
 
 (defun client-username (client &aux (session (client-session client)))
   (when session
-    (session-value 'username session))
-  #+nil(concatenate 'string (session-value 'username session) "(session: " (princ-to-string session) ")"))
+    (session-value 'username session)))
 
 (defclass chat-server (ws:ws-resource)
   ;; Really just 'pending' clients.
@@ -145,7 +143,6 @@
                              :acceptor *server*))
          (session (session-verify req)))
     (declare (ignore _))
-    ;; This whole chunk is ok.
     (if session
         (let ((old-session (cdr (find session (session-db *server*) :key #'cdr))))
           (format t "~&Got a session: ~A" session)
