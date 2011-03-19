@@ -6,7 +6,8 @@
 (function() {
   
   if (window.WebSocket) return;
-  document.write('<script type="text/javascript" src="res/swfobject.js"></scr'+'ipt>');
+  $.getScript('res/swfobject.js', function() {
+
   var console = window.console;
   if (!console || !console.log || !console.error) {
     console = {log: function(){ }, error: function(){ }};
@@ -338,4 +339,4 @@
     }
   }
   
-})();
+});})();
