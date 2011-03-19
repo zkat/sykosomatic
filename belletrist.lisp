@@ -190,9 +190,14 @@
                                   (render-user-action user-action))))))
 
 ;; Handlers
-(defun logout (username)
-  (format t "~&~A logged out.~%" username)
-  (deletef *users* username :test #'string-equal))
+(defun logout (session)
+  (let ((username (session-value 'username session))
+        (websocket-client (session-value 'websocket-clients session)))
+    (when username
+      (deletef *users* username :test #'string-equal)
+      (format t "~&~A logged out.~%" username))
+    (when websocket-client
+      (disconnect-client websocket-client))))
 
 (define-easy-handler (login :uri "/login") (username)
   (if (and *session* (session-value 'username))
@@ -255,9 +260,7 @@
 
 ;; Server startup/teardown.
 (defun session-cleanup (session)
-  (let ((username (session-value 'username session)))
-    (when username
-      (logout username))))
+  (logout session))
 
 (defun begin-shared-hallucination ()
   (when *server* (end-shared-hallucination) (warn "Restarting server."))
