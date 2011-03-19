@@ -30,6 +30,8 @@ var ws;
 function init_chat() {
     disable_input();
     ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
+    // When running as root, use this.
+    // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
         ws.send(navigator.userAgent);
         alert('Websocket connected.');
