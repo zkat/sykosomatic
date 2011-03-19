@@ -18,6 +18,8 @@ function ajaxPing() {
     $.get('pingme');
 }
 
+var ws;
+
 function addMsg() {
   var action = $('#user-action').val();
   var dialogue = $('#user-dialogue').val();
@@ -26,7 +28,6 @@ function addMsg() {
   ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
 };
 
-var ws;
 function init_chat() {
     disable_input();
     ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
@@ -50,11 +51,13 @@ function init() {
     if (window.WebSocket) {
         init_chat();
     }
+    // For some reason, doing this chained script loading seems to be preventing Flash from doing
+    // its job.
     else {
         $.getScript('res/swfobject.js', function () {
                         $.getScript('res/web_socket.js', init_chat);
                     });
-    }
+    };
     // ping the server every 5 minutes to keep the session alive.
     setInterval(ajaxPing,1000*60*5);
 }
