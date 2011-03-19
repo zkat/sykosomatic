@@ -17,7 +17,7 @@ function disable_input () {
 }
 
 function ajaxPing() {
-    $.get('ping');
+    $.get('pingme');
 }
 
 function addMsg() {
