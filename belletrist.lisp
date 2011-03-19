@@ -290,6 +290,7 @@
   (setf *users* nil
         *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
+  (setf *catch-errors-p* nil)
   t)
 
 (defun end-shared-hallucination ()
