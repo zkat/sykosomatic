@@ -4,6 +4,9 @@
   :serial t
   :depends-on (#:alexandria #:hunchentoot #:yaclml #:clws #:bordeaux-threads #:jsown)
   :components
-  ((:file "package")
-   (:file "belletrist")))
+  ((:module src
+            :serial t
+            :components
+            ((:file "package")
+             (:file "belletrist")))))
 
