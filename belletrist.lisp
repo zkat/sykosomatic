@@ -101,26 +101,53 @@
 
 ;; clws stuff
 ;; TODO - Check all this against HT session.
-(defgeneric add-client (chat-server client))
+(defgeneric add-client (chat-server client resource-name header))
 (defgeneric remove-client (chat-server client))
-(defgeneric find-client (chat-server host port))
-(defun client-key (client)
-  (cons (ws::client-host client) (ws::client-port client)))
-(defun validating-add-client (chat-server client)
-  (add-client chat-server client)
-  t)
-(defun client-username (client)
-  (ws::client-host client))
+(defgeneric client-session (chat-server client))
+(defgeneric (setf client-session) (new-session chat-server client))
+(defgeneric validate-client (chat-server client user-agent))
+
+(defun disconnect-client (client)
+  (ws:write-to-client client :close))
+
+(defun client-username (res client)
+  (session-value 'username (client-session res client)))
 
 (defclass chat-server (ws:ws-resource)
-  ((clients :initform (make-hash-table :test 'equal))))
-(defmethod add-client ((srv chat-server) client)
-  (setf (gethash (client-key client) (slot-value srv 'clients))
-        client))
+  ((clients :initform nil)))
+
+(defmethod add-client ((srv chat-server) client resource-name headers)
+  (setf (slot-value srv 'clients)
+        (cons (list client nil resource-name headers) (slot-value srv 'clients))))
+
 (defmethod remove-client ((srv chat-server) client)
-  (remhash (client-key client) (slot-value srv 'clients)))
-(defmethod find-client ((srv chat-server) host port)
-  (gethash (cons host port) (slot-value srv 'clients)))
+  (deletef (slot-value srv 'clients) client))
+
+(defmethod client-session ((srv chat-server) client)
+  (cadr (assoc client (slot-value srv 'clients))))
+(defmethod (setf client-session) (new-session (srv chat-server) client)
+  (setf (cadr (assoc client (slot-value srv 'clients)))
+        new-session))
+
+(defmethod validate-client ((srv chat-server) client user-agent)
+  (let* ((params (cddr (assoc client (slot-value srv 'clients))))
+         (resource-name (car params))
+         (headers (cadr params))
+         (*acceptor* *server*)
+         (_ (format t "~&Validating client ~A.~%Resource name: ~A~%Headers: ~S~%User Agent: ~A"
+                    client resource-name headers user-agent))
+         (req (make-instance 'request :uri resource-name :remote-addr (ws::client-host client)
+                             :headers-in (cons (cons :user-agent user-agent) headers)
+                             :acceptor *server*))
+         (session (session-verify req)))
+    (if session
+        (progn
+          ;; TODO - also remove the entry. :)
+          (loop for (old-client old-session nil nil) in (slot-value srv 'clients)
+             when (eq session old-session)
+             do (disconnect-client old-client))
+          (setf (client-session srv client) session))
+        (disconnect-client client))))
 
 (defun register-chat-server ()
   (ws:register-global-resource
@@ -129,24 +156,35 @@
    #'ws::any-origin))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers client)
-  (declare (ignore resource-name headers))
-  (validating-add-client res client))
+  (format t "~&Got client connection.~%")
+  (add-client res client resource-name (let (alist-headers)
+                                         (maphash (lambda (k v)
+                                                    (push (cons (intern (string-upcase k) :keyword)
+                                                                v)
+                                                          alist-headers))
+                                                  headers)
+                                         alist-headers))
+  t)
 
-(defmethod ws:resource-client-disconnected ((res chat-server) client &aux (client-key (client-key client)))
-  (format t "~&Client @~A:~A disconnected.~%" (car client-key) (cdr client-key))
+(defmethod ws:resource-client-disconnected ((res chat-server) client)
+  (format t "~&Client ~A disconnected.~%" client)
   (remove-client res client))
 
 (defmethod ws:resource-received-frame ((res chat-server) client message)
-  (process-client-message res client message))
+  (format t "~&Received resource frame.~%")
+  (if (client-session res client)
+      (process-client-message res client message)
+      (validate-client res client message)))
 
 (defun process-client-message (res client message)
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
-         (user-action (add-user-action (client-username client) action dialogue)))
-    (maphash-values (lambda (c) (ws:write-to-client c (with-yaclml-output-to-string
-                                                        (render-user-action user-action))))
-                    (slot-value res 'clients))))
+         (user-action (add-user-action (client-username res client) action dialogue)))
+    (loop for (c session nil nil) in (slot-value res 'clients)
+       when session
+       do (ws:write-to-client c (with-yaclml-output-to-string
+                                  (render-user-action user-action))))))
 
 ;; Handlers
 (defun logout (username)
