@@ -135,6 +135,7 @@
                              :headers-in (cons (cons :user-agent user-agent) headers)
                              :acceptor *server*))
          (session (session-verify req)))
+    (declare (ignore _))
     ;; This whole chunk is ok.
     (if session
         (let ((old-session (cdr (find session (session-db *server*) :key #'cdr))))
@@ -142,12 +143,12 @@
           (when old-session
             (let ((old-client (session-value 'websocket-client old-session)))
               (when old-client
-                (format t "~&Found two clients using the same session. Disconnecting old one.~%")
+                (format t "~&Found two clients using the same session. Disconnecting old one. (~A)~%" old-client)
                 (disconnect-client old-client))))
           (remove-client srv client)
           (setf (session-value 'websocket-client session) client))
         (progn
-          (format t "~&No session!~%")
+          (format t "~&No session. Disconnecting client. (~A)~%" client)
           (disconnect-client client)))))
 
 (defun register-chat-server ()
