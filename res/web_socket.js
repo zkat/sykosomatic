@@ -6,7 +6,6 @@
 (function() {
   
   if (window.WebSocket) return;
-  $.getScript('res/swfobject.js', function() {
 
   var console = window.console;
   if (!console || !console.log || !console.error) {
@@ -339,4 +338,4 @@
     }
   }
   
-});})();
+})();

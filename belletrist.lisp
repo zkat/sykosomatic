@@ -239,7 +239,6 @@
       (<:title "Hello!")
       (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
       (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
-      (<:script :type "text/javascript" :src "res/web_socket.js")
       (<:script :type "text/javascript" :src "res/ajaxlib.js"))
      (<:body
       (<:div :class "chat-box" :id "chat-box"
