@@ -86,7 +86,7 @@
     (<:div :class "user-entry"
       (if (and (not (emptyp action)) (emptyp dialogue))
           (<:p :class "action"
-               (<:ah action))
+               (<:ah (user-action-user user-action) " " action))
           (progn
             (<:p :class "character"
                  (<:ah (user-action-user user-action)))
