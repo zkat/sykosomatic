@@ -7,8 +7,6 @@ function callback(data) {
   objDiv.scrollTop = objDiv.scrollHeight;
 };
 
-var ws;
-
 function enable_input () {
     $('#user-input :input').attr('disabled', false);
 }
@@ -28,7 +26,8 @@ function addMsg() {
   ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
 };
 
-function init() {
+var ws;
+function init_chat() {
     disable_input();
     ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
     ws.onopen = function() {
@@ -43,28 +42,19 @@ function init() {
         disable_input();
         alert('Websocket disconnected. Refresh.');
     };
-    // ping the server every 5 minutes to keep the session alive.
-    setInterval(ajaxPing,1000*60*5);
 };
 
+function init() {
+    if (window.WebSocket) {
+        init_chat();
+    }
+    else {
+        $.getScript('res/swfobject.js', function () {
+                        $.getScript('res/web_socket.js', init_chat);
+                    });
+    }
+    // ping the server every 5 minutes to keep the session alive.
+    setInterval(ajaxPing,1000*60*5);
+}
+
 $(document).ready(init);
-// function callback(data) {
-//   $('#chat-box').append(data);
-//   var objDiv = document.getElementById('chat-box');
-//   objDiv.scrollTop = objDiv.scrollHeight;
-// };
-
-// function addMsg() {
-//   var action = $('#user-action').val();
-//   var dialogue = $('#user-dialogue').val();
-//   $('#user-action').val('');
-//   $('#user-dialogue').val('');
-//   $.get('ajax', { 'f' : 'ADD-ACTION', 'action' : action, 'dialogue' : dialogue }, callback);
-// }
-
-// function updateChat() {
-//   $.get('ajax', { 'f' : 'UPDATE-CHAT' }, callback);
-// }
-
-// $(document).ready(updateChat);
-// setInterval(updateChat, 1000);
