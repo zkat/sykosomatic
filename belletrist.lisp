@@ -100,7 +100,9 @@
 (defgeneric validate-client (chat-server client user-agent))
 
 (defun disconnect-client (client)
-  (ws:write-to-client client :close))
+  ;; Chrome doesn't seem to pay attention to :close.
+  (ws:write-to-client client :close)
+  (ws::client-disconnect client :abort t))
 
 (defun client-session (client)
   (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
