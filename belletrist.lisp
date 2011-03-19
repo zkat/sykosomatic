@@ -60,8 +60,8 @@
 
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
-(defparameter *chat-server-port* 12345)
-(defparameter *current-story* nil)
+(defparameter *chat-server-port* 8889)
+(defvar *current-story* nil)
 (defvar *users* nil)
 (defvar *max-action-id* 0)
 (defvar *folder-dispatcher-pushed-p* nil)
@@ -110,8 +110,9 @@
 (defun disconnect-client (client)
   (ws:write-to-client client :close))
 
-(defun client-username (res client)
-  (session-value 'username (client-session res client)))
+(defun client-username (res client &aux (session (client-session res client)))
+  (session-value 'username session)
+  #+nil(concatenate 'string (session-value 'username session) "(session: " (princ-to-string session) ")"))
 
 (defclass chat-server (ws:ws-resource)
   ((clients :initform nil)))
@@ -134,7 +135,7 @@
          (resource-name (car params))
          (headers (cadr params))
          (*acceptor* *server*)
-         (_ (format t "~&Validating client ~A.~%Resource name: ~A~%Headers: ~S~%User Agent: ~A"
+         (_ (format t "~&Validating client ~A.~%Resource name: ~A~%Headers: ~S~%User Agent: ~A~%"
                     client resource-name headers user-agent))
          (req (make-instance 'request :uri resource-name :remote-addr (ws::client-host client)
                              :headers-in (cons (cons :user-agent user-agent) headers)
@@ -142,12 +143,17 @@
          (session (session-verify req)))
     (if session
         (progn
-          ;; TODO - also remove the entry. :)
+          (format t "~&Got a session: ~A" session)
+          ;; TODO - also remove the entry.
+          ;; TODO - IT ISN'T WORKING. WTF. DIE DIE DIE. D:<
           (loop for (old-client old-session nil nil) in (slot-value srv 'clients)
              when (eq session old-session)
-             do (disconnect-client old-client))
+             do (format t "~&Found two clients using the same session. Disconnecting old one.~%")
+               (disconnect-client old-client))
           (setf (client-session srv client) session))
-        (disconnect-client client))))
+        (progn
+          (format t "~&No session!~%")
+          (disconnect-client client)))))
 
 (defun register-chat-server ()
   (ws:register-global-resource
