@@ -6,7 +6,7 @@
 (function() {
   
   if (window.WebSocket) return;
-
+  document.write('<script type="text/javascript" src="res/swfobject.js"></scr'+'ipt>');
   var console = window.console;
   if (!console || !console.log || !console.error) {
     console = {log: function(){ }, error: function(){ }};
