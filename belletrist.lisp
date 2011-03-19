@@ -63,7 +63,10 @@
 
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
-(defparameter *chat-server-port* 8889)
+(defparameter *chat-server-port*
+  ;; 843 ; makes flash load faster, but can only do this as root.
+  8889
+)
 (defvar *current-story* nil)
 (defvar *users* nil)
 (defvar *max-action-id* 0)
