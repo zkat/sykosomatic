@@ -277,7 +277,9 @@
 
 (defun end-shared-hallucination ()
   (when *server* (stop *server*) (setf *server* nil))
-  (when *websocket-thread* (bt:destroy-thread *websocket-thread*)
-        (setf *websocket-thread* nil))
-  (when *chat-resource-thread* (bt:destroy-thread *chat-resource-thread*)
-        (setf *chat-resource-thread* nil)))
+  (when (and *websocket-thread* (bt:thread-alive-p *websocket-thread*))
+    (bt:destroy-thread *websocket-thread*)
+    (setf *websocket-thread* nil))
+  (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
+    (bt:destroy-thread *chat-resource-thread*)
+    (setf *chat-resource-thread* nil)))
