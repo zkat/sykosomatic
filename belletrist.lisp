@@ -266,6 +266,10 @@
       (setf (session-value 'username) nil)))
   (redirect "/login"))
 
+(define-easy-handler (ajax-ping :uri "/pingme") ()
+  (unless (and *session* (session-value 'username))
+    (redirect "/login")))
+
 ;; Server startup/teardown.
 (defun session-cleanup (session)
   (logout session))

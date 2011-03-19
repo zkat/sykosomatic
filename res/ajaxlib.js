@@ -16,6 +16,18 @@ function disable_input () {
     $('#user-input :input').attr('disabled', true);
 }
 
+function ajaxPing() {
+    $.get('ping');
+}
+
+function addMsg() {
+  var action = $('#user-action').val();
+  var dialogue = $('#user-dialogue').val();
+  $('#user-action').val('');
+  $('#user-dialogue').val('');
+  ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+};
+
 function init() {
     disable_input();
     ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
@@ -31,15 +43,8 @@ function init() {
         disable_input();
         alert('Websocket disconnected. Refresh.');
     };
-
-};
-
-function addMsg() {
-  var action = $('#user-action').val();
-  var dialogue = $('#user-dialogue').val();
-  $('#user-action').val('');
-  $('#user-dialogue').val('');
-  ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+    // ping the server every 5 minutes to keep the session alive.
+    setInterval(ajaxPing,1000*60*5);
 };
 
 $(document).ready(init);
