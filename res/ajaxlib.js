@@ -9,17 +9,29 @@ function callback(data) {
 
 var ws;
 
+function enable_input () {
+    $('#user-input :input').attr('disabled', false);
+}
+function disable_input () {
+    $('#user-input :input').attr('disabled', true);
+}
+
 function init() {
-    ws = new WebSocket('ws://localhost:12345/chat');
+    disable_input();
+    ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
     ws.onopen = function() {
         ws.send(navigator.userAgent);
+        alert('Websocket connected.');
+        enable_input();
     };
     ws.onmessage = function(e) {
         callback(e.data);
     };
     ws.onclose = function () {
-        alert('disconnected');
+        disable_input();
+        alert('Websocket disconnected. Refresh.');
     };
+
 };
 
 function addMsg() {
@@ -30,6 +42,7 @@ function addMsg() {
   ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
 };
 
+$(document).ready(init);
 // function callback(data) {
 //   $('#chat-box').append(data);
 //   var objDiv = document.getElementById('chat-box');

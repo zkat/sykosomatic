@@ -234,16 +234,18 @@
       (<:script :type "text/javascript" :src "res/ajaxlib.js")
       (<:script :type "text/javascript" :src "res/swfobject.js")
       (<:script :type "text/javascript" :src "res/web_socket.js"))
-     (<:body :onload "init();"
-      (<:div :class "chat-box" :id "chat-box" (<:div :class "sceneheader-div"
-                                                     (<:p :class "sceneheader"
-                                                          (<:ah "ext. josh's computer. night."))))
-      (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
-       (<:label (<:ah "Action: "))
-       (<:input :type "textarea" :id "user-action")
-       (<:label (<:ah "Dialogue: "))
-       (<:input :type "textarea" :id "user-dialogue")
-       (<:input :type "submit" :value "Send"))
+     (<:body
+      (<:div :class "chat-box" :id "chat-box"
+             (<:div :class "sceneheader-div"
+                    (<:p :class "sceneheader"
+                         (<:ah "int. josh's computer. night."))))
+      (<:div :id "user-input"
+       (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
+               (<:label (<:ah "Action: "))
+               (<:input :type "textarea" :id "user-action")
+               (<:label (<:ah "Dialogue: "))
+               (<:input :type "textarea" :id "user-dialogue")
+               (<:input :type "submit" :value "Send")))
       (<:form :class "logout-button" :action "/logout"
         (<:input :type "submit" :value "Log Out"))))))
 
