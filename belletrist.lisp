@@ -47,12 +47,6 @@
 ;; * group actions and dialog by user.
 ;; * Use (CONT'D.)
 
-;; WebSockets
-;; * Figure out how to validate http sessions vs websocket connections.  This can possibly be done
-;;   by grabbing the hunchentoot cookie from the websocket, sending the user-agent in through the
-;;   onopen() event, and then reconstructing a request object and passing it to HT's
-;;   validate-session. http://paste.lisp.org/display/120622
-;;
 ;; clws issues
 ;; * Doesn't work on CCL.
 ;; * client accessors aren't exported.
@@ -103,54 +97,53 @@
 ;; TODO - Check all this against HT session.
 (defgeneric add-client (chat-server client resource-name header))
 (defgeneric remove-client (chat-server client))
-(defgeneric client-session (chat-server client))
-(defgeneric (setf client-session) (new-session chat-server client))
 (defgeneric validate-client (chat-server client user-agent))
 
 (defun disconnect-client (client)
   (ws:write-to-client client :close))
 
-(defun client-username (res client &aux (session (client-session res client)))
-  (session-value 'username session)
+(defun client-session (client)
+  (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
+
+(defun client-username (client &aux (session (client-session client)))
+  (when session
+    (session-value 'username session))
   #+nil(concatenate 'string (session-value 'username session) "(session: " (princ-to-string session) ")"))
 
 (defclass chat-server (ws:ws-resource)
+  ;; Really just 'pending' clients.
   ((clients :initform nil)))
 
 (defmethod add-client ((srv chat-server) client resource-name headers)
-  (setf (slot-value srv 'clients)
-        (cons (list client nil resource-name headers) (slot-value srv 'clients))))
+  (format t "~&Adding Pending Client ~A.~%Resource name: ~A~%Headers: ~S~%"
+          client resource-name headers)
+  (push (list client resource-name headers)
+        (slot-value srv 'clients)))
 
 (defmethod remove-client ((srv chat-server) client)
-  (deletef (slot-value srv 'clients) client))
+  (deletef (slot-value srv 'clients) client :key #'car))
 
-(defmethod client-session ((srv chat-server) client)
-  (cadr (assoc client (slot-value srv 'clients))))
-(defmethod (setf client-session) (new-session (srv chat-server) client)
-  (setf (cadr (assoc client (slot-value srv 'clients)))
-        new-session))
-
-(defmethod validate-client ((srv chat-server) client user-agent)
-  (let* ((params (cddr (assoc client (slot-value srv 'clients))))
+(defmethod validate-client ((srv chat-server) client user-agent &aux (*acceptor* *server*))
+  (let* ((params (cdr (assoc client (slot-value srv 'clients))))
          (resource-name (car params))
          (headers (cadr params))
-         (*acceptor* *server*)
          (_ (format t "~&Validating client ~A.~%Resource name: ~A~%Headers: ~S~%User Agent: ~A~%"
                     client resource-name headers user-agent))
          (req (make-instance 'request :uri resource-name :remote-addr (ws::client-host client)
                              :headers-in (cons (cons :user-agent user-agent) headers)
                              :acceptor *server*))
          (session (session-verify req)))
+    ;; This whole chunk is ok.
     (if session
-        (progn
+        (let ((old-session (cdr (find session (session-db *server*) :key #'cdr))))
           (format t "~&Got a session: ~A" session)
-          ;; TODO - also remove the entry.
-          ;; TODO - IT ISN'T WORKING. WTF. DIE DIE DIE. D:<
-          (loop for (old-client old-session nil nil) in (slot-value srv 'clients)
-             when (eq session old-session)
-             do (format t "~&Found two clients using the same session. Disconnecting old one.~%")
-               (disconnect-client old-client))
-          (setf (client-session srv client) session))
+          (when old-session
+            (let ((old-client (session-value 'websocket-client old-session)))
+              (when old-client
+                (format t "~&Found two clients using the same session. Disconnecting old one.~%")
+                (disconnect-client old-client))))
+          (remove-client srv client)
+          (setf (session-value 'websocket-client session) client))
         (progn
           (format t "~&No session!~%")
           (disconnect-client client)))))
@@ -178,7 +171,7 @@
 
 (defmethod ws:resource-received-frame ((res chat-server) client message)
   (format t "~&Received resource frame.~%")
-  (if (client-session res client)
+  (if (client-session client)
       (process-client-message res client message)
       (validate-client res client message)))
 
@@ -186,9 +179,10 @@
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
-         (user-action (add-user-action (client-username res client) action dialogue)))
-    (loop for (c session nil nil) in (slot-value res 'clients)
-       when session
+         (user-action (add-user-action (client-username client) action dialogue)))
+    (loop for (nil . session) in (session-db *server*)
+       for c = (session-value 'websocket-client session)
+       when c
        do (ws:write-to-client c (with-yaclml-output-to-string
                                   (render-user-action user-action))))))
 
