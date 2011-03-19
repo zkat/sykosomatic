@@ -242,6 +242,9 @@
       (<:title "Hello!")
       (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
       (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
+      ;; When you feel like figuring out why optional loading fails, take the following two lines out...
+      (<:script :type "text/javascript" :src "res/swfobject.js")
+      (<:script :type "text/javascript" :src "res/web_socket.js")
       (<:script :type "text/javascript" :src "res/ajaxlib.js"))
      (<:body
       (<:div :class "chat-box" :id "chat-box"
