@@ -44,8 +44,17 @@
 ;; Question: Do even minor instances of HTML need to be templated out?
 
 ;; TODO for today:
+;; * Account creation.
+;; * Persistent accounts.
+;; * Persistent scenes.
+;; * OOC message pane.
+
+;; TODO later:
 ;; * group actions and dialog by user.
 ;; * Use (CONT'D.)
+;; * Instead of alerts, replace the chat box with 'loading...' until the websocket is connected,
+;;   then show the whole chat box.
+;; * Fix clws to work on CCL.
 
 ;; clws issues
 ;; * Doesn't work on CCL.
