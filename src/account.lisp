@@ -37,7 +37,7 @@
   (jsown:val document key))
 
 (defun get-uuid ()
-  (cadr (assoc "uuids" (cdr (get-uuids *server* :number 1)) :test #'string=)))
+  (car (doc-val (get-uuids *server* :number 1) "uuids")))
 
 (defun create-account (username password)
   (ensure-doc (get-uuid)
