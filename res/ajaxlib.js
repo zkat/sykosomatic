@@ -23,9 +23,11 @@ var ws;
 function addMsg() {
   var action = $('#user-action').val();
   var dialogue = $('#user-dialogue').val();
-  $('#user-action').val('');
-  $('#user-dialogue').val('');
-  ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+  if (action || dialogue) {
+      $('#user-action').val('');
+      $('#user-dialogue').val('');
+      ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+  };
 };
 
 function init_chat() {
