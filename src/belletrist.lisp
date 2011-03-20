@@ -158,7 +158,7 @@
      collect session))
 
 (defun render-signup-component ()
-  (<:form :name "signup" :action "/signup"
+  (<:form :name "signup" :action "/signup" :method "post"
           (<:label (<:ah "Sign up:"))
           (<:br)
           (<:label (<:ah "Email"))
@@ -199,7 +199,7 @@
                   (render-signup-component)))))))))
 
 (defun render-login-component ()
-  (<:form :name "login" :action "/login"
+  (<:form :name "login" :action "/login" :method "post"
           (<:label (<:ah "Log in:"))
           (<:input :type "text" :name "account-name")
           (<:input :type "password" :name "password")
