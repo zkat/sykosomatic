@@ -172,6 +172,10 @@
           (<:br)
           (<:input :type "submit" :value "Submit")))
 
+(defun render-error-messages (errors)
+  (<:ul :class "errorlist"
+        (mapc (lambda (err) (<:li (<:ah err))) errors)))
+
 (define-easy-handler (signup :uri "/signup") (account-name password confirmation)
   (with-yaclml-output-to-string
     (<:html
@@ -181,24 +185,15 @@
      (<:body
       (if (emptyp account-name)
           (render-signup-component)
-          (if-let ((existing-account (find-account account-name)))
-            (<:div
-             (<:p (<:ah "Sorry, that account name is already taken."))
-             (render-signup-component))
-            (cond ((emptyp password)
-                   (<:div (<:p (<:ah "You must enter a password."))
-                          (render-signup-component)))
-                  ((not (string= password confirmation))
-                   (<:div (<:p (<:ah "Password and confirmation do not match. Try again."))
-                          (render-signup-component)))
-                  (t
-                   (if (create-account account-name password)
-                       (progn
-                         (format t "~&Account created: ~A~%" account-name)
-                         (redirect "/login"))
-                       (<:div
-                        (<:p (<:ah "Sorry, that account name is already taken."))
-                        (render-signup-component)))))))))))
+          (multiple-value-bind (account-created-p errors)
+              (create-account account-name password confirmation)
+            (if account-created-p
+                (progn
+                  (format t "~&Account created: ~A~%" account-name)
+                  (redirect "/login"))
+                (progn
+                  (render-error-messages errors)
+                  (render-signup-component)))))))))
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login"
