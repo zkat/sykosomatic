@@ -2,7 +2,11 @@
 
 (asdf:defsystem #:belletrist
   :serial t
-  :depends-on (#:alexandria #:hunchentoot #:yaclml #:clws #:bordeaux-threads #:jsown)
+  :depends-on (#:alexandria
+               #:hunchentoot #:yaclml #:clws
+               #:bordeaux-threads
+               #:jsown
+               #:chillax.core #:chillax.jsown)
   :components
   ((:module src
             :serial t
