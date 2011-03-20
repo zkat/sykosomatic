@@ -1,12 +1,17 @@
 (cl:defpackage #:belletrist.account
   (:use :cl :alexandria :chillax.core :chillax.jsown)
-  (:export :boot-db))
+  (:export :boot-db :create-account :find-account :validate-account))
 (cl:in-package #:belletrist.account)
 
 (declaim (optimize debug))
 ;; TODO
 ;; * Create an account object based on stored version.
 ;; * Encrypt user passwords.
+;; * Make login page validate logins against database.
+;; * Make account creation page that just accepts username, password, and password confirmation.
+;;   It should check the password confirmation, and insert a new account into the DB.
+
+;; Chillax TODO
 ;; * Fix the goddamn view server.
 ;; * Build a view server that uses jsown.
 ;; * Convert view code to use jsown, too.
@@ -38,12 +43,6 @@
 
 (defun get-uuid ()
   (car (doc-val (get-uuids *server* :number 1) "uuids")))
-
-(defun create-account (username password)
-  (ensure-doc (get-uuid)
-              (mkdoc "type" "account"
-                     "username" username
-                     "password" password)))
 
 (defmacro couchfun (lambda-list &body body)
   (prin1-to-string `(lambda ,lambda-list ,@body)))
@@ -80,6 +79,12 @@
                                          emit([doc.username,doc.password],doc);
                                        }
                                      }")))))
+
+(defun create-account (username password)
+  (ensure-doc (get-uuid)
+              (mkdoc "type" "account"
+                     "username" username
+                     "password" password)))
 
 (defun find-account (username)
   (when-let((results (doc-val (query-view *db* "account" "by_username"
