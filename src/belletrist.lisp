@@ -189,6 +189,7 @@
       (validate-client res client message)))
 
 (defun process-client-message (res client message)
+  (declare (ignore res))
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
