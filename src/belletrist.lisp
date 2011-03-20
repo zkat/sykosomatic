@@ -203,7 +203,7 @@
 ;; Handlers
 (defun logout (session)
   (let ((username (session-value 'username session))
-        (websocket-client (session-value 'websocket-clients session)))
+        (websocket-client (session-value 'websocket-client session)))
     (when username
       (deletef *users* username :test #'string-equal)
       (format t "~&~A logged out.~%" username))
