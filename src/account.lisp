@@ -50,8 +50,7 @@
 
 (defun ensure-account-design-doc ()
   (ensure-doc "_design/account"
-              ;; View server is fucked? :(
-              #+nil(mkdoc "language" "common-lisp"
+              (mkdoc "language" "common-lisp"
                      "views" (mkdoc "by_account_name"
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
@@ -64,29 +63,13 @@
                                              (when (equal type "account")
                                                (emit (list (string-downcase (hashget doc "account_name"))
                                                            (hashget doc "password"))
-                                                     doc))))))
-              (mkdoc "language" "javascript"
-                     "views" (mkdoc "by_account_name"
-                                    (mkdoc "map"
-                                     "function (doc) {
-                                       if (doc.type == 'account') {
-                                         emit(doc.account_name.toLowerCase(),doc);
-                                       }
-                                     }")
-                                    "by_account_name_password"
-                                    (mkdoc "map"
-                                     "function (doc) {
-                                       if (doc.type == 'account') {
-                                         emit([doc.account_name.toLowerCase(),doc.password],doc);
-                                       }
-                                     }")
+                                                     doc))))
                                     "by_display_name"
                                     (mkdoc "map"
-                                     "function (doc) {
-                                       if (doc.type == 'account') {
-                                         emit(doc.display_name.toLowerCase(),doc);
-                                       }
-                                     }")))))
+                                           (couchfun (doc &aux (type (hashget doc "type")))
+                                             (when (equal type "account")
+                                               (emit (string-downcase (hashget doc "display_name"))
+                                                     doc))))))))
 
 (defun find-account-by-display-name (display-name)
   (when-let ((results (doc-val (query-view *db* "account" "by_display_name"
