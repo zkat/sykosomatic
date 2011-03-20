@@ -81,9 +81,9 @@
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 ** Chillax
-*** Fix the goddamn view server.
+*** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
-*** Build a view server that uses jsown.
+*** TODO Build a view server that uses jsown.
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
-*** Convert view code to use jsown, too.
+*** TODO Convert view code to use jsown, too.
     Because using mkhash in one place and mkdoc in another sucks.
