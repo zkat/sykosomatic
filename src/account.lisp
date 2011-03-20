@@ -58,7 +58,7 @@
                                              (when (equal type "account")
                                                (emit (string-downcase (hashget doc "account_name"))
                                                      doc))))
-                                    "password_validation"
+                                    "by_account_name_password"
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (when (equal type "account")
