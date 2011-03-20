@@ -47,7 +47,6 @@
 
 ;; TODO for today:
 ;; * Account creation.
-;; * Persistent accounts.
 ;; * Persistent scenes.
 ;; * OOC message pane.
 
@@ -114,6 +113,7 @@
 (defun disconnect-client (client)
   (ws:write-to-client client :close)
   ;; Chrome doesn't seem to pay attention to :close.
+  ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
   (ws::client-disconnect client :abort t))
 
 (defun client-session (client)
