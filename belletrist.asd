@@ -5,7 +5,7 @@
   :depends-on (#:alexandria
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads
-               #:jsown
+               #:jsown #:ironclad
                #:chillax.core #:chillax.jsown)
   :components
   ((:module src
