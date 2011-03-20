@@ -73,11 +73,11 @@
                                          emit(doc.username,doc);
                                        }
                                      }")
-                                    "password_validation"
+                                    "by_username_password"
                                     (mkdoc "map"
                                      "function (doc) {
                                        if (doc.type == 'account') {
-                                         emit([doc.username,doc.password],true);
+                                         emit([doc.username,doc.password],doc);
                                        }
                                      }")))))
 
@@ -88,7 +88,7 @@
                "value"))))
 
 (defun validate-account (username password)
-  (let ((results (doc-val (query-view *db* "account" "password_validation" :key (list username password)) "rows")))
+  (let ((results (doc-val (query-view *db* "account" "by_username_password" :key (list username password)) "rows")))
     (when results
       (doc-val (car results)
                "value"))))
