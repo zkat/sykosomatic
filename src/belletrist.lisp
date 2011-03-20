@@ -164,6 +164,9 @@
           (<:label (<:ah "Email"))
           (<:input :type "text" :name "account-name")
           (<:br)
+          (<:label (<:ah "Display name"))
+          (<:input :type "text" :name "display-name")
+          (<:br)
           (<:label (<:ah "Password"))
           (<:input :type "password" :name "password")
           (<:br)
@@ -176,7 +179,7 @@
   (<:ul :class "errorlist"
         (mapc (lambda (err) (<:li (<:ah err))) errors)))
 
-(define-easy-handler (signup :uri "/signup") (account-name password confirmation)
+(define-easy-handler (signup :uri "/signup") (account-name display-name password confirmation)
   (with-yaclml-output-to-string
     (<:html
      (<:head
@@ -186,7 +189,7 @@
       (if (emptyp account-name)
           (render-signup-component)
           (multiple-value-bind (account-created-p errors)
-              (create-account account-name password confirmation)
+              (create-account account-name display-name password confirmation)
             (if account-created-p
                 (progn
                   (format t "~&Account created: ~A~%" account-name)

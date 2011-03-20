@@ -7,7 +7,7 @@
 **** DONE Prevent duplicate account creation.
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
-*** TODO Add display names for accounts.
+*** DONE Add display names for accounts.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
