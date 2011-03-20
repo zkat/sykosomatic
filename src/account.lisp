@@ -18,6 +18,15 @@
 (defparameter *server* (make-instance 'jsown-server))
 (defparameter *db* (ensure-db *server* "belletrist"))
 
+(defun hash-password (password)
+  "Password hashing function."
+  ;; TODO - maybe a salt?
+  (ironclad:byte-array-to-hex-string
+   (ironclad:digest-sequence
+    :sha256
+    (ironclad:ascii-string-to-byte-array
+     password))))
+
 (defun boot-db ()
   ;; First-time boot stuff goes here.
   (ensure-account-design-doc))
@@ -83,7 +92,7 @@
   (ensure-doc (get-uuid)
               (mkdoc "type" "account"
                      "username" username
-                     "password" password)))
+                     "password" (hash-password password))))
 
 (defun find-account (username)
   (when-let((results (doc-val (query-view *db* "account" "by_username"
@@ -94,7 +103,7 @@
 
 (defun validate-account (username password)
   (when-let ((results (doc-val (query-view *db* "account" "by_username_password"
-                                           :key (list username password))
+                                           :key (list username (hash-password password)))
                                "rows")))
     (doc-val (car results)
              "value")))
