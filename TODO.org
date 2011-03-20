@@ -5,6 +5,9 @@
 **** DONE Use emails as logins, and replace usernames with 'display names'.
 **** DONE Limit characters and number of characters allowed for usernames and passwords
 **** DONE Prevent duplicate account creation.
+*** TODO Allow changing passwords.
+*** TODO Password recovery.
+*** TODO Add display names for accounts.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
@@ -28,6 +31,7 @@
 *** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
 ** Websockets
+*** TODO Possibly-optional websocket ping to keep the socket alive even when idle.
 *** TODO Better disconnect-client
     It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
     though, _3b recommends that I just send a custom CLOSE message to the client, and close up the
@@ -74,6 +78,8 @@
 *** TODO Loading screen
     Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
     show the whole chat box.
+*** TODO Smaller timeout for ajax ping.
+    Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 ** Chillax
 *** Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
