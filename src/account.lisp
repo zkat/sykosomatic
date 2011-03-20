@@ -53,13 +53,13 @@
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (when (equal type "account")
-                                               (emit (hashget doc "username")
+                                               (emit (string-downcase (hashget doc "username"))
                                                      doc))))
                                     "password_validation"
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (when (equal type "account")
-                                               (emit (list (hashget doc "username")
+                                               (emit (list (string-downcase (hashget doc "username"))
                                                            (hashget doc "password"))
                                                      doc))))))
               (mkdoc "language" "javascript"
@@ -67,14 +67,14 @@
                                     (mkdoc "map"
                                      "function (doc) {
                                        if (doc.type == 'account') {
-                                         emit(doc.username,doc);
+                                         emit(doc.username.toLowerCase(),doc);
                                        }
                                      }")
                                     "by_username_password"
                                     (mkdoc "map"
                                      "function (doc) {
                                        if (doc.type == 'account') {
-                                         emit([doc.username,doc.password],doc);
+                                         emit([doc.username.toLowerCase(),doc.password],doc);
                                        }
                                      }")))))
 
@@ -85,15 +85,15 @@
                      "password" (hash-password password))))
 
 (defun find-account (username)
-  (when-let((results (doc-val (query-view *db* "account" "by_username"
-                                          :key username)
-                              "rows")))
+  (when-let ((results (doc-val (query-view *db* "account" "by_username"
+                                           :key (string-downcase username))
+                               "rows")))
     (doc-val (car results)
              "value")))
 
-(defun validate-credentials (username password)
+(defun validate-credentials (username password &aux (hashed-pass (hash-password password)))
   (when-let ((results (doc-val (query-view *db* "account" "by_username_password"
-                                           :key (list username (hash-password password)))
+                                           :key (list (string-downcase username) hashed-pass))
                                "rows")))
     (doc-val (car results)
              "value")))
