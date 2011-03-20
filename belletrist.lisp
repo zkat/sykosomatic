@@ -263,9 +263,8 @@
 
 (define-easy-handler (logout-page :uri "/logout") ()
   (when (and *session* (session-value 'username))
-    (let ((username (session-value 'username)))
-      (logout username)
-      (setf (session-value 'username) nil)))
+    (logout *session*)
+    (setf (session-value 'username) nil))
   (redirect "/login"))
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
