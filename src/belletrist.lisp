@@ -192,9 +192,13 @@
                    (<:div (<:p (<:ah "Password and confirmation do not match. Try again."))
                           (render-signup-component)))
                   (t
-                   (create-account username password)
-                   (format t "~&Account created: ~A~%" username)
-                   (redirect "/login")))))))))
+                   (if (create-account username password)
+                       (progn
+                         (format t "~&Account created: ~A~%" username)
+                         (redirect "/login"))
+                       (<:div
+                        (<:p (<:ah "Sorry, that username is already taken."))
+                        (render-signup-component)))))))))))
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login"

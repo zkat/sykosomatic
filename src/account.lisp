@@ -38,6 +38,9 @@
 
 (defun doc-val (document key)
   (jsown:val document key))
+(defun (setf doc-val) (new-value document key)
+  (setf (jsown:val document key) new-value)
+  new-value)
 
 (defun get-uuid ()
   (car (doc-val (get-uuids *server* :number 1) "uuids")))
@@ -78,11 +81,16 @@
                                        }
                                      }")))))
 
-(defun create-account (username password)
-  (ensure-doc (get-uuid)
-              (mkdoc "type" "account"
-                     "username" username
-                     "password" (hash-password password))))
+(defun create-account (username password &key errorp &aux (hashed-pass (hash-password password)))
+  (if-let ((existing-account (find-account username)))
+    (when errorp
+      (cerror "Change password instead." "Account already exists.")
+      (setf (doc-val existing-account "password") hashed-pass)
+      (put-document *db* (doc-val existing-account "_id") existing-account))
+    (ensure-doc (get-uuid)
+                (mkdoc "type" "account"
+                       "username" username
+                       "password" hashed-pass))))
 
 (defun find-account (username)
   (when-let ((results (doc-val (query-view *db* "account" "by_username"
