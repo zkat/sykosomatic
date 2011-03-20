@@ -210,7 +210,21 @@
     (when websocket-client
       (disconnect-client websocket-client))))
 
-(define-easy-handler (login :uri "/login") (username)
+(defun active-account-sessions (username)
+  "Finds all sessions that are logged in as USERNAME."
+  (mapcar #'cdr
+          (remove-if-not (curry #'equalp username)
+                         (session-db *server*)
+                         :key (compose (curry #'session-value 'username) #'cdr))))
+
+(defun render-login-component ()
+  (<:form :name "login" :action "/login"
+          (<:label (<:ah "Log in:"))
+          (<:input :type "text" :name "username")
+          (<:input :type "password" :name "password")
+          (<:input :type "submit" :value "Submit")))
+
+(define-easy-handler (login :uri "/login") (username password)
   (if (and *session* (session-value 'username))
       (redirect "/")
       (start-session))
@@ -220,20 +234,18 @@
       (<:title "Login Page")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
-      (if (and username (not (find username *users* :test #'string-equal)))
-          (progn
-            (<:p (<:ah "Successfully logged in as " username "."))
-            (push username *users*)
-            (setf (session-value 'username) username)
-            (format t "~&~A logged in.~%" username)
-            (redirect "/"))
-          (<:div
-           (<:form :name "username" :action "/login"
-            (<:label (<:ah "Pick a username: "))
-            (<:input :type "text" :name "username")
-            (<:input :type "submit" :value "Submit"))
-           (when username
-             (<:label (<:ah "Sorry, that username is already being used.")))))))))
+      (if username
+          (if-let ((account (validate-account username password)))
+            (progn
+              (when-let ((other-logins (active-account-sessions username)))
+                (mapcar #'logout other-logins))
+              (setf (session-value 'username) username)
+              (format t "~&~A logged in.~%" username)
+              (<:p (<:ah "Successfully logged in as " username "."))
+              (redirect "/"))
+            (<:div (<:p :class "error-msg" "Invalid credentials. Login failed.")
+                   (render-login-component)))
+          (render-login-component))))))
 
 (define-easy-handler (home :uri "/") ()
   (unless (and *session* (session-value 'username))
