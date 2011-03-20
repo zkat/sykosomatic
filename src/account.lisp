@@ -82,13 +82,15 @@
                                      }")))))
 
 (defun find-account (username)
-  (let ((results (doc-val (query-view *db* "account" "by_username" :key username) "rows")))
-    (when results
-      (doc-val (car results)
-               "value"))))
+  (when-let((results (doc-val (query-view *db* "account" "by_username"
+                                          :key username)
+                              "rows")))
+    (doc-val (car results)
+             "value")))
 
 (defun validate-account (username password)
-  (let ((results (doc-val (query-view *db* "account" "by_username_password" :key (list username password)) "rows")))
-    (when results
-      (doc-val (car results)
-               "value"))))
+  (when-let ((results (doc-val (query-view *db* "account" "by_username_password"
+                                           :key (list username password))
+                               "rows")))
+    (doc-val (car results)
+             "value")))
