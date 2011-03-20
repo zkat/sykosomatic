@@ -1,3 +1,5 @@
+(cl:defpackage #:belletrist
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml))
 (cl:in-package #:belletrist)
 
 ;; Ideas:
