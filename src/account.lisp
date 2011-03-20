@@ -71,26 +71,20 @@
                                                (emit (string-downcase (hashget doc "display_name"))
                                                      doc))))))))
 
-(defun find-account-by-display-name (display-name)
-  (when-let ((results (doc-val (query-view *db* "account" "by_display_name"
-                                           :key (string-downcase display-name))
+(defun account-view-value (view-name key)
+  (when-let ((results (doc-val (query-view *db* "account" view-name
+                                           :key key)
                                "rows")))
-    (doc-val (car results)
-             "value")))
+    (doc-val (car results) "value")))
+
+(defun find-account-by-display-name (display-name)
+  (account-view-value "by_display_name" display-name))
 
 (defun find-account (account-name)
-  (when-let ((results (doc-val (query-view *db* "account" "by_account_name"
-                                           :key (string-downcase account-name))
-                               "rows")))
-    (doc-val (car results)
-             "value")))
+  (account-view-value "by_account_name" (string-downcase account-name)))
 
 (defun validate-credentials (account-name password &aux (hashed-pass (hash-password password)))
-  (when-let ((results (doc-val (query-view *db* "account" "by_account_name_password"
-                                           :key (list (string-downcase account-name) hashed-pass))
-                               "rows")))
-    (doc-val (car results)
-             "value")))
+  (account-view-value "by_account_name_password" (list (string-downcase account-name) hashed-pass)))
 
 (defparameter *email-regex* (create-scanner "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$"
                                             :case-insensitive-mode t))
