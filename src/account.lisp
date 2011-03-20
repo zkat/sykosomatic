@@ -1,6 +1,6 @@
 (cl:defpackage #:belletrist.account
   (:use :cl :alexandria :chillax.core :chillax.jsown)
-  (:export :boot-db :create-account :find-account :validate-account))
+  (:export :boot-db :create-account :find-account :validate-credentials))
 (cl:in-package #:belletrist.account)
 
 (declaim (optimize debug))
@@ -91,7 +91,7 @@
     (doc-val (car results)
              "value")))
 
-(defun validate-account (username password)
+(defun validate-credentials (username password)
   (when-let ((results (doc-val (query-view *db* "account" "by_username_password"
                                            :key (list username (hash-password password)))
                                "rows")))
