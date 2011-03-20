@@ -14,8 +14,9 @@ function disable_input () {
     $('#user-input :input').attr('disabled', true);
 }
 
-function ajaxPing() {
+function ping() {
     $.get('pingme');
+    // ws.send('ping');
 }
 
 var ws;
@@ -61,7 +62,7 @@ function init() {
                     });
     };
     // ping the server every 5 minutes to keep the session alive.
-    setInterval(ajaxPing,1000*60*5);
+    setInterval(ping,1000*60*5);
 }
 
 $(document).ready(init);
