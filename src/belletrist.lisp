@@ -200,9 +200,14 @@
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login" :method "post"
-          (<:label (<:ah "Log in:"))
+          (<:label (<:ah "Log in"))
+          (<:br)
+          (<:label (<:ah "Email"))
           (<:input :type "text" :name "account-name")
+          (<:br)
+          (<:label (<:ah "Password"))
           (<:input :type "password" :name "password")
+          (<:br)
           (<:input :type "submit" :value "Submit")))
 
 (define-easy-handler (login :uri "/login") (account-name password)
