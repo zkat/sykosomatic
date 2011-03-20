@@ -217,6 +217,45 @@
      when (and session-user (string-equal session-user username))
      collect session))
 
+(defun render-signup-component ()
+  (<:form :name "signup" :action "/signup"
+          (<:label (<:ah "Sign up:"))
+          (<:br)
+          (<:label (<:ah "Username"))
+          (<:input :type "text" :name "username")
+          (<:br)
+          (<:label (<:ah "Password"))
+          (<:input :type "password" :name "password")
+          (<:br)
+          (<:label (<:ah "Confirm password"))
+          (<:input :type "password" :name "confirmation")
+          (<:br)
+          (<:input :type "submit" :value "Submit")))
+
+(define-easy-handler (signup :uri "/signup") (username password confirmation)
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Sign up for Belletrist.")
+      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+     (<:body
+      (if (emptyp username)
+          (render-signup-component)
+          (if-let ((existing-account (find-account username)))
+            (<:div
+             (<:p (<:ah "Sorry, that username is already taken."))
+             (render-signup-component))
+            (cond ((emptyp password)
+                   (<:div (<:p (<:ah "You must enter a password."))
+                          (render-signup-component)))
+                  ((not (string= password confirmation))
+                   (<:div (<:p (<:ah "Password and confirmation do not match. Try again."))
+                          (render-signup-component)))
+                  (t
+                   (create-account username password)
+                   (format t "~&Account created: ~A~%" username)
+                   (redirect "/login")))))))))
+
 (defun render-login-component ()
   (<:form :name "login" :action "/login"
           (<:label (<:ah "Log in:"))
@@ -245,7 +284,8 @@
               (redirect "/"))
             (<:div (<:p :class "error-msg" "Invalid credentials. Login failed.")
                    (render-login-component)))
-          (render-login-component))))))
+          (render-login-component))
+      (<:a :href "/signup" "Create account.")))))
 
 (define-easy-handler (home :uri "/") ()
   (unless (and *session* (session-value 'username))
