@@ -59,9 +59,9 @@
 (defun client-session (client)
   (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
 
-(defun client-username (client &aux (session (client-session client)))
+(defun client-account-name (client &aux (session (client-session client)))
   (when session
-    (session-value 'username session)))
+    (session-value 'account-name session)))
 
 (defclass chat-server (ws:ws-resource)
   ;; Really just 'pending' clients.
@@ -133,7 +133,7 @@
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
-         (user-action (add-user-action (client-username client) action dialogue)))
+         (user-action (add-user-action (client-account-name client) action dialogue)))
     (loop for (nil . session) in (session-db *server*)
        for c = (session-value 'websocket-client session)
        when c
@@ -142,27 +142,27 @@
 
 ;; Handlers
 (defun logout (session)
-  (let ((username (session-value 'username session))
+  (let ((account-name (session-value 'account-name session))
         (websocket-client (session-value 'websocket-client session)))
-    (when username
-      (setf (session-value 'username session) nil)
-      (format t "~&~A logged out.~%" username))
+    (when account-name
+      (setf (session-value 'account-name session) nil)
+      (format t "~&~A logged out.~%" account-name))
     (when websocket-client
       (disconnect-client websocket-client))))
 
-(defun active-account-sessions (username)
-  "Finds all sessions that are logged in as USERNAME."
+(defun active-account-sessions (account-name)
+  "Finds all sessions that are logged in as ACCOUNT-NAME."
   (loop for (nil . session) in (session-db *server*)
-     for session-user = (session-value 'username session)
-     when (and session-user (string-equal session-user username))
+     for session-user = (session-value 'account-name session)
+     when (and session-user (string-equal session-user account-name))
      collect session))
 
 (defun render-signup-component ()
   (<:form :name "signup" :action "/signup"
           (<:label (<:ah "Sign up:"))
           (<:br)
-          (<:label (<:ah "Username"))
-          (<:input :type "text" :name "username")
+          (<:label (<:ah "Email"))
+          (<:input :type "text" :name "account-name")
           (<:br)
           (<:label (<:ah "Password"))
           (<:input :type "password" :name "password")
@@ -172,18 +172,18 @@
           (<:br)
           (<:input :type "submit" :value "Submit")))
 
-(define-easy-handler (signup :uri "/signup") (username password confirmation)
+(define-easy-handler (signup :uri "/signup") (account-name password confirmation)
   (with-yaclml-output-to-string
     (<:html
      (<:head
       (<:title "Sign up for Belletrist.")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
-      (if (emptyp username)
+      (if (emptyp account-name)
           (render-signup-component)
-          (if-let ((existing-account (find-account username)))
+          (if-let ((existing-account (find-account account-name)))
             (<:div
-             (<:p (<:ah "Sorry, that username is already taken."))
+             (<:p (<:ah "Sorry, that account name is already taken."))
              (render-signup-component))
             (cond ((emptyp password)
                    (<:div (<:p (<:ah "You must enter a password."))
@@ -192,23 +192,23 @@
                    (<:div (<:p (<:ah "Password and confirmation do not match. Try again."))
                           (render-signup-component)))
                   (t
-                   (if (create-account username password)
+                   (if (create-account account-name password)
                        (progn
-                         (format t "~&Account created: ~A~%" username)
+                         (format t "~&Account created: ~A~%" account-name)
                          (redirect "/login"))
                        (<:div
-                        (<:p (<:ah "Sorry, that username is already taken."))
+                        (<:p (<:ah "Sorry, that account name is already taken."))
                         (render-signup-component)))))))))))
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login"
           (<:label (<:ah "Log in:"))
-          (<:input :type "text" :name "username")
+          (<:input :type "text" :name "account-name")
           (<:input :type "password" :name "password")
           (<:input :type "submit" :value "Submit")))
 
-(define-easy-handler (login :uri "/login") (username password)
-  (if (and *session* (session-value 'username))
+(define-easy-handler (login :uri "/login") (account-name password)
+  (if (and *session* (session-value 'account-name))
       (redirect "/")
       (start-session))
   (with-yaclml-output-to-string
@@ -217,14 +217,14 @@
       (<:title "Login Page")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
-      (if username
-          (if-let ((account (validate-credentials username password)))
+      (if account-name
+          (if-let ((account (validate-credentials account-name password)))
             (progn
-              (when-let ((other-logins (active-account-sessions username)))
+              (when-let ((other-logins (active-account-sessions account-name)))
                 (mapcar #'logout other-logins))
-              (setf (session-value 'username) username)
-              (format t "~&~A logged in.~%" username)
-              (<:p (<:ah "Successfully logged in as " username "."))
+              (setf (session-value 'account-name) account-name)
+              (format t "~&~A logged in.~%" account-name)
+              (<:p (<:ah "Successfully logged in as " account-name "."))
               (redirect "/"))
             (<:div (<:p :class "error-msg" "Invalid credentials. Login failed.")
                    (render-login-component)))
@@ -232,7 +232,7 @@
       (<:a :href "/signup" "Create account.")))))
 
 (define-easy-handler (home :uri "/") ()
-  (unless (and *session* (session-value 'username))
+  (unless (and *session* (session-value 'account-name))
     (redirect "/login"))
   (with-yaclml-output-to-string
     (<:html
@@ -260,12 +260,12 @@
         (<:input :type "submit" :value "Log Out"))))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
-  (when (and *session* (session-value 'username))
+  (when (and *session* (session-value 'account-name))
     (logout *session*))
   (redirect "/login"))
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
-  (unless (and *session* (session-value 'username))
+  (unless (and *session* (session-value 'account-name))
     (redirect "/login")))
 
 ;; Server startup/teardown.
