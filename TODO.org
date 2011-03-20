@@ -25,6 +25,7 @@
 *** TODO group actions and dialog by user.
 *** TODO Use (CONT'D.) (?)
 *** TODO Persistent scenes
+    NOTE: This'll need to be done *after* characters are implemented.
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
     should be viewable in a separate page (for phase 1). Would be nice to also have them formatted
     as screenplays.
