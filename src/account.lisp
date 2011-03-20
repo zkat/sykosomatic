@@ -4,14 +4,6 @@
 (cl:in-package #:belletrist.account)
 
 (declaim (optimize debug))
-;; TODO signup validation
-;; * Limit characters and number of characters allowed for usernames and passwords
-;; * Make usernames case-insensitive.
-
-;; Chillax TODO
-;; * Fix the goddamn view server.
-;; * Build a view server that uses jsown.
-;; * Convert view code to use jsown, too.
 
 (defparameter *server* (make-instance 'jsown-server))
 (defparameter *db* (ensure-db *server* "belletrist"))
