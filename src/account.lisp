@@ -4,11 +4,9 @@
 (cl:in-package #:belletrist.account)
 
 (declaim (optimize debug))
-;; TODO
-;; * Create an account object based on stored version.
-;; * Encrypt user passwords.
-;; * Make account creation page that just accepts username, password, and password confirmation.
-;;   It should check the password confirmation, and insert a new account into the DB.
+;; TODO signup validation
+;; * Limit characters and number of characters allowed for usernames and passwords
+;; * Make usernames case-insensitive.
 
 ;; Chillax TODO
 ;; * Fix the goddamn view server.
@@ -38,13 +36,13 @@
   (handler-case
       (put-document *db* id document)
     (document-conflict ()
-      (ensure-design-doc id (let ((new-rev (get-document-revision *db* id))
-                                  (old-rev-cons (assoc "_rev" (cdr document) :test #'equal)))
-                              (if old-rev-cons
-                                  (setf (cdr old-rev-cons) new-rev)
-                                  (push (cons "_rev" new-rev)
-                                        (cdr document)))
-                              document)))))
+      (ensure-doc id (let ((new-rev (get-document-revision *db* id))
+                           (old-rev-cons (assoc "_rev" (cdr document) :test #'equal)))
+                       (if old-rev-cons
+                           (setf (cdr old-rev-cons) new-rev)
+                           (push (cons "_rev" new-rev)
+                                 (cdr document)))
+                       document)))))
 
 (defun doc-val (document key)
   (jsown:val document key))
