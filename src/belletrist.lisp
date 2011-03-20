@@ -214,7 +214,7 @@
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
       (if username
-          (if-let ((account (validate-account username password)))
+          (if-let ((account (validate-credentials username password)))
             (progn
               (when-let ((other-logins (active-account-sessions username)))
                 (mapcar #'logout other-logins))
