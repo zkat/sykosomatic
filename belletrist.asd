@@ -11,5 +11,6 @@
   ((:module src
             :serial t
             :components
-            ((:file "belletrist")))))
+            ((:file "account")
+             (:file "belletrist")))))
 
