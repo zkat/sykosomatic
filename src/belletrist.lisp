@@ -70,7 +70,6 @@
   8889
 )
 (defvar *current-story* nil)
-(defvar *users* nil)
 (defvar *max-action-id* 0)
 (defvar *folder-dispatcher-pushed-p* nil)
 (defparameter *belletrist-path* (asdf:system-relative-pathname 'belletrist "res/"))
@@ -205,17 +204,17 @@
   (let ((username (session-value 'username session))
         (websocket-client (session-value 'websocket-client session)))
     (when username
-      (deletef *users* username :test #'string-equal)
+      (setf (session-value 'username session) nil)
       (format t "~&~A logged out.~%" username))
     (when websocket-client
       (disconnect-client websocket-client))))
 
 (defun active-account-sessions (username)
   "Finds all sessions that are logged in as USERNAME."
-  (mapcar #'cdr
-          (remove-if-not (curry #'equalp username)
-                         (session-db *server*)
-                         :key (compose (curry #'session-value 'username) #'cdr))))
+  (loop for (nil . session) in (session-db *server*)
+     for session-user = (session-value 'username session)
+     when (and session-user (string-equal session-user username))
+     collect session))
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login"
@@ -277,8 +276,7 @@
 
 (define-easy-handler (logout-page :uri "/logout") ()
   (when (and *session* (session-value 'username))
-    (logout *session*)
-    (setf (session-value 'username) nil))
+    (logout *session*))
   (redirect "/login"))
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
@@ -305,8 +303,7 @@
         (bt:make-thread
          (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
          :name "chat resource listener"))
-  (setf *users* nil
-        *session-removal-hook* #'session-cleanup)
+  (setf *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   (setf *catch-errors-p* nil)
   t)
