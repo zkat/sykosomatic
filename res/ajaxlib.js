@@ -60,8 +60,8 @@ function init() {
                         $.getScript('res/web_socket.js', init_chat);
                     });
     };
-    // ping the server every minute to keep the session alive.
-    setInterval(ajaxPing,1000*60*1);
+    // ping the server every 5 minutes to keep the session alive.
+    setInterval(ajaxPing,1000*60*5);
 }
 
 $(document).ready(init);
