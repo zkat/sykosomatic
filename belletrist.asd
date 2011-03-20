@@ -4,7 +4,7 @@
   :serial t
   :depends-on (#:alexandria
                #:hunchentoot #:yaclml #:clws
-               #:bordeaux-threads
+               #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad
                #:chillax.core #:chillax.jsown)
   :components

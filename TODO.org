@@ -1,10 +1,10 @@
 * Features
 ** Misc
 ** Accounts
-*** TODO Account creation
-**** TODO Limit characters and number of characters allowed for usernames and passwords
-**** TODO Make usernames case-insensitive
-**** TODO Collect email from users. (Not Needed Yet)
+*** DONE Account creation
+**** DONE Use emails as logins, and replace usernames with 'display names'.
+**** DONE Limit characters and number of characters allowed for usernames and passwords
+**** DONE Prevent duplicate account creation.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
