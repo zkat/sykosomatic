@@ -7,7 +7,6 @@
 ;; TODO
 ;; * Create an account object based on stored version.
 ;; * Encrypt user passwords.
-;; * Make login page validate logins against database.
 ;; * Make account creation page that just accepts username, password, and password confirmation.
 ;;   It should check the password confirmation, and insert a new account into the DB.
 
