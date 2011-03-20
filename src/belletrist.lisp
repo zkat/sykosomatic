@@ -1,5 +1,5 @@
 (cl:defpackage #:belletrist
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml))
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:belletrist.account))
 (cl:in-package #:belletrist)
 
 ;; Ideas:
