@@ -52,56 +52,56 @@
   (ensure-doc "_design/account"
               ;; View server is fucked? :(
               #+nil(mkdoc "language" "common-lisp"
-                     "views" (mkdoc "by_username"
+                     "views" (mkdoc "by_account_name"
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (when (equal type "account")
-                                               (emit (string-downcase (hashget doc "username"))
+                                               (emit (string-downcase (hashget doc "account_name"))
                                                      doc))))
                                     "password_validation"
                                     (mkdoc "map"
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (when (equal type "account")
-                                               (emit (list (string-downcase (hashget doc "username"))
+                                               (emit (list (string-downcase (hashget doc "account_name"))
                                                            (hashget doc "password"))
                                                      doc))))))
               (mkdoc "language" "javascript"
-                     "views" (mkdoc "by_username"
+                     "views" (mkdoc "by_account_name"
                                     (mkdoc "map"
                                      "function (doc) {
                                        if (doc.type == 'account') {
-                                         emit(doc.username.toLowerCase(),doc);
+                                         emit(doc.account_name.toLowerCase(),doc);
                                        }
                                      }")
-                                    "by_username_password"
+                                    "by_account_name_password"
                                     (mkdoc "map"
                                      "function (doc) {
                                        if (doc.type == 'account') {
-                                         emit([doc.username.toLowerCase(),doc.password],doc);
+                                         emit([doc.account_name.toLowerCase(),doc.password],doc);
                                        }
                                      }")))))
 
-(defun create-account (username password &key errorp &aux (hashed-pass (hash-password password)))
-  (if-let ((existing-account (find-account username)))
+(defun create-account (account-name password &key errorp &aux (hashed-pass (hash-password password)))
+  (if-let ((existing-account (find-account account-name)))
     (when errorp
       (cerror "Change password instead." "Account already exists.")
       (setf (doc-val existing-account "password") hashed-pass)
       (put-document *db* (doc-val existing-account "_id") existing-account))
     (ensure-doc (get-uuid)
                 (mkdoc "type" "account"
-                       "username" username
+                       "account_name" account-name
                        "password" hashed-pass))))
 
-(defun find-account (username)
-  (when-let ((results (doc-val (query-view *db* "account" "by_username"
-                                           :key (string-downcase username))
+(defun find-account (account-name)
+  (when-let ((results (doc-val (query-view *db* "account" "by_account_name"
+                                           :key (string-downcase account-name))
                                "rows")))
     (doc-val (car results)
              "value")))
 
-(defun validate-credentials (username password &aux (hashed-pass (hash-password password)))
-  (when-let ((results (doc-val (query-view *db* "account" "by_username_password"
-                                           :key (list (string-downcase username) hashed-pass))
+(defun validate-credentials (account-name password &aux (hashed-pass (hash-password password)))
+  (when-let ((results (doc-val (query-view *db* "account" "by_account_name_password"
+                                           :key (list (string-downcase account-name) hashed-pass))
                                "rows")))
     (doc-val (car results)
              "value")))
