@@ -14,8 +14,9 @@ function disable_input () {
     $('#user-input :input').attr('disabled', true);
 }
 
-function ajaxPing() {
+function ping() {
     $.get('pingme');
+    // ws.send('ping');
 }
 
 var ws;
@@ -23,9 +24,11 @@ var ws;
 function addMsg() {
   var action = $('#user-action').val();
   var dialogue = $('#user-dialogue').val();
-  $('#user-action').val('');
-  $('#user-dialogue').val('');
-  ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+  if (action || dialogue) {
+      $('#user-action').val('');
+      $('#user-dialogue').val('');
+      ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+  };
 };
 
 function init_chat() {
@@ -58,8 +61,8 @@ function init() {
                         $.getScript('res/web_socket.js', init_chat);
                     });
     };
-    // ping the server every minute to keep the session alive.
-    setInterval(ajaxPing,1000*60*1);
+    // ping the server every 5 minutes to keep the session alive.
+    setInterval(ping,1000*60*5);
 }
 
 $(document).ready(init);

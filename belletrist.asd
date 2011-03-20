@@ -2,8 +2,15 @@
 
 (asdf:defsystem #:belletrist
   :serial t
-  :depends-on (#:alexandria #:hunchentoot #:yaclml #:clws #:bordeaux-threads #:jsown)
+  :depends-on (#:alexandria
+               #:hunchentoot #:yaclml #:clws
+               #:bordeaux-threads #:cl-ppcre
+               #:jsown #:ironclad
+               #:chillax.core #:chillax.jsown)
   :components
-  ((:file "package")
-   (:file "belletrist")))
+  ((:module src
+            :serial t
+            :components
+            ((:file "account")
+             (:file "belletrist")))))
 

@@ -1,0 +1,89 @@
+* Features
+** Misc
+** Accounts
+*** DONE Account creation
+**** DONE Use emails as logins, and replace usernames with 'display names'.
+**** DONE Limit characters and number of characters allowed for usernames and passwords
+**** DONE Prevent duplicate account creation.
+*** TODO Allow changing passwords.
+*** TODO Password recovery.
+*** DONE Add display names for accounts.
+** Storybuilding
+   In general, players can hang around and play casually however they want. If/when they have an
+   idea or want to play out something more seriously, they can choose to start a 'scene' to earn
+   points.
+
+   A scene will be recorded, and transcribed to look like a screenplay once it's done. It will then
+   be posted in a community area, where others can rate the overall scene, as well as individual
+   characters in it.
+
+   Scene scores are divided amongst players, and individual achievement scores give individual
+   players bonuses. Points are awarded based on score, and the points can be used towards something.
+*** TODO Add characters that accounts can switch between.
+*** TODO Users should chat as -characters-, not as their usernames.
+*** TODO Add either a drop down or a 'choose character' screen.
+*** TODO group actions and dialog by user.
+*** TODO Use (CONT'D.) (?)
+*** TODO Persistent scenes
+    Players should be able to 'record' scenes, which will be saved as they see them. These scenes
+    should be viewable in a separate page (for phase 1). Would be nice to also have them formatted
+    as screenplays.
+*** TODO Scene ratings
+    Allow others to view and rate existing recorded scenes.
+** Websockets
+*** TODO Possibly-optional websocket ping to keep the socket alive even when idle.
+*** TODO Better disconnect-client
+    It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
+    though, _3b recommends that I just send a custom CLOSE message to the client, and close up the
+    socket client-side.
+*** TODO Fix clws to work on CCL.
+*** TODO Optional Flash loading
+    Things got messed up when I tried to have optional loading of Flash. Give it another shot.
+*** TODO FUTURE make clws support socket.io protocol.
+    socket.io has a client that automagically detects the right tools to use for different
+    browsers. If clws supports socket.io's protocol, then rainbows will be shat, and even IE 5.5 and
+    all the mobile browsers will be supported! This would probably take a bit of effort, and so is
+    probably better left to near-launch. Websockets + Flash sockets is good enough for now.
+** Webapp
+*** TODO Templatify code
+    belletrist.lisp is starting to look like a big ball of pseudo-HTML in some places. It might be
+    worthwhile to start looking into moving that HTML out into template, or pseudo-template files.
+*** TODO New template system
+    All templating systems suck. This one won't. No logic goes into a template, and templates should
+    be kept small (like functions). Additionally, multiple templates will be kept in a single file,
+    which will generate either lisp functions or CLOS objects to correspond to each individual
+    template, which the programmer can compose with the logic (much like pages are strung together
+    with logic). The template files will basically look like lisp files, and require parameter
+    declaration for clarity, as well as accept an optional docstring.
+   
+    Example:
+    (deftempl standard-page (title head-contents body-contents)
+      "This template renders the standard page thingy."
+      <html>
+        <head>
+          <title>{title}</title>
+          {head}
+        </head>
+        <body>
+        {body-contents}
+        </body>
+      </html>)
+   
+    The above can be loaded (probably with a special reader macro), and could then create a function
+    to be called on a stream, with the required parameters:
+    (load "page.templ")
+    (render-template 'standard-page *standard-output* :title "My special page" :body-contents "<p>Hello, World!</p>")
+   
+    Question: Do even minor instances of HTML need to be templated out?
+*** TODO Loading screen
+    Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
+    show the whole chat box.
+*** TODO Smaller timeout for ajax ping.
+    Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
+** Chillax
+*** Fix the goddamn view server.
+    It's switching the order of map functions in a view. :(
+*** Build a view server that uses jsown.
+    JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
+*** Convert view code to use jsown, too.
+    Because using mkhash in one place and mkdoc in another sucks.

@@ -1,65 +1,6 @@
+(cl:defpackage #:belletrist
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:belletrist.account))
 (cl:in-package #:belletrist)
-
-;; Ideas:
-
-;; Story:
-;; In general, players can hang around and play casually however they want. If/when they have an
-;; idea or want to play out something more seriously, they can choose to start a 'scene' to earn
-;; points.
-
-;; A scene will be recorded, and transcribed to look like a screenplay once it's done. It will then
-;; be posted in a community area, where others can rate the overall scene, as well as individual
-;; characters in it.
-
-;; Scene scores are divided amongst players, and individual achievement scores give individual
-;; players bonuses. Points are awarded based on score, and the points can be used towards something.
-
-;; Templating:
-
-;; All templating systems suck. This one won't. No logic goes into a template, and templates should
-;; be kept small (like functions). Additionally, multiple templates will be kept in a single file,
-;; which will generate either lisp functions or CLOS objects to correspond to each individual
-;; template, which the programmer can compose with the logic (much like pages are strung together
-;; with logic). The template files will basically look like lisp files, and require parameter
-;; declaration for clarity, as well as accept an optional docstring.
-;;
-;; Example:
-;; (deftempl standard-page (title head-contents body-contents)
-;;   "This template renders the standard page thingy."
-;;   <html>
-;;     <head>
-;;       <title>{title}</title>
-;;       {head}
-;;     </head>
-;;     <body>
-;;     {body-contents}
-;;     </body>
-;;   </html>)
-;;
-;; The above can be loaded (probably with a special reader macro), and could then create a function
-;; to be called on a stream, with the required parameters:
-;; (load "page.templ")
-;; (render-template 'standard-page *standard-output* :title "My special page" :body-contents "<p>Hello, World!</p>")
-;;
-;; Question: Do even minor instances of HTML need to be templated out?
-
-;; TODO for today:
-;; * Account creation.
-;; * Persistent accounts.
-;; * Persistent scenes.
-;; * OOC message pane.
-
-;; TODO later:
-;; * group actions and dialog by user.
-;; * Use (CONT'D.)
-;; * Instead of alerts, replace the chat box with 'loading...' until the websocket is connected,
-;;   then show the whole chat box.
-;; * Fix clws to work on CCL.
-
-;; clws issues
-;; * Doesn't work on CCL.
-;; * client accessors aren't exported.
-;; * No SSL support.
 
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
@@ -68,7 +9,6 @@
   8889
 )
 (defvar *current-story* nil)
-(defvar *users* nil)
 (defvar *max-action-id* 0)
 (defvar *folder-dispatcher-pushed-p* nil)
 (defparameter *belletrist-path* (asdf:system-relative-pathname 'belletrist "res/"))
@@ -113,14 +53,15 @@
 (defun disconnect-client (client)
   (ws:write-to-client client :close)
   ;; Chrome doesn't seem to pay attention to :close.
+  ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
   (ws::client-disconnect client :abort t))
 
 (defun client-session (client)
   (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
 
-(defun client-username (client &aux (session (client-session client)))
+(defun client-account-name (client &aux (session (client-session client)))
   (when session
-    (session-value 'username session)))
+    (session-value 'account-name session)))
 
 (defclass chat-server (ws:ws-resource)
   ;; Really just 'pending' clients.
@@ -188,10 +129,11 @@
       (validate-client res client message)))
 
 (defun process-client-message (res client message)
+  (declare (ignore res))
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
-         (user-action (add-user-action (client-username client) action dialogue)))
+         (user-action (add-user-action (client-account-name client) action dialogue)))
     (loop for (nil . session) in (session-db *server*)
        for c = (session-value 'websocket-client session)
        when c
@@ -200,16 +142,71 @@
 
 ;; Handlers
 (defun logout (session)
-  (let ((username (session-value 'username session))
-        (websocket-client (session-value 'websocket-clients session)))
-    (when username
-      (deletef *users* username :test #'string-equal)
-      (format t "~&~A logged out.~%" username))
+  (let ((account-name (session-value 'account-name session))
+        (websocket-client (session-value 'websocket-client session)))
+    (when account-name
+      (setf (session-value 'account-name session) nil)
+      (format t "~&~A logged out.~%" account-name))
     (when websocket-client
       (disconnect-client websocket-client))))
 
-(define-easy-handler (login :uri "/login") (username)
-  (if (and *session* (session-value 'username))
+(defun active-account-sessions (account-name)
+  "Finds all sessions that are logged in as ACCOUNT-NAME."
+  (loop for (nil . session) in (session-db *server*)
+     for session-user = (session-value 'account-name session)
+     when (and session-user (string-equal session-user account-name))
+     collect session))
+
+(defun render-signup-component ()
+  (<:form :name "signup" :action "/signup"
+          (<:label (<:ah "Sign up:"))
+          (<:br)
+          (<:label (<:ah "Email"))
+          (<:input :type "text" :name "account-name")
+          (<:br)
+          (<:label (<:ah "Display name"))
+          (<:input :type "text" :name "display-name")
+          (<:br)
+          (<:label (<:ah "Password"))
+          (<:input :type "password" :name "password")
+          (<:br)
+          (<:label (<:ah "Confirm password"))
+          (<:input :type "password" :name "confirmation")
+          (<:br)
+          (<:input :type "submit" :value "Submit")))
+
+(defun render-error-messages (errors)
+  (<:ul :class "errorlist"
+        (mapc (lambda (err) (<:li (<:ah err))) errors)))
+
+(define-easy-handler (signup :uri "/signup") (account-name display-name password confirmation)
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Sign up for Belletrist.")
+      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+     (<:body
+      (if (emptyp account-name)
+          (render-signup-component)
+          (multiple-value-bind (account-created-p errors)
+              (create-account account-name display-name password confirmation)
+            (if account-created-p
+                (progn
+                  (format t "~&Account created: ~A~%" account-name)
+                  (redirect "/login"))
+                (progn
+                  (render-error-messages errors)
+                  (render-signup-component)))))))))
+
+(defun render-login-component ()
+  (<:form :name "login" :action "/login"
+          (<:label (<:ah "Log in:"))
+          (<:input :type "text" :name "account-name")
+          (<:input :type "password" :name "password")
+          (<:input :type "submit" :value "Submit")))
+
+(define-easy-handler (login :uri "/login") (account-name password)
+  (if (and *session* (session-value 'account-name))
       (redirect "/")
       (start-session))
   (with-yaclml-output-to-string
@@ -218,23 +215,22 @@
       (<:title "Login Page")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
-      (if (and username (not (find username *users* :test #'string-equal)))
-          (progn
-            (<:p (<:ah "Successfully logged in as " username "."))
-            (push username *users*)
-            (setf (session-value 'username) username)
-            (format t "~&~A logged in.~%" username)
-            (redirect "/"))
-          (<:div
-           (<:form :name "username" :action "/login"
-            (<:label (<:ah "Pick a username: "))
-            (<:input :type "text" :name "username")
-            (<:input :type "submit" :value "Submit"))
-           (when username
-             (<:label (<:ah "Sorry, that username is already being used.")))))))))
+      (if account-name
+          (if-let ((account (validate-credentials account-name password)))
+            (progn
+              (when-let ((other-logins (active-account-sessions account-name)))
+                (mapcar #'logout other-logins))
+              (setf (session-value 'account-name) account-name)
+              (format t "~&~A logged in.~%" account-name)
+              (<:p (<:ah "Successfully logged in as " account-name "."))
+              (redirect "/"))
+            (<:div (<:p :class "error-msg" "Invalid credentials. Login failed.")
+                   (render-login-component)))
+          (render-login-component))
+      (<:a :href "/signup" "Create account.")))))
 
 (define-easy-handler (home :uri "/") ()
-  (unless (and *session* (session-value 'username))
+  (unless (and *session* (session-value 'account-name))
     (redirect "/login"))
   (with-yaclml-output-to-string
     (<:html
@@ -262,13 +258,12 @@
         (<:input :type "submit" :value "Log Out"))))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
-  (when (and *session* (session-value 'username))
-    (logout *session*)
-    (setf (session-value 'username) nil))
+  (when (and *session* (session-value 'account-name))
+    (logout *session*))
   (redirect "/login"))
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
-  (unless (and *session* (session-value 'username))
+  (unless (and *session* (session-value 'account-name))
     (redirect "/login")))
 
 ;; Server startup/teardown.
@@ -291,8 +286,7 @@
         (bt:make-thread
          (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
          :name "chat resource listener"))
-  (setf *users* nil
-        *session-removal-hook* #'session-cleanup)
+  (setf *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   (setf *catch-errors-p* nil)
   t)
