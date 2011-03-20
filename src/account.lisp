@@ -148,5 +148,6 @@
                     (mkdoc "type" "account"
                            "account_name" account-name
                            "display_name" display-name
-                           "password" hashed-pass))
+                           "password" hashed-pass
+                           "created_at" (get-universal-time)))
         (values nil errors))))
