@@ -184,7 +184,7 @@
   (with-yaclml-output-to-string
     (<:html
      (<:head
-      (<:title "Sign up for Sykosomatic.")
+      (<:title "Sign up for Sykosomatic")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
       (if (emptyp account-name)
