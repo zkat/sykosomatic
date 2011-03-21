@@ -13,6 +13,7 @@
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
+*** TODO Write a function that will return all currently-chatting accounts.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
