@@ -11,6 +11,7 @@
   ((:module src
             :serial t
             :components
-            ((:file "account")
+            ((:file "db")
+             (:file "account")
              (:file "sykosomatic")))))
 

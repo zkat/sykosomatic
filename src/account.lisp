@@ -1,13 +1,13 @@
 (cl:defpackage #:sykosomatic.account
-  (:use :cl :alexandria :chillax.core :chillax.jsown :cl-ppcre)
-  (:export :boot-db :create-account :find-account :validate-credentials))
+  (:use :cl :alexandria :cl-ppcre :sykosomatic.db)
+  (:export :ensure-account-design-doc :create-account :find-account :validate-credentials))
 (cl:in-package #:sykosomatic.account)
 
 (declaim (optimize debug))
 
-(defparameter *server* (make-instance 'jsown-server))
-(defparameter *db* (ensure-db *server* "sykosomatic"))
-
+;;;
+;;; Utils
+;;;
 (defun hash-password (password)
   "Password hashing function."
   ;; TODO - maybe a salt?
@@ -17,34 +17,9 @@
     (ironclad:ascii-string-to-byte-array
      password))))
 
-(defun boot-db ()
-  ;; First-time boot stuff goes here.
-  (ensure-account-design-doc))
-
-(defun mkdoc (&rest keys-and-values)
-  (cons :obj (plist-alist keys-and-values)))
-
-(defun doc-val (document key)
-  (jsown:val document key))
-(defun (setf doc-val) (new-value document key)
-  (setf (jsown:val document key) new-value)
-  new-value)
-
-(defun ensure-doc (id document)
-  (handler-case
-      (put-document *db* id document)
-    (document-conflict ()
-      (ensure-doc id (progn
-                       (setf (doc-val document "_rev")
-                             (get-document-revision *db* id))
-                       document)))))
-
-(defun get-uuid ()
-  (car (doc-val (get-uuids *server* :number 1) "uuids")))
-
-(defmacro couchfun (lambda-list &body body)
-  (prin1-to-string `(lambda ,lambda-list ,@body)))
-
+;;;
+;;; Design and querying
+;;;
 (defun ensure-account-design-doc ()
   (ensure-doc "_design/account"
               (mkdoc "language" "common-lisp"
@@ -69,10 +44,7 @@
                                                      doc))))))))
 
 (defun account-view-value (view-name key)
-  (when-let ((results (doc-val (query-view *db* "account" view-name
-                                           :key key)
-                               "rows")))
-    (doc-val (car results) "value")))
+  (view-query-value "account" view-name key))
 
 (defun find-account-by-display-name (display-name)
   (account-view-value "by_display_name" display-name))
@@ -83,6 +55,9 @@
 (defun validate-credentials (account-name password &aux (hashed-pass (hash-password password)))
   (account-view-value "by_account_name_password" (list (string-downcase account-name) hashed-pass)))
 
+;;;
+;;; Creation and validation
+;;;
 (defparameter *email-regex* (create-scanner "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$"
                                             :case-insensitive-mode t))
 

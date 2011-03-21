@@ -2,7 +2,7 @@
 ** Misc
 *** DONE s/belletrist/sykosomatic/
     It is time.
-*** TODO Factor out db-related stuff from account.lisp into db.lisp
+*** DONE Factor out db-related stuff from account.lisp into db.lisp
     Give it its own package, too.
 *** TODO Move websocket stuff into its own file. (?)
 ** Accounts
