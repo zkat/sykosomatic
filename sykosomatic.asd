@@ -1,6 +1,6 @@
-;;;; belletrist.asd
+;;;; sykosomatic.asd
 
-(asdf:defsystem #:belletrist
+(asdf:defsystem #:sykosomatic
   :serial t
   :depends-on (#:alexandria
                #:hunchentoot #:yaclml #:clws
@@ -12,5 +12,5 @@
             :serial t
             :components
             ((:file "account")
-             (:file "belletrist")))))
+             (:file "sykosomatic")))))
 
