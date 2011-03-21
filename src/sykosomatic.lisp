@@ -1,6 +1,6 @@
-(cl:defpackage #:belletrist
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:belletrist.account))
-(cl:in-package #:belletrist)
+(cl:defpackage #:sykosomatic
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account))
+(cl:in-package #:sykosomatic)
 
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
@@ -11,7 +11,7 @@
 (defvar *current-story* nil)
 (defvar *max-action-id* 0)
 (defvar *folder-dispatcher-pushed-p* nil)
-(defparameter *belletrist-path* (asdf:system-relative-pathname 'belletrist "res/"))
+(defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
@@ -183,7 +183,7 @@
   (with-yaclml-output-to-string
     (<:html
      (<:head
-      (<:title "Sign up for Belletrist.")
+      (<:title "Sign up for Sykosomatic.")
       (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
      (<:body
       (if (emptyp account-name)
@@ -279,7 +279,7 @@
   (when *server* (end-shared-hallucination) (warn "Restarting server."))
   (unless *folder-dispatcher-pushed-p*
     (push (create-folder-dispatcher-and-handler
-           "/res/" *belletrist-path*)
+           "/res/" *sykosomatic-path*)
           *dispatch-table*))
   (register-chat-server)
   (setf *websocket-thread*

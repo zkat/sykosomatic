@@ -1,12 +1,12 @@
-(cl:defpackage #:belletrist.account
+(cl:defpackage #:sykosomatic.account
   (:use :cl :alexandria :chillax.core :chillax.jsown :cl-ppcre)
   (:export :boot-db :create-account :find-account :validate-credentials))
-(cl:in-package #:belletrist.account)
+(cl:in-package #:sykosomatic.account)
 
 (declaim (optimize debug))
 
 (defparameter *server* (make-instance 'jsown-server))
-(defparameter *db* (ensure-db *server* "belletrist"))
+(defparameter *db* (ensure-db *server* "sykosomatic"))
 
 (defun hash-password (password)
   "Password hashing function."
