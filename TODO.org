@@ -26,12 +26,16 @@
    Scene scores are divided amongst players, and individual achievement scores give individual
    players bonuses. Points are awarded based on score, and the points can be used towards something.
 *** DONE Use display names instead of account names for the chat.
-*** TODO Add basic character creation.
-    Just a little box where users can enter a character name, which must be unique.
+*** DONE Add basic character creation.
+    Just a little box where users can enter a character name, which must be unique, and a brief
+    description of the character.
 *** TODO Use current character name instead of display name for chat.
     Make 'current character' the first character in the account's character array.
 *** TODO Add a 'choose character' dropdown.
 *** TODO Add either a drop down or a 'choose character' screen.
+*** TODO Use account _id instead of account_name for characters
+    This'll require figuring out how to do view collation so that searching can happen by account
+    name, but the account name itself can stay on the account document.
 *** TODO group actions and dialog by user.
 *** TODO Use (CONT'D.) (?)
 *** TODO OOC pane
@@ -134,6 +138,7 @@
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
+*** TODO Figure out why the hell the view server is freezing up
 *** TODO Build a view server that uses jsown.
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
 *** TODO Convert view code to use jsown, too.
