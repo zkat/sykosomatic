@@ -24,23 +24,20 @@
 (defun mkdoc (&rest keys-and-values)
   (cons :obj (plist-alist keys-and-values)))
 
-(defun ensure-doc (id document)
-  (handler-case
-      (put-document *db* id document)
-    (document-conflict ()
-      (ensure-doc id (let ((new-rev (get-document-revision *db* id))
-                           (old-rev-cons (assoc "_rev" (cdr document) :test #'equal)))
-                       (if old-rev-cons
-                           (setf (cdr old-rev-cons) new-rev)
-                           (push (cons "_rev" new-rev)
-                                 (cdr document)))
-                       document)))))
-
 (defun doc-val (document key)
   (jsown:val document key))
 (defun (setf doc-val) (new-value document key)
   (setf (jsown:val document key) new-value)
   new-value)
+
+(defun ensure-doc (id document)
+  (handler-case
+      (put-document *db* id document)
+    (document-conflict ()
+      (ensure-doc id (progn
+                       (setf (doc-val document "_rev")
+                             (get-document-revision *db* id))
+                       document)))))
 
 (defun get-uuid ()
   (car (doc-val (get-uuids *server* :number 1) "uuids")))
