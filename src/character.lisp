@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.character
   (:use :cl :alexandria :sykosomatic.db :chillax.core :cl-ppcre)
-  (:export :create-character :find-character))
+  (:export :ensure-character-design-doc :create-character :find-character))
 (cl:in-package #:sykosomatic.character)
 
 (defun ensure-character-design-doc ()
