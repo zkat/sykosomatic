@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account)
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character)
   (:import-from #:sykosomatic.db #:init-db))
 (cl:in-package #:sykosomatic)
 
@@ -200,6 +200,37 @@
                 (progn
                   (format t "~&Account created: ~A~%" account-name)
                   (redirect "/login"))
+                (progn
+                  (render-error-messages errors)
+                  (render-signup-component)))))))))
+
+(defun render-character-creation-component ()
+  (<:form :name "create-character" :action "/newchar" :method "post"
+          (<:label (<:ah "Create a character."))
+          (<:br)
+          (<:label (<:ah "Name"))
+          (<:input :type "text" :name "name")
+          (<:br)
+          (<:label (<:ah "Description"))
+          (<:input :type "textfield" :name "description")))
+
+(define-easy-handler (newchar :uri "/newchar") (name description)
+  (unless (and *session* (session-value 'account-name))
+    (redirect "/login"))
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Character creation")
+      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+     (<:body
+      (if (emptyp name)
+          (render-character-creation-component)
+          (multiple-value-bind (createdp errors)
+              (create-character (session-value 'account-name) name description)
+            (if createdp
+                (progn
+                  (format t "~&Character created: ~A~%" name)
+                  (redirect "/"))
                 (progn
                   (render-error-messages errors)
                   (render-signup-component)))))))))
