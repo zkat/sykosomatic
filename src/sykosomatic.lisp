@@ -60,6 +60,10 @@
 (defun client-session (client)
   (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
 
+(defun client-character-name (client &aux (session (client-session client)))
+  (when session
+    (session-value 'display-name session)))
+
 (defun client-account-name (client &aux (session (client-session client)))
   (when session
     (session-value 'account-name session)))
@@ -134,7 +138,7 @@
   (let* ((action-obj (jsown:parse message))
          (action (cdr (assoc "action" (cdr action-obj) :test #'string=)))
          (dialogue (cdr (assoc "dialogue" (cdr action-obj) :test #'string=)))
-         (user-action (add-user-action (client-account-name client) action dialogue)))
+         (user-action (add-user-action (client-character-name client) action dialogue)))
     (loop for (nil . session) in (session-db *server*)
        for c = (session-value 'websocket-client session)
        when c
@@ -146,7 +150,8 @@
   (let ((account-name (session-value 'account-name session))
         (websocket-client (session-value 'websocket-client session)))
     (when account-name
-      (setf (session-value 'account-name session) nil)
+      (setf (session-value 'account-name session) nil
+            (session-value 'display-name session) nil)
       (format t "~&~A logged out.~%" account-name))
     (when websocket-client
       (disconnect-client websocket-client))))
@@ -226,7 +231,8 @@
             (progn
               (when-let ((other-logins (active-account-sessions account-name)))
                 (mapcar #'logout other-logins))
-              (setf (session-value 'account-name) account-name)
+              (setf (session-value 'account-name) (account-name account)
+                    (session-value 'display-name) (account-display-name account))
               (format t "~&~A logged in.~%" account-name)
               (<:p (<:ah "Successfully logged in as " account-name "."))
               (redirect "/"))

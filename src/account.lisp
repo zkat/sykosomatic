@@ -1,6 +1,8 @@
 (cl:defpackage #:sykosomatic.account
   (:use :cl :alexandria :cl-ppcre :sykosomatic.db)
-  (:export :ensure-account-design-doc :create-account :find-account :validate-credentials))
+  (:export :ensure-account-design-doc :create-account :find-account :validate-credentials
+           :account-name
+           :account-display-name))
 (cl:in-package #:sykosomatic.account)
 
 (declaim (optimize debug))
@@ -54,6 +56,11 @@
 
 (defun validate-credentials (account-name password &aux (hashed-pass (hash-password password)))
   (account-view-value "by_account_name_password" (list (string-downcase account-name) hashed-pass)))
+
+(defun account-name (account)
+  (doc-val account "account_name"))
+(defun account-display-name (account)
+  (doc-val account "display_name"))
 
 ;;;
 ;;; Creation and validation
