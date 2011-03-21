@@ -138,7 +138,7 @@
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
-*** TODO Figure out why the hell the view server is freezing up
+*** DONE Figure out why the hell the view server is freezing up
 *** TODO Build a view server that uses jsown.
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
 *** TODO Convert view code to use jsown, too.
