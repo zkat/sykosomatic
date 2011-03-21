@@ -1,5 +1,10 @@
 * Features
 ** Misc
+*** DONE s/belletrist/sykosomatic/
+    It is time.
+*** TODO Factor out db-related stuff from account.lisp into db.lisp
+    Give it its own package, too.
+*** TODO Move websocket stuff into its own file. (?)
 ** Accounts
 *** DONE Account creation
 **** DONE Use emails as logins, and replace usernames with 'display names'.
@@ -19,11 +24,18 @@
 
    Scene scores are divided amongst players, and individual achievement scores give individual
    players bonuses. Points are awarded based on score, and the points can be used towards something.
-*** TODO Add characters that accounts can switch between.
-*** TODO Users should chat as -characters-, not as their usernames.
+*** TODO Use display names instead of account names for the chat.
+*** TODO Add basic character creation.
+    Just a little box where users can enter a character name, which must be unique.
+*** TODO Use current character name instead of display name for chat.
+    Make 'current character' the first character in the account's character array.
+*** TODO Add a 'choose character' dropdown.
 *** TODO Add either a drop down or a 'choose character' screen.
 *** TODO group actions and dialog by user.
 *** TODO Use (CONT'D.) (?)
+*** TODO OOC pane
+    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
+    chatting can happen without interrupting the flow of the scene.
 *** TODO Persistent scenes
     NOTE: This'll need to be done *after* characters are implemented.
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
@@ -31,6 +43,36 @@
     as screenplays.
 *** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
+*** TODO More better input
+    The current input method is cute, but not the intended one. A better input mechanism should be
+    developed. Most likely, it should at least partly use the old MUD-style sentence parser, and
+    decompose it into the necessary components. It's not important to get very fancy with this yet,
+    though.
+    While developing this, the fact that there will also be an OOC pane should be taken into
+    consideration. Should there be multiple inputs?
+    A full implementation of this will probably have to wait until there's full support for game
+    objects and similar.
+*** TODO Add concept of a 'location'
+    Once characters exist, we can start adding the concept of a 'location' to the game. Locations
+    should have a description, and should be able to 'contain' other characters. Characters can only
+    interact with other characters provided they are in the same location. OOC local chat will also
+    be per-location.
+*** TODO Location transitions
+    Changing locations should have a couple of effects:
+**** TODO Scene transition.
+     The actor who is moving from point A to point B should receive a short scene-transition
+     message, which should be properly formatted as a transition.
+**** TODO Slug lines and descriptions
+     Upon entering the new area, the actor who moved should receive both a new slug line (displayed
+     after the transition message), followed by the new location's description.
+**** TODO Hi, I'm here!
+     Once the actor has transitioned into the new location, everyone, including the actor, should
+     receive a "X arrives." message. This'll eventually be extended to provide fancier, nicer
+     transitions, but an arrival message is good enough for now.
+*** TODO OOC messaging
+    Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
+    OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
+    an OOC messaging system should be implemented.
 ** Websockets
 *** TODO Possibly-optional websocket ping to keep the socket alive even when idle.
 *** TODO Better disconnect-client
@@ -81,6 +123,8 @@
     show the whole chat box.
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
+*** TODO Styling
+    Seriously. Make things -not- look like utter shit.
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
