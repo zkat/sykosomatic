@@ -74,6 +74,11 @@
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
     an OOC messaging system should be implemented.
 ** Websockets
+*** TODO Refactor code to use a simple CouchDB-view-server-like protocol.
+    Just so we have a nice open window for expansion. Something like
+    ["message_type","contents"]. It'll allow things like ["ping",1], as well as any future
+    non-chat-related commands we may want to send down the pipe. It might also be useful for doing
+    any HTML rendering client-side, instead of having the webserver generate the markup.
 *** TODO Possibly-optional websocket ping to keep the socket alive even when idle.
 *** TODO Better disconnect-client
     It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
