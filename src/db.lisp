@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.db
   (:use :cl :alexandria :chillax.core :chillax.jsown)
-  (:export :init-db :mkdoc :doc-val :ensure-doc :get-uuid :couchfun :view-query-value))
+  (:export :init-db :mkdoc :doc-val :ensure-doc :get-uuid :couchfun :mapfun :view-query-value
+           :assert-validation :with-validation :assert-required))
 (cl:in-package #:sykosomatic.db)
 
 (defparameter *server* (make-instance 'jsown-server))
@@ -30,11 +31,39 @@
 (defun get-uuid ()
   (car (doc-val (get-uuids *server* :number 1) "uuids")))
 
+(defmacro mapfun (doc-name target-types &body body)
+  (let ((type-var (gensym "TYPE"))
+        (target-types (ensure-list target-types)))
+    `(couchfun (,doc-name &aux (,type-var (hashget ,doc-name "type")))
+       (when (or ,@(mapcar (lambda (type) `(equal ,type-var ,type))
+                           target-types))
+         ,@body))))
+
 (defmacro couchfun (lambda-list &body body)
-  (prin1-to-string `(lambda ,lambda-list ,@body)))
+  `(prin1-to-string '(lambda ,lambda-list ,@body)))
 
 (defun view-query-value (design-doc-name view-name key)
   (when-let ((results (doc-val (query-view *db* design-doc-name view-name
                                            :key key)
                                "rows")))
     (doc-val (car results) "value")))
+
+
+(defvar *validation-errors*)
+
+(defmacro assert-validation (test failure-message)
+  `(%assert-validation (lambda () ,test) ,failure-message))
+
+(defmacro with-validation (&body body)
+  `(let (*validation-errors*)
+     ,@body
+     (if *validation-errors*
+         (values nil (nreverse *validation-errors*))
+         t)))
+
+(defun %assert-validation (test failure-message)
+  (unless (funcall test)
+    (push failure-message *validation-errors*)))
+
+(defun assert-required (fieldname  x)
+  (assert-validation (not (emptyp x)) (format nil "~A is required." fieldname)))

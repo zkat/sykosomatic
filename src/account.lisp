@@ -86,25 +86,6 @@
              (scan *display-name-regex* display-name))
     t))
 
-(defvar *validation-errors*)
-
-(defmacro assert-validation (test failure-message)
-  `(%assert-validation (lambda () ,test) ,failure-message))
-
-(defmacro with-validation (&body body)
-  `(let (*validation-errors*)
-     ,@body
-     (if *validation-errors*
-         (values nil (nreverse *validation-errors*))
-         t)))
-
-(defun %assert-validation (test failure-message)
-  (unless (funcall test)
-    (push failure-message *validation-errors*)))
-
-(defun assert-required (fieldname  x)
-  (assert-validation (not (emptyp x)) (format nil "~A is required." fieldname)))
-
 (defun validate-new-account (account-name display-name password confirmation)
   (with-validation
     (assert-required "Account name" account-name)
