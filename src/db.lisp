@@ -32,11 +32,12 @@
   (car (doc-val (get-uuids *server* :number 1) "uuids")))
 
 (defmacro mapfun (doc-name target-types &body body)
-  (let ((type-var (gensym "TYPE"))
+  (let ((type-var (gentemp "TYPE"))
         (target-types (ensure-list target-types)))
-    `(couchfun (,doc-name &aux (,type-var (hashget ,doc-name "type")))
-       (when (or ,@(mapcar (lambda (type) `(equal ,type-var ,type))
-                           target-types))
+    `(couchfun (,doc-name &aux (,type-var (,(intern "HASHGET") ,doc-name "type")))
+       (,(intern "WHEN") (,(intern "OR")
+                           ,@(mapcar (lambda (type) `(equal ,type-var ,type))
+                                     target-types))
          ,@body))))
 
 (defmacro couchfun (lambda-list &body body)
