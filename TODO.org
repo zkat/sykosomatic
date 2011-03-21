@@ -24,7 +24,7 @@
 
    Scene scores are divided amongst players, and individual achievement scores give individual
    players bonuses. Points are awarded based on score, and the points can be used towards something.
-*** TODO Use display names instead of account names for the chat.
+*** DONE Use display names instead of account names for the chat.
 *** TODO Add basic character creation.
     Just a little box where users can enter a character name, which must be unique.
 *** TODO Use current character name instead of display name for chat.
