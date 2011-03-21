@@ -1,5 +1,6 @@
 (cl:defpackage #:sykosomatic
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account))
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account)
+  (:import-from #:sykosomatic.db #:init-db))
 (cl:in-package #:sykosomatic)
 
 (defvar *server* nil)
@@ -276,11 +277,11 @@
   (logout session))
 
 (defun begin-shared-hallucination ()
+  ;; Cleanup
   (when *server* (end-shared-hallucination) (warn "Restarting server."))
-  (unless *folder-dispatcher-pushed-p*
-    (push (create-folder-dispatcher-and-handler
-           "/res/" *sykosomatic-path*)
-          *dispatch-table*))
+  ;; Database
+  (init-db)
+  ;; Websockets
   (register-chat-server)
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
@@ -291,6 +292,11 @@
         (bt:make-thread
          (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
          :name "chat resource listener"))
+  ;; Hunchentoot
+  (unless *folder-dispatcher-pushed-p*
+    (push (create-folder-dispatcher-and-handler
+           "/res/" *sykosomatic-path*)
+          *dispatch-table*))
   (setf *session-removal-hook* #'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   (setf *catch-errors-p* nil)
