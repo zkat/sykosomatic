@@ -27,23 +27,20 @@
               (mkdoc "language" "common-lisp"
                      "views" (mkdoc "by_account_name"
                                     (mkdoc "map"
-                                           (couchfun (doc &aux (type (hashget doc "type")))
-                                             (when (equal type "account")
-                                               (emit (string-downcase (hashget doc "account_name"))
-                                                     doc))))
+                                           (mapfun doc "account"
+                                             (emit (string-downcase (hashget doc "account_name"))
+                                                   doc)))
                                     "by_account_name_password"
                                     (mkdoc "map"
-                                           (couchfun (doc &aux (type (hashget doc "type")))
-                                             (when (equal type "account")
-                                               (emit (list (string-downcase (hashget doc "account_name"))
-                                                           (hashget doc "password"))
-                                                     doc))))
+                                           (mapfun doc "account"
+                                             (emit (list (string-downcase (hashget doc "account_name"))
+                                                         (hashget doc "password"))
+                                                   doc)))
                                     "by_display_name"
                                     (mkdoc "map"
-                                           (couchfun (doc &aux (type (hashget doc "type")))
-                                             (when (equal type "account")
-                                               (emit (string-downcase (hashget doc "display_name"))
-                                                     doc))))))))
+                                           (mapfun doc "account"
+                                             (emit (string-downcase (hashget doc "display_name"))
+                                                   doc)))))))
 
 (defun account-view-value (view-name key)
   (view-query-value "account" view-name key))
