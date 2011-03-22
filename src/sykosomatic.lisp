@@ -275,6 +275,25 @@
           (render-login-component))
       (<:a :href "/signup" "Create account.")))))
 
+(defun render-chat-box ()
+  (<:div :class "chat-box" :id "chat-box"
+         (<:div :class "sceneheader-div"
+                (<:p :class "sceneheader"
+                     (<:ah "int. josh's computer. night.")))))
+
+(defun render-user-input-area ()
+  (<:div :id "user-input"
+         (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
+                 (<:label (<:ah "Action: "))
+                 (<:input :type "textarea" :id "user-action")
+                 (<:label (<:ah "Dialogue: "))
+                 (<:input :type "textarea" :id "user-dialogue")
+                 (<:input :type "submit" :value "Send"))))
+
+(defun render-logout-button ()
+  (<:form :class "logout-button" :action "/logout"
+          (<:input :type "submit" :value "Log Out")))
+
 (define-easy-handler (home :uri "/") ()
   (unless (and *session* (session-value 'account-name))
     (redirect "/login"))
@@ -289,19 +308,9 @@
       (<:script :type "text/javascript" :src "res/web_socket.js")
       (<:script :type "text/javascript" :src "res/ajaxlib.js"))
      (<:body
-      (<:div :class "chat-box" :id "chat-box"
-             (<:div :class "sceneheader-div"
-                    (<:p :class "sceneheader"
-                         (<:ah "int. josh's computer. night."))))
-      (<:div :id "user-input"
-       (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
-               (<:label (<:ah "Action: "))
-               (<:input :type "textarea" :id "user-action")
-               (<:label (<:ah "Dialogue: "))
-               (<:input :type "textarea" :id "user-dialogue")
-               (<:input :type "submit" :value "Send")))
-      (<:form :class "logout-button" :action "/logout"
-        (<:input :type "submit" :value "Log Out"))))))
+      (render-chat-box)
+      (render-user-input-area)
+      (render-logout-button)))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
   (when (and *session* (session-value 'account-name))
