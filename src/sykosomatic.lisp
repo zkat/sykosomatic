@@ -62,7 +62,8 @@
 
 (defun client-character-name (client &aux (session (client-session client)))
   (when session
-    (session-value 'display-name session)))
+    (when-let ((character (find-character-by-account-name (session-value 'account-name session))))
+      (jsown:val character "name"))))
 
 (defun client-account-name (client &aux (session (client-session client)))
   (when session

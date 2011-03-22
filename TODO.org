@@ -29,8 +29,7 @@
 *** DONE Add basic character creation.
     Just a little box where users can enter a character name, which must be unique, and a brief
     description of the character.
-*** TODO Use current character name instead of display name for chat.
-    Make 'current character' the first character in the account's character array.
+*** DONE Use current character name instead of display name for chat.
 *** TODO Add a 'choose character' dropdown.
 *** TODO Add either a drop down or a 'choose character' screen.
 *** TODO Use account _id instead of account_name for characters
