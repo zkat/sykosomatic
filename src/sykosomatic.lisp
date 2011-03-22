@@ -213,7 +213,9 @@
           (<:input :type "text" :name "name")
           (<:br)
           (<:label (<:ah "Description"))
-          (<:input :type "textfield" :name "description")))
+          (<:input :type "textfield" :name "description")
+          (<:br)
+          (<:input :type "submit" :value "Submit")))
 
 (define-easy-handler (newchar :uri "/newchar") (name description)
   (unless (and *session* (session-value 'account-name))
