@@ -30,6 +30,7 @@
     Just a little box where users can enter a character name, which must be unique, and a brief
     description of the character.
 *** DONE Use current character name instead of display name for chat.
+*** TODO Require a character to exist before a user can chat.
 *** TODO Add a 'choose character' dropdown.
 *** TODO Add either a drop down or a 'choose character' screen.
 *** TODO Use account _id instead of account_name for characters
