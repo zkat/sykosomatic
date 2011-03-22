@@ -46,6 +46,25 @@
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
     should be viewable in a separate page (for phase 1). Would be nice to also have them formatted
     as screenplays.
+    Not all user messages must (or should) be saved. Instead, create a 'recorded session' document,
+    and then record each line of input that the character is witness to into 'entry' documents,
+    which can then be collated with the recorded session as outlined in the CouchDB Joins article.
+**** TODO Add 'record' and 'stop recording' buttons to chat page.
+**** TODO Recorded session
+     'Record' button should create a 'recorded-session' document, associated with the user. This
+     document can be pretty blank, but will eventually be used to store more metadata. For now, use
+     some default auto-generated name.
+**** TODO Recorded entries
+     Create new 'recorded-entry' documents associated with the recorded for each line of input since
+     the button was pressed.
+**** TODO View scenes page
+     Add a 'recorded scenes' page where viewer can read through all the scenes they've recorded. The
+     scenes should be formatted just like they were in the chat.
+**** TODO Session naming
+     Add ability to change the name of the recorded session.
+*** TODO Scene linking
+    Users should have the ability to link to their entire recorded-scenes page, and/or link to
+    individual scenes that other users (login required for now) can view.
 *** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
 *** TODO More better input
