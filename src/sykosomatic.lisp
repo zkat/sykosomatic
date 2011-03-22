@@ -180,7 +180,7 @@
           (<:label (<:ah "Confirm password"))
           (<:input :type "password" :name "confirmation")
           (<:br)
-          (<:input :type "submit" :value "Submit")))
+          (<:submit :value "Submit")))
 
 (defun render-error-messages (errors)
   (<:ul :class "errorlist"
@@ -215,7 +215,7 @@
           (<:label (<:ah "Description"))
           (<:input :type "textfield" :name "description")
           (<:br)
-          (<:input :type "submit" :value "Submit")))
+          (<:submit :value "Submit")))
 
 (define-easy-handler (newchar :uri "/newchar") (name description)
   (unless (and *session* (session-value 'account-name))
@@ -248,7 +248,7 @@
           (<:label (<:ah "Password"))
           (<:input :type "password" :name "password")
           (<:br)
-          (<:input :type "submit" :value "Submit")))
+          (<:submit :value "Submit")))
 
 (define-easy-handler (login :uri "/login") (account-name password)
   (if (and *session* (session-value 'account-name))
@@ -288,11 +288,11 @@
                  (<:input :type "textarea" :id "user-action")
                  (<:label (<:ah "Dialogue: "))
                  (<:input :type "textarea" :id "user-dialogue")
-                 (<:input :type "submit" :value "Send"))))
+                 (<:submit :value "Send"))))
 
 (defun render-logout-button ()
   (<:form :class "logout-button" :action "/logout"
-          (<:input :type "submit" :value "Log Out")))
+          (<:submit :value "Log Out")))
 
 (define-easy-handler (home :uri "/") ()
   (unless (and *session* (session-value 'account-name))
