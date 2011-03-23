@@ -35,6 +35,7 @@
     screen. The character selection screen should include a list of current characters. Clicking on
     a character will log you into that character.
 *** TODO Add a 'choose character' dropdown.
+*** TODO Allow players to play multiple characters in different tabs/windows on a single account.
 *** TODO Add either a drop down or a 'choose character' screen.
 *** TODO Use account _id instead of account_name for characters
     This'll require figuring out how to do view collation so that searching can happen by account
@@ -125,6 +126,8 @@
     all the mobile browsers will be supported! This would probably take a bit of effort, and so is
     probably better left to near-launch. Websockets + Flash sockets is good enough for now.
 ** Webapp
+*** TODO Reorganize app into MVC-like thing.
+    Start with having separate handlers for GET/POST (if possible)
 *** TODO Templatify code
     belletrist.lisp is starting to look like a big ball of pseudo-HTML in some places. It might be
     worthwhile to start looking into moving that HTML out into template, or pseudo-template files.
