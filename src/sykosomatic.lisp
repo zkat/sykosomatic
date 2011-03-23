@@ -155,6 +155,10 @@
     (when websocket-client
       (disconnect-client websocket-client))))
 
+(defun ensure-logged-in ()
+  (unless (and *session* (session-value 'account-name))
+    (redirect "/login")))
+
 (defun active-account-sessions (account-name)
   "Finds all sessions that are logged in as ACCOUNT-NAME."
   (loop for (nil . session) in (session-db *server*)
@@ -180,28 +184,32 @@
           (<:br)
           (<:submit :value "Submit")))
 
-(defun render-error-messages (errors)
-  (<:ul :class "errorlist"
-        (mapc (lambda (err) (<:li (<:ah err))) errors)))
+(defun render-error-messages ()
+  (when-let ((errors (session-value 'errors)))
+    (<:ul :class "errorlist"
+          (mapc (lambda (err) (<:li (<:ah err))) errors))))
 
 (define-easy-handler (signup :uri "/signup") (account-name display-name password confirmation)
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Sign up for Sykosomatic")
-      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-     (<:body
-      (if (emptyp account-name)
-          (render-signup-component)
-          (multiple-value-bind (account-created-p errors)
-              (create-account account-name display-name password confirmation)
-            (if account-created-p
-                (progn
-                  (format t "~&Account created: ~A~%" account-name)
-                  (redirect "/login"))
-                (progn
-                  (render-error-messages errors)
-                  (render-signup-component)))))))))
+  (case (request-method*)
+    (:post
+     (multiple-value-bind (account-created-p errors)
+         (create-account account-name display-name password confirmation)
+       (if account-created-p
+           (progn
+             (format t "~&Account created: ~A~%" account-name)
+             (redirect "/login"))
+           (progn
+             (appendf (session-value 'errors) errors)
+             (redirect "/signup")))))
+    (:get
+     (with-yaclml-output-to-string
+       (<:html
+        (<:head
+         (<:title "Sign up for Sykosomatic")
+         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+        (<:body
+         (render-error-messages)
+         (render-signup-component)))))))
 
 (defun render-character-creation-component ()
   (<:form :name "create-character" :action "/newchar" :method "post"
@@ -216,25 +224,27 @@
           (<:submit :value "Submit")))
 
 (define-easy-handler (newchar :uri "/newchar") (name description)
-  (unless (and *session* (session-value 'account-name))
-    (redirect "/login"))
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Character creation")
-      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-     (<:body
-      (if (emptyp name)
-          (render-character-creation-component)
-          (multiple-value-bind (createdp errors)
-              (create-character (session-value 'account-name) name description)
-            (if createdp
-                (progn
-                  (format t "~&Character created: ~A~%" name)
-                  (redirect "/"))
-                (progn
-                  (render-error-messages errors)
-                  (render-signup-component)))))))))
+  (ensure-logged-in)
+  (case (request-method*)
+    (:post
+     (multiple-value-bind (createdp errors)
+         (create-character (session-value 'account-name) name description)
+       (if createdp
+           (progn
+             (format t "~&Character created: ~A~%" name)
+             (redirect "/"))
+           (progn
+             (appendf (session-value 'errors) errors)
+             (redirect "/signup")))))
+    (:get
+     (with-yaclml-output-to-string
+       (<:html
+        (<:head
+         (<:title "Character creation")
+         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+        (<:body
+         (render-error-messages)
+         (render-character-creation-component)))))))
 
 (defun render-login-component ()
   (<:form :name "login" :action "/login" :method "post"
@@ -249,29 +259,33 @@
           (<:submit :value "Submit")))
 
 (define-easy-handler (login :uri "/login") (account-name password)
-  (if (and *session* (session-value 'account-name))
-      (redirect "/")
-      (start-session))
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Login Page")
-      (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-     (<:body
-      (if account-name
-          (if-let ((account (validate-credentials account-name password)))
-            (progn
-              (when-let ((other-logins (active-account-sessions account-name)))
-                (mapcar #'logout other-logins))
-              (setf (session-value 'account-name) (account-name account)
-                    (session-value 'display-name) (account-display-name account))
-              (format t "~&~A logged in.~%" account-name)
-              (<:p (<:ah "Successfully logged in as " account-name "."))
-              (redirect "/"))
-            (<:div (<:p :class "error-msg" "Invalid credentials. Login failed.")
-                   (render-login-component)))
-          (render-login-component))
-      (<:a :href "/signup" "Create account.")))))
+  (unless *session*
+    (start-session))
+  (case (request-method*)
+    (:get
+     (with-yaclml-output-to-string
+       (<:html
+        (<:head
+         (<:title "Login Page")
+         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
+        (<:body
+         (when-let ((account-name (session-value 'account-name)))
+           (push (format nil "Already logged in as ~A." account-name)
+                 (session-value 'errors)))
+         (when-let ((login-errors (pop (session-value 'errors))))
+           (render-error-messages login-errors))
+         (render-login-component))
+        (<:a :href "/signup" "Create account.")))))
+  (:post
+   (if-let ((account (validate-credentials account-name password)))
+     (progn
+       (setf (session-value 'account-name) (account-name account)
+             (session-value 'display-name) (account-display-name account))
+       (format t "~&~A logged in.~%" account-name)
+       (redirect "/"))
+     (progn
+       (push "Invalid login or password." (session-value 'errors))
+       (redirect "/login"))))))
 
 (defun render-chat-box ()
   (<:div :class "chat-box" :id "chat-box"
@@ -289,12 +303,11 @@
                  (<:submit :value "Send"))))
 
 (defun render-logout-button ()
-  (<:form :class "logout-button" :action "/logout"
+  (<:form :class "logout-button" :action "/logout" :method "post"
           (<:submit :value "Log Out")))
 
-(define-easy-handler (home :uri "/") ()
-  (unless (and *session* (session-value 'account-name))
-    (redirect "/login"))
+(define-easy-handler (home :uri "/") (#+nil char)
+  (ensure-logged-in)
   (with-yaclml-output-to-string
     (<:html
      (<:head
@@ -316,8 +329,26 @@
   (redirect "/login"))
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
-  (unless (and *session* (session-value 'account-name))
-    (redirect "/login")))
+  (ensure-logged-in))
+
+(defun render-character-link (char-name)
+  (<:a :href (format nil "/?char=~A" charname) (<:ah char-name)))
+
+(defun render-character-selection ()
+  (<:ul
+   (mapc (lambda (char) (<:li (render-character-link char)))
+         (list-user-character-names (session-value 'account-name)))))
+
+(define-easy-handler (character-selection :uri "/charselect") ()
+  (ensure-logged-in)
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Character Selection")
+      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"))
+     (<:body
+      (render-character-selection)
+      (render-logout-button)))))
 
 ;; Server startup/teardown.
 (defun session-cleanup (session)
