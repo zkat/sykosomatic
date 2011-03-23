@@ -31,6 +31,9 @@
     description of the character.
 *** DONE Use current character name instead of display name for chat.
 *** TODO Require a character to exist before a user can chat.
+    This should be done by placing a character selection screen between the chat and the login
+    screen. The character selection screen should include a list of current characters. Clicking on
+    a character will log you into that character.
 *** TODO Add a 'choose character' dropdown.
 *** TODO Add either a drop down or a 'choose character' screen.
 *** TODO Use account _id instead of account_name for characters
@@ -97,6 +100,11 @@
     Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
     an OOC messaging system should be implemented.
+*** TODO Scene collection
+    Users should be able to 'collect' others' stories, much like in DA.
+*** TODO "Canon" system.
+    While people can tell any story they want, how about giving extra weight to stories that fit the
+    game's canon, and/or are staff approved?
 ** Websockets
 *** TODO Refactor code to use a simple CouchDB-view-server-like protocol.
     Just so we have a nice open window for expansion. Something like
