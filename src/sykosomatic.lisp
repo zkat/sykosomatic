@@ -148,11 +148,9 @@
 
 ;; Handlers
 (defun logout (session)
-  (let ((account-name (session-value 'account-name session))
+  (let ((account-name (session-value 'websocket-client session))
         (websocket-client (session-value 'websocket-client session)))
     (when account-name
-      (setf (session-value 'account-name session) nil
-            (session-value 'display-name session) nil)
       (format t "~&~A logged out.~%" account-name))
     (when websocket-client
       (disconnect-client websocket-client))))
