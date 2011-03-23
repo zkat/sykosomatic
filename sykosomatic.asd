@@ -13,5 +13,6 @@
             :components
             ((:file "db")
              (:file "account")
+             (:file "character")
              (:file "sykosomatic")))))
 
