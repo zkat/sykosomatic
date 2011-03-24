@@ -352,6 +352,7 @@
 
 ;; Server startup/teardown.
 (defun session-cleanup (session)
+  (format t "~&Session timed out. Trying to log it out...~%")
   (logout session))
 
 (defun begin-shared-hallucination ()
@@ -375,7 +376,7 @@
     (push (create-folder-dispatcher-and-handler
            "/res/" *sykosomatic-path*)
           *dispatch-table*))
-  (setf *session-removal-hook* #'session-cleanup)
+  (setf *session-removal-hook* 'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   (setf *catch-errors-p* nil)
   t)
