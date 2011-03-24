@@ -272,20 +272,19 @@
          (when-let ((account-name (session-value 'account-name)))
            (push (format nil "Already logged in as ~A." account-name)
                  (session-value 'errors)))
-         (when-let ((login-errors (pop (session-value 'errors))))
-           (render-error-messages login-errors))
+         (render-error-messages)
          (render-login-component))
-        (<:a :href "/signup" "Create account.")))))
-  (:post
-   (if-let ((account (validate-credentials account-name password)))
-     (progn
-       (setf (session-value 'account-name) (account-name account)
-             (session-value 'display-name) (account-display-name account))
-       (format t "~&~A logged in.~%" account-name)
-       (redirect "/"))
-     (progn
-       (push "Invalid login or password." (session-value 'errors))
-       (redirect "/login"))))))
+        (<:a :href "/signup" "Create account."))))
+    (:post
+     (if-let ((account (validate-credentials account-name password)))
+       (progn
+         (setf (session-value 'account-name) (account-name account)
+               (session-value 'display-name) (account-display-name account))
+         (format t "~&~A logged in.~%" account-name)
+         (redirect "/"))
+       (progn
+         (push "Invalid login or password." (session-value 'errors))
+         (redirect "/login"))))))
 
 (defun render-chat-box ()
   (<:div :class "chat-box" :id "chat-box"
@@ -332,12 +331,13 @@
   (ensure-logged-in))
 
 (defun render-character-link (char-name)
-  (<:a :href (format nil "/?char=~A" charname) (<:ah char-name)))
+  (<:a :href (format nil "/?char=~A" char-name) (<:ah char-name)))
 
 (defun render-character-selection ()
   (<:ul
    (mapc (lambda (char) (<:li (render-character-link char)))
-         (list-user-character-names (session-value 'account-name)))))
+         nil
+         #+nil(list-user-character-names (session-value 'account-name)))))
 
 (define-easy-handler (character-selection :uri "/charselect") ()
   (ensure-logged-in)
