@@ -93,7 +93,7 @@
           (<:submit :value "Log Out")))
 
 (defun render-character-link (char-name)
-  (<:a :href (format nil "/?char=~A" char-name) (<:ah char-name)))
+  (<:href (format nil "/?char=~A" char-name) (<:ah char-name)))
 
 (defun render-character-selection ()
   (<:ul
@@ -119,9 +119,9 @@
   (render-page "Sykosomatic.org Dev Site"
                (lambda ()
                  (<:p (<:ah "Sykosomatic is currently in development. ")
-                      (<:a :href "/login" (<:ah "Log in.")))
+                      (<:href "/login" (<:ah "Log in.")))
                  (<:p (<:ah "Already logged in? What are you doing here?! Go ")
-                      (<:a :href "/play" (<:ah "play!"))))))
+                      (<:href "/play" (<:ah "play!"))))))
 
 (define-easy-handler (play :uri "/play") (char)
   (ensure-logged-in)
@@ -154,7 +154,7 @@
                             (session-value 'errors)))
                     (render-error-messages)
                     (render-login-component)
-                    (<:a :href "/signup" "Create account."))))
+                    (<:href "/signup" (<:ah "Create account.")))))
     (:post
      (if-let ((account (validate-credentials account-name password)))
        (progn
