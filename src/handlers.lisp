@@ -127,14 +127,14 @@
 (define-easy-handler (home :uri "/") ()
   (render-page "Sykosomatic.org Dev Site"
                (lambda ()
-                 (<:p (<:ah "Sykosomatic is currently in development. ")
+                 (<:p (<:ah "Sykosomatic is a cooperative storytelling system, currently in development. ")
                       (<:href "/login" (<:ah "Log in.")))
-                 (<:p (<:ah "Already logged in? What are you doing here?! Go ")
-                      (<:href "/play" (<:ah "play!"))))))
+                 (<:p (<:ah "Already logged in? What are you doing here?! Head to the ")
+                      (<:href "/stage" (<:ah "Stage!"))))))
 
-(define-easy-handler (play :uri "/play") (char)
+(define-easy-handler (play :uri "/stage") (char)
   (ensure-logged-in)
-  (render-page "Tell me a story"
+  (render-page "All the World's a Stage"
                (lambda ()
                  (if (emptyp char)
                      (<:p (<:ah "No character selected."))
@@ -165,7 +165,7 @@
          (setf (session-value 'account-name) (account-name account)
                (session-value 'display-name) (account-display-name account))
          (format t "~&~A logged in.~%" account-name)
-         (redirect "/play"))
+         (redirect "/stage"))
        (progn
          (push "Invalid login or password." (session-value 'errors))
          (redirect "/login"))))))
@@ -205,7 +205,7 @@
        (if createdp
            (progn
              (format t "~&Character created: ~A~%" name)
-             (redirect "/play"))
+             (redirect "/stage"))
            (progn
              (appendf (session-value 'errors) errors)
              (redirect "/newchar")))))
