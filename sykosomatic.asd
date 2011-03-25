@@ -14,5 +14,6 @@
             ((:file "db")
              (:file "account")
              (:file "character")
-             (:file "sykosomatic")))))
+             (:file "sykosomatic")
+             (:file "handlers")))))
 
