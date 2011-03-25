@@ -101,40 +101,45 @@
          nil
          #+nil(list-user-character-names (session-value 'account-name)))))
 
+(defun render-page (title body-fun &optional head-fun)
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title (<:ah title))
+      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
+      (when head-fun (funcall head-fun)))
+     (<:body
+      (funcall body-fun)))))
 ;;;
 ;;; Handlers
 ;;;
 
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Sykosomatic.org Dev Site")
-      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"))
-     (<:body
-      (<:p (<:ah "Sykosomatic is currently in development. ")
-           (<:a :href "/login" (<:ah "Log in.")))
-      (<:p (<:ah "Already logged in? What are you doing here?! Go ")
-           (<:a :href "/play" (<:ah "play!")))))))
+  (render-page "Sykosomatic.org Dev Site"
+               (lambda ()
+                 (<:p (<:ah "Sykosomatic is currently in development. ")
+                      (<:a :href "/login" (<:ah "Log in.")))
+                 (<:p (<:ah "Already logged in? What are you doing here?! Go ")
+                      (<:a :href "/play" (<:ah "play!"))))))
 
 (define-easy-handler (play :uri "/play") (char)
-  (declare (ignore char))
   (ensure-logged-in)
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Hello!")
-      (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
-      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
-      ;; When you feel like figuring out why optional loading fails, take the following two lines out...
-      (<:script :type "text/javascript" :src "res/swfobject.js")
-      (<:script :type "text/javascript" :src "res/web_socket.js")
-      (<:script :type "text/javascript" :src "res/ajaxlib.js"))
-     (<:body
-      (render-chat-box)
-      (render-user-input-area)
-      (render-logout-button)))))
+  (render-page "Tell me a story"
+               (lambda ()
+                 (if (emptyp char)
+                     (<:p (<:ah "No character selected."))
+                     (render-chat-box))
+                 (render-user-input-area)
+                 (render-logout-button))
+               (lambda ()
+                 (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
+                 (unless (emptyp char)
+                   ;; When you feel like figuring out why optional loading fails, take the following
+                   ;; two lines out...
+                   (<:script :type "text/javascript" :src "res/swfobject.js")
+                   (<:script :type "text/javascript" :src "res/web_socket.js")
+                   (<:script :type "text/javascript" :src "res/ajaxlib.js")))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-name password)
@@ -142,18 +147,14 @@
     (start-session))
   (case (request-method*)
     (:get
-     (with-yaclml-output-to-string
-       (<:html
-        (<:head
-         (<:title "Login Page")
-         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-        (<:body
-         (when-let ((account-name (session-value 'account-name)))
-           (push (format nil "Already logged in as ~A." account-name)
-                 (session-value 'errors)))
-         (render-error-messages)
-         (render-login-component))
-        (<:a :href "/signup" "Create account."))))
+     (render-page "Log in"
+                  (lambda ()
+                    (when-let ((account-name (session-value 'account-name)))
+                      (push (format nil "Already logged in as ~A." account-name)
+                            (session-value 'errors)))
+                    (render-error-messages)
+                    (render-login-component)
+                    (<:a :href "/signup" "Create account."))))
     (:post
      (if-let ((account (validate-credentials account-name password)))
        (progn
@@ -185,14 +186,10 @@
              (appendf (session-value 'errors) errors)
              (redirect "/signup")))))
     (:get
-     (with-yaclml-output-to-string
-       (<:html
-        (<:head
-         (<:title "Sign up for Sykosomatic")
-         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-        (<:body
-         (render-error-messages)
-         (render-signup-component)))))))
+     (render-page "Sign up"
+                  (lambda ()
+                    (render-error-messages)
+                    (render-signup-component))))))
 
 ;;; Characters
 (define-easy-handler (newchar :uri "/newchar") (name description)
@@ -209,26 +206,21 @@
              (appendf (session-value 'errors) errors)
              (redirect "/signup")))))
     (:get
-     (with-yaclml-output-to-string
-       (<:html
-        (<:head
-         (<:title "Character creation")
-         (<:script :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" :type "text/javascript"))
-        (<:body
-         (render-error-messages)
-         (render-character-creation-component)))))))
+     (render-page "Create a character"
+                  (lambda ()
+                    (render-error-messages)
+                    (render-character-creation-component))))))
 
 (define-easy-handler (character-selection :uri "/charselect") ()
   (ensure-logged-in)
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title "Character Selection")
-      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"))
-     (<:body
-      (render-character-selection)
-      (render-logout-button)))))
+  (render-page "Select character"
+               (lambda ()
+                 (render-error-messages)
+                 (render-character-selection)
+                 (render-logout-button))))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
-  (ensure-logged-in))
+  (ensure-logged-in)
+  (setf (content-type*) "text/plain")
+  "pong")
