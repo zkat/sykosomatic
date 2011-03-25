@@ -208,7 +208,7 @@
              (redirect "/play"))
            (progn
              (appendf (session-value 'errors) errors)
-             (redirect "/signup")))))
+             (redirect "/newchar")))))
     (:get
      (render-page "Create a character"
                   (lambda ()
