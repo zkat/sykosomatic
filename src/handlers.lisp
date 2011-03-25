@@ -154,7 +154,8 @@
 
 (define-easy-handler (logout-page :uri "/logout") ()
   (when (and *session* (session-value 'account-name))
-    (logout *session*))
+    (logout *session*)
+    (remove-session *session*))
   (redirect "/login"))
 
 ;;; Account creation and management
