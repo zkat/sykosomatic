@@ -106,7 +106,20 @@
 ;;;
 
 ;;; Main page
-(define-easy-handler (home :uri "/") (#+nil char)
+(define-easy-handler (home :uri "/") ()
+  (with-yaclml-output-to-string
+    (<:html
+     (<:head
+      (<:title "Sykosomatic.org Dev Site")
+      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"))
+     (<:body
+      (<:p (<:ah "Sykosomatic is currently in development. ")
+           (<:a :href "/login" (<:ah "Log in.")))
+      (<:p (<:ah "Already logged in? What are you doing here?! Go ")
+           (<:a :href "/play" (<:ah "play!")))))))
+
+(define-easy-handler (play :uri "/play") (char)
+  (declare (ignore char))
   (ensure-logged-in)
   (with-yaclml-output-to-string
     (<:html
@@ -147,7 +160,7 @@
          (setf (session-value 'account-name) (account-name account)
                (session-value 'display-name) (account-display-name account))
          (format t "~&~A logged in.~%" account-name)
-         (redirect "/"))
+         (redirect "/play"))
        (progn
          (push "Invalid login or password." (session-value 'errors))
          (redirect "/login"))))))
@@ -191,7 +204,7 @@
        (if createdp
            (progn
              (format t "~&Character created: ~A~%" name)
-             (redirect "/"))
+             (redirect "/play"))
            (progn
              (appendf (session-value 'errors) errors)
              (redirect "/signup")))))
