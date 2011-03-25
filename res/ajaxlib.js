@@ -1,6 +1,12 @@
 WEB_SOCKET_SWF_LOCATION = 'res/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
 
+function getURLParameter(name) {
+    return unescape(
+        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+    );
+}
+
 function callback(data) {
   $('#chat-box').append(data);
   var objDiv = document.getElementById('chat-box');
@@ -17,6 +23,10 @@ function disable_input () {
 function ping() {
     $.get('pingme');
     // ws.send('ping');
+}
+
+function currentChar () {
+    return getURLParameter('char');
 }
 
 var ws;
@@ -38,6 +48,7 @@ function init_chat() {
     // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
         ws.send(navigator.userAgent);
+        ws.send(currentChar());
         enable_input();
     };
     ws.onmessage = function(e) {
