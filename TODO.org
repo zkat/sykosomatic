@@ -14,6 +14,7 @@
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
 *** TODO Write a function that will return all currently-chatting accounts.
+*** TODO Prevent multiple accounts from playing at the same time.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
@@ -36,15 +37,10 @@
     a character will log you into that character.
 *** TODO Add a 'choose character' dropdown.
 *** TODO Allow players to play multiple characters in different tabs/windows on a single account.
-*** TODO Add either a drop down or a 'choose character' screen.
 *** TODO Use account _id instead of account_name for characters
     This'll require figuring out how to do view collation so that searching can happen by account
     name, but the account name itself can stay on the account document.
 *** TODO group actions and dialog by user.
-*** TODO Use (CONT'D.) (?)
-*** TODO OOC pane
-    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
-    chatting can happen without interrupting the flow of the scene.
 *** TODO Persistent scenes
     NOTE: This'll need to be done *after* characters are implemented.
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
@@ -71,6 +67,11 @@
     individual scenes that other users (login required for now) can view.
 *** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
+*** TODO Use (CONT'D.) (?)
+*** TODO OOC pane
+    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
+    chatting can happen without interrupting the flow of the scene.
+
 *** TODO More better input
     The current input method is cute, but not the intended one. A better input mechanism should be
     developed. Most likely, it should at least partly use the old MUD-style sentence parser, and
@@ -126,8 +127,15 @@
     all the mobile browsers will be supported! This would probably take a bit of effort, and so is
     probably better left to near-launch. Websockets + Flash sockets is good enough for now.
 ** Webapp
-*** TODO Reorganize app into MVC-like thing.
-    Start with having separate handlers for GET/POST (if possible)
+*** DONE Split up handlers between POST and GET
+*** DONE Move handlers to a separate file.
+*** DONE Make / an actual homepage, /play the playing page.
+*** TODO Improve form error reporting.
+    The GET version should accept an optional 'errors' argument that it can be called with to handle
+    error messages. This may involve not using define-easy-handler anymore.
+*** TODO Loading screen
+    Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
+    show the whole chat box.
 *** TODO Templatify code
     belletrist.lisp is starting to look like a big ball of pseudo-HTML in some places. It might be
     worthwhile to start looking into moving that HTML out into template, or pseudo-template files.
@@ -158,9 +166,6 @@
     (render-template 'standard-page *standard-output* :title "My special page" :body-contents "<p>Hello, World!</p>")
    
     Question: Do even minor instances of HTML need to be templated out?
-*** TODO Loading screen
-    Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
-    show the whole chat box.
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 *** TODO Styling
