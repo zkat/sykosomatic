@@ -106,10 +106,19 @@
     (<:html
      (<:head
       (<:title (<:ah title))
+      (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
       (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
       (when head-fun (funcall head-fun)))
      (<:body
       (funcall body-fun)))))
+
+(defun render-gameplay-js-libs ()
+  ;; When you feel like figuring out why optional loading fails, take the following
+  ;; two lines out...
+  (<:script :type "text/javascript" :src "res/swfobject.js")
+  (<:script :type "text/javascript" :src "res/web_socket.js")
+  (<:script :type "text/javascript" :src "res/ajaxlib.js"))
+
 ;;;
 ;;; Handlers
 ;;;
@@ -133,13 +142,8 @@
                  (render-user-input-area)
                  (render-logout-button))
                (lambda ()
-                 (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
                  (unless (emptyp char)
-                   ;; When you feel like figuring out why optional loading fails, take the following
-                   ;; two lines out...
-                   (<:script :type "text/javascript" :src "res/swfobject.js")
-                   (<:script :type "text/javascript" :src "res/web_socket.js")
-                   (<:script :type "text/javascript" :src "res/ajaxlib.js")))))
+                   (render-gameplay-js-libs)))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-name password)
