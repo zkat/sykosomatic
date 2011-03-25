@@ -38,7 +38,6 @@ function init_chat() {
     // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
         ws.send(navigator.userAgent);
-        alert('Websocket connected.');
         enable_input();
     };
     ws.onmessage = function(e) {
@@ -46,7 +45,6 @@ function init_chat() {
     };
     ws.onclose = function () {
         disable_input();
-        alert('Websocket disconnected. Refresh.');
     };
 };
 
