@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic.db
   (:use :cl :alexandria :chillax.core :chillax.jsown)
   (:export :init-db :mkdoc :doc-val :ensure-doc :get-uuid :couchfun :mapfun :view-query-value
-           :assert-validation :with-validation :assert-required))
+           :assert-validation :with-validation :assert-required :*db*))
 (cl:in-package #:sykosomatic.db)
 
 (defparameter *server* (make-instance 'jsown-server))

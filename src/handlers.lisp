@@ -1,16 +1,9 @@
 (cl:in-package :sykosomatic)
 
+(declaim (optimize debug))
 ;;;
 ;;; Utils
 ;;;
-
-(defun logout (session)
-  (let ((account-name (session-value 'websocket-client session))
-        (websocket-client (session-value 'websocket-client session)))
-    (when account-name
-      (format t "~&~A logged out.~%" account-name))
-    (when websocket-client
-      (disconnect-client websocket-client))))
 
 (defun ensure-logged-in ()
   (unless (and *session* (session-value 'account-name))
@@ -127,6 +120,9 @@
 ;;;
 ;;; Handlers
 ;;;
+
+(defun current-account-name (&optional (*session* *session*))
+  (session-value 'account-name))
 
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
