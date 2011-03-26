@@ -14,6 +14,8 @@
 
 (defun ensure-logged-in ()
   (unless (and *session* (session-value 'account-name))
+    (push "You must be logged in to access that page."
+          (session-value 'errors))
     (redirect "/login")))
 
 (defun active-account-sessions (account-name)
@@ -47,7 +49,8 @@
 (defun render-error-messages ()
   (when-let ((errors (session-value 'errors)))
     (<:ul :class "errorlist"
-          (mapc (lambda (err) (<:li (<:ah err))) errors))))
+          (mapc (lambda (err) (<:li (<:ah err))) errors))
+    (setf (session-value 'errors) nil)))
 
 (defun render-character-creation-component ()
   (<:form :name "create-character" :action "/newchar" :method "post"
