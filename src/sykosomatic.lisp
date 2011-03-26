@@ -47,62 +47,62 @@
                       dialogue))))))))
 
 ;; clws stuff
-(defgeneric add-client (chat-server client resource-name header))
+(defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
-(defgeneric validate-client (chat-server client user-agent))
+(defgeneric validate-client (chat-server client))
 
 (defun disconnect-client (client)
-  (ws:write-to-client client :close)
-  ;; Chrome doesn't seem to pay attention to :close.
-  ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
-  (ws::client-disconnect client :abort t))
+  (let ((ws-client (client-ws-client client))
+        (session (client-session client)))
+    (ws:write-to-client ws-client :close)
+    ;; Chrome doesn't seem to pay attention to :close.
+    ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
+    (ws::client-disconnect ws-client :abort t)
+    (when session
+      (deletef (session-value 'websocket-clients session)
+               client))))
 
-(defun client-session (client)
-  (cdr (find client (session-db *server*) :key (compose (curry #'session-value 'websocket-client) #'cdr))))
-
-(defun client-character-name (client &aux (session (client-session client)))
-  (when session
-    (when-let ((character (find-character-by-account-name (session-value 'account-name session))))
-      (jsown:val character "name"))))
-
-(defun client-account-name (client &aux (session (client-session client)))
-  (when session
-    (session-value 'account-name session)))
+(defstruct client uri host headers user-agent ws-client session account-name character-id)
 
 (defclass chat-server (ws:ws-resource)
-  ;; Really just 'pending' clients.
-  ((clients :initform nil)))
+  ((clients :initform (make-hash-table :test #'eq))))
 
-(defmethod add-client ((srv chat-server) client resource-name headers)
-  (format t "~&Adding Pending Client ~A.~%Resource name: ~A~%Headers: ~S~%"
-          client resource-name headers)
-  (push (list client resource-name headers)
-        (slot-value srv 'clients)))
+(defun find-client (chat-server ws-client)
+  (gethash ws-client (slot-value chat-server 'clients)))
+
+(defmethod add-client ((srv chat-server) client)
+  (format t "~&Adding Pending Client ~A.~%" client)
+  (setf (gethash (client-ws-client client) (slot-value srv 'clients))
+        client))
 
 (defmethod remove-client ((srv chat-server) client)
-  (deletef (slot-value srv 'clients) client :key #'car))
+  (remhash (client-ws-client client) (slot-value srv 'clients)))
 
-(defmethod validate-client ((srv chat-server) client user-agent &aux (*acceptor* *server*))
-  (let* ((params (cdr (assoc client (slot-value srv 'clients))))
-         (resource-name (car params))
-         (headers (cadr params))
-         (_ (format t "~&Validating client ~A.~%Resource name: ~A~%Headers: ~S~%User Agent: ~A~%"
-                    client resource-name headers user-agent))
-         (req (make-instance 'request :uri resource-name :remote-addr (ws::client-host client)
-                             :headers-in (cons (cons :user-agent user-agent) headers)
-                             :acceptor *server*))
-         (session (session-verify req)))
-    (declare (ignore _))
-    (if session
-        (let ((old-session (cdr (find session (session-db *server*) :key #'cdr))))
-          (format t "~&Got a session: ~A" session)
-          (when old-session
-            (let ((old-client (session-value 'websocket-client old-session)))
-              (when old-client
-                (format t "~&Found two clients using the same session. Disconnecting old one. (~A)~%" old-client)
-                (disconnect-client old-client))))
-          (remove-client srv client)
-          (setf (session-value 'websocket-client session) client))
+(defmethod validate-client ((srv chat-server) client &aux (*acceptor* *server*))
+  (let ((session (session-verify (make-instance 'request
+                                                :uri (client-uri client)
+                                                :remote-addr (client-host client)
+                                                :headers-in (client-headers client)
+                                                :acceptor *server*))))
+    (when (and session (session-value 'account-name session))
+      (setf (client-session client) session
+            (client-account-name client) (session-value 'account-name session))
+      client)))
+
+(defun process-client-validation (res client json-message
+                                  &aux (*acceptor* *server*)
+                                  (message (jsown:parse json-message)))
+  (push (cons :user-agent (jsown:val message "useragent"))
+        (client-headers client))
+  (let ((character (find-character (jsown:val message "char"))))
+    (if (and (validate-client res client)
+             (string-equal (character-account-name character)
+                           (client-account-name client)))
+        (progn
+          (format t "~&Client validated: ~A. It's now playing as ~A.~%"
+                  client (character-name character))
+          (setf (client-character-id client) (character-id character))
+          (push (session-value 'websocket-clients (client-session client)) client))
         (progn
           (format t "~&No session. Disconnecting client. (~A)~%" client)
           (disconnect-client client)))))
@@ -113,40 +113,53 @@
    (make-instance 'chat-server)
    #'ws::any-origin))
 
-(defmethod ws:resource-accept-connection ((res chat-server) resource-name headers client)
+(defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
   (format t "~&Got client connection.~%")
-  (add-client res client resource-name (let (alist-headers)
-                                         (maphash (lambda (k v)
-                                                    (push (cons (intern (string-upcase k) :keyword)
-                                                                v)
-                                                          alist-headers))
-                                                  headers)
-                                         alist-headers))
+  (let (alist-headers)
+    (maphash (lambda (k v)
+               (push (cons (intern (string-upcase k) :keyword)
+                           v)
+                     alist-headers))
+             headers)
+    (add-client res (make-client :uri resource-name :headers alist-headers :ws-client ws-client)))
   t)
 
-(defmethod ws:resource-client-disconnected ((res chat-server) client)
+(defmethod ws:resource-client-disconnected ((res chat-server) ws-client
+                                            &aux (client (find-client res ws-client)))
   (format t "~&Client ~A disconnected.~%" client)
   (remove-client res client))
 
-(defmethod ws:resource-received-frame ((res chat-server) client message)
+(defmethod ws:resource-received-frame ((res chat-server) ws-client message
+                                       &aux (client (find-client res ws-client)))
   (format t "~&Received resource frame.~%")
   (if (client-session client)
       (process-client-message res client message)
-      (validate-client res client message)))
+      (process-client-validation res client message)))
+
+(defun client-character-name (client)
+  (when-let ((character (find-character-by-id (client-character-id client))))
+    (character-name character)))
 
 (defun process-client-message (res client message)
-  (declare (ignore res))
   (let* ((action-obj (jsown:parse message))
          (action (jsown:val action-obj "action"))
          (dialogue (jsown:val action-obj "dialogue"))
          (user-action (add-user-action (client-character-name client) action dialogue)))
-    (loop for (nil . session) in (session-db *server*)
-       for c = (session-value 'websocket-client session)
-       when c
-       do (ws:write-to-client c (with-yaclml-output-to-string
-                                  (render-user-action user-action))))))
+    (maphash-keys (lambda (ws-client)
+                    (ws:write-to-client ws-client
+                                        (with-yaclml-output-to-string
+                                          (render-user-action user-action))))
+                  (slot-value res 'clients))))
 
 ;; Server startup/teardown.
+(defun logout (session)
+  (let ((account-name (session-value 'account-name session))
+        (websocket-clients (session-value 'websocket-clients session)))
+    (when account-name
+      (format t "~&~A logged out.~%" account-name))
+    (when websocket-clients
+      (mapc #'disconnect-client websocket-clients))))
+
 (defun session-cleanup (session)
   (format t "~&Session timed out. Trying to log it out...~%")
   (logout session))

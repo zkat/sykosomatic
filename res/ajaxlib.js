@@ -47,8 +47,7 @@ function init_chat() {
     // When running as root, use this.
     // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
-        ws.send(navigator.userAgent);
-        ws.send(currentChar());
+        ws.send("{\"useragent\":\""+navigator.userAgent+"\",\"char\":\""+currentChar()+"\"}");
         enable_input();
     };
     ws.onmessage = function(e) {
