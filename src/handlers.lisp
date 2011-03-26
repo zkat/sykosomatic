@@ -92,14 +92,16 @@
   (<:form :class "logout-button" :action "/logout" :method "post"
           (<:submit :value "Log Out")))
 
-(defun render-character-link (char-name)
-  (<:href (format nil "/?char=~A" char-name) (<:ah char-name)))
+(defun render-character-link (char)
+  (let ((name (character-name char)))
+   (<:href (format nil "/stage?char=~A" (string-downcase name))
+           (<:ah name))))
 
-(defun render-character-selection ()
+(defun render-character-list (characters)
+  (print characters)
   (<:ul
    (mapc (lambda (char) (<:li (render-character-link char)))
-         nil
-         #+nil(list-user-character-names (session-value 'account-name)))))
+         characters)))
 
 (defun render-page (title body-fun &optional head-fun)
   (with-yaclml-output-to-string
@@ -137,13 +139,27 @@
   (render-page "All the World's a Stage"
                (lambda ()
                  (if (emptyp char)
-                     (<:p (<:ah "No character selected."))
-                     (render-chat-box))
-                 (render-user-input-area)
-                 (render-logout-button))
+                     (progn
+                       (push (format nil "You must select a character before playing.")
+                             (session-value 'errors))
+                       (redirect "/role"))
+                     (progn
+                      (render-chat-box)
+                      (render-user-input-area)
+                      (render-logout-button))))
                (lambda ()
                  (unless (emptyp char)
                    (render-gameplay-js-libs)))))
+
+(define-easy-handler (role :uri "/role") ()
+  (ensure-logged-in)
+  (render-page "What role shall you play?"
+               (lambda ()
+                 (render-error-messages)
+                 (let ((characters (find-characters-by-account-name (session-value 'account-name))))
+                   (render-character-list characters)
+                   (<:href "/newchar" "Create a new character.")
+                   (render-logout-button)))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-name password)
@@ -214,14 +230,6 @@
                   (lambda ()
                     (render-error-messages)
                     (render-character-creation-component))))))
-
-(define-easy-handler (character-selection :uri "/charselect") ()
-  (ensure-logged-in)
-  (render-page "Select character"
-               (lambda ()
-                 (render-error-messages)
-                 (render-character-selection)
-                 (render-logout-button))))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()

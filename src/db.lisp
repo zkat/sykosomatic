@@ -43,12 +43,13 @@
 (defmacro couchfun (lambda-list &body body)
   `(prin1-to-string '(lambda ,lambda-list ,@body)))
 
-(defun view-query-value (design-doc-name view-name key)
+(defun view-query-value (design-doc-name view-name key &optional (singlep t))
   (when-let ((results (doc-val (query-view *db* design-doc-name view-name
                                            :key key)
                                "rows")))
-    (doc-val (car results) "value")))
-
+    (if singlep
+        (doc-val (car results) "value")
+        (mapcar (rcurry #'doc-val "value") results))))
 
 (defvar *validation-errors*)
 

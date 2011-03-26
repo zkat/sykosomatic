@@ -1,7 +1,8 @@
 (cl:defpackage #:sykosomatic.character
   (:use :cl :alexandria :sykosomatic.db :chillax.core :cl-ppcre)
-  (:export :find-character :find-character-by-account-name
-           :ensure-character-design-doc :create-character :find-character))
+  (:export :find-character :find-characters-by-account-name
+           :ensure-character-design-doc :create-character
+           :character-name :character-description))
 (cl:in-package #:sykosomatic.character)
 
 (defun ensure-character-design-doc ()
@@ -21,8 +22,8 @@
 (defun find-character (name)
   (view-query-value "character" "by_name" (string-downcase name)))
 
-(defun find-character-by-account-name (account-name)
-  (view-query-value "character" "by_account_name" (string-downcase account-name)))
+(defun find-characters-by-account-name (account-name)
+  (view-query-value "character" "by_account_name" (string-downcase account-name) nil))
 
 (defparameter *character-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
                                                      :case-insensitive-mode t))
@@ -51,3 +52,8 @@
                            "name" name
                            "description" description))
         (values nil errors))))
+
+(defun character-name (character)
+  (doc-val character "name"))
+(defun character-description (character)
+  (doc-val character "description"))
