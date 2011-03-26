@@ -14,7 +14,6 @@
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
 *** TODO Write a function that will return all currently-chatting accounts.
-*** TODO Prevent multiple accounts from playing at the same time.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
@@ -31,16 +30,11 @@
     Just a little box where users can enter a character name, which must be unique, and a brief
     description of the character.
 *** DONE Use current character name instead of display name for chat.
-*** TODO Require a character to exist before a user can chat.
+*** DONE Require a character to exist before a user can chat.
     This should be done by placing a character selection screen between the chat and the login
     screen. The character selection screen should include a list of current characters. Clicking on
     a character will log you into that character.
-*** TODO Add a 'choose character' dropdown.
-*** TODO Allow players to play multiple characters in different tabs/windows on a single account.
-*** TODO Use account _id instead of account_name for characters
-    This'll require figuring out how to do view collation so that searching can happen by account
-    name, but the account name itself can stay on the account document.
-*** TODO group actions and dialog by user.
+*** DONE Allow players to play multiple characters in different tabs/windows on a single account.
 *** TODO Persistent scenes
     NOTE: This'll need to be done *after* characters are implemented.
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
@@ -68,6 +62,14 @@
 *** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
 *** TODO Use (CONT'D.) (?)
+*** TODO Add a 'choose character' dropdown.
+    This means -to the chat screen-.
+*** TODO Make sure a user is chatting as a character only once.
+*** TODO Confirm again that users can't play as someone else's character.
+*** TODO Use account _id instead of account_name for characters
+    This'll require figuring out how to do view collation so that searching can happen by account
+    name, but the account name itself can stay on the account document.
+    NOTE: Unnecessary for now. Accounts are pretty much unique identifiers.
 *** TODO OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
@@ -113,6 +115,9 @@
     ["message_type","contents"]. It'll allow things like ["ping",1], as well as any future
     non-chat-related commands we may want to send down the pipe. It might also be useful for doing
     any HTML rendering client-side, instead of having the webserver generate the markup.
+*** TODO Render html client-side
+    Lisp shouldn't be pre-rendering HTML. Just send out a JSON response and let the client take care
+    of it.
 *** TODO Possibly-optional websocket ping to keep the socket alive even when idle.
 *** TODO Better disconnect-client
     It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
@@ -126,6 +131,8 @@
     browsers. If clws supports socket.io's protocol, then rainbows will be shat, and even IE 5.5 and
     all the mobile browsers will be supported! This would probably take a bit of effort, and so is
     probably better left to near-launch. Websockets + Flash sockets is good enough for now.
+*** TODO FUTURE separate websockets client from hunchentoot.
+    This'll make it possible to switch the frontend.
 ** Webapp
 *** DONE Split up handlers between POST and GET
 *** DONE Move handlers to a separate file.
