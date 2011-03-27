@@ -14,6 +14,7 @@
             ((:file "db")
              (:file "account")
              (:file "character")
+             (:file "scene")
              (:file "sykosomatic")
              (:file "handlers")))))
 
