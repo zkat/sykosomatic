@@ -43,7 +43,8 @@
     Not all user messages must (or should) be saved. Instead, create a 'recorded session' document,
     and then record each line of input that the character is witness to into 'entry' documents,
     which can then be collated with the recorded session as outlined in the CouchDB Joins article.
-**** TODO Add 'record' and 'stop recording' buttons to chat page.
+**** DONE Add 'record' and 'stop recording' buttons to chat page.
+     Link them up with a javascript function that alerts when recording starts/stops.
 **** TODO Recorded session
      'Record' button should create a 'recorded-session' document, associated with the user. This
      document can be pretty blank, but will eventually be used to store more metadata. For now, use
@@ -80,6 +81,12 @@
      can then request entries X, Y, and Z to be saved/'recorded' as a scene log.
 **** TODO Scene collection
     Users should be able to 'collect' others' stories, much like in DA.
+**** TODO Scene editing
+     I like the idea of rendering each 'sentence'/unit as a targetable DOM element (such as SPANs
+     for sentences in a paragraph), and using jQuery UI to make those units individually
+     draggable. I don't think I want to allow full editing of scenes, but this might be a really
+     neat feature that allows cleaning up garbage without giving too much freedom (or requiring too
+     much effort to handle formatting, and the like).
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
