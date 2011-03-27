@@ -44,6 +44,14 @@ function currentChar () {
     return getURLParameter('char');
 }
 
+function startRecording() {
+    alert('Recording scene.');
+}
+
+function stopRecording() {
+    alert('Done recording.');
+}
+
 function addMsg() {
   var action = $('#user-action').val();
   var dialogue = $('#user-dialogue').val();
