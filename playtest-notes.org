@@ -1,0 +1,14 @@
+* Grammer/Spealing erarrs
+  People misspell what they say, and sometimes they want to correct it. The coughing trick receives
+  poor reviews. Bavardage suggests actually correcting corrections inline. Apparently, Skype does
+  it.
+* Emphasis?
+  F wants to have italics to emphasize phrases, instead of using *foo*/-foo-/_foo_
+* Parentheticals vs Action
+  There's a tension between standalone actions, and what goes in (parentheticals). Some kind of rule
+  of how actions are parsed into parentheticals vs actions might be nice.
+* Action/Dialogue grouping
+  It would be nice if actions and dialogue were automatically grouped if said in direct sequence by
+  the same character.
+* Writing quality
+  Writing quality is a concern. Does it help that the parser handles most of it?
