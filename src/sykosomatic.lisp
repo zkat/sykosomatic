@@ -96,6 +96,7 @@
         (client-headers client))
   (let ((character (find-character (jsown:val message "char"))))
     (if (and (validate-client res client)
+             character
              (string-equal (character-account-name character)
                            (client-account-name client)))
         (progn
