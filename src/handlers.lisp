@@ -118,6 +118,12 @@
   (<:script :type "text/javascript" :src "res/json2.js")
   (<:script :type "text/javascript" :src "res/ajaxlib.js"))
 
+(defun render-scene-recording ()
+  (<:form :action "javascript:startRecording()"
+          (<:submit :value "Start Recording"))
+  (<:form :action "javascript:stopRecording()"
+          (<:submit :value "Stop Recording")))
+
 ;;;
 ;;; Handlers
 ;;;
@@ -146,6 +152,7 @@
                      (progn
                       (render-chat-box)
                       (render-user-input-area)
+                      (render-scene-recording)
                       (render-logout-button))))
                (lambda ()
                  (unless (emptyp char)
