@@ -73,7 +73,17 @@
   (<:div :class "chat-box" :id "chat-box"
          (<:div :class "sceneheader-div"
                 (<:p :class "sceneheader"
-                     (<:ah "int. josh's computer. night.")))))
+                     (<:ah "int. breakfast bar. night."))
+                (<:div :class "user-entry"
+                       (<:p :class "action"
+                            (<:ah "The entire 'bar' is only about 7 feed wide, with just enough depth and
+height to hold the bar, with stovetops behind it, and the 6 barstools. It is lit by a few dingy
+bulbs. The walls on either side are covered with tiny scraps of paper, old posters, and splatters of
+what used to be food.  This bar is literally an alley, and beneath the detritus you know the walls
+are actually the exteriors of two buildings.")))
+                (<:div :class "user-entry"
+                       (<:p :class "action"
+                            (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
 
 (defun render-user-input-area ()
   (<:div :id "user-input"

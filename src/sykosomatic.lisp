@@ -100,7 +100,7 @@
              (string-equal (character-account-name character)
                            (client-account-name client)))
         (progn
-          (format t "~&Client validated: ~A. It's now playing as ~A.~%"
+          (format t "~&Client validated: ~A. ~%It's now playing as ~A.~%"
                   client (character-name character))
           (setf (client-character-id client) (character-id character))
           (push (session-value 'websocket-clients (client-session client)) client))
