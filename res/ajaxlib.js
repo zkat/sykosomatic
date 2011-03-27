@@ -1,11 +1,26 @@
 WEB_SOCKET_SWF_LOCATION = 'res/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
 
+var num_failures = 0;
+var interval_id;
+var ws;
+
 function getURLParameter(name) {
     return unescape(
         (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
     );
 }
+
+function on_ajax_error() {
+  num_failures = num_failures + 1;
+  if (num_failures >= 5) {
+      clearTimeout(interval_id);
+  };
+};
+
+function on_ajax_success() {
+  num_failures = 0;
+};
 
 function callback(data) {
   $('#chat-box').append(data);
@@ -21,15 +36,13 @@ function disable_input () {
 }
 
 function ping() {
-    $.get('pingme');
+    $.get('pingme',on_ajax_success);
     // ws.send('ping');
 }
 
 function currentChar () {
     return getURLParameter('char');
 }
-
-var ws;
 
 function addMsg() {
   var action = $('#user-action').val();
@@ -69,8 +82,9 @@ function init() {
                         $.getScript('res/web_socket.js', init_chat);
                     });
     };
-    // ping the server every 5 minutes to keep the session alive.
-    setInterval(ping,1000*60*5);
+    // ping the server every 10 minutes to keep the session alive.
+    interval_id = setInterval(ping,1000*60*10);
+    $(document).ajaxError(on_ajax_error);
 }
 
 $(document).ready(init);
