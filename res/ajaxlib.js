@@ -50,7 +50,7 @@ function addMsg() {
   if (action || dialogue) {
       $('#user-action').val('');
       $('#user-dialogue').val('');
-      ws.send("{\"action\":\""+action+"\",\"dialogue\":\""+dialogue+"\"}");
+      ws.send(JSON.stringify({action:action,dialogue:dialogue}));
   };
 };
 
@@ -60,7 +60,8 @@ function init_chat() {
     // When running as root, use this.
     // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
-        ws.send("{\"useragent\":\""+navigator.userAgent+"\",\"char\":\""+currentChar()+"\"}");
+        ws.send(JSON.stringify({useragent: navigator.userAgent,
+                                char: currentChar()}));
         enable_input();
     };
     ws.onmessage = function(e) {

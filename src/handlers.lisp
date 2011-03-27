@@ -115,6 +115,7 @@
   ;; two lines out...
   (<:script :type "text/javascript" :src "res/swfobject.js")
   (<:script :type "text/javascript" :src "res/web_socket.js")
+  (<:script :type "text/javascript" :src "res/json2.js")
   (<:script :type "text/javascript" :src "res/ajaxlib.js"))
 
 ;;;
