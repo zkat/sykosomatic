@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic
   (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character)
   (:import-from #:sykosomatic.db #:init-db)
-  (:import-from #:sykosomatic.scene #:create-scene))
+  (:import-from #:sykosomatic.scene #:create-scene #:add-action))
 (cl:in-package #:sykosomatic)
 
 (defvar *server* nil)
@@ -158,16 +158,27 @@
     ("start-recording"  . start-recording)
     ("stop-recording" . stop-recording)))
 
+(defun save-user-action (scene-id user-action)
+  (format t "~&Saving user action ~A under scene-id ~A~%" user-action scene-id)
+  (add-action scene-id
+              :character (user-action-user user-action)
+              :action (user-action-action user-action)
+              :dialogue (user-action-dialogue user-action)
+              :timestamp (user-action-timestamp user-action)))
+
+(defun send-user-action (client user-action)
+  (when-let ((scene-id (session-value 'scene-id (client-session client))))
+    (save-user-action scene-id user-action))
+  #+nil(render-user-action-to-json user-action)
+  (ws:write-to-client (client-ws-client client)
+                      (jsown:to-json
+                       (list "user-action"
+                             (with-yaclml-output-to-string
+                               (render-user-action user-action))))))
+
 (defun process-user-input (res client action dialogue)
-  (let ((user-action (add-user-action (client-character-name client) action dialogue)))
-    (maphash-keys (lambda (ws-client)
-                    (ws:write-to-client ws-client
-                                        #+nil(render-user-action-to-json user-action)
-                                        (jsown:to-json
-                                         (list "user-action"
-                                               (with-yaclml-output-to-string
-                                                 (render-user-action user-action))))))
-                  (slot-value res 'clients))))
+  (maphash-values (rcurry #'send-user-action (add-user-action (client-character-name client) action dialogue))
+                  (slot-value res 'clients)))
 
 (defun process-ping (res client)
   (declare (ignore res))
