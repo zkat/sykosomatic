@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character)
-  (:import-from #:sykosomatic.db #:init-db)
-  (:import-from #:sykosomatic.scene #:create-scene #:add-action))
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character
+        #:sykosomatic.scene)
+  (:import-from #:sykosomatic.db #:init-db))
 (cl:in-package #:sykosomatic)
 
 (defvar *server* nil)

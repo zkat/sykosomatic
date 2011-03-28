@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.scene
   (:use :cl :alexandria :chillax.core :sykosomatic.db)
-  (:export :create-scene :add-action :find-scene-with-actions))
+  (:export :create-scene :add-action :find-scenes-by-account-name :find-scene-with-actions :find-scene-actions
+           :scene-id))
 (cl:in-package #:sykosomatic.scene)
 
 (defun ensure-scene-design-doc ()
@@ -17,7 +18,10 @@
                                              (cond ((string= type "scene")
                                                     (emit (list (hashget doc "_id") 0) doc))
                                                    ((string= type "scene-action")
-                                                    (emit (list (hashget doc "scene_id") 1) doc))
+                                                    (emit (list (hashget doc "scene_id")
+                                                                1
+                                                                (hashget doc "timestamp"))
+                                                          doc))
                                                    (t nil))))
                                     "actions_by_scene_id"
                                     (mkdoc "map"
@@ -39,6 +43,12 @@
                      "action" action
                      "dialogue" dialogue
                      "timestamp" timestamp)))
+
+(defun scene-id (scene)
+  (doc-val scene "_id"))
+
+(defun find-scenes-by-account-name (account-name)
+  (view-query-value "scene" "by_account_name" account-name nil))
 
 (defun find-scene-with-actions (scene-id)
   (when-let ((results (doc-val (query-view *db* "scene" "full_by_id"
