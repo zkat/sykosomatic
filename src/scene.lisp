@@ -12,6 +12,8 @@
                                              (emit (string-downcase (hashget doc "account_name"))
                                                    doc)))))))
 (defun create-scene (account-name)
-  (ensure-doc (get-uuid)
-              (mkdoc "type" "scene"
-                     "account_name" account-name)))
+  (let ((uuid (get-uuid)))
+    (ensure-doc uuid
+                (mkdoc "type" "scene"
+                       "account_name" account-name))
+    uuid))

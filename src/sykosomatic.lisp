@@ -170,14 +170,22 @@
                   (slot-value res 'clients))))
 
 (defun process-ping (res client)
+  (declare (ignore res))
   (ws:write-to-client (client-ws-client client) (jsown:to-json (list "pong"))))
 
 (defun start-recording (res client)
+  (declare (ignore res))
   (format t "~&Request to start recording received.~%")
-  (create-scene (client-account-name client)))
+  (if (session-value 'scene-id (client-session client))
+      (format t "~&Scene already being recorded. Ignoring request.~%")
+      (let ((*acceptor* *server*))
+        (setf (session-value 'scene-id (client-session client))
+              (create-scene (client-account-name client))))))
 
 (defun stop-recording (res client)
-  (format t "~&Request to stop recording received.~%"))
+  (declare (ignore res))
+  (format t "~&Request to stop recording received.~%")
+  (delete-session-value 'scene-id (client-session client)))
 
 (defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
   (let ((action (cdr (assoc (car message) *dispatch* :test #'string=))))
