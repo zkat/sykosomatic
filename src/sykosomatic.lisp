@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic
   (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character)
-  (:import-from #:sykosomatic.db #:init-db))
+  (:import-from #:sykosomatic.db #:init-db)
+  (:import-from #:sykosomatic.scene #:create-scene))
 (cl:in-package #:sykosomatic)
 
 (defvar *server* nil)
@@ -172,7 +173,8 @@
   (ws:write-to-client (client-ws-client client) (jsown:to-json (list "pong"))))
 
 (defun start-recording (res client)
-  (format t "~&Request to start recording received.~%"))
+  (format t "~&Request to start recording received.~%")
+  (create-scene (client-account-name client)))
 
 (defun stop-recording (res client)
   (format t "~&Request to stop recording received.~%"))
