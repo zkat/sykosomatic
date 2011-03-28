@@ -27,6 +27,16 @@
 (defun get-recent-actions (last-action-id)
   (member (1+ last-action-id) (reverse *current-story*) :key #'user-action-id))
 
+(defun render-user-action-to-json (user-action)
+  (let ((action (user-action-action user-action))
+        (dialogue (user-action-dialogue user-action))
+        (user (user-action-user user-action)))
+    (jsown:to-json
+     `("user-action"
+       (:obj ("action" . ,action)
+             ("character" . ,user)
+             ("dialogue" . ,dialogue))))))
+
 (defun render-user-action (user-action)
   (let ((action (user-action-action user-action))
         (dialogue (user-action-dialogue user-action)))
@@ -141,16 +151,36 @@
   (when-let ((character (find-character-by-id (client-character-id client))))
     (character-name character)))
 
-(defun process-client-message (res client message)
-  (let* ((action-obj (jsown:parse message))
-         (action (jsown:val action-obj "action"))
-         (dialogue (jsown:val action-obj "dialogue"))
-         (user-action (add-user-action (client-character-name client) action dialogue)))
+(defparameter *dispatch*
+  '(("user-input" . process-user-input)
+    ("ping" . process-ping)
+    ("start-recording"  . start-recording)
+    ("stop-recording" . stop-recording)))
+
+(defun process-user-input (res client action dialogue)
+  (let ((user-action (add-user-action (client-character-name client) action dialogue)))
     (maphash-keys (lambda (ws-client)
                     (ws:write-to-client ws-client
-                                        (with-yaclml-output-to-string
-                                          (render-user-action user-action))))
+                                        #+nil(render-user-action-to-json user-action)
+                                        (jsown:to-json
+                                         (list "user-action"
+                                               (with-yaclml-output-to-string
+                                                 (render-user-action user-action))))))
                   (slot-value res 'clients))))
+
+(defun process-ping (res client)
+  (ws:write-to-client (client-ws-client client) (jsown:to-json (list "pong"))))
+
+(defun start-recording (res client)
+  (format t "~&Request to start recording received.~%"))
+
+(defun stop-recording (res client)
+  (format t "~&Request to stop recording received.~%"))
+
+(defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
+  (let ((action (cdr (assoc (car message) *dispatch* :test #'string=))))
+    (when action
+      (apply action res client (cdr message)))))
 
 ;; Server startup/teardown.
 (defun logout (session)
