@@ -22,8 +22,26 @@ function on_ajax_success() {
   num_failures = 0;
 };
 
-function callback(data) {
-  $('#chat-box').append(data);
+function callback(user_action) {
+  // var character = user_action['character'];
+  // var dialogue = user_action['dialogue'];
+  // var action = user_action['action'];
+
+  // var html = "<div class='user-entry'>";
+
+  // if (action.length > 0 && dialogue.length == 0) {
+  //     html = html + "<p class='action'>"+character+" "+action+"</p>";
+  // }
+  // else {
+  //     html = html + "<p class='character'>"+character+"</p>";
+  //     if (action.length > 0) {
+  //         html = html + "<p class='parenthetical'>"+"("+action+")</p>";
+  //     };
+  //     html = html + "<p class='dialogue'>"+dialogue+"</p>";
+  // };
+
+//  $('#chat-box').append($(html));
+  $('#chat-box').append(user_action);
   var objDiv = document.getElementById('chat-box');
   objDiv.scrollTop = objDiv.scrollHeight;
 };
@@ -37,7 +55,7 @@ function disable_input () {
 
 function ping() {
     $.get('pingme',on_ajax_success);
-    // ws.send('ping');
+    ws.send(JSON.stringify(['ping']));
 }
 
 function currentChar () {
@@ -46,10 +64,12 @@ function currentChar () {
 
 function startRecording() {
     alert('Recording scene.');
+    ws.send(JSON.stringify(["start-recording"]));
 }
 
 function stopRecording() {
     alert('Done recording.');
+    ws.send(JSON.stringify(["stop-recording"]));
 }
 
 function addMsg() {
@@ -58,7 +78,7 @@ function addMsg() {
   if (action || dialogue) {
       $('#user-action').val('');
       $('#user-dialogue').val('');
-      ws.send(JSON.stringify({action:action,dialogue:dialogue}));
+      ws.send(JSON.stringify(['user-input',action,dialogue]));
   };
 };
 
@@ -73,7 +93,13 @@ function init_chat() {
         enable_input();
     };
     ws.onmessage = function(e) {
-        callback(e.data);
+        var message = JSON.parse(e.data);
+        if (message[0] == 'user-action') {
+            callback(message[1]);
+        };
+        if (message[0] == 'pong') {
+            console.log('got a pong');
+        };
     };
     ws.onclose = function () {
         disable_input();
@@ -91,8 +117,8 @@ function init() {
                         $.getScript('res/web_socket.js', init_chat);
                     });
     };
-    // ping the server every 10 minutes to keep the session alive.
-    interval_id = setInterval(ping,1000*60*10);
+    // ping the server to keep the session and websocket alive.
+    interval_id = setInterval(ping,1000*60*5);
     $(document).ajaxError(on_ajax_error);
 }
 
