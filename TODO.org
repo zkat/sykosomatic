@@ -4,7 +4,6 @@
     It is time.
 *** DONE Factor out db-related stuff from account.lisp into db.lisp
     Give it its own package, too.
-*** TODO Move websocket stuff into its own file. (?)
 ** Accounts
 *** DONE Account creation
 **** DONE Use emails as logins, and replace usernames with 'display names'.
@@ -13,6 +12,9 @@
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
+*** TODO Use (strcat "account/" email "/" display-name) as the _id for accounts.
+    CouchDB doesn't have unique constraints for general document fields. Gotta encode this stuff in
+    the _id.
 *** TODO Write a function that will return all currently-chatting accounts.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
@@ -53,12 +55,12 @@
 **** DONE Recorded entries
      Create new 'recorded-entry' documents associated with the recorded for each line of input since
      the button was pressed. Linking entries with the 'scene' is done through document collation.
-**** TODO View scenes page
+**** DONE View scenes page
      Add a 'recorded scenes' page where viewer can read through all the scenes they've recorded. The
      scenes should be formatted just like they were in the chat.
-**** TODO Scene linking
-    Users should have the ability to link to their entire recorded-scenes page, and/or link to
-    individual scenes that other users (login required for now) can view.
+**** DONE Scene linking
+     Users should have the ability to link to their entire recorded-scenes page, and/or link to
+     individual scenes that other users (no login required for now) can view.
 **** TODO Scene ratings
     Allow others to view and rate existing recorded scenes.
 **** TODO Session naming
@@ -94,12 +96,10 @@
 *** TODO Use (CONT'D.) (?)
 *** TODO Add a 'choose character' dropdown.
     This means -to the chat screen-.
+*** TODO Use something like (strcat "character/" charname) for character document _ids
+    CouchDB's lack of uniqueness constraints can be a real pain...
 *** TODO Make sure a user is chatting as a character only once.
 *** TODO Confirm again that users can't play as someone else's character.
-*** TODO Use account _id instead of account_name for characters
-    This'll require figuring out how to do view collation so that searching can happen by account
-    name, but the account name itself can stay on the account document.
-    NOTE: Unnecessary for now. Accounts are pretty much unique identifiers.
 *** TODO OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
@@ -145,10 +145,15 @@
     of it.
 *** DONE Possibly-optional websocket ping to keep the socket alive even when idle.
     Can't turn it off atm. Add new task if it becomes necessary to.
+*** TODO Back-button-friendliness.
+    When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
+    input fields are enabled, as if the websocket connection were still up. Perhaps there's a
+    javascripty way to reconnect the websocket on back-button?
 *** TODO Better disconnect-client
     It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
     though, _3b recommends that I just send a custom CLOSE message to the client, and close up the
     socket client-side.
+*** TODO Move websocket stuff into its own file. (?)
 *** TODO Fix clws to work on CCL.
 *** TODO Optional Flash loading
     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
