@@ -9,6 +9,9 @@
   of how actions are parsed into parentheticals vs actions might be nice.
 * Action/Dialogue grouping
   It would be nice if actions and dialogue were automatically grouped if said in direct sequence by
-  the same character.
+  the same character. This was very prominent in Tom's response. It sounds like this alone really
+  broke the readability for him. Ralith also commented on it, but he thinks it may be a lost cause:
+  It's a common problem in IRC, and while grouping might be 'nice', it's probably far from a real
+  solution.
 * Writing quality
   Writing quality is a concern. Does it help that the parser handles most of it?
