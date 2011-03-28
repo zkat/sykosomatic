@@ -104,7 +104,6 @@ are actually the exteriors of two buildings.")))
            (<:ah name))))
 
 (defun render-character-list (characters)
-  (print characters)
   (<:ul
    (mapc (lambda (char) (<:li (render-character-link char)))
          characters)))
@@ -133,6 +132,23 @@ are actually the exteriors of two buildings.")))
           (<:submit :value "Start Recording"))
   (<:form :action "javascript:stopRecording()"
           (<:submit :value "Stop Recording")))
+
+(defun render-scene-list-link ()
+  (<:href "/scenes" "My Scenes"))
+
+(defun render-scene-list ()
+  (<:ul :class "scene-list"
+   (mapc (lambda (scene &aux (id (scene-id scene)))
+           (<:li (<:href (format nil "/view-scene?id=~A" id) (<:ah id))))
+         (find-scenes-by-account-name (current-account-name)))))
+
+(defun render-scene (id)
+  (<:div :class "chat-box" :id "chat-box"
+   (mapc (lambda (action-obj)
+           (render-user-action (make-user-action :user (jsown:val action-obj "character")
+                                                 :action (jsown:val action-obj "action")
+                                                 :dialogue (jsown:val action-obj "dialogue"))))
+         (find-scene-actions id))))
 
 ;;;
 ;;; Handlers
@@ -163,6 +179,7 @@ are actually the exteriors of two buildings.")))
                       (render-chat-box)
                       (render-user-input-area)
                       (render-scene-recording)
+                      (render-scene-list-link)
                       (render-logout-button))))
                (lambda ()
                  (unless (emptyp char)
@@ -177,6 +194,14 @@ are actually the exteriors of two buildings.")))
                    (render-character-list characters)
                    (<:href "/newchar" "Create a new character.")
                    (render-logout-button)))))
+
+(define-easy-handler (scenes :uri "/scenes") ()
+  (ensure-logged-in)
+  (render-page "My scenes" #'render-scene-list))
+
+(define-easy-handler (view-scene :uri "/view-scene") (id)
+  (render-page "Viewing Scene"
+               (lambda () (render-scene id))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-name password)
