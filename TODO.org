@@ -50,7 +50,7 @@
      document can be pretty blank, but will eventually be used to store more metadata. For now, use
      some default auto-generated name. The session should also be associated with the recording
      account.
-**** TODO Recorded entries
+**** DONE Recorded entries
      Create new 'recorded-entry' documents associated with the recorded for each line of input since
      the button was pressed. Linking entries with the 'scene' is done through document collation.
 **** TODO View scenes page
