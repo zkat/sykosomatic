@@ -12,7 +12,6 @@
 )
 (defvar *current-story* nil)
 (defvar *max-action-id* 0)
-(defvar *folder-dispatcher-pushed-p* nil)
 (defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
@@ -233,10 +232,13 @@
          (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
          :name "chat resource listener"))
   ;; Hunchentoot
-  (unless *folder-dispatcher-pushed-p*
-    (push (create-folder-dispatcher-and-handler
-           "/res/" *sykosomatic-path*)
-          *dispatch-table*))
+  (setf *dispatch-table*
+        (list (create-folder-dispatcher-and-handler
+               "/res/" *sykosomatic-path*)
+              'dispatch-easy-handlers
+              'default-dispatcher))
+  (setf *default-handler* '404-handler)
+  (pushnew 404 *approved-return-codes*)
   (setf *session-removal-hook* 'session-cleanup)
   (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
   (setf *catch-errors-p* nil)

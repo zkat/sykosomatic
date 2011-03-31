@@ -157,6 +157,12 @@ are actually the exteriors of two buildings.")))
 (defun current-account-name (&optional (*session* *session*))
   (session-value 'account-name))
 
+(defun 404-handler ()
+  (render-page "404 Not Found"
+               (lambda ()
+                 (setf (return-code*) +http-not-found+)
+                 (<:p (<:ah "Sorry, that page does not exist.")))))
+
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
   (render-page "Sykosomatic.org Dev Site"
