@@ -87,17 +87,13 @@
 **** TODO Scene editing
      I like the idea of rendering each 'sentence'/unit as a targetable DOM element (such as SPANs
      for sentences in a paragraph), and using jQuery UI to make those units individually
-     draggable. I don't think I want to allow full editing of scenes, but this might be a really
-     neat feature that allows cleaning up garbage without giving too much freedom (or requiring too
-     much effort to handle formatting, and the like).
+     draggable. I don't think I want to allow full editing of scenes (might feel like it defeats the
+     purpose of -playing- the scenes if you can just -write- them), but this might be a really neat
+     feature that allows cleaning up garbage without giving too much freedom (or requiring too much
+     effort to handle formatting, and the like).
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
-*** TODO Use (CONT'D.) (?)
-*** TODO Add a 'choose character' dropdown.
-    This means -to the chat screen-.
-*** TODO Use something like (strcat "character/" charname) for character document _ids
-    CouchDB's lack of uniqueness constraints can be a real pain...
 *** TODO Make sure a user is chatting as a character only once.
 *** TODO Confirm again that users can't play as someone else's character.
 *** TODO OOC pane
@@ -108,6 +104,10 @@
     Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
     an OOC messaging system should be implemented.
+** Game world
+*** TODO Spend some time splitting game-related stuff into baby steps
+    There's a lot that needs to happen. A lot of it is interrelated. Pick a starting point and a
+    minimal requirement, build up from there.
 *** TODO More better input
     The current input method is cute, but not the intended one. A better input mechanism should be
     developed. Most likely, it should at least partly use the old MUD-style sentence parser, and
@@ -134,7 +134,22 @@
      Once the actor has transitioned into the new location, everyone, including the actor, should
      receive a "X arrives." message. This'll eventually be extended to provide fancier, nicer
      transitions, but an arrival message is good enough for now.
-** Websockets
+*** TODO Game objects - basic entities
+    Time to start coding up some game objects!
+    http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
+**** TODO Convert characters to use entity system (start with Describable?)
+**** TODO Convert locations to use entity system.
+**** TODO Hook up the parser to the entity system.
+***** TODO Allow parser to target characters by name.
+***** TODO Allow parser to target locations by name.
+*** TODO Event system
+**** TODO Plan out some ideas for a fully-persistent event system.
+**** TODO Implement a simple, non-persistent, asynchronous event system.
+**** TODO Persist an event.
+     Make an event that will output a message in 10 minutes, then shut down the server and bring it
+     back up -- the event should still fire.
+
+** Game client
 *** DONE Refactor code to use a simple CouchDB-view-server-like protocol.
     Just so we have a nice open window for expansion. Something like
     ["message_type","contents"]. It'll allow things like ["ping",1], as well as any future
@@ -142,13 +157,16 @@
     any HTML rendering client-side, instead of having the webserver generate the markup.
 *** TODO Render html client-side
     Lisp shouldn't be pre-rendering HTML. Just send out a JSON response and let the client take care
-    of it.
+    of it. The purpose of this is to be more flexible about presentation -- it'll make it easier to
+    group chat messages together, as well as to add/remove bits and pieces.
+*** TODO Popup character description when you click on character's name.
 *** DONE Possibly-optional websocket ping to keep the socket alive even when idle.
     Can't turn it off atm. Add new task if it becomes necessary to.
 *** TODO Back-button-friendliness.
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
     javascripty way to reconnect the websocket on back-button?
+**** TODO disabled=true by default for chat input fields
 *** TODO Better disconnect-client
     It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
     though, _3b recommends that I just send a custom CLOSE message to the client, and close up the
