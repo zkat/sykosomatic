@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic.scene
   (:use :cl :alexandria :chillax.core :sykosomatic.db)
   (:export :create-scene :add-action :find-scenes-by-account-name :find-scene-with-actions :find-scene-actions
-           :scene-id))
+           :scene-id :scene-upvote :scene-rating))
 (cl:in-package #:sykosomatic.scene)
 
 (defun ensure-scene-design-doc ()
@@ -27,7 +27,21 @@
                                     (mkdoc "map"
                                            (mapfun doc "scene-action"
                                              (emit (hashget doc "scene_id")
-                                                   doc)))))))
+                                                   doc)))
+                                    "rating_by_scene_id"
+                                    (mkdoc "map"
+                                           (mapfun doc "scene-rating"
+                                             (emit (hashget doc "scene_id") 1))
+                                           "reduce"
+                                           (couchfun (keys vals &optional rrp)
+                                             (declare (ignore keys rrp))
+                                             (reduce #'+ vals :initial-value 0)))
+                                    "rating_by_account_name"
+                                    (mkdoc "map"
+                                           (mapfun doc "scene-rating"
+                                             (emit (list (hashget doc "scene_id")
+                                                         (hashget doc "account_name")) doc)))))))
+
 (defun create-scene (account-name)
   (let ((uuid (get-uuid)))
     (ensure-doc uuid
@@ -46,6 +60,20 @@
 
 (defun scene-id (scene)
   (doc-val scene "_id"))
+
+(defun find-scene-rating-by-account-name (scene-id account-name)
+  (view-query-value "scene" "rating_by_account_name" (list scene-id account-name)))
+
+(defun scene-upvote (scene-id account-name)
+  (unless (find-scene-rating-by-account-name scene-id account-name)
+    (ensure-doc (get-uuid)
+                (mkdoc "type" "scene-rating"
+                       "scene_id" scene-id
+                       "account_name" account-name))
+    t))
+
+(defun scene-rating (scene-id)
+  (view-query-value "scene" "rating_by_scene_id" scene-id))
 
 (defun find-scenes-by-account-name (account-name)
   (view-query-value "scene" "by_account_name" account-name nil))

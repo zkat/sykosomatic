@@ -150,6 +150,13 @@ are actually the exteriors of two buildings.")))
                                                  :dialogue (jsown:val action-obj "dialogue"))))
          (find-scene-actions id))))
 
+(defun render-scene-rating (scene-id)
+  (<:p (<:ah "Rating: " (scene-rating scene-id))))
+
+(defun render-scene-upvote (scene-id)
+  (<:form :method "post" :action (format nil "/view-scene?id=~A" scene-id)
+          (<:submit :value "Vote for Scene")))
+
 ;;;
 ;;; Handlers
 ;;;
@@ -206,8 +213,19 @@ are actually the exteriors of two buildings.")))
   (render-page "My scenes" #'render-scene-list))
 
 (define-easy-handler (view-scene :uri "/view-scene") (id)
-  (render-page "Viewing Scene"
-               (lambda () (render-scene id))))
+  (case (request-method*)
+    (:get
+     (render-page "Viewing Scene"
+                  (lambda ()
+                    (render-scene id)
+                    (when (session-value 'account-name)
+                      (render-scene-upvote id))
+                    (when (scene-rating id)
+                      (render-scene-rating id)))))
+    (:post
+     (ensure-logged-in)
+     (scene-upvote id (session-value 'account-name))
+     (redirect (format nil "/view-scene?id=~A" id)))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-name password)
