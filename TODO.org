@@ -61,13 +61,14 @@
 **** DONE Scene linking
      Users should have the ability to link to their entire recorded-scenes page, and/or link to
      individual scenes that other users (no login required for now) can view.
-**** TODO Scene ratings
+**** DONE Scene ratings
     Allow others to view and rate existing recorded scenes.
-**** TODO Session naming
+**** TODO Scene naming
      Add ability to change the name of the recorded session.
+     NOTE: Perhaps more important than this -- descriptions? I'll do this later.
 **** TODO Automatically add slug lines.
      Even if the user starts recording a while after entering an area, the recorded scene should
-     include the slug line for that area.
+     include the slug line for that area. Will probably have to wait until we have locations. :)
 **** TODO Automatically add location description under slug line.
      May need to wait until locations are implemented (although no harm in having some default text
      for now). Under the slug line for persisted scenes, the description of the location, as seen by
@@ -95,7 +96,6 @@
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
 *** TODO Make sure a user is chatting as a character only once.
-*** TODO Confirm again that users can't play as someone else's character.
 *** TODO OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
@@ -104,10 +104,6 @@
     Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
     an OOC messaging system should be implemented.
-** Game world
-*** TODO Spend some time splitting game-related stuff into baby steps
-    There's a lot that needs to happen. A lot of it is interrelated. Pick a starting point and a
-    minimal requirement, build up from there.
 *** TODO More better input
     The current input method is cute, but not the intended one. A better input mechanism should be
     developed. Most likely, it should at least partly use the old MUD-style sentence parser, and
@@ -117,6 +113,10 @@
     consideration. Should there be multiple inputs?
     A full implementation of this will probably have to wait until there's full support for game
     objects and similar.
+** Game world
+*** TODO Spend some time splitting game-related stuff into baby steps
+    There's a lot that needs to happen. A lot of it is interrelated. Pick a starting point and a
+    minimal requirement, build up from there.
 *** TODO Add concept of a 'location'
     Once characters exist, we can start adding the concept of a 'location' to the game. Locations
     should have a description, and should be able to 'contain' other characters. Characters can only
@@ -155,13 +155,18 @@
     ["message_type","contents"]. It'll allow things like ["ping",1], as well as any future
     non-chat-related commands we may want to send down the pipe. It might also be useful for doing
     any HTML rendering client-side, instead of having the webserver generate the markup.
-*** TODO Render html client-side
+*** DONE Popup character description when you click on character's name.
+*** DONE Render chat html client-side
     Lisp shouldn't be pre-rendering HTML. Just send out a JSON response and let the client take care
     of it. The purpose of this is to be more flexible about presentation -- it'll make it easier to
     group chat messages together, as well as to add/remove bits and pieces.
-*** TODO Popup character description when you click on character's name.
 *** DONE Possibly-optional websocket ping to keep the socket alive even when idle.
     Can't turn it off atm. Add new task if it becomes necessary to.
+*** TODO Put descriptions somewhere more sane than an alert()
+*** TODO Make description popups more generic: should be able to fetch any game object's description
+*** TODO Location/visibility-restricted description getting
+    Should validate what comes down the pipe: when a description request is received, there should
+    be validation that the character can, in fact, see the object.
 *** TODO Back-button-friendliness.
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
