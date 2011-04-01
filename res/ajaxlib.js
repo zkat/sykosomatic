@@ -23,25 +23,28 @@ function on_ajax_success() {
 };
 
 function callback(user_action) {
-  // var character = user_action['character'];
-  // var dialogue = user_action['dialogue'];
-  // var action = user_action['action'];
+  var character = user_action['character'];
+  var dialogue = user_action['dialogue'];
+  var action = user_action['action'];
 
-  // var html = "<div class='user-entry'>";
+  var html = "<div class='user-entry'>";
 
-  // if (action.length > 0 && dialogue.length == 0) {
-  //     html = html + "<p class='action'>"+character+" "+action+"</p>";
-  // }
-  // else {
-  //     html = html + "<p class='character'>"+character+"</p>";
-  //     if (action.length > 0) {
-  //         html = html + "<p class='parenthetical'>"+"("+action+")</p>";
-  //     };
-  //     html = html + "<p class='dialogue'>"+dialogue+"</p>";
-  // };
+  if (action.length > 0 && dialogue.length == 0) {
+      html = html + "<p class='action'>"
+            +"<span onclick='requestCharDescription(\""+character+"\")'>"+character+"</span>"
+            +" "+action+"</p>";
+  }
+  else {
+      html = html + "<p class='character' onclick='requestCharDescription(\""+character+"\")'>"+character+"</p>";
+      if (action.length > 0) {
+          html = html + "<p class='parenthetical'>"+"("+action+")</p>";
+      };
+      html = html + "<p class='dialogue'>"+dialogue+"</p>";
+  };
 
-//  $('#chat-box').append($(html));
-  $('#chat-box').append(user_action);
+ $('#chat-box').append($(html));
+  // If the html is pre-rendered...
+  // $('#chat-box').append(user_action);
   var objDiv = document.getElementById('chat-box');
   objDiv.scrollTop = objDiv.scrollHeight;
 };
@@ -51,6 +54,10 @@ function enable_input () {
 }
 function disable_input () {
     $('#user-input :input').attr('disabled', true);
+}
+
+function requestCharDescription(charname) {
+    return ws.send(JSON.stringify(['char-desc',charname]));
 }
 
 function ping() {
@@ -99,6 +106,9 @@ function init_chat() {
         };
         if (message[0] == 'pong') {
             console.log('got a pong');
+        };
+        if (message[0] == 'char-desc') {
+            alert('Description: ' + message[1]);
         };
     };
     ws.onclose = function () {

@@ -155,7 +155,14 @@
   '(("user-input" . process-user-input)
     ("ping" . process-ping)
     ("start-recording"  . start-recording)
-    ("stop-recording" . stop-recording)))
+    ("stop-recording" . stop-recording)
+    ("char-desc" . get-character-description)))
+
+(defun get-character-description (res client charname)
+  (declare (ignore res))
+  (format t "~&Got a character description request: ~S.~%" charname)
+  (ws:write-to-client (client-ws-client client)
+                      (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
 
 (defun save-user-action (scene-id user-action)
   (format t "~&Saving user action ~A under scene-id ~A~%" user-action scene-id)
@@ -168,9 +175,9 @@
 (defun send-user-action (client user-action)
   (when-let ((scene-id (session-value 'scene-id (client-session client))))
     (save-user-action scene-id user-action))
-  #+nil(render-user-action-to-json user-action)
   (ws:write-to-client (client-ws-client client)
-                      (jsown:to-json
+                      (render-user-action-to-json user-action)
+                      #+nil(jsown:to-json
                        (list "user-action"
                              (with-yaclml-output-to-string
                                (render-user-action user-action))))))
