@@ -12,6 +12,8 @@
             :serial t
             :components
             ((:file "db")
+             (:file "smug")
+             (:file "parser")
              (:file "account")
              (:file "character")
              (:file "scene")
