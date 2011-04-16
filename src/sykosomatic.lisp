@@ -37,6 +37,10 @@
              ("character" . ,user)
              ("dialogue" . ,dialogue))))))
 
+(defun session-websocket-clients (session)
+  (session-value 'websocket-clients session))
+(defun (setf session-websocket-clients) (new-value session)
+  (setf (session-value 'websocket-clients session) new-value))
 
 ;; clws stuff
 (defgeneric add-client (chat-server client))
@@ -44,14 +48,13 @@
 (defgeneric validate-client (chat-server client))
 
 (defun disconnect-client (client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
+  (let ((ws-client (client-ws-client client)))
     (ws:write-to-client ws-client :close)
     ;; Chrome doesn't seem to pay attention to :close.
     ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
     (ws::client-disconnect ws-client :abort t)
-    (when session
-      (deletef (session-value 'websocket-clients session)
+    (when (client-session client)
+      (deletef (session-websocket-clients session)
                client))))
 
 (defstruct client uri host headers user-agent ws-client session account-name character-id)
@@ -95,7 +98,7 @@
           (format t "~&Client validated: ~A. ~%It's now playing as ~A.~%"
                   client (character-name character))
           (setf (client-character-id client) (character-id character))
-          (push (session-value 'websocket-clients (client-session client)) client))
+          (push (session-websocket-clients (client-session client)) client))
         (progn
           (format t "~&No session. Disconnecting client. (~A)~%" client)
           (disconnect-client client)))))
@@ -194,7 +197,7 @@
 ;; Server startup/teardown.
 (defun logout (session)
   (let ((account-name (session-value 'account-name session))
-        (websocket-clients (session-value 'websocket-clients session)))
+        (websocket-clients (session-websocket-clients session)))
     (when account-name
       (format t "~&~A logged out.~%" account-name))
     (when websocket-clients
