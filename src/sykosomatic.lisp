@@ -37,24 +37,6 @@
              ("character" . ,user)
              ("dialogue" . ,dialogue))))))
 
-(defun render-user-action (user-action)
-  (let ((action (user-action-action user-action))
-        (dialogue (user-action-dialogue user-action)))
-    (<:div :class "user-entry"
-      (if (and (not (emptyp action)) (emptyp dialogue))
-          (<:p :class "action"
-               (<:ah (user-action-user user-action) " " action))
-          (progn
-            (<:p :class "character"
-                 (<:ah (user-action-user user-action)))
-            (unless (emptyp action)
-              (<:p :class "parenthetical"
-                   (<:ah "(" action ")")))
-            (<:p :class "dialogue"
-                 (<:ah
-                  (if (emptyp dialogue)
-                      "..."
-                      dialogue))))))))
 
 ;; clws stuff
 (defgeneric add-client (chat-server client))
