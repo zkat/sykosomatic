@@ -113,15 +113,31 @@
     consideration. Should there be multiple inputs?
     A full implementation of this will probably have to wait until there's full support for game
     objects and similar.
-** Game world
-*** TODO Spend some time splitting game-related stuff into baby steps
+** Game
+*** DONE Spend some time splitting game-related stuff into baby steps
     There's a lot that needs to happen. A lot of it is interrelated. Pick a starting point and a
     minimal requirement, build up from there.
+*** TODO Replace input boxes with a single input box.
+    The box should broadcast whatever is typed into it as the 'dialogue' for the current character.
+*** TODO Add basic dialogue parser
+    Instead of just typing anything into the box, dialogue should be delimited by a '.
+*** TODO Basic actions
+    Add the ability to take actions by using 'verbs'. These verbs can be inserted before
+    dialogue. They should be entered in their infinitive form. The application should then convert
+    them to third-person singular present and use them for the action. i.e. 'cry' -> 'Kat cries.'
+    The following verbs should be available:
+**** smile
+**** frown
+**** laugh
+**** cry
+**** wave
 *** TODO Add concept of a 'location'
     Once characters exist, we can start adding the concept of a 'location' to the game. Locations
     should have a description, and should be able to 'contain' other characters. Characters can only
-    interact with other characters provided they are in the same location. OOC local chat will also
-    be per-location.
+    interact with other characters provided they are in the same location.
+*** TODO Put characters in a location
+    Add several locations. Allow characters to interact only with other characters present in the
+    current location.
 *** TODO Location transitions
     Changing locations should have a couple of effects:
 **** TODO Scene transition.
