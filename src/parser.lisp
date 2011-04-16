@@ -33,13 +33,15 @@
                (noun-clause1 (maybe (noun-clause)))
                (noun-clause2 (maybe (noun-clause)))
                (adverb2 (maybe (adverb)))
-               (chat (maybe (chat-string))))
+               (chat (maybe (chat-string)))
+               (_ (no-more-input)))
          (result (list :sentence
                        :adverbs (list adverb1 adverb2)
                        :verb verb
                        :noun-clause-1 noun-clause1
                        :noun-clause-2 noun-clause2
                        :chat-string chat)))))
+
 ;; noun-clause =/ [[[adverb] preposition] noun-group]
 (defun noun-clause ()
   (noun-group))
@@ -55,25 +57,22 @@
     (result np)))
 
 ;; noun-phrase =  pronoun
-;; noun-phrase =/ [article] [cardinal] [adjective] noun
+;; noun-phrase =/ [cardinal] [adjective] noun
 ;; noun-phrase =/ [article] [ordinal] [adjective] \
-;;                (noun / possessive-noun noun-phrase)
+;;                (noun / possessive-noun-phrase)
 (defun noun-phrase ()
   (=or (pronoun)
-       (=let* ((article (maybe (article)))
-               (cardinal (cardinal))
+       (=let* ((cardinal (cardinal))
                (adjective (maybe (adjective)))
                (noun (noun)))
          (result (list :noun-phrase
-                       :article article
                        :cardinal cardinal
                        :adjective adjective
                        :noun noun)))
        (=let* ((article (maybe (article)))
-               (ordinal (maybe (ordinal)))
+               (ordinal (=and (=not (cardinal)) (maybe (ordinal))))
                (adjective (maybe (adjective)))
-               (noun (=or (possessive-noun-phrase)
-                          (noun))))
+               (noun (noun)))
          (result (list :noun-phrase
                        :article article
                        :ordinal ordinal
@@ -109,43 +108,61 @@
 
 ;; article = satisfies articlep
 (defun article ()
-  ;; TODO
-  nil)
+  (=or (=string "the")
+       (=string "a")))
 
 ;; adjective = any unknown token that comes before a noun or a possessive
 (defun adjective ()
   ;; TODO
-  nil)
+  (fail))
+
 ;; noun = anything that identifies a present, visible object (oof?)
 (defun noun ()
-  (word #'nounp))
+  (word))
 
 ;; pronoun = satisfies pronoun-p
 (defun pronoun ()
   ;; TODO
-  nil)
+  (fail))
 
 ;; possessive-noun = satisfies possessive-p (['s] or [s'])
 (defun possessive-noun ()
   ;; TODO
-  nil)
+  (fail))
 
 ;; cardinal = 1, 2, three, four...
 (defun cardinal ()
-  ;; TODO
-  nil)
+  (=let* ((card (=or (=let* ((num (natural-number))
+                             (_ (one-or-more (whitespace))))
+                       (result num))
+                     (word))))
+    (if (numberp card)
+        (result card)
+        (let ((position (position card (loop for i from 1 upto 20
+                                          collect (format nil "~r" i)) :test #'string-equal)))
+          (if position
+              (result (1+ position))
+              (fail))))))
 
 ;; ordinal = 1st, 2nd, third, fourth....
 (defun ordinal ()
-  ;; TODO
-  nil)
+  ;; TODO - 1st, 2nd, ...
+  (=let* ((ord (word)))
+    (let ((position (position ord (loop for i from 1 upto 20
+                                     collect (format nil "~:r" i)) :test #'string-equal)))
+      (if position
+          (result (1+ position))
+          (fail)))))
 
 ;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
 (defun conjunction ()
-  (=or (=let* ((_ (=and (=char #\,)
+  (=or (skip-whitespace (=string "and"))
+       (skip-whitespace (=string "&"))
+       #+nil(=let* ((_ (=and (=char #\,)
                         (maybe (word (curry #'string-equal "and"))))))
          (result ","))
-       (=or (word (curry #'string-equal "and")))))
+       #+nil(=or (word (curry #'string-equal "and"))
+            (word (curry #'string-equal "&")))))
 
 ;;;
 ;;; Word identifiers
@@ -166,7 +183,10 @@
   (=or parser (result nil)))
 
 (defun word (&optional (test #'identity))
-  (=let* ((word (skip-whitespace (text (none-of '(#\space #\tab #\,))))))
+  (=let* ((word (skip-whitespace (text (alpha-char)))))
     (if (funcall test word)
         (result word)
         (fail))))
+
+(defun alpha-char ()
+  (=satisfies #'alpha-char-p))

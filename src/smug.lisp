@@ -9,12 +9,14 @@
 
    #:=let*
    #:=char
+   #:=string
    #:=and
    #:=or
    #:=not
    #:=satisfies
 
    #:before
+   #:natural-number
    #:zero-or-more
    #:one-or-more
 
