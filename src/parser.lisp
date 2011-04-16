@@ -175,18 +175,3 @@
 
 (defun verbp (maybe-verb)
   (string= maybe-verb "get"))
-
-;;;
-;;; Utils
-;;;
-(defun maybe (parser)
-  (=or parser (result nil)))
-
-(defun word (&optional (test #'identity))
-  (=let* ((word (skip-whitespace (text (alpha-char)))))
-    (if (funcall test word)
-        (result word)
-        (fail))))
-
-(defun alpha-char ()
-  (=satisfies #'alpha-char-p))

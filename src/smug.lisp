@@ -26,6 +26,9 @@
    #:whitespace
    #:skip-whitespace
    #:none-of
+   #:maybe
+   #:word
+   #:alpha-char
 
    ))
 
@@ -262,6 +265,18 @@
           (v parser)
           (_ (zero-or-more (whitespace))))
     (result v)))
+
+(defun maybe (parser)
+  (=or parser (result nil)))
+
+(defun word (&optional (test #'identity))
+  (=let* ((word (skip-whitespace (text (alpha-char)))))
+    (if (funcall test word)
+        (result word)
+        (fail))))
+
+(defun alpha-char ()
+  (=satisfies #'alpha-char-p))
 
 (defun org-block (&optional (level 0))
   (=or (section level)
