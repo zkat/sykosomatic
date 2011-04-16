@@ -1,21 +1,13 @@
 (in-package :sykosomatic)
 
+(defvar *runningp* nil)
 (defun begin-shared-hallucination ()
   ;; Cleanup
-  (when *server* (end-shared-hallucination) (warn "Restarting server."))
+  (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
   ;; Database
   (init-db)
   ;; Websockets
-  (register-chat-server)
-  (setf *websocket-thread*
-        (bordeaux-threads:make-thread
-         (lambda ()
-           (ws:run-server *chat-server-port*))
-         :name "websockets server"))
-  (setf *chat-resource-thread*
-        (bt:make-thread
-         (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
-         :name "chat resource listener"))
+  (init-websockets)
   ;; Hunchentoot
   (setf *dispatch-table*
         (list (create-folder-dispatcher-and-handler
@@ -30,10 +22,5 @@
   t)
 
 (defun end-shared-hallucination ()
-  (when *server* (stop *server*) (setf *server* nil))
-  (when (and *websocket-thread* (bt:thread-alive-p *websocket-thread*))
-    (bt:destroy-thread *websocket-thread*)
-    (setf *websocket-thread* nil))
-  (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
-    (bt:destroy-thread *chat-resource-thread*)
-    (setf *chat-resource-thread* nil)))
+  (when *runningp* (stop *server*) (setf *server* nil *runningp* nil))
+  (teardown-websockets))

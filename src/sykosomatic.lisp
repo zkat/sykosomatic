@@ -194,6 +194,26 @@
     (when action
       (apply action res client (cdr message)))))
 
+(defun init-websockets ()
+  (register-chat-server)
+  (setf *websocket-thread*
+        (bordeaux-threads:make-thread
+         (lambda ()
+           (ws:run-server *chat-server-port*))
+         :name "websockets server"))
+  (setf *chat-resource-thread*
+        (bt:make-thread
+         (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
+         :name "chat resource listener")))
+
+(defun teardown-websockets ()
+  (when (and *websocket-thread* (bt:thread-alive-p *websocket-thread*))
+    (bt:destroy-thread *websocket-thread*)
+    (setf *websocket-thread* nil))
+  (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
+    (bt:destroy-thread *chat-resource-thread*)
+    (setf *chat-resource-thread* nil)))
+
 ;; Server startup/teardown.
 (defun logout (session)
   (let ((account-name (session-value 'account-name session))
