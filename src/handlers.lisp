@@ -169,6 +169,25 @@ are actually the exteriors of two buildings.")))
            (<:li (<:href (format nil "/view-scene?id=~A" id) (<:ah id))))
          (find-scenes-by-account-name (current-account-name)))))
 
+(defun render-user-action (user-action)
+  (let ((action (user-action-action user-action))
+        (dialogue (user-action-dialogue user-action)))
+    (<:div :class "user-entry"
+      (if (and (not (emptyp action)) (emptyp dialogue))
+          (<:p :class "action"
+               (<:ah (user-action-user user-action) " " action))
+          (progn
+            (<:p :class "character"
+                 (<:ah (user-action-user user-action)))
+            (unless (emptyp action)
+              (<:p :class "parenthetical"
+                   (<:ah "(" action ")")))
+            (<:p :class "dialogue"
+                 (<:ah
+                  (if (emptyp dialogue)
+                      "..."
+                      dialogue))))))))
+
 (defun render-scene (id)
   (<:div :class "chat-box" :id "chat-box"
    (mapc (lambda (action-obj)
