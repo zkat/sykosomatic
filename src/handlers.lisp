@@ -113,7 +113,7 @@ are actually the exteriors of two buildings.")))
                             (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
 
 (defun render-user-input-area ()
-  (<:form :class "user-input-area" :name "user-input-area" :action "javascript:send_input()"
+  (<:form :id "user-input-area" :name "user-input-area" :action "javascript:send_input()"
           (<:input :type "textarea" :id "user-input")
           (<:submit :value "Send")))
 
