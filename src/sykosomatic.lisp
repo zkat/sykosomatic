@@ -10,3 +10,8 @@
   ;; 843 ; makes flash load faster, but can only do this as root.
   8889)
 (defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
+
+(defun session-websocket-clients (session)
+  (session-value 'websocket-clients session))
+(defun (setf session-websocket-clients) (new-value session)
+  (setf (session-value 'websocket-clients session) new-value))

@@ -24,11 +24,6 @@
              ("character" . ,user)
              ("dialogue" . ,dialogue))))))
 
-(defun session-websocket-clients (session)
-  (session-value 'websocket-clients session))
-(defun (setf session-websocket-clients) (new-value session)
-  (setf (session-value 'websocket-clients session) new-value))
-
 ;; clws stuff
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
