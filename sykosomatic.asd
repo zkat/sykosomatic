@@ -11,7 +11,8 @@
   ((:module src
             :serial t
             :components
-            ((:file "db")
+            ((:file "utils")
+             (:file "db")
              (:file "smug")
              (:file "parser")
              (:file "account")

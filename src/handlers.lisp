@@ -24,12 +24,12 @@
   (let ((account-name (session-value 'account-name session))
         (websocket-clients (session-websocket-clients session)))
     (when account-name
-      (format t "~&~A logged out.~%" account-name))
+      (logit "~A logged out." account-name))
     (when websocket-clients
       (mapc #'disconnect-client websocket-clients))))
 
 (defun session-cleanup (session)
-  (format t "~&Session timed out. Trying to log it out...~%")
+  (logit "Session timed out. Trying to log it out...")
   (logout session))
 
 (defun ensure-logged-in ()
@@ -292,7 +292,7 @@ are actually the exteriors of two buildings.")))
        (progn
          (setf (session-value 'account-name) (account-name account)
                (session-value 'display-name) (account-display-name account))
-         (format t "~&~A logged in.~%" account-name)
+         (logit "~A logged in." account-name)
          (redirect "/stage"))
        (progn
          (push "Invalid login or password." (session-value 'errors))
@@ -312,7 +312,7 @@ are actually the exteriors of two buildings.")))
          (create-account account-name display-name password confirmation)
        (if account-created-p
            (progn
-             (format t "~&Account created: ~A~%" account-name)
+             (logit "Account created: ~A" account-name)
              (redirect "/login"))
            (progn
              (appendf (session-value 'errors) errors)
@@ -332,7 +332,7 @@ are actually the exteriors of two buildings.")))
          (create-character (session-value 'account-name) name description)
        (if createdp
            (progn
-             (format t "~&Character created: ~A~%" name)
+             (logit "Character created: ~A" name)
              (redirect "/stage"))
            (progn
              (appendf (session-value 'errors) errors)
