@@ -18,5 +18,6 @@
              (:file "character")
              (:file "scene")
              (:file "sykosomatic")
+             (:file "websocket")
              (:file "handlers")
              (:file "main")))))
