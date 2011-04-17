@@ -18,6 +18,5 @@
              (:file "character")
              (:file "scene")
              (:file "sykosomatic")
-             (:file "main")
-             (:file "handlers")))))
-
+             (:file "handlers")
+             (:file "main")))))
