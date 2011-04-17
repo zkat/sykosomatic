@@ -1,18 +1,8 @@
 (in-package :sykosomatic)
 
-(defvar *current-story* nil)
-(defvar *max-action-id* 0)
-
-(defstruct user-action id user timestamp action dialogue)
-
-(defun add-user-action (user action dialogue &optional (timestamp (get-universal-time))
-                         &aux (id (incf *max-action-id*)))
-  (let ((user-action (make-user-action :id id :user user :timestamp timestamp :action action :dialogue dialogue)))
-    (push user-action *current-story*)
-    user-action))
-
-(defun get-recent-actions (last-action-id)
-  (member (1+ last-action-id) (reverse *current-story*) :key #'user-action-id))
+(defstruct (user-action (:constructor make-user-action (user action dialogue
+                                                        &optional (timestamp (get-universal-time)))))
+  user timestamp action dialogue)
 
 (defun render-user-action-to-json (user-action)
   (let ((action (user-action-action user-action))
@@ -151,7 +141,7 @@
                                (render-user-action user-action))))))
 
 (defun process-user-input (res client action dialogue)
-  (maphash-values (rcurry #'send-user-action (add-user-action (client-character-name client) action dialogue))
+  (maphash-values (rcurry #'send-user-action (make-user-action (client-character-name client) action dialogue))
                   (slot-value res 'clients)))
 
 (defun process-ping (res client)
