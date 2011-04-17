@@ -113,13 +113,9 @@ are actually the exteriors of two buildings.")))
                             (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
 
 (defun render-user-input-area ()
-  (<:div :id "user-input"
-         (<:form :class "user-story" :name "user-story" :action "javascript:addMsg()"
-                 (<:label (<:ah "Action: "))
-                 (<:input :type "textarea" :id "user-action")
-                 (<:label (<:ah "Dialogue: "))
-                 (<:input :type "textarea" :id "user-dialogue")
-                 (<:submit :value "Send"))))
+  (<:form :class "user-input-area" :name "user-input-area" :action "javascript:send_input()"
+          (<:input :type "textarea" :id "user-input")
+          (<:submit :value "Send")))
 
 (defun render-logout-button ()
   (<:form :class "logout-button" :action "/logout" :method "post"
