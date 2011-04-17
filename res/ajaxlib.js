@@ -50,10 +50,10 @@ function callback(user_action) {
 };
 
 function enable_input () {
-    $('#user-input :input').attr('disabled', false);
+    $('#user-input-area :input').attr('disabled', false);
 }
 function disable_input () {
-    $('#user-input :input').attr('disabled', true);
+    $('#user-input-area :input').attr('disabled', true);
 }
 
 function requestCharDescription(charname) {
