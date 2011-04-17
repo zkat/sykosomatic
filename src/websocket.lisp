@@ -39,7 +39,7 @@
   (gethash ws-client (slot-value chat-server 'clients)))
 
 (defmethod add-client ((srv chat-server) client)
-  (format t "~&Adding Pending Client ~A.~%" client)
+  (logit "Adding Pending Client ~A." client)
   (setf (gethash (client-ws-client client) (slot-value srv 'clients))
         client))
 
@@ -68,12 +68,12 @@
              (string-equal (character-account-name character)
                            (client-account-name client)))
         (progn
-          (format t "~&Client validated: ~A. ~%It's now playing as ~A.~%"
+          (logit "Client validated: ~A. It's now playing as ~A."
                   client (character-name character))
           (setf (client-character-id client) (character-id character))
           (push (session-websocket-clients (client-session client)) client))
         (progn
-          (format t "~&No session. Disconnecting client. (~A)~%" client)
+          (logit "No session. Disconnecting client. (~A)" client)
           (disconnect-client client)))))
 
 (defun register-chat-server ()
@@ -83,7 +83,7 @@
    #'ws::any-origin))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (format t "~&Got client connection.~%")
+  (logit "Got client connection.")
   (let (alist-headers)
     (maphash (lambda (k v)
                (push (cons (intern (string-upcase k) :keyword)
@@ -95,12 +95,12 @@
 
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
-  (format t "~&Client ~A disconnected.~%" client)
+  (logit "Client ~A disconnected." client)
   (remove-client res client))
 
 (defmethod ws:resource-received-frame ((res chat-server) ws-client message
                                        &aux (client (find-client res ws-client)))
-  (format t "~&Received resource frame.~%")
+  (logit "Received resource frame.")
   (if (client-session client)
       (process-client-message res client message)
       (process-client-validation res client message)))
@@ -118,12 +118,12 @@
 
 (defun get-character-description (res client charname)
   (declare (ignore res))
-  (format t "~&Got a character description request: ~S.~%" charname)
+  (logit "Got a character description request: ~S." charname)
   (ws:write-to-client (client-ws-client client)
                       (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
 
 (defun save-user-action (scene-id user-action)
-  (format t "~&Saving user action ~A under scene-id ~A~%" user-action scene-id)
+  (logit "Saving user action ~A under scene-id ~A" user-action scene-id)
   (add-action scene-id
               :character (user-action-user user-action)
               :action (user-action-action user-action)
@@ -150,16 +150,16 @@
 
 (defun start-recording (res client)
   (declare (ignore res))
-  (format t "~&Request to start recording received.~%")
+  (logit "Request to start recording received.")
   (if (session-value 'scene-id (client-session client))
-      (format t "~&Scene already being recorded. Ignoring request.~%")
+      (logit "Scene already being recorded. Ignoring request.")
       (let ((*acceptor* *server*))
         (setf (session-value 'scene-id (client-session client))
               (create-scene (client-account-name client))))))
 
 (defun stop-recording (res client)
   (declare (ignore res))
-  (format t "~&Request to stop recording received.~%")
+  (logit "Request to stop recording received.")
   (delete-session-value 'scene-id (client-session client)))
 
 (defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
