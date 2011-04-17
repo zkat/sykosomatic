@@ -123,8 +123,8 @@ are actually the exteriors of two buildings.")))
 
 (defun render-character-link (char)
   (let ((name (character-name char)))
-   (<:href (format nil "/stage?char=~A" (string-downcase name))
-           (<:ah name))))
+    (<:href (format nil "/stage?char=~A" (string-downcase name))
+            (<:ah name))))
 
 (defun render-character-list (characters)
   (<:ul
