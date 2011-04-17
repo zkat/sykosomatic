@@ -2,6 +2,24 @@
 
 (declaim (optimize debug))
 ;;;
+;;; Init/teardown
+;;;
+(defun init-hunchentoot ()
+  (setf *dispatch-table*
+        (list (create-folder-dispatcher-and-handler
+               "/res/" *sykosomatic-path*)
+              'dispatch-easy-handlers
+              'default-dispatcher))
+  (setf *default-handler* '404-handler)
+  (pushnew 404 *approved-return-codes*)
+  (setf *session-removal-hook* 'session-cleanup)
+  (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
+  (setf *catch-errors-p* nil))
+
+(defun teardown-hunchentoot ()
+  (when *server* (stop *server*) (setf *server* nil)))
+
+;;;
 ;;; Utils
 ;;;
 
