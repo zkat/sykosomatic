@@ -149,8 +149,8 @@
     (save-user-action scene-id user-action))
   (client-write client (render-user-action-to-json user-action)))
 
-(defun process-user-input (res client action dialogue)
-  (maphash-values (rcurry #'send-user-action (make-user-action (client-character-name client) action dialogue))
+(defun process-user-input (res client dialogue)
+  (maphash-values (rcurry #'send-user-action (make-user-action (client-character-name client) nil dialogue))
                   (slot-value res 'clients)))
 
 (defun process-ping (res client)

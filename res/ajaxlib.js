@@ -79,13 +79,11 @@ function stopRecording() {
     ws.send(JSON.stringify(["stop-recording"]));
 }
 
-function addMsg() {
-  var action = $('#user-action').val();
-  var dialogue = $('#user-dialogue').val();
-  if (action || dialogue) {
-      $('#user-action').val('');
-      $('#user-dialogue').val('');
-      ws.send(JSON.stringify(['user-input',action,dialogue]));
+function send_input() {
+  var msg = $('#user-input').val();
+  if (msg) {
+      $('#user-input').val('');
+      ws.send(JSON.stringify(['user-input',msg]));
   };
 };
 
