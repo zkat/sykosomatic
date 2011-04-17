@@ -1,9 +1,36 @@
 (cl:in-package :sykosomatic)
 
 (declaim (optimize debug))
+
 ;;;
-;;; Utils
+;;; HT
 ;;;
+(defun init-hunchentoot ()
+  (setf *dispatch-table*
+        (list (create-folder-dispatcher-and-handler
+               "/res/" *sykosomatic-path*)
+              'dispatch-easy-handlers
+              'default-dispatcher))
+  (setf *default-handler* '404-handler)
+  (pushnew 404 *approved-return-codes*)
+  (setf *session-removal-hook* 'session-cleanup)
+  (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
+  (setf *catch-errors-p* nil))
+
+(defun teardown-hunchentoot ()
+  (when *server* (stop *server*) (setf *server* nil)))
+
+(defun logout (session)
+  (let ((account-name (session-value 'account-name session))
+        (websocket-clients (session-websocket-clients session)))
+    (when account-name
+      (logit "~A logged out." account-name))
+    (when websocket-clients
+      (mapc #'disconnect-client websocket-clients))))
+
+(defun session-cleanup (session)
+  (logit "Session timed out. Trying to log it out...")
+  (logout session))
 
 (defun ensure-logged-in ()
   (unless (and *session* (session-value 'account-name))
@@ -142,6 +169,25 @@ are actually the exteriors of two buildings.")))
            (<:li (<:href (format nil "/view-scene?id=~A" id) (<:ah id))))
          (find-scenes-by-account-name (current-account-name)))))
 
+(defun render-user-action (user-action)
+  (let ((action (user-action-action user-action))
+        (dialogue (user-action-dialogue user-action)))
+    (<:div :class "user-entry"
+      (if (and (not (emptyp action)) (emptyp dialogue))
+          (<:p :class "action"
+               (<:ah (user-action-user user-action) " " action))
+          (progn
+            (<:p :class "character"
+                 (<:ah (user-action-user user-action)))
+            (unless (emptyp action)
+              (<:p :class "parenthetical"
+                   (<:ah "(" action ")")))
+            (<:p :class "dialogue"
+                 (<:ah
+                  (if (emptyp dialogue)
+                      "..."
+                      dialogue))))))))
+
 (defun render-scene (id)
   (<:div :class "chat-box" :id "chat-box"
    (mapc (lambda (action-obj)
@@ -246,7 +292,7 @@ are actually the exteriors of two buildings.")))
        (progn
          (setf (session-value 'account-name) (account-name account)
                (session-value 'display-name) (account-display-name account))
-         (format t "~&~A logged in.~%" account-name)
+         (logit "~A logged in." account-name)
          (redirect "/stage"))
        (progn
          (push "Invalid login or password." (session-value 'errors))
@@ -266,7 +312,7 @@ are actually the exteriors of two buildings.")))
          (create-account account-name display-name password confirmation)
        (if account-created-p
            (progn
-             (format t "~&Account created: ~A~%" account-name)
+             (logit "Account created: ~A" account-name)
              (redirect "/login"))
            (progn
              (appendf (session-value 'errors) errors)
@@ -286,7 +332,7 @@ are actually the exteriors of two buildings.")))
          (create-character (session-value 'account-name) name description)
        (if createdp
            (progn
-             (format t "~&Character created: ~A~%" name)
+             (logit "Character created: ~A" name)
              (redirect "/stage"))
            (progn
              (appendf (session-value 'errors) errors)
