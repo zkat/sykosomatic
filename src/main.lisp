@@ -1,0 +1,15 @@
+(in-package :sykosomatic)
+
+(defvar *runningp* nil)
+(defun begin-shared-hallucination ()
+  (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
+  (init-db)
+  (init-websockets)
+  (init-hunchentoot)
+  t)
+
+(defun end-shared-hallucination ()
+  (teardown-websockets)
+  (teardown-hunchentoot)
+  (setf *runningp* nil)
+  t)
