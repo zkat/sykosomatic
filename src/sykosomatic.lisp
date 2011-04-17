@@ -48,12 +48,13 @@
 (defgeneric validate-client (chat-server client))
 
 (defun disconnect-client (client)
-  (let ((ws-client (client-ws-client client)))
+  (let ((ws-client (client-ws-client client))
+        (session (client-session client)))
     (ws:write-to-client ws-client :close)
     ;; Chrome doesn't seem to pay attention to :close.
     ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
     (ws::client-disconnect ws-client :abort t)
-    (when (client-session client)
+    (when session
       (deletef (session-websocket-clients session)
                client))))
 
