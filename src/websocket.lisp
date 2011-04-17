@@ -19,24 +19,14 @@
 (defgeneric remove-client (chat-server client))
 (defgeneric validate-client (chat-server client))
 
-(defun disconnect-client (client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
-    (ws:write-to-client ws-client :close)
-    ;; Chrome doesn't seem to pay attention to :close.
-    ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
-    (ws::client-disconnect ws-client :abort t)
-    (when session
-      (deletef (session-websocket-clients session)
-               client))))
-
-(defstruct client uri host headers user-agent ws-client session account-name character-id)
-
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test #'eq))))
 
-(defun find-client (chat-server ws-client)
-  (gethash ws-client (slot-value chat-server 'clients)))
+(defun register-chat-server ()
+  (ws:register-global-resource
+   "/chat"
+   (make-instance 'chat-server)
+   #'ws::any-origin))
 
 (defmethod add-client ((srv chat-server) client)
   (logit "Adding Pending Client ~A." client)
@@ -56,31 +46,6 @@
       (setf (client-session client) session
             (client-account-name client) (session-value 'account-name session))
       client)))
-
-(defun process-client-validation (res client json-message
-                                  &aux (*acceptor* *server*)
-                                  (message (jsown:parse json-message)))
-  (push (cons :user-agent (jsown:val message "useragent"))
-        (client-headers client))
-  (let ((character (find-character (jsown:val message "char"))))
-    (if (and (validate-client res client)
-             character
-             (string-equal (character-account-name character)
-                           (client-account-name client)))
-        (progn
-          (logit "Client validated: ~A. It's now playing as ~A."
-                  client (character-name character))
-          (setf (client-character-id client) (character-id character))
-          (push (session-websocket-clients (client-session client)) client))
-        (progn
-          (logit "No session. Disconnecting client. (~A)" client)
-          (disconnect-client client)))))
-
-(defun register-chat-server ()
-  (ws:register-global-resource
-   "/chat"
-   (make-instance 'chat-server)
-   #'ws::any-origin))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
   (logit "Got client connection.")
@@ -105,16 +70,58 @@
       (process-client-message res client message)
       (process-client-validation res client message)))
 
+(defstruct client uri host headers user-agent ws-client session account-name character-id)
+
+(defun disconnect-client (client)
+  (let ((ws-client (client-ws-client client))
+        (session (client-session client)))
+    (ws:write-to-client ws-client :close)
+    ;; Chrome doesn't seem to pay attention to :close.
+    ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
+    (ws::client-disconnect ws-client :abort t)
+    (when session
+      (deletef (session-websocket-clients session)
+               client))))
+
+(defun find-client (chat-server ws-client)
+  (gethash ws-client (slot-value chat-server 'clients)))
+
+(defun process-client-validation (res client json-message
+                                  &aux (*acceptor* *server*)
+                                  (message (jsown:parse json-message)))
+  (push (cons :user-agent (jsown:val message "useragent"))
+        (client-headers client))
+  (let ((character (find-character (jsown:val message "char"))))
+    (if (and (validate-client res client)
+             character
+             (string-equal (character-account-name character)
+                           (client-account-name client)))
+        (progn
+          (logit "Client validated: ~A. It's now playing as ~A."
+                  client (character-name character))
+          (setf (client-character-id client) (character-id character))
+          (push (session-websocket-clients (client-session client)) client))
+        (progn
+          (logit "No session. Disconnecting client. (~A)" client)
+          (disconnect-client client)))))
+
 (defun client-character-name (client)
   (when-let ((character (find-character-by-id (client-character-id client))))
     (character-name character)))
 
+;;;
+;;; Client messages
+;;;
 (defparameter *dispatch*
   '(("user-input" . process-user-input)
     ("ping" . process-ping)
     ("start-recording"  . start-recording)
     ("stop-recording" . stop-recording)
     ("char-desc" . get-character-description)))
+
+(defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
+  (when-let ((action (cdr (assoc (car message) *dispatch* :test #'string=))))
+    (apply action res client (cdr message))))
 
 (defun get-character-description (res client charname)
   (declare (ignore res))
@@ -161,11 +168,6 @@
   (declare (ignore res))
   (logit "Request to stop recording received.")
   (delete-session-value 'scene-id (client-session client)))
-
-(defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
-  (let ((action (cdr (assoc (car message) *dispatch* :test #'string=))))
-    (when action
-      (apply action res client (cdr message)))))
 
 ;;;
 ;;; Init/teardown
