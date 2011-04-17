@@ -14,13 +14,60 @@
              ("character" . ,user)
              ("dialogue" . ,dialogue))))))
 
-;; clws stuff
+;;;
+;;; Generic server code
+;;;
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
 (defgeneric validate-client (chat-server client))
+(defgeneric disconnect-client (chat-server client))
 
+(defstruct client server uri host headers user-agent ws-client session account-name character-id)
+
+(defun client-write (client string)
+  (ws:write-to-client (client-ws-client client) string))
+
+(defun find-client (chat-server ws-client)
+  (gethash ws-client (slot-value chat-server 'clients)))
+
+(defun process-client-validation (res client json-message
+                                  &aux (*acceptor* *server*)
+                                  (message (jsown:parse json-message)))
+  (push (cons :user-agent (jsown:val message "useragent"))
+        (client-headers client))
+  (let ((character (find-character (jsown:val message "char"))))
+    (if (and (validate-client res client)
+             character
+             (string-equal (character-account-name character)
+                           (client-account-name client)))
+        (progn
+          (logit "Client validated: ~A. It's now playing as ~A."
+                  client (character-name character))
+          (setf (client-character-id client) (character-id character))
+          (push (session-websocket-clients (client-session client)) client))
+        (progn
+          (logit "No session. Disconnecting client. (~A)" client)
+          (disconnect-client res client)))))
+
+(defun client-character-name (client)
+  (when-let ((character (find-character-by-id (client-character-id client))))
+    (character-name character)))
+
+;;;
+;;; CLWS-based server.
+;;;
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test #'eq))))
+
+(defmethod disconnect-client ((server chat-server) client)
+  (let ((ws-client (client-ws-client client))
+        (session (client-session client)))
+    (ws:write-to-client ws-client :close)
+    ;; Chrome doesn't seem to pay attention to :close.
+    (ws::client-disconnect ws-client :abort t)
+    (when session
+      (deletef (session-websocket-clients session)
+               client))))
 
 (defun register-chat-server ()
   (ws:register-global-resource
@@ -70,45 +117,6 @@
       (process-client-message res client message)
       (process-client-validation res client message)))
 
-(defstruct client uri host headers user-agent ws-client session account-name character-id)
-
-(defun disconnect-client (client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
-    (ws:write-to-client ws-client :close)
-    ;; Chrome doesn't seem to pay attention to :close.
-    ;; _3b proposes sending a custom 'close' command to Chrome, and closing the socket client-side.
-    (ws::client-disconnect ws-client :abort t)
-    (when session
-      (deletef (session-websocket-clients session)
-               client))))
-
-(defun find-client (chat-server ws-client)
-  (gethash ws-client (slot-value chat-server 'clients)))
-
-(defun process-client-validation (res client json-message
-                                  &aux (*acceptor* *server*)
-                                  (message (jsown:parse json-message)))
-  (push (cons :user-agent (jsown:val message "useragent"))
-        (client-headers client))
-  (let ((character (find-character (jsown:val message "char"))))
-    (if (and (validate-client res client)
-             character
-             (string-equal (character-account-name character)
-                           (client-account-name client)))
-        (progn
-          (logit "Client validated: ~A. It's now playing as ~A."
-                  client (character-name character))
-          (setf (client-character-id client) (character-id character))
-          (push (session-websocket-clients (client-session client)) client))
-        (progn
-          (logit "No session. Disconnecting client. (~A)" client)
-          (disconnect-client client)))))
-
-(defun client-character-name (client)
-  (when-let ((character (find-character-by-id (client-character-id client))))
-    (character-name character)))
-
 ;;;
 ;;; Client messages
 ;;;
@@ -126,8 +134,7 @@
 (defun get-character-description (res client charname)
   (declare (ignore res))
   (logit "Got a character description request: ~S." charname)
-  (ws:write-to-client (client-ws-client client)
-                      (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
+  (client-write client (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
 
 (defun save-user-action (scene-id user-action)
   (logit "Saving user action ~A under scene-id ~A" user-action scene-id)
@@ -140,12 +147,7 @@
 (defun send-user-action (client user-action)
   (when-let ((scene-id (session-value 'scene-id (client-session client))))
     (save-user-action scene-id user-action))
-  (ws:write-to-client (client-ws-client client)
-                      (render-user-action-to-json user-action)
-                      #+nil(jsown:to-json
-                       (list "user-action"
-                             (with-yaclml-output-to-string
-                               (render-user-action user-action))))))
+  (client-write client (render-user-action-to-json user-action)))
 
 (defun process-user-input (res client action dialogue)
   (maphash-values (rcurry #'send-user-action (make-user-action (client-character-name client) action dialogue))
@@ -153,7 +155,7 @@
 
 (defun process-ping (res client)
   (declare (ignore res))
-  (ws:write-to-client (client-ws-client client) (jsown:to-json (list "pong"))))
+  (client-write client (jsown:to-json (list "pong"))))
 
 (defun start-recording (res client)
   (declare (ignore res))
