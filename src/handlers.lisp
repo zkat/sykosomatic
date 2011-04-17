@@ -1,8 +1,9 @@
 (cl:in-package :sykosomatic)
 
 (declaim (optimize debug))
+
 ;;;
-;;; Init/teardown
+;;; HT
 ;;;
 (defun init-hunchentoot ()
   (setf *dispatch-table*
@@ -19,9 +20,17 @@
 (defun teardown-hunchentoot ()
   (when *server* (stop *server*) (setf *server* nil)))
 
-;;;
-;;; Utils
-;;;
+(defun logout (session)
+  (let ((account-name (session-value 'account-name session))
+        (websocket-clients (session-websocket-clients session)))
+    (when account-name
+      (format t "~&~A logged out.~%" account-name))
+    (when websocket-clients
+      (mapc #'disconnect-client websocket-clients))))
+
+(defun session-cleanup (session)
+  (format t "~&Session timed out. Trying to log it out...~%")
+  (logout session))
 
 (defun ensure-logged-in ()
   (unless (and *session* (session-value 'account-name))

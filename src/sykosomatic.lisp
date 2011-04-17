@@ -214,16 +214,3 @@
   (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
     (bt:destroy-thread *chat-resource-thread*)
     (setf *chat-resource-thread* nil)))
-
-;; Server startup/teardown.
-(defun logout (session)
-  (let ((account-name (session-value 'account-name session))
-        (websocket-clients (session-websocket-clients session)))
-    (when account-name
-      (format t "~&~A logged out.~%" account-name))
-    (when websocket-clients
-      (mapc #'disconnect-client websocket-clients))))
-
-(defun session-cleanup (session)
-  (format t "~&Session timed out. Trying to log it out...~%")
-  (logout session))
