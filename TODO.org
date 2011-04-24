@@ -117,7 +117,7 @@
 *** DONE Spend some time splitting game-related stuff into baby steps
     There's a lot that needs to happen. A lot of it is interrelated. Pick a starting point and a
     minimal requirement, build up from there.
-*** TODO Replace input boxes with a single input box.
+*** DONE Replace input boxes with a single input box.
     The box should broadcast whatever is typed into it as the 'dialogue' for the current character.
 *** TODO Add basic dialogue parser
     Instead of just typing anything into the box, dialogue should be delimited by a '.

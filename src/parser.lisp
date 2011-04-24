@@ -1,12 +1,20 @@
 (cl:defpackage #:sykosomatic.parser
-  (:use :cl :alexandria :smug))
+  (:use :cl :alexandria :smug)
+  (:export :invoke-parser :basic-dialogue))
 (cl:in-package #:sykosomatic.parser)
+
+(defun invoke-parser (parser string)
+  (mapcar #'car (funcall parser string)))
+
+(defun basic-dialogue ()
+  (=let* ((dialogue (dialogue)))
+    (result dialogue)))
 
 ;; ABNF grammar - http://en.wikipedia.org/wiki/ABNF
 ;; ------------
 ;;
-;; sentence =  chat-string
-;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [chat-string]
+;; sentence =  dialogue
+;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [dialogue]
 ;;
 ;; noun-clause =/ [[[adverb] preposition] noun-group]
 ;;
@@ -19,28 +27,28 @@
 ;;
 ;; article = satisfies article-p
 ;; adjective = any unknown token that comes before a noun or a possessive
-;; noun = anything before a preposition, a conjunction, an adverb, a chat-string, or a NIL
+;; noun = anything before a preposition, a conjunction, an adverb, a dialogue, or a NIL
 ;; pronoun = satisfies pronoun-p
 ;; possessive-noun = satisfies possessive-p (['s] or [s'])
 ;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
 
-;; sentence =  chat-string
-;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [chat-string]
+;; sentence =  dialogue
+;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [dialogue]
 (defun sentence ()
-  (=or (chat-string)
+  (=or (dialogue)
        (=let* ((adverb1 (maybe (adverb)))
                (verb (verb))
                (noun-clause1 (maybe (noun-clause)))
                (noun-clause2 (maybe (noun-clause)))
                (adverb2 (maybe (adverb)))
-               (chat (maybe (chat-string)))
+               (chat (maybe (dialogue)))
                (_ (no-more-input)))
          (result (list :sentence
                        :adverbs (list adverb1 adverb2)
                        :verb verb
                        :noun-clause-1 noun-clause1
                        :noun-clause-2 noun-clause2
-                       :chat-string chat)))))
+                       :dialogue chat)))))
 
 ;; noun-clause =/ [[[adverb] preposition] noun-group]
 (defun noun-clause ()
@@ -83,14 +91,14 @@
   ;; TODO
   nil)
 
-(defun chat-string-delimiter ()
+(defun dialogue-delimiter ()
   (=or (=char #\")
        (=char #\')))
 
-(defun chat-string ()
-  (=let* ((_ (chat-string-delimiter))
+(defun dialogue ()
+  (=let* ((_ (dialogue-delimiter))
           (text (text))
-          (_ (=or (=and (chat-string-delimiter)
+          (_ (=or (=and (dialogue-delimiter)
                         (no-more-input))
                   (no-more-input))))
     (result (if (char= (char text (1- (length text)))

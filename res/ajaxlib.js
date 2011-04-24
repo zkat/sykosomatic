@@ -108,6 +108,9 @@ function init_chat() {
         if (message[0] == 'char-desc') {
             alert('Description: ' + message[1]);
         };
+        if (message[0] == 'parse-error') {
+            alert('Parser error while processing "' + message[1] + '"');
+        };
     };
     ws.onclose = function () {
         disable_input();
