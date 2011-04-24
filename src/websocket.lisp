@@ -149,9 +149,14 @@
     (save-user-action scene-id user-action))
   (client-write client (render-user-action-to-json user-action)))
 
-(defun process-user-input (res client dialogue)
-  (maphash-values (rcurry #'send-user-action (make-user-action (client-character-name client) nil dialogue))
+(defun broadcast-user-action (res action)
+  (maphash-values (rcurry #'send-user-action action)
                   (slot-value res 'clients)))
+
+(defun process-user-input (res client input)
+  (if-let ((dialogue (car (invoke-parser (basic-dialogue) input))))
+    (broadcast-user-action res (make-user-action (client-character-name client) nil dialogue))
+    (client-write client (jsown:to-json (list "parse-error" input)))))
 
 (defun process-ping (res client)
   (declare (ignore res))
