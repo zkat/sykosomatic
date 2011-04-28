@@ -1,14 +1,15 @@
 (cl:defpackage #:sykosomatic.parser
   (:use :cl :alexandria :smug)
-  (:export :invoke-parser :basic-dialogue))
+  (:export :parse-input))
 (cl:in-package #:sykosomatic.parser)
+
+(defun parse-input (actor-id input)
+  (when-let ((dialogue (car (invoke-parser (dialogue) input))))
+    (map nil (rcurry #'sykosomatic::send-dialogue actor-id dialogue)
+         (sykosomatic::local-actors actor-id))))
 
 (defun invoke-parser (parser string)
   (mapcar #'car (funcall parser string)))
-
-(defun basic-dialogue ()
-  (=let* ((dialogue (dialogue)))
-    (result dialogue)))
 
 ;; ABNF grammar - http://en.wikipedia.org/wiki/ABNF
 ;; ------------

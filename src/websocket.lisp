@@ -14,9 +14,6 @@
              ("character" . ,user)
              ("dialogue" . ,dialogue))))))
 
-;;;
-;;; Generic server code
-;;;
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
 (defgeneric validate-client (chat-server client))
@@ -53,11 +50,9 @@
   (when-let ((character (find-character-by-id (client-character-id client))))
     (character-name character)))
 
-;;;
-;;; CLWS-based server.
-;;;
 (defclass chat-server (ws:ws-resource)
-  ((clients :initform (make-hash-table :test #'eq))))
+  ((clients :initform (make-hash-table :test #'eq))
+   (client-main :initarg :client-main)))
 
 (defmethod disconnect-client ((server chat-server) client)
   (let ((ws-client (client-ws-client client))
@@ -69,10 +64,12 @@
       (deletef (session-websocket-clients session)
                client))))
 
-(defun register-chat-server ()
+(defvar *websocket-server*)
+
+(defun register-chat-server (client-main)
   (ws:register-global-resource
    "/chat"
-   (make-instance 'chat-server)
+   (setf *websocket-server* (make-instance 'chat-server :client-main client-main))
    #'ws::any-origin))
 
 (defmethod add-client ((srv chat-server) client)
@@ -117,9 +114,48 @@
       (process-client-message res client message)
       (process-client-validation res client message)))
 
+(defun save-user-action (scene-id user-action)
+  (logit "Saving user action ~A under scene-id ~A" user-action scene-id)
+  (add-action scene-id
+              :character (user-action-user user-action)
+              :action (user-action-action user-action)
+              :dialogue (user-action-dialogue user-action)
+              :timestamp (user-action-timestamp user-action)))
+
+(defun character-client (character-id)
+  (maphash-values (lambda (client)
+                    (when (string= character-id (client-character-id client))
+                      (return-from character-client client)))
+                  (slot-value *websocket-server* 'clients))
+  nil)
+
+(defun send-action (recipient-id actor-id action-txt)
+  (client-write (character-client recipient-id)
+                (jsown:to-json `("user-action" (:obj
+                                                ("character" . ,(character-name (find-character-by-id actor-id)))
+                                                ("action" . ,action-txt)
+                                                ("dialogue" . nil)))
+                               #+nil`("action" (:obj ("action" . ,action-txt)
+                                                     ("actor" . ,(character-name (find-character-by-id actor-id))))))))
+
+(defun send-dialogue (recipient-id actor-id dialogue &optional parenthetical)
+  (client-write (character-client recipient-id)
+                (jsown:to-json `("user-action" (:obj
+                                                ("character" . ,(character-name (find-character-by-id actor-id)))
+                                                ("action" . ,parenthetical)
+                                                ("dialogue" . ,dialogue)))
+                               #+nil`("dialogue" (:obj ("actor" . ,(character-name (find-character-by-id actor-id)))
+                                                  ("dialogue" . ,dialogue)
+                                                  ("parenthetical" . ,parenthetical))))))
+
+(defun local-actors (actor-id)
+  (declare (ignore actor-id))
+  (mapcar #'client-character-id (hash-table-values (slot-value *websocket-server* 'clients))))
+
 ;;;
 ;;; Client messages
 ;;;
+(defvar *client-main*)
 (defparameter *dispatch*
   '(("user-input" . process-user-input)
     ("ping" . process-ping)
@@ -136,27 +172,8 @@
   (logit "Got a character description request: ~S." charname)
   (client-write client (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
 
-(defun save-user-action (scene-id user-action)
-  (logit "Saving user action ~A under scene-id ~A" user-action scene-id)
-  (add-action scene-id
-              :character (user-action-user user-action)
-              :action (user-action-action user-action)
-              :dialogue (user-action-dialogue user-action)
-              :timestamp (user-action-timestamp user-action)))
-
-(defun send-user-action (client user-action)
-  (when-let ((scene-id (session-value 'scene-id (client-session client))))
-    (save-user-action scene-id user-action))
-  (client-write client (render-user-action-to-json user-action)))
-
-(defun broadcast-user-action (res action)
-  (maphash-values (rcurry #'send-user-action action)
-                  (slot-value res 'clients)))
-
 (defun process-user-input (res client input)
-  (if-let ((dialogue (car (invoke-parser (basic-dialogue) input))))
-    (broadcast-user-action res (make-user-action (client-character-name client) nil dialogue))
-    (client-write client (jsown:to-json (list "parse-error" input)))))
+  (funcall (slot-value res 'client-main) (client-character-id client) input))
 
 (defun process-ping (res client)
   (declare (ignore res))
@@ -182,8 +199,8 @@
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
-(defun init-websockets (&optional (port *chat-server-port*))
-  (register-chat-server)
+(defun init-websockets (client-main &optional (port *chat-server-port*))
+  (register-chat-server client-main)
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
          (lambda ()
@@ -201,3 +218,12 @@
   (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
     (bt:destroy-thread *chat-resource-thread*)
     (setf *chat-resource-thread* nil)))
+
+;; (defun send-user-action (client user-action)
+;;   (when-let ((scene-id (session-value 'scene-id (client-session client))))
+;;     (save-user-action scene-id user-action))
+;;   (client-write client (render-user-action-to-json user-action)))
+
+;; (defun broadcast-user-action (res action)
+;;   (maphash-values (rcurry #'send-user-action action)
+;;                   (slot-value res 'clients)))

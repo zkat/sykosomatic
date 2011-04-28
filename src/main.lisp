@@ -4,7 +4,7 @@
 (defun begin-shared-hallucination ()
   (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
   (init-db)
-  (init-websockets)
+  (init-websockets 'sykosomatic.parser:parse-input)
   (init-hunchentoot)
   t)
 

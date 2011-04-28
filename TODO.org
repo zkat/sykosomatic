@@ -119,7 +119,7 @@
     minimal requirement, build up from there.
 *** DONE Replace input boxes with a single input box.
     The box should broadcast whatever is typed into it as the 'dialogue' for the current character.
-*** TODO Add basic dialogue parser
+*** DONE Add basic dialogue parser
     Instead of just typing anything into the box, dialogue should be delimited by a '.
 *** TODO Basic actions
     Add the ability to take actions by using 'verbs'. These verbs can be inserted before
