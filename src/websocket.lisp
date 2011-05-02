@@ -155,7 +155,6 @@
 ;;;
 ;;; Client messages
 ;;;
-(defvar *client-main*)
 (defparameter *dispatch*
   '(("user-input" . process-user-input)
     ("ping" . process-ping)
