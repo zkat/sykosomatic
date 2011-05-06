@@ -5,7 +5,7 @@ var num_failures = 0;
 var interval_id;
 var ws;
 
-function getURLParameter(name) {
+function get_url_parameter(name) {
     return unescape(
         (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
     );
@@ -31,11 +31,11 @@ function callback(user_action) {
 
   if (action.length > 0 && dialogue.length == 0) {
       html = html + "<p class='action'>"
-            +"<span onclick='requestCharDescription(\""+character+"\")'>"+character+"</span>"
+            +"<span onclick='request_char_description(\""+character+"\")'>"+character+"</span>"
             +" "+action+"</p>";
   }
   else {
-      html = html + "<p class='character' onclick='requestCharDescription(\""+character+"\")'>"+character+"</p>";
+      html = html + "<p class='character' onclick='request_char_description(\""+character+"\")'>"+character+"</p>";
       if (action.length > 0) {
           html = html + "<p class='parenthetical'>"+"("+action+")</p>";
       };
@@ -43,10 +43,8 @@ function callback(user_action) {
   };
 
  $('#chat-box').append($(html));
-  // If the html is pre-rendered...
-  // $('#chat-box').append(user_action);
-  var objDiv = document.getElementById('chat-box');
-  objDiv.scrollTop = objDiv.scrollHeight;
+  var obj_div = document.getElementById('chat-box');
+  obj_div.scrollTop = obj_div.scrollHeight;
 };
 
 function enable_input () {
@@ -56,7 +54,7 @@ function disable_input () {
     $('#user-input-area :input').attr('disabled', true);
 }
 
-function requestCharDescription(charname) {
+function request_char_description(charname) {
     return ws.send(JSON.stringify(['char-desc',charname]));
 }
 
@@ -65,16 +63,16 @@ function ping() {
     ws.send(JSON.stringify(['ping']));
 }
 
-function currentChar () {
-    return getURLParameter('char');
+function current_char () {
+    return get_url_parameter('char');
 }
 
-function startRecording() {
+function start_recording() {
     alert('Recording scene.');
     ws.send(JSON.stringify(["start-recording"]));
 }
 
-function stopRecording() {
+function stop_recording() {
     alert('Done recording.');
     ws.send(JSON.stringify(["stop-recording"]));
 }
@@ -93,8 +91,7 @@ function init_chat() {
     // When running as root, use this.
     // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
     ws.onopen = function() {
-        ws.send(JSON.stringify({useragent: navigator.userAgent,
-                                char: currentChar()}));
+        ws.send(JSON.stringify({useragent: navigator.userAgent, char: current_char()}));
         enable_input();
     };
     ws.onmessage = function(e) {
