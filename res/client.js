@@ -118,6 +118,7 @@ if (!sykosomatic) {
              html = html + "<p class='dialogue'>"+dialogue+"</p>";
          };
 
+         html = html = "</div>";
          $('#chat-box').append($(html));
          var obj_div = document.getElementById('chat-box');
          obj_div.scrollTop = obj_div.scrollHeight;
