@@ -148,7 +148,7 @@ are actually the exteriors of two buildings.")))
   (<:script :type "text/javascript" :src "res/swfobject.js")
   (<:script :type "text/javascript" :src "res/web_socket.js")
   (<:script :type "text/javascript" :src "res/json2.js")
-  (<:script :type "text/javascript" :src "res/ajaxlib.js"))
+  (<:script :type "text/javascript" :src "res/client.js"))
 
 (defun render-scene-recording ()
   (<:form :action "javascript:start_recording()"
