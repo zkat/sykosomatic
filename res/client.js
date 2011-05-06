@@ -7,14 +7,14 @@ if (!sykosomatic) {
 }
 
 (function () {
-     
+
      ///
      /// Utils
      ///
      function enable_input () {
          $('#user-input-area :input').attr('disabled', false);
      };
-     
+
      function disable_input () {
          $('#user-input-area :input').attr('disabled', true);
      };
@@ -51,7 +51,7 @@ if (!sykosomatic) {
      };
 
      function ws_send (obj) {
-       ws.send(JSON.stringify(obj));  
+       ws.send(JSON.stringify(obj));
      };
 
      ///
@@ -95,7 +95,7 @@ if (!sykosomatic) {
          var msg_callback = dispatch_table[message[0]];
          if (msg_callback) {
            msg_callback(message);
-         };  
+         };
      };
 
      function render_user_action(user_action) {
