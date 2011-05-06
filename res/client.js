@@ -127,6 +127,37 @@ if (!sykosomatic) {
          render_user_action(msg[1]);
      };
 
+     dispatch_table['action'] = function (msg) {
+         var actor = msg[1]['actor'];
+         var action = msg[1]['action'];
+
+         var html = "<div class='unit'>";
+         html = html + "<p class='action'>"
+             +"<span onclick='request_char_description(\""+actor+"\")'>"+actor+"</span>"
+             +" "+action+"</p>";
+         html = html = "</div>";
+         $('#chat-box').append($(html));
+         var obj_div = document.getElementById('chat-box');
+         obj_div.scrollTop = obj_div.scrollHeight;
+     };
+
+     dispatch_table['dialogue'] = function (msg) {
+         var actor = msg[1]['actor'];
+         var dialogue = msg[1]['dialogue'];
+         var parenthetical = msg[1]['action'];
+
+         var html = "<div class='unit'>";
+         html = html + "<p class='actor' onclick='request_char_description(\""+actor+"\")'>"+actor+"</p>";
+         if (parenthetical.length > 0) {
+             html = html + "<p class='parenthetical'>"+"("+parenthetical+")</p>";
+         };
+         html = html + "<p class='dialogue'>"+dialogue+"</p>";
+         html = html + "</div>";
+         $('#chat-box').append($(html));
+         var obj_div = document.getElementById('chat-box');
+         obj_div.scrollTop = obj_div.scrollHeight;
+     };
+
      ///
      /// Init
      ///
