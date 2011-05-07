@@ -128,18 +128,17 @@ if (!sykosomatic) {
          var paren = msg[1]['parenthetical'];
 
          if ((last_actor == actor) && (last_unit == 'dialogue')) {
-             $('.unit:last > p.dialogue').text(function (idx, text) {
-                                                    return text + ' ' + dialogue;
-                                                });
              if (paren.length > 0) {
-                 $('.unit:last > p.parenthetical').text(function (idx, text) {
-                                                            if (text.length > 0) {
-                                                                return text.slice(0,text.length-1) + ', then ' + paren + ')';
-                                                            } else {
-                                                                return '(' + paren + ')';
-                                                            }
-                                                   });
-             };
+                 var paren_html = "<p class='parenthetical'>("+paren+")</p>";
+                 var dialogue_html = "<p class='dialogue'>"+dialogue+"</p>";
+                 $('.unit:last').append($(paren_html));
+                 $('.unit:last').append($(dialogue_html));
+             }
+             else {
+                 $('.unit:last > p.dialogue:last').text(function (idx, text) {
+                                                            return text + ' ' + dialogue;
+                                                        });
+             }
          } else {
              var html = "<div class='unit'>";
              html = html + "<p class='character' onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</p>";
