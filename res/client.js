@@ -88,7 +88,7 @@ if (!sykosomatic) {
      var dispatch_table = {
          'pong' : function(msg) { console.log('got a pong'); },
          'char-desc' : function(msg) { alert('Description: ' + msg[1]); },
-         'parse-error' : function(msg) { alert('Parser error while processing "' + msg[1] + '"'); }
+         'parse-error' : function(msg) { alert('Parser error: ' + msg[1]); }
      };
 
      function dispatch_message (message) {
