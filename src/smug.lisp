@@ -311,8 +311,16 @@
        (funcall parser input)))))
 
 (defun maybe (parser &rest condition-types)
-  (=or (apply #'either parser condition-types)
-       (result nil)))
+  (lambda (input)
+    (block parse
+      (handler-bind ((condition (lambda (c)
+                                  (when (find-if (lambda (type)
+                                                   (typep c type))
+                                                 condition-types)
+                                    (return-from parse
+                                      (list (cons nil input)))))))
+        (or (funcall parser input)
+            (list (cons nil input)))))))
 
 (defun word (&optional (test #'identity))
   (=let* ((word (skip-whitespace (text (alpha-char)))))
