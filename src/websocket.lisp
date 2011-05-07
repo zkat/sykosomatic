@@ -135,16 +135,15 @@
                 (jsown:to-json msg)))
 
 (defun send-action (recipient actor action-txt)
-  (send-msg recipient `("user-action" (:obj
-                                       ("character" . ,(character-name (find-character-by-id actor)))
-                                       ("action" . ,action-txt)
-                                       ("dialogue" . nil)))))
+  (send-msg recipient `("action" (:obj
+                                  ("actor" . ,(character-name (find-character-by-id actor)))
+                                  ("action" . ,action-txt)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (send-msg recipient `("user-action" (:obj
-                                       ("character" . ,(character-name (find-character-by-id actor)))
-                                       ("action" . ,parenthetical)
-                                       ("dialogue" . ,dialogue)))))
+  (send-msg recipient `("dialogue" (:obj
+                                    ("actor" . ,(character-name (find-character-by-id actor)))
+                                    ("parenthetical" . ,parenthetical)
+                                    ("dialogue" . ,dialogue)))))
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
