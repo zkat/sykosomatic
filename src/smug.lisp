@@ -14,12 +14,14 @@
    #:=or
    #:=not
    #:=satisfies
+   #:=prog1
 
    #:before
    #:natural-number
    #:zero-or-more
    #:one-or-more
-
+   #:cardinal
+   #:ordinal
    #:no-more-input
 
    #:text
@@ -156,6 +158,11 @@
 (defun =char (x)
   (=satisfies (lambda (y) (eql x y))))
 
+(defun =prog1 (parser &rest parsers)
+  (=let* ((result parser)
+          (_ (apply #'=and parsers)))
+    (result result)))
+
 (defun before (parser end-parser)
   (=let* ((i parser)
           (result (lambda (input)
@@ -163,7 +170,6 @@
                         (list (cons i input))
                         nil))))
     (result result)))
-
 
 (defun =string (string)
   (if (input-empty-p string)
@@ -202,6 +208,32 @@
           (_ close-parser))
     (result x)))
 
+(defun alphanumeric ()
+  (=satisfies #'alphanumericp))
+
+;; cardinal = 1, 2, three, four...
+(defun cardinal ()
+  (=let* ((card (=or (=let* ((num (natural-number))
+                             (_ (one-or-more (whitespace))))
+                       (result num))
+                     (text (alphanumeric)))))
+    (if (numberp card)
+        (result card)
+        (let ((position (position card (loop for i from 1 below 99
+                                          collect (format nil "~r" i)) :test #'string-equal)))
+          (if position
+              (result (1+ position))
+              (fail))))))
+
+;; ordinal = 1st, 2nd, third, fourth....
+(defun ordinal ()
+  ;; TODO - 1st, 2nd, ...
+  (=let* ((ord (text (alphanumeric))))
+    (let ((position (position ord (loop for i from 1 upto 20
+                                     collect (format nil "~:r" i)) :test #'string-equal)))
+      (if position
+          (result (1+ position))
+          (fail)))))
 
 (defun none-of (char-bag)
   (=let* ((char (item)))
