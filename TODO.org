@@ -187,6 +187,27 @@
     group chat messages together, as well as to add/remove bits and pieces.
 *** DONE Possibly-optional websocket ping to keep the socket alive even when idle.
     Can't turn it off atm. Add new task if it becomes necessary to.
+*** DONE Adjust grouping when parentheticals are present.
+    If you have the following dialogue:
+
+       JOSH
+     (to X)
+    blah
+
+    if there's parentheticals in the second dialogue, you get:
+
+       JOSH
+     (to X, then to Y)
+    blah bloo
+
+    Make it so, instead, it does:
+
+       JOSH
+     (to X)
+    blah
+     (to Y)
+    bloo
+
 *** TODO Put descriptions somewhere more sane than an alert()
 *** TODO Make description popups more generic: should be able to fetch any game object's description
 *** TODO Location/visibility-restricted description getting
