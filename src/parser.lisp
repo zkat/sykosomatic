@@ -13,43 +13,61 @@
 
 ;; ABNF grammar - http://en.wikipedia.org/wiki/ABNF
 ;; ------------
-;;
-;; sentence =  dialogue
-;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [dialogue]
-;;
-;; noun-clause =/ [[[adverb] preposition] noun-group]
-;;
-;; noun-group =  noun-phrase [","] 0*(conjunction noun-phrase)
-;;
-;; noun-phrase =  pronoun
-;; noun-phrase =/ [article] [cardinal] [adjective] noun
-;; noun-phrase =/ [article] [ordinal] [adjective] \
-;;                (noun / possessive-noun noun-phrase)
-;;
-;; article = satisfies article-p
-;; adjective = any unknown token that comes before a noun or a possessive
-;; noun = anything before a preposition, a conjunction, an adverb, a dialogue, or a NIL
-;; pronoun = satisfies pronoun-p
-;; possessive-noun = satisfies possessive-p (['s] or [s'])
-;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
 
-;; sentence =  dialogue
-;; sentence =/ [adverb] verb [noun-clause] [noun-clause] [adverb] [dialogue]
-(defun sentence ()
+;; input = dialogue / action
+(defun input ()
   (=or (dialogue)
-       (=let* ((adverb1 (maybe (adverb)))
-               (verb (verb))
-               (noun-clause1 (maybe (noun-clause)))
-               (noun-clause2 (maybe (noun-clause)))
-               (adverb2 (maybe (adverb)))
-               (chat (maybe (dialogue)))
-               (_ (no-more-input)))
-         (result (list :sentence
-                       :adverbs (list adverb1 adverb2)
-                       :verb verb
-                       :noun-clause-1 noun-clause1
-                       :noun-clause-2 noun-clause2
-                       :dialogue chat)))))
+       #+nil(action)))
+
+;; ws = zero or more whitespace
+(defun ws ()
+  (one-or-more (whitespace)))
+
+;; dialogue = [parenthetical ws] text
+(defun dialogue ()
+  (=let* ((parenthetical (maybe (=prog1 (parenthetical) (ws))))
+          (dialogue-text (text)))
+    (result `(:dialogue
+              (:parenthetical . ,parenthetical)
+              (:dialogue . ,dialogue-text)))))
+
+;; parenthetical = "(" adverb ")"
+(defun parenthetical ()
+  (=let* ((_ (=char #\())
+          (content (adverb))
+          (_ (=char #\))))
+    (result `(:parenthetical . ,content))))
+
+;; adverb = word that satisfies adverbp
+(defun adverb ()
+  (=let* ((word (text (alpha-char))))
+    (if (adverbp word)
+        (result `(:adverb . ,word))
+        (fail))))
+
+;; action = action-delimiter 0*ws sentence
+(defun action ()
+  (=and (action-delimiter)
+        (zero-or-more (whitespace))
+        (sentence)))
+
+;; action-delimiter = "*"
+(defun action-delimiter ()
+  (=char #\*))
+
+;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
+(defun sentence ()
+  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws))))
+          (verb (verb))
+          (noun-clause-1 (maybe (=and (ws) (noun-clause))))
+          (noun-clause-2 (maybe (=and (ws) (noun-clause))))
+          (adverb2 (maybe (=and (ws) (adverb)))))
+    (result `(:sentence
+              (:adverb1 . ,adverb1)
+              (:verb . ,verb)
+              (:noun-clause-1 . ,noun-clause-1)
+              (:noun-clause-2 . ,noun-clause-2)
+              (:adverb2 . ,adverb2)))))
 
 ;; noun-clause =/ [[[adverb] preposition] noun-group]
 (defun noun-clause ()
@@ -92,25 +110,6 @@
   ;; TODO
   nil)
 
-(defun dialogue-delimiter ()
-  (=or (=char #\")
-       (=char #\')))
-
-(defun dialogue ()
-  (=let* ((_ (dialogue-delimiter))
-          (text (text))
-          (_ (=or (=and (dialogue-delimiter)
-                        (no-more-input))
-                  (no-more-input))))
-    (result (if (char= (char text (1- (length text)))
-                       #\")
-                (subseq text 0 (1- (length text)))
-                text))))
-
-;; adverb = existing adverb
-(defun adverb ()
-  (word #'adverbp))
-
 ;; verb = existing verb
 (defun verb ()
   (word #'verbp))
@@ -139,39 +138,11 @@
   ;; TODO
   (fail))
 
-;; cardinal = 1, 2, three, four...
-(defun cardinal ()
-  (=let* ((card (=or (=let* ((num (natural-number))
-                             (_ (one-or-more (whitespace))))
-                       (result num))
-                     (word))))
-    (if (numberp card)
-        (result card)
-        (let ((position (position card (loop for i from 1 upto 20
-                                          collect (format nil "~r" i)) :test #'string-equal)))
-          (if position
-              (result (1+ position))
-              (fail))))))
-
-;; ordinal = 1st, 2nd, third, fourth....
-(defun ordinal ()
-  ;; TODO - 1st, 2nd, ...
-  (=let* ((ord (word)))
-    (let ((position (position ord (loop for i from 1 upto 20
-                                     collect (format nil "~:r" i)) :test #'string-equal)))
-      (if position
-          (result (1+ position))
-          (fail)))))
-
 ;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
 (defun conjunction ()
-  (=or (skip-whitespace (=string "and"))
-       (skip-whitespace (=string "&"))
-       #+nil(=let* ((_ (=and (=char #\,)
-                        (maybe (word (curry #'string-equal "and"))))))
-         (result ","))
-       #+nil(=or (word (curry #'string-equal "and"))
-            (word (curry #'string-equal "&")))))
+  (=or (=string "and")
+       (=string "&")
+       (=string ",")))
 
 ;;;
 ;;; Word identifiers
