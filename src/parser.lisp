@@ -1,10 +1,10 @@
 (cl:defpackage #:sykosomatic.parser
-  (:use :cl :alexandria :smug)
+  (:use :cl :alexandria :smug :sykosomatic.utils)
   (:export :parse-input))
 (cl:in-package #:sykosomatic.parser)
 
 (defun parse-input (actor input)
-  (let ((result (car (invoke-parser (maybe (dialogue) 'error) input))))
+  (let ((result (car (invoke-parser (maybe (input) 'error) input))))
     (cond ((typep result 'error)
            (sykosomatic::send-msg actor (list "parse-error" (princ-to-string result))))
           (t
@@ -13,7 +13,14 @@
               (map nil (rcurry #'sykosomatic::send-dialogue actor
                                (cdr (assoc :dialogue (cdr result)))
                                (cdr (assoc :parenthetical (cdr result))))
+                   (sykosomatic::local-actors actor)))
+             (:sentence
+              (map nil (rcurry #'sykosomatic::send-action actor
+                               (sentence->text (cdr result)))
                    (sykosomatic::local-actors actor))))))))
+
+(defun sentence->text (sentence)
+  (format nil "~A." (cdr (assoc :verb sentence))))
 
 (defun invoke-parser (parser string)
   (mapcar #'car (funcall parser string)))
@@ -23,8 +30,8 @@
 
 ;; input = dialogue / action
 (defun input ()
-  (=or (dialogue)
-       #+nil(action)))
+  (=or (action)
+       (dialogue)))
 
 ;; ws = zero or more whitespace
 (defun ws ()
@@ -63,15 +70,24 @@
 
 ;; action-delimiter = "*"
 (defun action-delimiter ()
-  (=char #\*))
+  (=or (=char #\*)
+       (=string "/me ")
+       (=string "/em ")
+       (=string "/act ")))
 
 ;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
 (defun sentence ()
-  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws))))
+  (=let* ((verb (verb))
+          (_ (maybe (=char #\.))))
+    (result `(:sentence
+              (:verb . ,verb)))))
+
+#+nil(defun sentence ()
+  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
-          (noun-clause-1 (maybe (=and (ws) (noun-clause))))
-          (noun-clause-2 (maybe (=and (ws) (noun-clause))))
-          (adverb2 (maybe (=and (ws) (adverb)))))
+          (noun-clause-1 (maybe (=and (ws) (noun-clause)) 'error))
+          (noun-clause-2 (maybe (=and (ws) (noun-clause)) 'error))
+          (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
               (:adverb1 . ,adverb1)
               (:verb . ,verb)
@@ -122,7 +138,10 @@
 
 ;; verb = existing verb
 (defun verb ()
-  (word #'verbp))
+  (=let* ((text (text (alpha-char))))
+    (if (verbp text)
+        (result text)
+        (fail :error (format nil "'~A' is not a verb." text)))))
 
 ;; article = satisfies articlep
 (defun article ()
@@ -164,4 +183,8 @@
   (find maybe-adverb '("handsomely" "cleverly" "fascetiously") :test #'string-equal))
 
 (defun verbp (maybe-verb)
-  (string= maybe-verb "get"))
+  (or (string= maybe-verb "smiles")
+      (string= maybe-verb "frowns")
+      (string= maybe-verb "laughs")
+      (string= maybe-verb "cries")
+      (string= maybe-verb "waves")))
