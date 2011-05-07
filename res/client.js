@@ -87,7 +87,7 @@ if (!sykosomatic) {
      ///
      var dispatch_table = {
          'pong' : function(msg) { console.log('got a pong'); },
-         'char-desc' : function(msg) { alert('Description:' + msg[1]); },
+         'char-desc' : function(msg) { alert('Description: ' + msg[1]); },
          'parse-error' : function(msg) { alert('Parser error while processing "' + msg[1] + '"'); }
      };
 
@@ -107,11 +107,11 @@ if (!sykosomatic) {
 
          if (action.length > 0 && dialogue.length == 0) {
              html = html + "<p class='action'>"
-                 +"<span onclick='request_char_description(\""+character+"\")'>"+character+"</span>"
+                 +"<span onclick='sykosomatic.request_char_description(\""+character+"\")'>"+character+"</span>"
                  +" "+action+"</p>";
          }
          else {
-             html = html + "<p class='character' onclick='request_char_description(\""+character+"\")'>"+character+"</p>";
+             html = html + "<p class='character' onclick='sykosomatic.request_char_description(\""+character+"\")'>"+character+"</p>";
              if (action.length > 0) {
                  html = html + "<p class='parenthetical'>"+"("+action+")</p>";
              };
@@ -133,7 +133,7 @@ if (!sykosomatic) {
 
          var html = "<div class='unit'>";
          html = html + "<p class='action'>"
-             +"<span onclick='request_char_description(\""+actor+"\")'>"+actor+"</span>"
+             +"<span onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
              +" "+action+"</p>";
          html = html + "</div>";
          $('#chat-box').append($(html));
@@ -147,7 +147,7 @@ if (!sykosomatic) {
          var parenthetical = msg[1]['action'];
 
          var html = "<div class='unit'>";
-         html = html + "<p class='actor' onclick='request_char_description(\""+actor+"\")'>"+actor+"</p>";
+         html = html + "<p class='actor' onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</p>";
          if (parenthetical.length > 0) {
              html = html + "<p class='parenthetical'>"+"("+parenthetical+")</p>";
          };
@@ -194,6 +194,7 @@ if (!sykosomatic) {
      sykosomatic.send_input = send_input;
      sykosomatic.start_recording = start_recording;
      sykosomatic.stop_recording = stop_recording;
+     sykosomatic.request_char_description = request_char_description;
  })();
 
 $(document).ready(sykosomatic.init);
