@@ -118,7 +118,7 @@ if (!sykosomatic) {
              html = html + "<p class='dialogue'>"+dialogue+"</p>";
          };
 
-         html = html = "</div>";
+         html = html + "</div>";
          $('#chat-box').append($(html));
          var obj_div = document.getElementById('chat-box');
          obj_div.scrollTop = obj_div.scrollHeight;
@@ -135,7 +135,7 @@ if (!sykosomatic) {
          html = html + "<p class='action'>"
              +"<span onclick='request_char_description(\""+actor+"\")'>"+actor+"</span>"
              +" "+action+"</p>";
-         html = html = "</div>";
+         html = html + "</div>";
          $('#chat-box').append($(html));
          var obj_div = document.getElementById('chat-box');
          obj_div.scrollTop = obj_div.scrollHeight;
@@ -191,6 +191,9 @@ if (!sykosomatic) {
      }
 
      sykosomatic.init = init;
+     sykosomatic.send_input = send_input;
+     sykosomatic.start_recording = start_recording;
+     sykosomatic.stop_recording = stop_recording;
  })();
 
 $(document).ready(sykosomatic.init);

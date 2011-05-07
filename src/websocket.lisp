@@ -123,26 +123,26 @@
               :timestamp (user-action-timestamp user-action)))
 
 (defgeneric actor-client (actor)
-  (:method ((actor-id integer))
+  (:method ((actor-id string))
     (maphash-values (lambda (client)
-                      (when (string= actor-id (client-actor-id client))
+                      (when (string= actor-id (client-character-id client))
                         (return-from actor-client client)))
                     (slot-value *websocket-server* 'clients))
     nil))
 
 (defun send-msg (actor msg)
-  (client-write (character-client actor)
+  (client-write (actor-client actor)
                 (jsown:to-json msg)))
 
 (defun send-action (recipient actor action-txt)
   (send-msg recipient `("user-action" (:obj
-                                       ("character" . ,(character-name actor))
+                                       ("character" . ,(character-name (find-character-by-id actor)))
                                        ("action" . ,action-txt)
                                        ("dialogue" . nil)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
   (send-msg recipient `("user-action" (:obj
-                                       ("character" . ,(character-name actor))
+                                       ("character" . ,(character-name (find-character-by-id actor)))
                                        ("action" . ,parenthetical)
                                        ("dialogue" . ,dialogue)))))
 
