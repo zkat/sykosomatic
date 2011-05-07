@@ -53,9 +53,16 @@
 ;; parenthetical = "(" adverb ")"
 (defun parenthetical ()
   (=let* ((_ (=char #\())
-          (content (adverb))
+          (content (=or (to/at-someone) (adverb)))
           (_ (=char #\))))
     (result `(:parenthetical . ,(cdr content)))))
+
+(defun to/at-someone ()
+  (=let* ((at/to (=or (=string "at")
+                      (=string "to")))
+          (_ (ws))
+          (target-name (text (alpha-char))))
+    (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
 
 ;; adverb = word that satisfies adverbp
 (defun adverb ()
