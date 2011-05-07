@@ -189,7 +189,7 @@
   (find maybe-noun '("flask") :test #'string-equal))
 
 (defun adverbp (maybe-adverb)
-  (find maybe-adverb '("amusedly" "sunnily" "brightly" "happily" "honestly" "nicely" "handsomely" "cleverly" "fascetiously") :test #'string-equal))
+  (find maybe-adverb '("victoriously" "amusedly" "sunnily" "brightly" "happily" "honestly" "nicely" "handsomely" "cleverly" "fascetiously") :test #'string-equal))
 
 (defun verbp (maybe-verb)
-  (find maybe-verb '("smiles" "frowns" "cheers" "laughs" "cries" "waves") :test #'string-equal))
+  (find maybe-verb '("chuckles" "fluffs" "squees" "pouts" "cackles" "preens" "smiles" "frowns" "cheers" "laughs" "cries" "waves") :test #'string-equal))
