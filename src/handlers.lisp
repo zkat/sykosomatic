@@ -113,7 +113,7 @@ are actually the exteriors of two buildings.")))
                             (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
 
 (defun render-user-input-area ()
-  (<:form :id "user-input-area" :name "user-input-area" :action "javascript:send_input()"
+  (<:form :id "user-input-area" :name "user-input-area" :action "javascript:sykosomatic.send_input()"
           (<:input :type "textarea" :id "user-input")
           (<:submit :value "Send")))
 
@@ -151,9 +151,9 @@ are actually the exteriors of two buildings.")))
   (<:script :type "text/javascript" :src "res/client.js"))
 
 (defun render-scene-recording ()
-  (<:form :action "javascript:start_recording()"
+  (<:form :action "javascript:sykosomatic.start_recording()"
           (<:submit :value "Start Recording"))
-  (<:form :action "javascript:stop_recording()"
+  (<:form :action "javascript:sykosomatic.stop_recording()"
           (<:submit :value "Stop Recording")))
 
 (defun render-scene-list-link ()
