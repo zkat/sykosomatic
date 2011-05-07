@@ -3,10 +3,10 @@
   (:export :parse-input))
 (cl:in-package #:sykosomatic.parser)
 
-(defun parse-input (actor-id input)
+(defun parse-input (actor input)
   (when-let ((dialogue (car (invoke-parser (dialogue) input))))
-    (map nil (rcurry #'sykosomatic::send-dialogue actor-id dialogue)
-         (sykosomatic::local-actors actor-id))))
+    (map nil (rcurry #'sykosomatic::send-dialogue actor dialogue)
+         (sykosomatic::local-actors actor))))
 
 (defun invoke-parser (parser string)
   (mapcar #'car (funcall parser string)))
