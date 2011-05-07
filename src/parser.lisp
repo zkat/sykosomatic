@@ -7,6 +7,8 @@
   (let ((result (car (invoke-parser (maybe (input) 'error) input))))
     (cond ((typep result 'error)
            (sykosomatic::send-msg actor (list "parse-error" (princ-to-string result))))
+          ((null result)
+           (sykosomatic::send-msg actor (list "parse-error" "Sorry, I couldn't understand what you said.")))
           (t
            (case (car result)
              (:dialogue
@@ -180,7 +182,7 @@
   (find maybe-noun '("flask") :test #'string-equal))
 
 (defun adverbp (maybe-adverb)
-  (find maybe-adverb '("handsomely" "cleverly" "fascetiously") :test #'string-equal))
+  (find maybe-adverb '("happily" "honestly" "nicely" "handsomely" "cleverly" "fascetiously") :test #'string-equal))
 
 (defun verbp (maybe-verb)
   (or (string= maybe-verb "smiles")
