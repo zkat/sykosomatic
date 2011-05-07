@@ -29,6 +29,7 @@
    #:skip-whitespace
    #:none-of
    #:maybe
+   #:either
    #:word
    #:alpha-char
 
@@ -298,8 +299,20 @@
           (_ (zero-or-more (whitespace))))
     (result v)))
 
-(defun maybe (parser)
-  (=or parser (result nil)))
+(defun either (parser &rest condition-types)
+  (lambda (input)
+    (block parse
+     (handler-bind ((condition (lambda (c)
+                                 (when (find-if (lambda (type)
+                                                  (typep c type))
+                                                condition-types)
+                                   (return-from parse
+                                    (list (cons c input)))))))
+       (funcall parser input)))))
+
+(defun maybe (parser &rest condition-types)
+  (=or (apply #'either parser condition-types)
+       (result nil)))
 
 (defun word (&optional (test #'identity))
   (=let* ((word (skip-whitespace (text (alpha-char)))))
