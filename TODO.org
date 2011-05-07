@@ -121,10 +121,19 @@
     The box should broadcast whatever is typed into it as the 'dialogue' for the current character.
 *** DONE Add basic dialogue parser
     Instead of just typing anything into the box, dialogue should be delimited by a '.
-*** TODO Basic actions
+*** TODO Basic I/O protocol
+    The parser needs a specific IO protocol that works around some simple objects it can learn to
+    manipulate. Write two generic functions that the websocket server can implement that will
+    function as a basic API for the parser to send out input as it needs.
+**** send-to-actor
+     Only sends a message to the actor.
+**** send-to-all
+     Sends the message to all present.
+*** DONE Basic actions
     Add the ability to take actions by using 'verbs'. These verbs can be inserted before
     dialogue. They should be entered in their infinitive form. The application should then convert
     them to third-person singular present and use them for the action. i.e. 'cry' -> 'Kat cries.'
+    Note: Punted on conjugation. *cries is how you enter it now. :)
     The following verbs should be available:
 **** smile
 **** frown
