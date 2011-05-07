@@ -122,31 +122,29 @@
               :dialogue (user-action-dialogue user-action)
               :timestamp (user-action-timestamp user-action)))
 
-(defun character-client (character-id)
-  (maphash-values (lambda (client)
-                    (when (string= character-id (client-character-id client))
-                      (return-from character-client client)))
-                  (slot-value *websocket-server* 'clients))
-  nil)
+(defgeneric actor-client (actor)
+  (:method ((actor-id integer))
+    (maphash-values (lambda (client)
+                      (when (string= actor-id (client-actor-id client))
+                        (return-from actor-client client)))
+                    (slot-value *websocket-server* 'clients))
+    nil))
 
-(defun send-action (recipient-id actor-id action-txt)
-  (client-write (character-client recipient-id)
-                (jsown:to-json `("user-action" (:obj
-                                                ("character" . ,(character-name (find-character-by-id actor-id)))
-                                                ("action" . ,action-txt)
-                                                ("dialogue" . nil)))
-                               #+nil`("action" (:obj ("action" . ,action-txt)
-                                                     ("actor" . ,(character-name (find-character-by-id actor-id))))))))
+(defun send-msg (actor msg)
+  (client-write (character-client actor)
+                (jsown:to-json msg)))
 
-(defun send-dialogue (recipient-id actor-id dialogue &optional parenthetical)
-  (client-write (character-client recipient-id)
-                (jsown:to-json `("user-action" (:obj
-                                                ("character" . ,(character-name (find-character-by-id actor-id)))
-                                                ("action" . ,parenthetical)
-                                                ("dialogue" . ,dialogue)))
-                               #+nil`("dialogue" (:obj ("actor" . ,(character-name (find-character-by-id actor-id)))
-                                                  ("dialogue" . ,dialogue)
-                                                  ("parenthetical" . ,parenthetical))))))
+(defun send-action (recipient actor action-txt)
+  (send-msg recipient `("user-action" (:obj
+                                       ("character" . ,(character-name actor))
+                                       ("action" . ,action-txt)
+                                       ("dialogue" . nil)))))
+
+(defun send-dialogue (recipient actor dialogue &optional parenthetical)
+  (send-msg recipient `("user-action" (:obj
+                                       ("character" . ,(character-name actor))
+                                       ("action" . ,parenthetical)
+                                       ("dialogue" . ,dialogue)))))
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
