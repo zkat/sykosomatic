@@ -4,9 +4,16 @@
 (cl:in-package #:sykosomatic.parser)
 
 (defun parse-input (actor input)
-  (when-let ((dialogue (car (invoke-parser (dialogue) input))))
-    (map nil (rcurry #'sykosomatic::send-dialogue actor dialogue)
-         (sykosomatic::local-actors actor))))
+  (let ((result (car (invoke-parser (maybe (dialogue) 'error) input))))
+    (cond ((typep result 'error)
+           (sykosomatic::send-msg actor (list "parse-error" (princ-to-string result))))
+          (t
+           (case (car result)
+             (:dialogue
+              (map nil (rcurry #'sykosomatic::send-dialogue actor
+                               (cdr (assoc :dialogue (cdr result)))
+                               (cdr (assoc :parenthetical (cdr result))))
+                   (sykosomatic::local-actors actor))))))))
 
 (defun invoke-parser (parser string)
   (mapcar #'car (funcall parser string)))
@@ -26,9 +33,12 @@
 ;; dialogue = [parenthetical ws] text
 (defun dialogue ()
   (=let* ((parenthetical (maybe (=prog1 (parenthetical) (ws))))
-          (dialogue-text (text)))
+          (dialogue-text (if parenthetical
+                             (text)
+                             (=and (=not (=char #\())
+                                   (text)))))
     (result `(:dialogue
-              (:parenthetical . ,parenthetical)
+              (:parenthetical . ,(cdr parenthetical))
               (:dialogue . ,dialogue-text)))))
 
 ;; parenthetical = "(" adverb ")"
@@ -36,14 +46,14 @@
   (=let* ((_ (=char #\())
           (content (adverb))
           (_ (=char #\))))
-    (result `(:parenthetical . ,content))))
+    (result `(:parenthetical . ,(cdr content)))))
 
 ;; adverb = word that satisfies adverbp
 (defun adverb ()
   (=let* ((word (text (alpha-char))))
     (if (adverbp word)
         (result `(:adverb . ,word))
-        (fail))))
+        (fail :error (format nil "'~A' is not an adverb." word)))))
 
 ;; action = action-delimiter 0*ws sentence
 (defun action ()
