@@ -178,7 +178,7 @@
 (defun start-recording (res client)
   (declare (ignore res))
   (logit "Request to start recording received.")
-  (if (session-value 'scene-id (client-session client))
+  #+nil(if (session-value 'scene-id (client-session client))
       (logit "Scene already being recorded. Ignoring request.")
       (let ((*acceptor* *server*))
         (setf (session-value 'scene-id (client-session client))
@@ -187,7 +187,7 @@
 (defun stop-recording (res client)
   (declare (ignore res))
   (logit "Request to stop recording received.")
-  (delete-session-value 'scene-id (client-session client)))
+  #+nil(delete-session-value 'scene-id (client-session client)))
 
 ;;;
 ;;; Init/teardown
