@@ -104,12 +104,18 @@ if (!sykosomatic) {
          var actor = msg[1]['actor'];
          var action = msg[1]['action'];
 
-         var html = "<div class='unit'>";
-         html = html + "<p class='action'>"
-             +"<span onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
-             +" "+action+"</p>";
-         html = html + "</div>";
-         $('#chat-box').append($(html));
+         if ((last_actor == actor) && (last_unit == 'action')) {
+             $('.unit:last > p.action').text(function (idx, text) {
+                                                 return text + ' ' +actor+ ' ' + action;
+                                             });
+         } else {
+             var html = "<div class='unit'>";
+             html = html + "<p class='action'>"
+                 +"<span onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
+                 +" "+action+"</p>";
+             html = html + "</div>";
+             $('#chat-box').append($(html));
+         }
          var obj_div = document.getElementById('chat-box');
          obj_div.scrollTop = obj_div.scrollHeight;
          last_actor = actor;
@@ -125,9 +131,13 @@ if (!sykosomatic) {
              $('.unit:last > p.dialogue').text(function (idx, text) {
                                                     return text + ' ' + dialogue;
                                                 });
-             if (paren) {
+             if (paren.length > 0) {
                  $('.unit:last > p.parenthetical').text(function (idx, text) {
-                                                            return text.slice(0,text.length-1) + ', then ' + paren + ')';
+                                                            if (text.length > 0) {
+                                                                return text.slice(0,text.length-1) + ', then ' + paren + ')';
+                                                            } else {
+                                                                return '(' + paren + ')';
+                                                            }
                                                    });
              };
          } else {
@@ -135,7 +145,9 @@ if (!sykosomatic) {
              html = html + "<p class='character' onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</p>";
              if (paren.length > 0) {
                  html = html + "<p class='parenthetical'>"+"("+paren+")</p>";
-             };
+             } else {
+                 html = html + "<p class='parenthetical'></p>";
+             }
              html = html + "<p class='dialogue'>"+dialogue+"</p>";
              html = html + "</div>";
              $('#chat-box').append($(html));
