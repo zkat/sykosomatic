@@ -110,16 +110,20 @@ if (!sykosomatic) {
      }
      function mk_character(name) {
          return $("<p class='character'"
-                  +"onclick='sykosomatic.request_char_description(\""+name+"\")'>"
+                  +"onclick='javascript:sykosomatic.request_char_description(\""+name+"\")'>"
                   +name
                   +"</p>");
      }
      function mk_action(actor, action) {
          var html = "<p class='action'>";
-         html = html+"<span onclick='sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>";
+         html = html+"<span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>";
          html = html+" "+action;
          html = html+"</p>";
          return $(html);
+     }
+     function mk_append_action(actor, action) {
+         return $("<span> <span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
+                  +" "+action+"</span>");
      }
      var last_actor;
      var last_unit;
@@ -128,9 +132,10 @@ if (!sykosomatic) {
          var action = msg[1]['action'];
 
          if ((last_actor == actor) && (last_unit == 'action')) {
-             $('.unit:last > p.action').text(function (idx, text) {
-                                                 return text + ' ' +actor+ ' ' + action;
-                                             });
+             $('.unit:last > p.action').append(mk_append_action(actor,action));
+// text(function (idx, text) {
+//                                                  return text + ' ' +actor+ ' ' + action;
+//                                              });
          } else {
              var unit = mk_unit();
              unit.append(mk_action(actor,action));
