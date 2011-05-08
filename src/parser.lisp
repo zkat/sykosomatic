@@ -193,11 +193,12 @@
   (find maybe-adverb
   '("despondently" "curiously" "victoriously" "amusedly"
     "sunnily" "brightly" "happily" "honestly" "nicely"
-    "handsomely" "cleverly" "fascetiously" "excitedly")
+    "handsomely" "cleverly" "fascetiously" "excitedly"
+    "smugly" "smilingly" "angrily")
   :test #'string-equal))
 
 (defun verbp (maybe-verb)
   (find maybe-verb
-  '("grins" "chuckles" "fluffs" "squees" "pouts" "cackles"
+  '("grins" "chuckles" "fluffs" "squees" "pouts" "cackles" "fixes"
     "preens" "smiles" "frowns" "cheers" "laughs" "cries" "waves")
   :test #'string-equal))
