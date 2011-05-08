@@ -8,6 +8,7 @@
    #:fail
 
    #:=let*
+   #:*case-sensitive-p*
    #:=char
    #:=string
    #:=and
@@ -157,8 +158,12 @@
         (apply #'=and ps)
         (result result))))
 
+(defvar *case-sensitive-p* nil)
 (defun =char (x)
-  (=satisfies (lambda (y) (eql x y))))
+  (=satisfies (lambda (y)
+                (if *case-sensitive-p*
+                    (eql x y)
+                    (equalp x y)))))
 
 (defun =prog1 (parser &rest parsers)
   (=let* ((result parser)
