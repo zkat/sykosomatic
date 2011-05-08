@@ -4,7 +4,7 @@
 (cl:in-package #:sykosomatic.parser)
 
 (defun parse-input (actor input)
-  (let ((result (car (invoke-parser (maybe (input) 'error) input))))
+  (let ((result (car (invoke-parser (either (input) 'error) input))))
     (cond ((typep result 'error)
            (sykosomatic::send-msg actor (list "parse-error" (princ-to-string result))))
           ((null result)
