@@ -30,12 +30,15 @@
 ;; ABNF grammar - http://en.wikipedia.org/wiki/ABNF
 ;; ------------
 
-;; input = action / dialogue
+;; input = command / dialogue
 (defun input ()
-  (=or (action)
+  (=or (command)
        (dialogue)))
 
-;; ws = zero or more whitespace
+(defun command ()
+  (action))
+
+;; ws = one or more whitespace
 (defun ws ()
   (one-or-more (whitespace)))
 
@@ -83,8 +86,7 @@
 
 ;; action-delimiter = "*"
 (defun action-delimiter ()
-  (=or (=char #\*)
-       (=string "/me ")
+  (=or (=string "/me ")
        (=string "/em ")
        (=string "/act ")))
 
