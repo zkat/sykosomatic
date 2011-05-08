@@ -131,21 +131,20 @@
   (=or (=string "and")
        (=string "&")))
 
-;; TODO - technically, this should be 0*(adjective ws)
-;; noun-phrase = [cardinal ws] [adjective ws] noun
-;; noun-phrase =/ [article ws] [ordinal ws] [adjective ws] \
+;; noun-phrase = [cardinal ws] 0*(adjective ws) noun
+;; noun-phrase =/ [article ws] [ordinal ws] 0*(adjective ws) \
 ;;                (noun / possessive-noun ws noun-phrase)
 (defun noun-phrase ()
   (=or (=let* ((cardinal (=prog1 (cardinal) (ws)))
-               (adjective (maybe (=prog1 (adjective) (ws))))
+               (adjective (zero-or-more (=prog1 (adjective) (ws))))
                (noun (noun)))
          (result (list :noun-phrase
                        :cardinal cardinal
-                       :adjective adjective
+                       :adjectives adjective
                        :noun noun)))
        (=let* ((article (maybe (=prog1 (article) (ws))))
                (ordinal (=and (=not (cardinal)) (maybe (=prog1 (ordinal) (ws)))))
-               (adjective (maybe (=prog1 (adjective) (ws))))
+               (adjective (zero-or-more (=prog1 (adjective) (ws))))
                (noun (noun)))
          ;; TODO - What this should -really- return is the id of the game object, itself. If it
          ;;        fails to bind to an object, then the parser itself can fail. This could be used
@@ -153,7 +152,7 @@
          (result (list :noun-phrase
                        :article article
                        :ordinal ordinal
-                       :adjective adjective
+                       :adjectives adjective
                        :noun noun)))))
 
 ;; verb = existing verb
