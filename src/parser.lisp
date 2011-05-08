@@ -122,32 +122,27 @@
           (np (noun-phrase)))
     (result np)))
 
-;; noun-phrase =  pronoun
-;; noun-phrase =/ [cardinal] [adjective] noun
-;; noun-phrase =/ [article] [ordinal] [adjective] \
-;;                (noun / possessive-noun-phrase)
+;; noun-phrase = [cardinal ws] [adjective ws] noun
+;; noun-phrase =/ [article ws] [ordinal ws] [adjective ws] \
+;;                (noun / possessive-noun ws noun-phrase)
 (defun noun-phrase ()
-  (=or (pronoun)
-       (=let* ((cardinal (cardinal))
-               (adjective (maybe (adjective)))
+  (=or (=let* ((cardinal (=prog1 (cardinal) (ws)))
+               (adjective (maybe (=prog1 (adjective) (ws))))
                (noun (noun)))
          (result (list :noun-phrase
                        :cardinal cardinal
                        :adjective adjective
                        :noun noun)))
-       (=let* ((article (maybe (article)))
-               (ordinal (=and (=not (cardinal)) (maybe (ordinal))))
-               (adjective (maybe (adjective)))
+       (=let* ((article (maybe (=prog1 (article) (ws))))
+               (ordinal (=and (=not (cardinal)) (maybe (=prog1 (ordinal) (ws)))))
+               (adjective (maybe (=prog1 (adjective) (ws))))
                (noun (noun)))
+         ;; TODO - What this should -really- return is the id of the game object, itself. :)
          (result (list :noun-phrase
                        :article article
                        :ordinal ordinal
                        :adjective adjective
                        :noun noun)))))
-
-(defun possessive-noun-phrase ()
-  ;; TODO
-  nil)
 
 ;; verb = existing verb
 (defun verb ()
@@ -156,29 +151,27 @@
         (result text)
         (fail :error (format nil "'~A' is not a verb." text)))))
 
-;; article = satisfies articlep
+;; article = "the" / "a"
 (defun article ()
   (=or (=string "the")
        (=string "a")))
 
 ;; adjective = any unknown token that comes before a noun or a possessive
 (defun adjective ()
-  ;; TODO
-  (fail))
+  (text (alpha-char)))
 
 ;; noun = anything that identifies a present, visible object (oof?)
 (defun noun ()
-  (word))
-
-;; pronoun = satisfies pronoun-p
-(defun pronoun ()
-  ;; TODO
-  (fail))
+  (text (alpha-char)))
 
 ;; possessive-noun = satisfies possessive-p (['s] or [s'])
 (defun possessive-noun ()
-  ;; TODO
-  (fail))
+  (=let* ((name (text (alpha-char)))
+          (_ (=char #\'))
+          (final-s (maybe (=char #\s))))
+    (if (and final-s (char= #\s (char name (1- (length name)))))
+        (fail)
+        (result (cons :possessive name)))))
 
 ;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
 (defun conjunction ()
