@@ -30,7 +30,7 @@
 ;; ABNF grammar - http://en.wikipedia.org/wiki/ABNF
 ;; ------------
 
-;; input = dialogue / action
+;; input = action / dialogue
 (defun input ()
   (=or (action)
        (dialogue)))
@@ -51,11 +51,15 @@
               (:dialogue . ,dialogue-text)))))
 
 ;; parenthetical = "(" adverb ")"
+;; parenthetical =/ "@" name
 (defun parenthetical ()
-  (=let* ((_ (=char #\())
-          (content (=or (to/at-someone) (adverb)))
-          (_ (=char #\))))
-    (result `(:parenthetical . ,(cdr content)))))
+  (=or (=let* ((_ (=char #\@))
+               (name (text (alpha-char))))
+         (result `(:parenthetical . ,(concatenate 'string "to " name))))
+       (=let* ((_ (=char #\())
+               (content (=or (to/at-someone) (adverb)))
+               (_ (=char #\))))
+         (result `(:parenthetical . ,(cdr content))))))
 
 (defun to/at-someone ()
   (=let* ((at/to (=or (=string "at")
