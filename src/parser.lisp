@@ -126,7 +126,7 @@
           (np (noun-phrase)))
     (result np)))
 
-;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
+;; conjunction = "and" / "&"
 (defun conjunction ()
   (=or (=string "and")
        (=string "&")))
@@ -167,22 +167,19 @@
   (=or (=string "the")
        (=string "a")))
 
-;; adjective = any unknown token that comes before a noun or a possessive
+;; adjective = A word. Later validated against the noun it's attached to.
 (defun adjective ()
   (text (alpha-char)))
 
-;; noun = anything that identifies a present, visible object (oof?)
+;; noun = A word that identifies a present, visible object.
 (defun noun ()
   (text (alpha-char)))
 
-;; possessive-noun = satisfies possessive-p (['s] or [s'])
+;; possessive-noun = noun ("'"/"'s")
 (defun possessive-noun ()
   (=let* ((name (text (alpha-char)))
-          (_ (=char #\'))
-          (final-s (maybe (=char #\s))))
-    (if (and final-s (char= #\s (char name (1- (length name)))))
-        (fail)
-        (result (cons :possessive name)))))
+          (_ (=and (=char #\') (maybe (=char #\s)))))
+    (result (cons :possessive name))))
 
 ;;;
 ;;; Word identifiers
