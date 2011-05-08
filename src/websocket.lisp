@@ -114,14 +114,6 @@
       (process-client-message res client message)
       (process-client-validation res client message)))
 
-(defun save-user-action (scene-id user-action)
-  (logit "Saving user action ~A under scene-id ~A" user-action scene-id)
-  (add-action scene-id
-              :character (user-action-user user-action)
-              :action (user-action-action user-action)
-              :dialogue (user-action-dialogue user-action)
-              :timestamp (user-action-timestamp user-action)))
-
 (defgeneric actor-client (actor)
   (:method ((actor-id string))
     (maphash-values (lambda (client)
@@ -135,15 +127,22 @@
                 (jsown:to-json msg)))
 
 (defun send-action (recipient actor action-txt)
+  (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
+    (logit "Saving action under scene ~A: ~A" scene-id action-txt)
+    (add-action scene-id (character-name (find-character-by-id actor)) action-txt))
   (send-msg recipient `("action" (:obj
                                   ("actor" . ,(character-name (find-character-by-id actor)))
                                   ("action" . ,action-txt)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (send-msg recipient `("dialogue" (:obj
-                                    ("actor" . ,(character-name (find-character-by-id actor)))
-                                    ("parenthetical" . ,parenthetical)
-                                    ("dialogue" . ,dialogue)))))
+  (let ((char-name (character-name (find-character-by-id actor))))
+    (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
+      (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
+      (add-dialogue scene-id char-name dialogue parenthetical))
+    (send-msg recipient `("dialogue" (:obj
+                                      ("actor" . ,char-name)
+                                      ("parenthetical" . ,parenthetical)
+                                      ("dialogue" . ,dialogue))))))
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
@@ -178,7 +177,7 @@
 (defun start-recording (res client)
   (declare (ignore res))
   (logit "Request to start recording received.")
-  #+nil(if (session-value 'scene-id (client-session client))
+  (if (session-value 'scene-id (client-session client))
       (logit "Scene already being recorded. Ignoring request.")
       (let ((*acceptor* *server*))
         (setf (session-value 'scene-id (client-session client))
@@ -187,7 +186,7 @@
 (defun stop-recording (res client)
   (declare (ignore res))
   (logit "Request to stop recording received.")
-  #+nil(delete-session-value 'scene-id (client-session client)))
+  (delete-session-value 'scene-id (client-session client)))
 
 ;;;
 ;;; Init/teardown
