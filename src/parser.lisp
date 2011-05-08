@@ -108,19 +108,26 @@
               (:noun-clause-2 . ,noun-clause-2)
               (:adverb2 . ,adverb2)))))
 
-;; noun-clause =/ [[[adverb] preposition] noun-group]
+;; noun-clause = [[[adverb ws] preposition ws] noun-group]
 (defun noun-clause ()
+  ;; TODO
   (noun-group))
 
-;; noun-group =  noun-phrase [","] 0*(conjunction noun-phrase)
+;; noun-group =  noun-phrase 0*(["," ws] conjunction noun-phrase)
 (defun noun-group ()
   (=let* ((x (noun-phrase))
           (y (zero-or-more (conjed-noun-phrase))))
     (result (cons x y))))
 (defun conjed-noun-phrase ()
-  (=let* ((_ (conjunction))
+  (=let* ((comma (maybe (=and (=char #\,) (ws))))
+          (_ (if comma (maybe (=prog1 (conjunction) (ws))) (=prog2 (ws) (conjunction) (ws))))
           (np (noun-phrase)))
     (result np)))
+
+;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
+(defun conjunction ()
+  (=or (=string "and")
+       (=string "&")))
 
 ;; TODO - technically, this should be 0*(adjective ws)
 ;; noun-phrase = [cardinal ws] [adjective ws] noun
@@ -175,12 +182,6 @@
     (if (and final-s (char= #\s (char name (1- (length name)))))
         (fail)
         (result (cons :possessive name)))))
-
-;; conjunction = satisfies conjunction-p (i.e. "and" "&" "," etc.)
-(defun conjunction ()
-  (=or (=string "and")
-       (=string "&")
-       (=string ",")))
 
 ;;;
 ;;; Word identifiers
