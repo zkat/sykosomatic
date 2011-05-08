@@ -122,6 +122,7 @@
           (np (noun-phrase)))
     (result np)))
 
+;; TODO - technically, this should be 0*(adjective ws)
 ;; noun-phrase = [cardinal ws] [adjective ws] noun
 ;; noun-phrase =/ [article ws] [ordinal ws] [adjective ws] \
 ;;                (noun / possessive-noun ws noun-phrase)
@@ -137,7 +138,9 @@
                (ordinal (=and (=not (cardinal)) (maybe (=prog1 (ordinal) (ws)))))
                (adjective (maybe (=prog1 (adjective) (ws))))
                (noun (noun)))
-         ;; TODO - What this should -really- return is the id of the game object, itself. :)
+         ;; TODO - What this should -really- return is the id of the game object, itself. If it
+         ;;        fails to bind to an object, then the parser itself can fail. This could be used
+         ;;        to stop the all-powerful hunger of the adjective parser.
          (result (list :noun-phrase
                        :article article
                        :ordinal ordinal
