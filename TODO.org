@@ -63,7 +63,7 @@
      individual scenes that other users (no login required for now) can view.
 **** DONE Scene ratings
     Allow others to view and rate existing recorded scenes.
-**** TODO Revive scene recording
+**** DONE Revive scene recording
      There were some changes to the whole action/dialogue model. Scenes need to be updated.
 **** TODO Scene naming
      Add ability to change the name of the recorded session.
@@ -161,6 +161,8 @@
      Once the actor has transitioned into the new location, everyone, including the actor, should
      receive a "X arrives." message. This'll eventually be extended to provide fancier, nicer
      transitions, but an arrival message is good enough for now.
+*** TODO Location building.
+    Write an interface that can be used to easily build and connect locations.
 *** TODO Game objects - basic entities
     Time to start coding up some game objects!
     http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
