@@ -16,6 +16,7 @@
    #:=not
    #:=satisfies
    #:=prog1
+   #:=prog2
 
    #:before
    #:natural-number
@@ -169,6 +170,9 @@
   (=let* ((result parser)
           (_ (apply #'=and parsers)))
     (result result)))
+
+(defun =prog2 (parser1 result-parser &rest more-parsers)
+  (=and parser1 (apply #'=prog1 result-parser more-parsers)))
 
 (defun before (parser end-parser)
   (=let* ((i parser)
