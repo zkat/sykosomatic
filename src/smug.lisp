@@ -22,6 +22,7 @@
    #:one-or-more
    #:cardinal
    #:ordinal
+   #:one-of
    #:no-more-input
 
    #:text
