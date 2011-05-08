@@ -38,12 +38,12 @@
              (string-equal (character-account-name character)
                            (client-account-name client)))
         (progn
-          (logit "Client validated: ~A. It's now playing as ~A."
+          (logit "Client validated: ~S. It's now playing as ~A."
                   client (character-name character))
           (setf (client-character-id client) (character-id character))
           (push (session-websocket-clients (client-session client)) client))
         (progn
-          (logit "No session. Disconnecting client. (~A)" client)
+          (logit "No session. Disconnecting client. (~S)" client)
           (disconnect-client res client)))))
 
 (defun client-character-name (client)
@@ -73,7 +73,7 @@
    #'ws::any-origin))
 
 (defmethod add-client ((srv chat-server) client)
-  (logit "Adding Pending Client ~A." client)
+  (logit "Adding Pending Client ~S." client)
   (setf (gethash (client-ws-client client) (slot-value srv 'clients))
         client))
 
@@ -104,7 +104,7 @@
 
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
-  (logit "Client ~A disconnected." client)
+  (logit "Client ~S disconnected." client)
   (remove-client res client))
 
 (defmethod ws:resource-received-frame ((res chat-server) ws-client message
