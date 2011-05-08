@@ -210,6 +210,8 @@
      (to Y)
     bloo
 
+*** TODO Fix double quotes
+    Yeah, wtf.
 *** TODO Put descriptions somewhere more sane than an alert()
 *** TODO Make description popups more generic: should be able to fetch any game object's description
 *** TODO Location/visibility-restricted description getting
