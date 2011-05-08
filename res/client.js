@@ -133,9 +133,6 @@ if (!sykosomatic) {
 
          if ((last_actor == actor) && (last_unit == 'action')) {
              $('.unit:last > p.action').append(mk_append_action(actor,action));
-// text(function (idx, text) {
-//                                                  return text + ' ' +actor+ ' ' + action;
-//                                              });
          } else {
              var unit = mk_unit();
              unit.append(mk_action(actor,action));
