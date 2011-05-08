@@ -63,6 +63,8 @@
      individual scenes that other users (no login required for now) can view.
 **** DONE Scene ratings
     Allow others to view and rate existing recorded scenes.
+**** TODO Revive scene recording
+     There were some changes to the whole action/dialogue model. Scenes need to be updated.
 **** TODO Scene naming
      Add ability to change the name of the recorded session.
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
@@ -104,7 +106,7 @@
     Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
     an OOC messaging system should be implemented.
-*** TODO More better input
+*** DONE More better input
     The current input method is cute, but not the intended one. A better input mechanism should be
     developed. Most likely, it should at least partly use the old MUD-style sentence parser, and
     decompose it into the necessary components. It's not important to get very fancy with this yet,
