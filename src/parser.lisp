@@ -57,7 +57,7 @@
 ;; parenthetical =/ "@" name
 (defun parenthetical ()
   (=or (=let* ((_ (=char #\@))
-               (name (text (alpha-char))))
+               (name (word)))
          (result `(:parenthetical . ,(concatenate 'string "to " name))))
        (=let* ((_ (=char #\())
                (content (=or (to/at-someone) (adverb)))
@@ -68,7 +68,7 @@
   (=let* ((at/to (=or (=string "at")
                       (=string "to")))
           (_ (ws))
-          (target-name (text (alpha-char))))
+          (target-name (word)))
     (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
 
 ;; adverb = word that satisfies adverbp
@@ -169,11 +169,11 @@
 
 ;; adjective = A word. Later validated against the noun it's attached to.
 (defun adjective ()
-  (text (alpha-char)))
+  (word))
 
 ;; noun = A word that identifies a present, visible object.
 (defun noun ()
-  (text (alpha-char)))
+  (word))
 
 ;; possessive-noun = noun ("'"/"'s")
 (defun possessive-noun ()
@@ -181,6 +181,8 @@
           (_ (=and (=char #\') (maybe (=char #\s)))))
     (result (cons :possessive name))))
 
+(defun word ()
+  (text (=or (alpha-char) (=char #\-))))
 ;;;
 ;;; Word identifiers
 ;;;
