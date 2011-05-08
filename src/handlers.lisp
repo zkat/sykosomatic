@@ -185,12 +185,22 @@ are actually the exteriors of two buildings.")))
                       dialogue))))))))
 
 (defun render-scene (id)
-  (<:div :class "chat-box" :id "chat-box"
-   (mapc (lambda (action-obj)
-           (render-user-action (make-user-action :user (jsown:val action-obj "character")
-                                                 :action (jsown:val action-obj "action")
-                                                 :dialogue (jsown:val action-obj "dialogue"))))
-         (find-scene-actions id))))
+  (<:script :type "text/javascript" :src "res/client.js")
+  (<:div :class "chat-box" :id "chat-box")
+  (<:script
+   (mapc (lambda (entry-obj)
+           (let ((entry-type (jsown:val entry-obj "entry_type")))
+             (cond ((equal entry-type "dialogue")
+                    (let ((actor (jsown:val entry-obj "actor"))
+                          (dialogue (jsown:val entry-obj "dialogue"))
+                          (paren (jsown:val entry-obj "parenthetical")))
+                      (<:ai (format nil "sykosomatic.add_dialogue(~S,~S~@[,~S~]);~%"
+                                    actor dialogue paren))))
+                   ((equal entry-type "action")
+                    (let ((actor (jsown:val entry-obj "actor"))
+                          (action-txt (jsown:val entry-obj "action")))
+                      (<:ai (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
+         (find-scene-entries id))))
 
 (defun render-scene-rating (scene-id)
   (<:p (<:ah "Rating: " (scene-rating scene-id))))
