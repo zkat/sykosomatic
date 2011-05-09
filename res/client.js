@@ -1,23 +1,21 @@
 WEB_SOCKET_SWF_LOCATION = 'res/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
 
-var sykosomatic;
-if (!sykosomatic) {
-    sykosomatic = {};
-}
-
+var sykosomatic =
 (function () {
 
+     var ws;
+     var pub = {};
      ///
      /// Utils
      ///
      function enable_input () {
          $('#user-input-area :input').attr('disabled', false);
-     };
+     }
 
      function disable_input () {
          $('#user-input-area :input').attr('disabled', true);
-     };
+     }
 
      function get_url_parameter(name) {
          return unescape(
@@ -31,10 +29,10 @@ if (!sykosomatic) {
 
      function mk_dialogue(text) {
          return $("<p class='dialogue'>"+text+"</p>");
-     };
+     }
      function mk_paren(text) {
          return $("<p class='parenthetical'>("+text+")</p>");
-     };
+     }
 
      function mk_unit() {
          return $("<div class='unit' />");
@@ -72,6 +70,7 @@ if (!sykosomatic) {
          last_actor = actor;
          last_unit = 'action';
      }
+     pub.add_action = add_action;
 
      function add_dialogue(actor,dialogue,paren) {
          if ((last_actor == actor) && (last_unit == 'dialogue')) {
@@ -98,18 +97,21 @@ if (!sykosomatic) {
          var obj_div = document.getElementById('chat-box');
          obj_div.scrollTop = obj_div.scrollHeight;
      }
+     pub.add_dialogue = add_dialogue;
 
      ///
      /// Websockets
      ///
-     var ws;
+
      function init_websockets() {
          disable_input();
          ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
          // When running as root, use this.
          // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
          ws.onopen = function() {
-             ws.send(JSON.stringify({useragent: navigator.userAgent, char: current_char()}));
+             var obj = { useragent : navigator.userAgent,
+                         'char' : current_char() };
+             ws.send(JSON.stringify(obj));
              enable_input();
          };
          ws.onmessage = function(e) {
@@ -118,11 +120,11 @@ if (!sykosomatic) {
          ws.onclose = function () {
              disable_input();
          };
-     };
+     }
 
      function ws_send (obj) {
        ws.send(JSON.stringify(obj));
-     };
+     }
 
      ///
      /// From client
@@ -130,22 +132,26 @@ if (!sykosomatic) {
      function request_char_description(charname) {
          ws_send(['char-desc',charname]);
      }
+     pub.request_char_description = request_char_description;
 
      function start_recording() {
          ws_send(["start-recording"]);
      }
+     pub.start_recording = start_recording;
 
      function stop_recording() {
          ws_send(["stop-recording"]);
      }
+     pub.stop_recording = stop_recording;
 
      function send_input() {
          var msg = $('#user-input').val();
          if (msg) {
              $('#user-input').val('');
              ws_send(['user-input',msg]);
-         };
-     };
+         }
+     }
+     pub.send_input = send_input;
 
      function ping() {
          $.get('pingme',on_ajax_success);
@@ -165,7 +171,7 @@ if (!sykosomatic) {
          var msg_callback = dispatch_table[message[0]];
          if (msg_callback) {
            msg_callback(message);
-         };
+         }
      };
 
      dispatch_table['action'] = function (msg) {
@@ -182,7 +188,7 @@ if (!sykosomatic) {
      var interval_id;
      var num_ajax_failures = 0;
      function on_ajax_error() {
-         num_failures = num_ajax_failures + 1;
+         num_ajax_failures = num_ajax_failures + 1;
          if (num_failures >= 5) {
              clearTimeout(interval_id);
          };
@@ -200,21 +206,16 @@ if (!sykosomatic) {
          // its job.
          else {
              $.getScript('res/swfobject.js', function () {
-                             $.getScript('res/web_socket.js', init_chat);
+                             $.getScript('res/web_socket.js', init_websockets);
                          });
          };
          // ping the server to keep the session and websocket alive.
          interval_id = setInterval(ping,1000*60*5);
          $(document).ajaxError(on_ajax_error);
      }
+     pub.init = init;
 
-     sykosomatic.init = init;
-     sykosomatic.send_input = send_input;
-     sykosomatic.start_recording = start_recording;
-     sykosomatic.stop_recording = stop_recording;
-     sykosomatic.request_char_description = request_char_description;
-     sykosomatic.add_action = add_action;
-     sykosomatic.add_dialogue = add_dialogue;
+     return pub;
  })();
 
 $(document).ready(sykosomatic.init);
