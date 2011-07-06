@@ -35,6 +35,7 @@
   (=or (command)
        (dialogue)))
 
+(defvar *command-char* #\/)
 (defun command ()
   (action))
 
