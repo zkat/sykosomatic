@@ -105,7 +105,7 @@ var sykosomatic =
 
      function init_websockets() {
          disable_input();
-         ws = new WebSocket('ws://dagon.ath.cx:8889/chat');
+         ws = new WebSocket('ws://zushakon.sykosomatic.org:8889/chat');
          // When running as root, use this.
          // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
          ws.onopen = function() {
