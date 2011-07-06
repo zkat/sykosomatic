@@ -76,13 +76,13 @@ var sykosomatic =
          if ((last_actor == actor) && (last_unit == 'dialogue')) {
              if (paren && paren.length > 0) {
                  $('.unit:last').append(mk_paren(paren));
-                 $('.unit:last').append(mk_dialogue(dialogue));
              }
-             else {
-                 $('.unit:last > p.dialogue:last').text(function (idx, text) {
-                                                            return text + ' ' + dialogue;
-                                                        });
-             }
+             $('.unit:last').append(mk_dialogue(dialogue));
+             // else {
+             //     $('.unit:last > p.dialogue:last').text(function (idx, text) {
+             //                                                return text + ' ' + dialogue;
+             //                                            });
+             // }
          } else {
              var unit = mk_unit();
              unit.append(mk_character(actor));
