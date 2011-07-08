@@ -145,6 +145,9 @@
                                       ("parenthetical" . ,parenthetical)
                                       ("dialogue" . ,dialogue))))))
 
+(defun send-transition (recipient text)
+  (send-msg recipient (list "transition" text)))
+
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
   (mapcar #'client-character-id (hash-table-values (slot-value *websocket-server* 'clients))))

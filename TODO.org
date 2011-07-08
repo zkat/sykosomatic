@@ -298,9 +298,7 @@
 *** TODO Change stylesheet to be more generic than just 'screenplay'
 *** TODO Add OOC chat area
     It should include an /ooc command, and be separate from the main game window.
-
-
-*** TODO Add Action and Transition commands
+*** DONE Add Action and Transition commands
     For use by whoever's running the actual playtest. /action will broadcast an action to all
     connected players (without the usual appending of the character name). /transition will throw in
     a scene transition, denoting that the location has changed.
