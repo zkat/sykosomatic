@@ -110,7 +110,9 @@ var sykosomatic =
      pub.add_dialogue = add_dialogue;
 
     function add_transition(text) {
-        $('#chat-box').append(mk_transition(text));
+        var unit = mk_unit();
+        unit.append(mk_transition(text));
+        $('#chat-box').append(unit);
         last_actor = null;
         last_unit = 'transition';
     }
