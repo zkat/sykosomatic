@@ -92,7 +92,7 @@
     (assert-validation (valid-email-p account-name) "Invalid email.")
     (assert-validation (not (find-account account-name)) "Account already exists.")
     (assert-validation (valid-password-p password) "Invalid password.")
-    (assert-validation (valid-display-name-p display-name) "Invalid display name.")
+    (assert-validation (valid-display-name-p display-name) "Invalid display name. Display name must be between 4 and 32 alphanumeric characters.")
     (assert-validation (not (find-account-by-display-name display-name)) "Display name already in use.")
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
 
