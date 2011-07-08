@@ -111,6 +111,8 @@ var sykosomatic =
 
     function add_transition(text) {
         $('#chat-box').append(mk_transition(text));
+        last_actor = null;
+        last_unit = 'transition';
     }
     pub.add_transition = add_transition;
 
