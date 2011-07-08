@@ -61,6 +61,9 @@ var sykosomatic =
              return $(" <span>"+action+"</span>");
          }
      }
+    function mk_transition(text) {
+        return $("<p class='sceneheader'>"+text+"</p>");
+    }
 
      var last_actor;
      var last_unit;
@@ -105,6 +108,11 @@ var sykosomatic =
          obj_div.scrollTop = obj_div.scrollHeight;
      }
      pub.add_dialogue = add_dialogue;
+
+    function add_transition(text) {
+        $('#chat-box').append(mk_transition(text));
+    }
+    pub.add_transition = add_transition;
 
      ///
      /// Websockets
@@ -188,6 +196,10 @@ var sykosomatic =
      dispatch_table['dialogue'] = function (msg) {
          add_dialogue(msg[1]['actor'],msg[1]['dialogue'],msg[1]['parenthetical']);
      };
+
+    dispatch_table['transition'] = function (msg) {
+        add_transition(msg[1]);
+    };
 
      ///
      /// Init

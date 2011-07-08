@@ -23,6 +23,9 @@
              (:raw-action
               (map nil (rcurry #'sykosomatic::send-action nil
                                (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:transition
+              (map nil (rcurry #'sykosomatic::send-transition (cdr result))
                    (sykosomatic::local-actors actor))))))))
 
 (defun sentence->text (sentence)
@@ -42,7 +45,8 @@
 (defvar *command-char* #\/)
 (defun command ()
   (=or (action)
-       (raw-action)))
+       (raw-action)
+       (transition)))
 
 (defun raw-action ()
   (=let* ((_ (=and (=char *command-char*)
@@ -50,6 +54,13 @@
                    (one-or-more (whitespace))))
           (action-text (text)))
     (result `(:raw-action . ,action-text))))
+
+(defun transition ()
+  (=let* ((_ (=and (=char *command-char*)
+                   (=string "transition")
+                   (one-or-more (whitespace))))
+          (text (text)))
+    (result `(:transition . ,text))))
 
 ;; ws = one or more whitespace
 (defun ws ()
