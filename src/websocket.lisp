@@ -131,7 +131,8 @@
     (logit "Saving action under scene ~A: ~A" scene-id action-txt)
     (add-action scene-id (character-name (find-character-by-id actor)) action-txt))
   (send-msg recipient `("action" (:obj
-                                  ("actor" . ,(character-name (find-character-by-id actor)))
+                                  ,@(when actor
+                                      `(("actor" . ,(character-name (find-character-by-id actor)))))
                                   ("action" . ,action-txt)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)

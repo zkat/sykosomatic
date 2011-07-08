@@ -45,14 +45,21 @@ var sykosomatic =
      }
      function mk_action(actor, action) {
          var html = "<p class='action'>";
-         html = html+"<span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>";
-         html = html+" "+action;
+         if (actor) {
+             html = html+"<span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span> ";
+         }
+         html = html+action;
          html = html+"</p>";
          return $(html);
      }
      function mk_append_action(actor, action) {
-         return $("<span> <span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
-                  +" "+action+"</span>");
+         if (actor) {
+             return $("<span> <span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
+                      +" "+action+"</span>");
+         }
+         else {
+             return $(" <span>"+action+"</span>");
+         }
      }
 
      var last_actor;
