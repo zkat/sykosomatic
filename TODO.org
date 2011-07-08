@@ -302,3 +302,11 @@
     For use by whoever's running the actual playtest. /action will broadcast an action to all
     connected players (without the usual appending of the character name). /transition will throw in
     a scene transition, denoting that the location has changed.
+*** TODO Stability
+**** TODO Clean startup/shutdown
+     Even if there's an error, I should be able to start/stop the server without needing to restart
+     lisp.
+**** TODO Continuable
+     Killing the clws server threads every time there's some minor hiccup in the code is
+     ridiculous. Make it more robust, and use one of them fancy continuable restart macros so things
+     can proceed normally.
