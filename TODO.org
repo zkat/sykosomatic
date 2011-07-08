@@ -310,3 +310,10 @@
      Killing the clws server threads every time there's some minor hiccup in the code is
      ridiculous. Make it more robust, and use one of them fancy continuable restart macros so things
      can proceed normally.
+*** TODO Commands
+**** TODO Typing a /slash command that doesn't exist shouldn't chat it.
+     If it starts with a /, and we can't find it, it's an error that should be reported (maybe in
+     the OOC area?)
+**** TODO Relax actions and adverbs
+     For the purpose of playtesting, people should be able to type whatever they want as an action
+     or adverb. We'll control it at the playtest level.
