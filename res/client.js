@@ -23,46 +23,66 @@ var sykosomatic =
          );
      }
 
+    function elt(tag,classname) {
+        var element = $(document.createElement(tag));
+        if (classname) {
+            $(element).addClass(classname);
+        }
+        return element;
+    }
+
      function current_char () {
          return get_url_parameter('char');
      }
 
      function mk_dialogue(text) {
-         return $("<p class='dialogue'>"+text+"</p>");
+         var e = elt('p','dialogue');
+         $(e).text(text);
+         return e;
      }
      function mk_paren(text) {
-         return $("<p class='parenthetical'>("+text+")</p>");
+         var e = elt('p','parenthetical');
+         $(e).text("("+text+")");
+         return e;
      }
-
      function mk_unit() {
-         return $("<div class='unit' />");
+         return elt('div','unit');
      }
      function mk_character(name) {
-         return $("<p class='character'"
-                  +"onclick='javascript:sykosomatic.request_char_description(\""+name+"\")'>"
-                  +name
-                  +"</p>");
+         var e = elt('p','character');
+         $(e).click(function(){request_char_description(name);});
+         $(e).text(name);
+         return e;
      }
      function mk_action(actor, action) {
-         var html = "<p class='action'>";
+         var e = elt('p','action');
          if (actor) {
-             html = html+"<span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span> ";
+             var span = elt('span');
+             $(span).text(actor);
+             $(span).click(function(){request_char_description(actor);});
+             $(e).append(span);
+             $(e).append(document.createTextNode(' '));
          }
-         html = html+action;
-         html = html+"</p>";
-         return $(html);
+         $(e).append(document.createTextNode(action));
+         return e;
      }
      function mk_append_action(actor, action) {
+         var e = elt('span');
+         $(e).append(document.createTextNode(" "));
          if (actor) {
-             return $("<span> <span onclick='javascript:sykosomatic.request_char_description(\""+actor+"\")'>"+actor+"</span>"
-                      +" "+action+"</span>");
+             var span = elt('span');
+             $(span).text(actor);
+             $(span).click(function(){request_char_description(actor);});
+             $(e).append(span);
+             $(e).append(document.createTextNode(' '));
          }
-         else {
-             return $(" <span>"+action+"</span>");
-         }
+         $(e).append(document.createTextNode(action));
+         return e;
      }
     function mk_transition(text) {
-        return $("<p class='sceneheader'>"+text+"</p>");
+        var e = elt('p','sceneheader');
+        $(e).text(text);
+        return e;
     }
 
      var last_actor;
