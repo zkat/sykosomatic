@@ -285,6 +285,14 @@
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 *** TODO Styling
     Seriously. Make things -not- look like utter shit.
+** Security
+*** TODO XSS
+    There should be a specific method of handling all user input, and all redisplaying of
+    server-side data such that XSS is not possible. This should be handled within the
+    infrastructure.
+**** DONE De-XSS-ify client.js
+**** TODO De-XSS-ify server-side generated HTML.
+     This involves using yaclml's <:ah
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
