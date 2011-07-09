@@ -302,18 +302,18 @@
     For use by whoever's running the actual playtest. /action will broadcast an action to all
     connected players (without the usual appending of the character name). /transition will throw in
     a scene transition, denoting that the location has changed.
-*** TODO Stability
-**** TODO Clean startup/shutdown
+*** DONE Stability
+**** DONE Clean startup/shutdown
      Even if there's an error, I should be able to start/stop the server without needing to restart
      lisp.
-**** TODO Continuable
+**** DONE Continuable
      Killing the clws server threads every time there's some minor hiccup in the code is
      ridiculous. Make it more robust, and use one of them fancy continuable restart macros so things
      can proceed normally.
-*** TODO Commands
-**** TODO Typing a /slash command that doesn't exist shouldn't chat it.
+*** DONE Commands
+**** DONE Typing a /slash command that doesn't exist shouldn't chat it.
      If it starts with a /, and we can't find it, it's an error that should be reported (maybe in
      the OOC area?)
-**** TODO Relax actions and adverbs
+**** DONE Relax actions and adverbs
      For the purpose of playtesting, people should be able to type whatever they want as an action
      or adverb. We'll control it at the playtest level.
