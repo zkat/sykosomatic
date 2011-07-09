@@ -59,8 +59,6 @@
   (let ((ws-client (client-ws-client client))
         (session (client-session client)))
     (ws:write-to-client ws-client :close)
-    ;; Chrome doesn't seem to pay attention to :close.
-    (ws::client-disconnect ws-client :abort t)
     (when session
       (deletef (session-websocket-clients session)
                client))))
@@ -71,7 +69,7 @@
   (ws:register-global-resource
    "/chat"
    (setf *websocket-server* (make-instance 'chat-server :client-main client-main))
-   #'ws::any-origin))
+   (ws::origin-prefix "http://zushakon.sykosomatic.org")))
 
 (defmethod add-client ((srv chat-server) client)
   (logit "Adding Pending Client ~S." client)
