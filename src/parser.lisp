@@ -20,7 +20,11 @@
               (map nil (rcurry #'sykosomatic::send-action actor
                                (sentence->text (cdr result)))
                    (sykosomatic::local-actors actor)))
-             (:raw-action
+             (:action
+              (map nil (rcurry #'sykosomatic::send-action actor
+                               (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:actorless-action
               (map nil (rcurry #'sykosomatic::send-action nil
                                (cdr result))
                    (sykosomatic::local-actors actor)))
@@ -42,24 +46,41 @@
   (=or (command)
        (dialogue)))
 
+(defvar *commands* (make-hash-table :test #'equalp))
 (defvar *command-char* #\/)
 (defun command ()
-  (=or (action)
-       (raw-action)
-       (transition)))
+  (=let* ((_ (=char *command-char*))
+          (command-name (text (=or (=satisfies #'alphanumericp) (=char #\-))))
+          (command-arg (=and (one-or-more (whitespace))
+                             (text))))
+    (if-let (command-parser (find-command command-name))
+      (result (caar (funcall command-parser command-arg)))
+      (fail :error "No such command."))))
 
-(defun raw-action ()
-  (=let* ((_ (=and (=char *command-char*)
-                   (=string "action")
-                   (one-or-more (whitespace))))
-          (action-text (text)))
-    (result `(:raw-action . ,action-text))))
+(defun add-command (name parser)
+  (setf (gethash (string name) *commands*) parser))
+(defun find-command (name)
+  (gethash (string name) *commands*))
+(defun remove-command (name)
+  (remhash (string name) *commands*))
+(defmacro defcommand (name-or-names () &body body)
+  (let ((names (ensure-list name-or-names)))
+    `(let ((cmd (funcall (lambda ()
+                           ,@body))))
+       ,@(loop for name in names
+            collect `(add-command ,(if (stringp name) name (string name))
+                                  cmd)))))
 
-(defun transition ()
-  (=let* ((_ (=and (=char *command-char*)
-                   (=string "transition")
-                   (one-or-more (whitespace))))
-          (text (text)))
+(defcommand (me em) ()
+  (=let* ((action-text (text)))
+    (result `(:action . ,action-text))))
+
+(defcommand (action act) ()
+  (=let* ((action-text (text)))
+    (result `(:actorless-action . ,action-text))))
+
+(defcommand (transition trans) ()
+  (=let* ((text (text)))
     (result `(:transition . ,text))))
 
 ;; ws = one or more whitespace
