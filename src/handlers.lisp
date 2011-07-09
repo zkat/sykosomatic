@@ -113,6 +113,7 @@ are actually the exteriors of two buildings.")))
                             (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
 
 (defun render-user-input-area ()
+  ;; TODO - Maybe let client.js install send_input()?
   (<:form :id "user-input-area" :name "user-input-area" :action "javascript:sykosomatic.send_input()"
           (<:input :type "textarea" :id "user-input")
           (<:submit :value "Send")))
@@ -123,6 +124,7 @@ are actually the exteriors of two buildings.")))
 
 (defun render-character-link (char)
   (let ((name (character-name char)))
+    ;; TODO - This ~A smells really bad.
     (<:href (format nil "/stage?char=~A" (string-downcase name))
             (<:ah name))))
 
@@ -151,6 +153,7 @@ are actually the exteriors of two buildings.")))
   (<:script :type "text/javascript" :src "res/client.js"))
 
 (defun render-scene-recording ()
+  ;; TODO - let client.js install these?
   (<:form :action "javascript:sykosomatic.start_recording()"
           (<:submit :value "Start Recording"))
   (<:form :action "javascript:sykosomatic.stop_recording()"
@@ -185,6 +188,7 @@ are actually the exteriors of two buildings.")))
                       dialogue))))))))
 
 (defun render-scene (id)
+  ;; TODO - THIS IS DANGEROUS AND LEAKY. XSS GALORE.
   (<:script :type "text/javascript" :src "res/client.js")
   (<:div :class "chat-box" :id "chat-box")
   (<:script
@@ -194,12 +198,14 @@ are actually the exteriors of two buildings.")))
                     (let ((actor (jsown:val entry-obj "actor"))
                           (dialogue (jsown:val entry-obj "dialogue"))
                           (paren (jsown:val entry-obj "parenthetical")))
-                      (<:ai (format nil "sykosomatic.add_dialogue(~S,~S~@[,~S~]);~%"
+                      ;; TODO - This smells a bit.
+                      (<:ah (format nil "sykosomatic.add_dialogue(~S,~S~@[,~S~]);~%"
                                     actor dialogue paren))))
                    ((equal entry-type "action")
                     (let ((actor (jsown:val entry-obj "actor"))
                           (action-txt (jsown:val entry-obj "action")))
-                      (<:ai (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
+                      ;; TODO - Smelly, smelly.
+                      (<:ah (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
          (find-scene-entries id))))
 
 (defun render-scene-rating (scene-id)
