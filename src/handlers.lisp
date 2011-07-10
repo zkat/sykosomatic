@@ -116,7 +116,7 @@
 
 (defun render-logout-button ()
   (<:form :class "logout-button" :action "/logout" :method "post"
-          (<:submit :value "Log Out")))
+          (<:submit :class "btn" :value "Log Out")))
 
 (defun render-character-link (char)
   (let ((name (character-name char)))
@@ -155,13 +155,12 @@
 
 (defun render-scene-recording ()
   ;; TODO - let client.js install these?
-  (<:form :action "javascript:sykosomatic.start_recording()"
-          (<:submit :value "Start Recording"))
-  (<:form :action "javascript:sykosomatic.stop_recording()"
-          (<:submit :value "Stop Recording")))
+  (<:submit :class "btn" :id "start-recording" :value "Start Recording")
+  (<:submit :class "btn" :id "stop-recording" :value "Stop Recording"))
 
 (defun render-scene-list-link ()
-  (<:href "/scenes" "My Scenes"))
+  (<:a :class "btn"
+       :href "/scenes" "My Scenes"))
 
 (defun render-scene-list ()
   (<:ul :class "scene-list"
