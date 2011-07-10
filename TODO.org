@@ -293,10 +293,23 @@
 **** DONE De-XSS-ify client.js
 **** TODO De-XSS-ify server-side generated HTML.
      This involves using yaclml's <:ah
+*** TODO CSRF
+    Pretty much nothing to defend against this right now.
+**** TODO Track down all URLs with side effects and attach CSRF tokens to them.
+**** TODO Figure out what sort of similar attacks can be mounted on websockets.
+*** DONE Password security
+    Use something like bcrypt to encrypt passwords. Find some information about good practices on
+    this. I read something along the lines of adding encryption iterations as CPU power
+    improves. This can probably be added later, though.
+*** TODO Injection
+    I wonder if Chillax has any dangerous injection vulnerabilities.
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
 *** DONE Figure out why the hell the view server is freezing up
+*** TODO Figure out how to stringify views properly.
+    Right now, symbols get printed out with package prefixes if ENSURE-* are called outside of their
+    home packages. This is ridiculous.
 *** TODO Build a view server that uses jsown.
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
 *** TODO Convert view code to use jsown, too.
@@ -304,7 +317,7 @@
 ** Playtest
    These are features deemed necessary in order to do online no-game-engine playtests.
 *** TODO Change stylesheet to be more generic than just 'screenplay'
-*** TODO Add OOC chat area
+*** DONE Add OOC chat area
     It should include an /ooc command, and be separate from the main game window.
 *** DONE Add Action and Transition commands
     For use by whoever's running the actual playtest. /action will broadcast an action to all
