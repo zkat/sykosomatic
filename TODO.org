@@ -347,7 +347,7 @@
     Replace (or supplement) the simple command-line with a graphical story builder. Allow players to
     pick from a limited number of elements (action, dialogue(+parenthetical), description,
     transition), and insert them into the current 'screenplay'.
-**** TODO Separate OOC chat input into a separate input field.
+**** DONE Separate OOC chat input into a separate input field.
 **** TODO Widget + Dialogue
      Create a widget that allows players to input two things: dialogue that their character will
      speak, and an optional parenthetical.

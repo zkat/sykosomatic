@@ -18,10 +18,12 @@ var sykosomatic =
 
     function enable_input () {
         $('#user-input-area :input').attr('disabled', false);
+        $('#ooc-input-area :input').attr('disabled', false);
     }
 
     function disable_input () {
         $('#user-input-area :input').attr('disabled', true);
+        $('#ooc-input-area :input').attr('disabled', true);
     }
 
     function get_url_parameter(name) {
@@ -155,8 +157,8 @@ var sykosomatic =
     function add_ooc(display_name,text) {
         var unit = mk_unit();
         unit.append(mk_ooc(display_name,text));
-        $('#ooc-area').append(unit);
-        var obj_div = document.getElementById('ooc-area');
+        $('#ooc-display').append(unit);
+        var obj_div = document.getElementById('ooc-display');
         obj_div.scrollTop = obj_div.scrollHeight;
     }
     pub.add_ooc = add_ooc;
@@ -213,6 +215,15 @@ var sykosomatic =
         }
     }
     pub.send_input = send_input;
+
+    function send_ooc_input() {
+        var msg = $('#ooc-input').val();
+        if (msg) {
+            $('#ooc-input').val('');
+            ws_send(['user-input',"/ooc "+msg]);
+        }
+    }
+    pub.send_ooc_input = send_ooc_input;
 
     function ping() {
         $.get('pingme',on_ajax_success);
@@ -282,6 +293,7 @@ var sykosomatic =
         };
 
         // UI stuff
+        // Not sure why this doesn't play nice with enable_input()
         $(".btn").button();
 
         // ping the server to keep the session and websocket alive.
