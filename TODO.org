@@ -303,6 +303,10 @@
     improves. This can probably be added later, though.
 *** TODO Injection
     I wonder if Chillax has any dangerous injection vulnerabilities.
+*** TODO DoS
+**** TODO Throttle user input.
+     Length and regularity of user input should be somewhat limited, so players can't just spam a
+     ton of garbage onto the screen.
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
