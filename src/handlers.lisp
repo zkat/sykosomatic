@@ -135,10 +135,15 @@
      (<:head
       (<:title (<:ah title))
       (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
-      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
+      (render-jquery-libs)
       (when head-fun (funcall head-fun)))
      (<:body
       (funcall body-fun)))))
+
+(defun render-jquery-libs ()
+  (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")
+  (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
+  (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
 
 (defun render-gameplay-js-libs ()
   ;; When you feel like figuring out why optional loading fails, take the following

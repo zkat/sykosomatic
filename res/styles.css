@@ -17,6 +17,10 @@
     clear:both;
 }
 
+.btn {
+    clear: both;
+}
+
 /* From: http://scrippets.org/ */
 .chat-box {
     float: left;
