@@ -96,21 +96,16 @@
           (<:br)
           (<:submit :value "Submit")))
 
+(defun render-chat-area ()
+  (<:div :class "main-area"
+         (render-chat-box)
+         (render-ooc-area)))
+
 (defun render-chat-box ()
-  (<:div :class "chat-box" :id "chat-box"
-         (<:div :class "sceneheader-div"
-                (<:p :class "sceneheader"
-                     (<:ah "int. breakfast bar. night."))
-                (<:div :class "user-entry"
-                       (<:p :class "action"
-                            (<:ah "The entire 'bar' is only about 7 feed wide, with just enough depth and
-height to hold the bar, with stovetops behind it, and the 6 barstools. It is lit by a few dingy
-bulbs. The walls on either side are covered with tiny scraps of paper, old posters, and splatters of
-what used to be food.  This bar is literally an alley, and beneath the detritus you can tell the walls
-are actually the exteriors of two buildings.")))
-                (<:div :class "user-entry"
-                       (<:p :class "action"
-                            (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
+  (<:div :class "chat-box" :id "chat-box"))
+
+(defun render-ooc-area ()
+  (<:div :class "ooc-area" :id "ooc-area"))
 
 (defun render-user-input-area ()
   ;; TODO - Maybe let client.js install send_input()?
@@ -247,11 +242,13 @@ are actually the exteriors of two buildings.")))
                              (session-value 'errors))
                        (redirect "/role"))
                      (progn
-                      (render-chat-box)
-                      (render-user-input-area)
-                      (render-scene-recording)
-                      (render-scene-list-link)
-                      (render-logout-button))))
+                       ;; TODO - Check authorization. If the current session can't play that
+                       ;; character, get the hell out of here asap.
+                       (render-chat-area)
+                       (render-user-input-area)
+                       (render-scene-recording)
+                       (render-scene-list-link)
+                       (render-logout-button))))
                (lambda ()
                  (unless (emptyp char)
                    (render-gameplay-js-libs)))))

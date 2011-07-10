@@ -84,6 +84,11 @@ var sykosomatic =
         $(e).text(text);
         return e;
     }
+    function mk_ooc(display_name,text) {
+        var e = elt('p','ooc-line');
+        $(e).text(display_name+": "+text);
+        return e;
+    }
 
     var last_actor;
     var last_unit;
@@ -140,6 +145,14 @@ var sykosomatic =
     }
     pub.add_transition = add_transition;
 
+    function add_ooc(display_name,text) {
+        var unit = mk_unit();
+        unit.append(mk_ooc(display_name,text));
+        $('#ooc-area').append(unit);
+        var obj_div = document.getElementById('ooc-area');
+        obj_div.scrollTop = obj_div.scrollHeight;
+    }
+    pub.add_ooc = add_ooc;
     ///
     /// Websockets
     ///
@@ -227,6 +240,10 @@ var sykosomatic =
         add_transition(msg[1]);
     };
 
+    dispatch_table['ooc'] = function (msg) {
+        add_ooc(msg[1]['display_name'],msg[1]['text']);
+    };
+
     ///
     /// Init
     ///
@@ -234,7 +251,7 @@ var sykosomatic =
     var num_ajax_failures = 0;
     function on_ajax_error() {
         num_ajax_failures = num_ajax_failures + 1;
-        if (num_failures >= 5) {
+        if (num_ajax_failures >= 5) {
             clearTimeout(interval_id);
         };
     };
@@ -257,6 +274,7 @@ var sykosomatic =
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
         $(document).ajaxError(on_ajax_error);
+        //$(document).unload(disable_input);
     }
     pub.init = init;
 

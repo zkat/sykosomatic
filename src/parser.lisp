@@ -30,6 +30,9 @@
                    (sykosomatic::local-actors actor)))
              (:transition
               (map nil (rcurry #'sykosomatic::send-transition (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:ooc
+              (map nil (rcurry #'sykosomatic::send-ooc actor (cdr result))
                    (sykosomatic::local-actors actor))))))))
 
 (defun sentence->text (sentence)
@@ -82,6 +85,10 @@
 (defcommand (transition trans) ()
   (=let* ((text (text)))
     (result `(:transition . ,text))))
+
+(defcommand ooc ()
+  (=let* ((text (text)))
+    (result `(:ooc . ,text))))
 
 ;; ws = one or more whitespace
 (defun ws ()

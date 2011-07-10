@@ -1,14 +1,28 @@
+.main-area {
+    margin-left: auto;
+    margin-right: auto;
+    height: 560;
+    width: 700px;
+}
+
+.ooc-area {
+    float: right;
+    border: 1px solid #333;
+    overflow: auto;
+    width: 190;
+    height: 100%;
+}
+
 /* From: http://scrippets.org/ */
 .chat-box {
+    float: left;
     list-style: none;
     width: 475px;
-    height: 560;
+    height: 100%;
     background: #fffffc;
     color: #000000;
     border: 1px solid #333;
     padding: 5px 14px 15px 14px !important;
-    margin-left: auto;
-    margin-right: auto;
     overflow:auto;
 }
 
