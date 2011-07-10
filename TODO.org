@@ -342,3 +342,21 @@
 **** DONE Relax actions and adverbs
      For the purpose of playtesting, people should be able to type whatever they want as an action
      or adverb. We'll control it at the playtest level.
+
+*** TODO Storybuilder
+    Replace (or supplement) the simple command-line with a graphical story builder. Allow players to
+    pick from a limited number of elements (action, dialogue(+parenthetical), description,
+    transition), and insert them into the current 'screenplay'.
+**** TODO Separate OOC chat input into a separate input field.
+**** TODO Widget + Dialogue
+     Create a widget that allows players to input two things: dialogue that their character will
+     speak, and an optional parenthetical.
+**** TODO Action
+     Extend the widget (play with jquery-ui tabs, for now!), to also allow inserting an
+     'action'. This will replace /me.
+**** TODO Description
+     In the actual game, this should be a "select object" widget. For now, just give players a plain
+     input field where they can type whatever, that will be added to a new description element.
+**** TODO Parser
+     Move the parser into its own tab. Make all the /me, /act, etc commands still available through
+     there.
