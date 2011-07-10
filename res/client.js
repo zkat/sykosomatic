@@ -282,7 +282,7 @@ var sykosomatic =
         };
 
         // UI stuff
-        //$(".btn, :submit").button();
+        $(".btn").button();
 
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
