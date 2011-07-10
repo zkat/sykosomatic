@@ -98,15 +98,18 @@
 
 (defun render-chat-area ()
   (<:div :class "main-area"
-         (render-chat-box)
-         (render-ooc-area)
-         (render-user-input-area)))
-
-(defun render-chat-box ()
-  (<:div :class "chat-box" :id "chat-box"))
+         (<:div :class "chat-area"
+                (<:div :class "chat-box" :id "chat-box")
+                (render-user-input-area))
+         (render-ooc-area)))
 
 (defun render-ooc-area ()
-  (<:div :class "ooc-area" :id "ooc-area"))
+  (<:div :class "ooc-area"
+         (<:div :class "ooc-display" :id "ooc-display")
+         (<:form :class "user-input-area" :id "ooc-input-area"
+                 :action "javascript:sykosomatic.send_ooc_input()"
+                 (<:input :type "textarea" :id "ooc-input")
+                 (<:submit :value "Send"))))
 
 (defun render-user-input-area ()
   ;; TODO - Maybe let client.js install send_input()?
