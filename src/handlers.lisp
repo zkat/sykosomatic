@@ -99,7 +99,8 @@
 (defun render-chat-area ()
   (<:div :class "main-area"
          (render-chat-box)
-         (render-ooc-area)))
+         (render-ooc-area)
+         (render-user-input-area)))
 
 (defun render-chat-box ()
   (<:div :class "chat-box" :id "chat-box"))
@@ -245,7 +246,6 @@
                        ;; TODO - Check authorization. If the current session can't play that
                        ;; character, get the hell out of here asap.
                        (render-chat-area)
-                       (render-user-input-area)
                        (render-scene-recording)
                        (render-scene-list-link)
                        (render-logout-button))))
