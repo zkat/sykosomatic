@@ -9,6 +9,13 @@ var sykosomatic =
     ///
     /// Utils
     ///
+
+    function popup_dialog (title,text,modalp,buttons) {
+        var d = elt('div');
+        $(d).append(elt('p').text(text));
+        $(d).dialog({title:title,modal:modalp,buttons:buttons});
+    }
+
     function enable_input () {
         $('#user-input-area :input').attr('disabled', false);
     }
@@ -217,8 +224,10 @@ var sykosomatic =
     ///
     var dispatch_table = {
         'pong' : function(msg) { console.log('got a pong'); },
-        'char-desc' : function(msg) { alert('Description: ' + msg[1]); },
-        'parse-error' : function(msg) { alert('Parser error: ' + msg[1]); }
+        'char-desc' : function(msg) { popup_dialog('Description', msg[1], false,
+                                                   {Ok:function(){$(this).dialog("close");}}); },
+        'parse-error' : function(msg) { popup_dialog('Parser error', msg[1], true,
+                                                     {Ok:function(){$(this).dialog("close");}}); }
     };
 
     function dispatch_message (message) {
@@ -271,6 +280,10 @@ var sykosomatic =
                 $.getScript('res/web_socket.js', init_websockets);
             });
         };
+
+        // UI stuff
+        //$(".btn, :submit").button();
+
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
         $(document).ajaxError(on_ajax_error);
