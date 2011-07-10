@@ -54,10 +54,10 @@
 (defun command ()
   (=let* ((_ (=char *command-char*))
           (command-name (text (=or (=satisfies #'alphanumericp) (=char #\-))))
-          (command-arg (=and (one-or-more (whitespace))
-                             (text))))
+          (command-arg (maybe (=and (one-or-more (whitespace))
+                                    (text)))))
     (if-let (command-parser (find-command command-name))
-      (result (caar (funcall command-parser command-arg)))
+      (result (caar (funcall command-parser (or command-arg ""))))
       (fail :error "No such command."))))
 
 (defun add-command (name parser)
@@ -89,6 +89,12 @@
 (defcommand ooc ()
   (=let* ((text (text)))
     (result `(:ooc . ,text))))
+
+(defcommand error ()
+  (=or
+   (=let* ((text (text)))
+     (fail :error text))
+   (fail :error "Kaboom")))
 
 ;; ws = one or more whitespace
 (defun ws ()
