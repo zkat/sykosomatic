@@ -17,6 +17,7 @@
     overflow-y: scroll;
     height: 100%;
     word-wrap: break-word;
+    font-size: 0.8em;
 }
 
 #game-panel {
