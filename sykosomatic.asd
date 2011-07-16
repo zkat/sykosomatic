@@ -20,5 +20,6 @@
              (:file "sykosomatic")
              (:file "websocket")
              (:file "parser")
+             (:file "templates")
              (:file "handlers")
              (:file "main")))))
