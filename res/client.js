@@ -103,7 +103,7 @@ var sykosomatic =
     var last_unit;
     function add_action(actor,action) {
         if ((last_actor == actor) && (last_unit == 'action')) {
-            $('.unit:last > p.action').append(mk_append_action(actor,action));
+            $('#scene-display > .unit:last > p.action').append(mk_append_action(actor,action));
         } else {
             var unit = mk_unit();
             unit.append(mk_action(actor,action));
@@ -119,9 +119,9 @@ var sykosomatic =
     function add_dialogue(actor,dialogue,paren) {
         if ((last_actor == actor) && (last_unit == 'dialogue')) {
             if (paren && paren.length > 0) {
-                $('.unit:last').append(mk_paren(paren));
+                $('#scene-displa > .unit:last').append(mk_paren(paren));
             }
-            $('.unit:last').append(mk_dialogue(dialogue));
+            $('#scene-display > .unit:last').append(mk_dialogue(dialogue));
             // else {
             //     $('.unit:last > p.dialogue:last').text(function (idx, text) {
             //                                                return text + ' ' + dialogue;
