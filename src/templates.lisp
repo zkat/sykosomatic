@@ -1,9 +1,10 @@
-(in-package :sykosomatic)
-(defpackage :templ
-  (:export :404 :/ :login :stage :role :scenes :view-scene :signup :newchar))
+(cl:defpackage :templ
+  (:use :cl :yaclml :alexandria)
+  (:export :404 :home :login :stage :role :scenes :view-scene :signup :newchar))
+(cl:in-package :templ)
 
 ;;; General
-(defun templ::page (title body-fun &optional head-fun)
+(defun page (title body-fun &optional head-fun)
   (with-yaclml-output-to-string
     (<:html :prologue "<!DOCTYPE html>"
      (<:head
@@ -11,79 +12,77 @@
       (<:meta :http-equiv "Content-type"
               :content "text/html;charset=UTF-8")
       (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
-      (templ::jquery-libs)
+      (jquery-libs)
       (when head-fun (funcall head-fun)))
      (<:body
       (funcall body-fun)))))
 
 (defmacro defpage (name lambda-list (&rest head) title &body body)
   `(defun ,name ,lambda-list
-     (templ::page ,title
+     (page ,title
                   (lambda ()
                     ,@body)
                   ,@(when head
                      `((lambda () ,@head))))))
 
-(defun templ::jquery-libs ()
+(defun jquery-libs ()
   (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")
   (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
   (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
 
-(defun templ::login-component ()
+(defun login-component ()
   (<:form :name "login" :action "/login" :method "post"
           (<:label (<:ah "Log in"))
-          (<:br)
-          (<:label (<:ah "Email"))
-          (<:text :name "account-name")
-          (<:br)
-          (<:label (<:ah "Password"))
-          (<:input :type "password" :name "password")
-          (<:br)
+          (<:label :for "account-name" (<:ah "Email"))
+          (<:text :name "account-name"
+                  :id "account-name")
+          (<:label :for "password" (<:ah "Password"))
+          (<:input :type "password" :name "password" :id "password")
           (<:submit :value "Submit")))
 
-(defun templ::logout-button ()
+(defun logout-button ()
   (<:form :class "logout-button" :action "/logout" :method "post"
           (<:submit :class "btn" :value "Log Out")))
 
-(defun templ::error-messages ()
+(defun error-messages ()
   ;; This one's a bit leaky. It's pretty special, anyway.
-  (when-let ((errors (session-value 'errors)))
+  (when-let ((errors (sykosomatic::session-value 'errors)))
     (<:ul :class "errors"
           (mapc (lambda (err) (<:li (<:ah err))) errors))
-    (setf (session-value 'errors) nil)))
+    (setf (sykosomatic::session-value 'errors) nil)))
 
 ;;; 404
-(defpage templ::404 () ()
+(defpage not-found () ()
     "404 Not Found"
   (<:p (<:ah "Sorry, that page does not exist.")))
 
 ;;; /
-(defpage templ::/ () ()
+(defpage home () ()
     "Sykosomatic.org Dev Site"
   (<:p (<:ah "Sykosomatic is a cooperative storytelling system, currently in development. ")
-       (<:href "/login" (<:ah "Log in.")))
+        (<:href "/login" (<:ah "Log in.")))
   (<:p (<:ah "Already logged in? What are you doing here?! Head to the ")
        (<:href "/stage" (<:ah "Stage!"))))
 
 ;;; /login
-(defpage templ::login () ()
+(defpage login () ()
     "Log in"
-  (templ::error-messages)
-  (templ::login-component)
+  (error-messages)
+  (login-component)
   (<:href "/signup" (<:ah "Create account.")))
 
 ;;; /stage
-(defpage templ::stage () ((templ::gameplay-js-libs))
+(defpage stage () ((gameplay-js-libs))
     "All the World's a Stage"
-  (templ::chat-area)
+  (chat-area)
   #+nil
-  (templ::scene-recording)
+  (scene-recording)
   #+nil
-  (templ::scene-list-link)
+  (scene-list-link)
   #+nil
-  (templ::logout-button))
+  (logout-button))
 
-(defun templ::gameplay-js-libs ()
+(defun gameplay-js-libs ()
   ;; When you feel like figuring out why optional loading fails, take the following
   ;; two lines out...
   (<:script :type "text/javascript" :src "res/swfobject.js")
@@ -91,14 +90,14 @@
   (<:script :type "text/javascript" :src "res/json2.js")
   (<:script :type "text/javascript" :src "res/client.js"))
 
-(defun templ::chat-area ()
+(defun chat-area ()
   (<:div :class "main-area"
          (<:div :class "chat-area"
                 (<:div :class "chat-box" :id "chat-box")
-                (templ::user-input-area))
-         (templ::ooc-area)))
+                (user-input-area))
+         (ooc-area)))
 
-(defun templ::ooc-area ()
+(defun ooc-area ()
   (<:div :class "ooc-area"
          (<:div :class "ooc-display" :id "ooc-display")
          (<:form :class "user-input-area" :id "ooc-input-area"
@@ -106,41 +105,41 @@
                  (<:input :type "textarea" :id "ooc-input")
                  (<:submit :value "Send"))))
 
-(defun templ::user-input-area ()
+(defun user-input-area ()
   ;; TODO - Maybe let client.js install send_input()?
   (<:form :id "user-input-area" :name "user-input-area" :action "javascript:sykosomatic.send_input()"
           (<:input :type "textarea" :id "user-input")
           (<:submit :value "Send")))
 
-(defun templ::scene-recording ()
+(defun scene-recording ()
   ;; TODO - let client.js install these?
   (<:submit :class "btn" :id "start-recording" :value "Start Recording")
   (<:submit :class "btn" :id "stop-recording" :value "Stop Recording"))
 
-(defun templ::scene-list-link ()
+(defun scene-list-link ()
   (<:a :class "btn"
        :href "/scenes" "My Scenes"))
 
 ;;; /role
-(defpage templ::role (characters) ()
+(defpage role (characters) ()
     "What role shall you play?"
-  (templ::error-messages)
-  (templ::character-list characters)
+  (error-messages)
+  (character-list characters)
   (<:href "/newchar" "Create a new character.")
-  (templ::logout-button))
+  (logout-button))
 
-(defun templ::character-list (characters)
+(defun character-list (characters)
   (<:ul
-   (mapc (lambda (char) (<:li (templ::character-link char)))
+   (mapc (lambda (char) (<:li (character-link char)))
          characters)))
 
-(defun templ::character-link (char)
+(defun character-link (char)
   ;; TODO - This ~A smells really bad.
   (<:href (format nil "/stage?char=~A" (string-downcase char))
           (<:ah char)))
 
 ;;; /scenes
-(defpage templ::scenes (scenes) ()
+(defpage scenes (scenes) ()
     "My scenes"
   (<:ul :class "scene-list"
         (mapc (lambda (scene)
@@ -148,31 +147,32 @@
               scenes)))
 
 ;;; /view-scene
-(defpage templ::view-scene (scene display-vote-button-p scene-rating) ()
+(defpage view-scene (scene display-vote-button-p scene-rating) ()
     "Viewing Scene"
-  (templ::scene scene)
+  (scene scene)
   (when display-vote-button-p
-    (templ::scene-upvote scene))
+    (scene-upvote scene))
   (when scene-rating
-    (templ::scene-rating scene-rating)))
+    (scene-rating scene-rating)))
 
-(defun templ::scene-rating (rating)
+(defun scene-rating (rating)
   (<:p (<:ah "Rating: " rating)))
 
-(defun templ::scene-upvote (scene-id)
+(defun scene-upvote (scene-id)
   (<:form :method "post" :action (format nil "/view-scene?id=~A" scene-id)
           (<:submit :value "Vote for Scene")))
 
-(defun templ::user-action (user-action)
-  (let ((action (user-action-action user-action))
-        (dialogue (user-action-dialogue user-action)))
+;; TODO - fixme
+(defun user-action (user-action)
+  (let ((action (sykosomatic::user-action-action user-action))
+        (dialogue (sykosomatic::user-action-dialogue user-action)))
     (<:div :class "user-entry"
       (if (and (not (emptyp action)) (emptyp dialogue))
           (<:p :class "action"
-               (<:ah (user-action-user user-action) " " action))
+               (<:ah (sykosomatic::user-action-user user-action) " " action))
           (progn
             (<:p :class "character"
-                 (<:ah (user-action-user user-action)))
+                 (<:ah (sykosomatic::user-action-user user-action)))
             (unless (emptyp action)
               (<:p :class "parenthetical"
                    (<:ah "(" action ")")))
@@ -182,7 +182,8 @@
                       "..."
                       dialogue))))))))
 
-(defun templ::scene (id)
+;; TODO - fixme
+(defun scene (id)
   ;; TODO - THIS IS DANGEROUS AND LEAKY. XSS GALORE.
   (<:script :type "text/javascript" :src "res/client.js")
   (<:div :class "chat-box" :id "chat-box")
@@ -201,15 +202,15 @@
                           (action-txt (jsown:val entry-obj "action")))
                       ;; TODO - Smelly, smelly.
                       (<:ah (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
-         (find-scene-entries id))))
+         (sykosomatic::find-scene-entries id))))
 
 ;;; /signup
-(defpage templ::signup () ()
+(defpage signup () ()
     "Sign up"
-  (templ::error-messages)
-  (templ::signup-component))
+  (error-messages)
+  (signup-component))
 
-(defun templ::signup-component ()
+(defun signup-component ()
   (<:form :name "signup" :action "/signup" :method "post"
           (<:label (<:ah "Sign up:"))
           (<:br)
@@ -228,12 +229,12 @@
           (<:submit :value "Submit")))
 
 ;;; /newchar
-(defpage templ::newchar () ()
+(defpage newchar () ()
     "Create a character"
-  (templ::error-messages)
-  (templ::character-creation-component))
+  (error-messages)
+  (character-creation-component))
 
-(defun templ::character-creation-component ()
+(defun character-creation-component ()
   (<:form :name "create-character" :action "/newchar" :method "post"
           (<:label (<:ah "Create a character."))
           (<:br)
