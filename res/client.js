@@ -280,6 +280,11 @@ var sykosomatic =
         num_ajax_failures = 0;
     };
 
+    function install_onsubmits() {
+        $("#ooc-input-area").submit(send_ooc_input);
+        $("#user-input-area").submit(send_input);
+    }
+
     function init() {
         if (window.WebSocket) {
             init_websockets();
@@ -295,6 +300,8 @@ var sykosomatic =
         // UI stuff
         // Not sure why this doesn't play nice with enable_input()
         $(".btn").button();
+
+        install_onsubmits();
 
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
