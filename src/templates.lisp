@@ -101,18 +101,15 @@
   (<:div :class "ooc-area"
          (<:div :class "ooc-display" :id "ooc-display")
          (<:form :class "user-input-area" :id "ooc-input-area"
-                 :action "javascript:sykosomatic.send_ooc_input()"
                  (<:input :type "textarea" :id "ooc-input")
                  (<:submit :value "Send"))))
 
 (defun user-input-area ()
-  ;; TODO - Maybe let client.js install send_input()?
-  (<:form :id "user-input-area" :name "user-input-area" :action "javascript:sykosomatic.send_input()"
+  (<:form :class "user-input-area" :id "user-input-area" :name "user-input-area"
           (<:input :type "textarea" :id "user-input")
           (<:submit :value "Send")))
 
 (defun scene-recording ()
-  ;; TODO - let client.js install these?
   (<:submit :class "btn" :id "start-recording" :value "Start Recording")
   (<:submit :class "btn" :id "stop-recording" :value "Stop Recording"))
 
