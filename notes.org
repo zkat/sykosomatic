@@ -1,0 +1,52 @@
+* CSS
+** Some links
+   htmldog.com css.maxdesign.com.au/floatutorial/
+   css.maxdesign.com.au/selectutorial/ http://oksushi.com/test haslayout.net/css-tuts
+*** Same height columns
+**** Method 1
+     http://www.alistapart.com/articles/fauxcolumns/
+**** Method 2
+     http://www.positioniseverything.net/articles/onetruelayout/equalheight
+**** Method 3
+     http://matthewjamestaylor.com/blog/equal-height-columns-cross-browser-css-no-hacks
+**** Easy way, no IE6/7
+     http://zoffix.com/new/sameheight.html
+*** Developing good taste
+    http://www.visualmess.com
+    http://www.delicious.com/jonhicks
+*** Usability
+    http://glyphobet.net/blog/essay/269#success
+** Ideas
+*** Quickly check object descriptions
+    Instead of having to -click- on an object's name, display a little box above the cursor on
+    hover?
+* World
+** Dreaming
+   Interesting: http://en.wikipedia.org/wiki/Dreaming_(spirituality)
+   Particularly the bit about ownership. Here's our precedent for skill orbs. :)
+* Storytelling
+** Story blocks
+   http://artsedge.kennedy-center.org/families/at-home/now-playing/build-a-story.aspx#Make%20it%20Happen
+** Building a story from scratch
+   http://www.associatedcontent.com/article/271489/story_writing_tips_how_to_build_a_story.html
+** How to @ scriptfrenzy.org
+   http://www.scriptfrenzy.org/eng/howtoguides
+
+   There's also a very nice pdf with a questionnaire here:
+   http://ywp.scriptfrenzy.org/files/scriptfrenzy-ywp/sf_ywp_10_wb_hs_chars.pdf
+
+   Some of the things in the questionnaire are already included in character creation (physical
+   traits, skills, setting-related bits). Most of them, though, have to do with more psychological
+   get-to-know bits. Some of these may simply develop as the character grows into the game, others
+   might just be good food for thought while figuring out who the character is.
+
+   How can we get the players to consider these traits while developing their characters? I've seen
+   forum games that explore some of these questions (like likes/dislikes, greatest fears, etc) while
+   developing their characters, to give them more depth?
+
+   http://ywp.scriptfrenzy.org/files/scriptfrenzy-ywp/sf_ywp_10_wb_hs_conflict.pdf
+   Has a short explanation of internal and external conflict, their importance to a story, and a
+   questionnaire to help you think about what that conflict might be.
+
+   IDEA: Have the story arc system encourage players to figure out these questions. Give them a
+   system that helps them keep focused on the characters' goals for a particular story arc.
