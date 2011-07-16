@@ -91,23 +91,24 @@
   (<:script :type "text/javascript" :src "res/client.js"))
 
 (defun chat-area ()
-  (<:div :class "main-area"
-         (<:div :class "chat-area"
-                (<:div :class "chat-box" :id "chat-box")
-                (user-input-area))
-         (ooc-area)))
+  (<:div :id "main-game-panel"
+         (game-panel)
+         (ooc-panel)))
 
-(defun ooc-area ()
-  (<:div :class "ooc-area"
-         (<:div :class "ooc-display" :id "ooc-display")
-         (<:form :class "user-input-area" :id "ooc-input-area"
-                 (<:input :type "textarea" :id "ooc-input")
+(defun game-panel ()
+  (<:div :id "game-panel"
+         (<:div :class "scene-display" :id "scene-display")
+         (<:form :id "game-input"
+                 (<:input)
                  (<:submit :value "Send"))))
 
-(defun user-input-area ()
-  (<:form :class "user-input-area" :id "user-input-area" :name "user-input-area"
-          (<:input :type "textarea" :id "user-input")
-          (<:submit :value "Send")))
+(defun ooc-panel ()
+  (<:div :id "ooc-panel"
+         (<:div :id "ooc-display")
+         (<:form :id "ooc-input"
+                 (<:input)
+                 (<:submit :value "Send"))))
+
 
 (defun scene-recording ()
   (<:submit :class "btn" :id "start-recording" :value "Start Recording")
