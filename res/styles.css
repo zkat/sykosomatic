@@ -1,35 +1,37 @@
-.main-area {
+#main-game-panel {
     margin-left: auto;
     margin-right: auto;
-    height: 600;
+    height: 600px;
     width: 700px;
 }
 
-.ooc-area {
+#ooc-panel {
     float: right;
     border: 1px solid #333;
-    width: 190;
+    width: 190px;
     height: 100%;
 }
 
-.ooc-display {
+#ooc-display {
     overflow: auto;
     overflow-y: scroll;
     height: 100%;
+    word-wrap: break-word;
 }
 
-.chat-area {
+#game-panel {
     float:left;
+    height: 100%;
 }
 
-
+/*
 .btn {
     clear: both;
 }
-
+*/
 
 /* From: http://scrippets.org/ */
-.chat-box {
+.scene-display {
     float: left;
     list-style: none;
     width: 475px;
@@ -42,7 +44,7 @@
     overflow-y: scroll;
 }
 
-.chat-box p { font: 14px Courier, monospace, fixed !important;
+.scene-display p { font: 14px Courier, monospace, fixed !important;
               text-align: left !important;
               letter-spacing: 0 !important;
               margin-top: 0px !important;

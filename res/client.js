@@ -107,9 +107,9 @@ var sykosomatic =
         } else {
             var unit = mk_unit();
             unit.append(mk_action(actor,action));
-            $('#chat-box').append(unit);
+            $('#scene-display').append(unit);
         }
-        var obj_div = document.getElementById('chat-box');
+        var obj_div = document.getElementById('scene-display');
         obj_div.scrollTop = obj_div.scrollHeight;
         last_actor = actor;
         last_unit = 'action';
@@ -134,11 +134,11 @@ var sykosomatic =
                 unit.append(mk_paren(paren));
             };
             unit.append(mk_dialogue(dialogue));
-            $('#chat-box').append(unit);
+            $('#scene-display').append(unit);
         };
         last_actor = actor;
         last_unit = 'dialogue';
-        var obj_div = document.getElementById('chat-box');
+        var obj_div = document.getElementById('scene-display');
         obj_div.scrollTop = obj_div.scrollHeight;
     }
     pub.add_dialogue = add_dialogue;
@@ -146,10 +146,10 @@ var sykosomatic =
     function add_transition(text) {
         var unit = mk_unit();
         unit.append(mk_transition(text));
-        $('#chat-box').append(unit);
+        $('#scene-display').append(unit);
         last_actor = null;
         last_unit = 'transition';
-        var obj_div = document.getElementById('chat-box');
+        var obj_div = document.getElementById('scene-display');
         obj_div.scrollTop = obj_div.scrollHeight;
     }
     pub.add_transition = add_transition;
@@ -208,20 +208,22 @@ var sykosomatic =
     pub.stop_recording = stop_recording;
 
     function send_input() {
-        var msg = $('#user-input').val();
+        var msg = $('#game-input > :first').val();
         if (msg) {
-            $('#user-input').val('');
+            $('#game-input > :first').val('');
             ws_send(['user-input',msg]);
         }
+        return false;
     }
     pub.send_input = send_input;
 
     function send_ooc_input() {
-        var msg = $('#ooc-input').val();
+        var msg = $('#ooc-input > :first').val();
         if (msg) {
-            $('#ooc-input').val('');
+            $('#ooc-input > :first').val('');
             ws_send(['user-input',"/ooc "+msg]);
         }
+        return false;
     }
     pub.send_ooc_input = send_ooc_input;
 
@@ -281,8 +283,8 @@ var sykosomatic =
     };
 
     function install_onsubmits() {
-        $("#ooc-input-area").submit(send_ooc_input);
-        $("#user-input-area").submit(send_input);
+        $("#ooc-input").submit(send_ooc_input);
+        $("#game-input").submit(send_input);
     }
 
     function init() {
