@@ -54,11 +54,11 @@
 
 (defun 404-handler ()
   (setf (return-code*) +http-not-found+)
-  (templ:404))
+  (templ:not-found))
 
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
-  (templ:/))
+  (templ:home))
 
 (define-easy-handler (play :uri "/stage") (char)
   (ensure-logged-in)
