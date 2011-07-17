@@ -1,6 +1,7 @@
-(cl:defpackage :templ
+(cl:defpackage :sykosomatic.templ
   (:use :cl :yaclml :alexandria)
-  (:export :404 :home :login :stage :role :scenes :view-scene :signup :newchar))
+  (:nicknames :templ)
+  (:export :not-found :home :login :stage :role :scenes :view-scene :signup :newchar))
 (cl:in-package :templ)
 
 ;;; General
