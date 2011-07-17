@@ -343,13 +343,15 @@ var sykosomatic =
                     };
                 };
                 $("#game-input").tabs("select",current_tab);
-                $("#"+inputs[current_tab]+" :input:first").focus();
+                $("#game-input > div :input").get(current_tab).focus();
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
                 return false;
             }
             return e;
         });
-
-        $("#dialogue-input :input:first").focus();
+        $("#game-input > div :input").get(0).focus();
 
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
