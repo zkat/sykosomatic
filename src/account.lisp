@@ -67,10 +67,10 @@
   (account-view-value "by_account_name" (string-downcase account-name)))
 
 (defun validate-credentials (account-name password)
-  (let* ((account (account-view-value "by_account_name" (string-downcase account-name)))
-         (hashed-pass (hash-password password (doc-val account "_id"))))
-    (when (string= hashed-pass (doc-val account "password"))
-      account)))
+  (when-let (account (account-view-value "by_account_name" (string-downcase account-name)))
+    (let ((hashed-pass (hash-password password (doc-val account "_id"))))
+      (when (string= hashed-pass (doc-val account "password"))
+        account))))
 
 (defun account-name (account)
   (doc-val account "account_name"))
