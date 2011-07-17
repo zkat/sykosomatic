@@ -98,17 +98,30 @@
 (defun game-panel ()
   (<:div :id "game-panel"
          (<:div :class "scene-display" :id "scene-display")
-         (<:form :id "game-input"
-                 (<:input)
-                 (<:submit :value "Send"))))
+         (<:div :id "game-input"
+                (<:ul
+                 (<:li (<:href "#dialogue-tab" "Dialogue"))
+                 (<:li (<:href "#action-tab" "Action"))
+                 (<:li (<:href "#ooc-tab" "OOC"))
+                 (<:li (<:href "#parser-tab" "Parser")))
+                (<:div :id "dialogue-tab"
+                       (<:form :id "dialogue-input"
+                               (<:p :class "character" "<YOUR NAME>")
+                               (<:input)))
+                (<:div :id "action-tab"
+                       (<:form :id "action-input"
+                               "<your name> "
+                               (<:input)))
+                (<:div :id "ooc-tab"
+                       (<:form :id "ooc-input"
+                               "OOC - " (<:input)))
+                (<:div :id "parser-tab"
+                       (<:form :id "parser-input"
+                               (<:input))))))
 
 (defun ooc-panel ()
   (<:div :id "ooc-panel"
-         (<:div :id "ooc-display")
-         (<:form :id "ooc-input"
-                 (<:input)
-                 (<:submit :value "Send"))))
-
+         (<:div :id "ooc-display")))
 
 (defun scene-recording ()
   (<:submit :class "btn" :id "start-recording" :value "Start Recording")
