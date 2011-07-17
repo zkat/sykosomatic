@@ -208,19 +208,37 @@ var sykosomatic =
     pub.stop_recording = stop_recording;
 
     function send_input() {
-        var msg = $('#game-input > :first').val();
+        var msg = $('#parser-input :input').val();
         if (msg) {
-            $('#game-input > :first').val('');
+            $('#parser-input :input').val('');
             ws_send(['user-input',msg]);
         }
         return false;
     }
     pub.send_input = send_input;
 
-    function send_ooc_input() {
-        var msg = $('#ooc-input > :first').val();
+    function send_dialogue() {
+        var msg = $('#dialogue-input :input').val();
         if (msg) {
-            $('#ooc-input > :first').val('');
+            $('#dialogue-input :input').val('');
+            ws_send(['user-input',msg]);
+        }
+        return false;
+    }
+
+    function send_action() {
+        var msg = $('#action-input :input').val();
+        if (msg) {
+            $('#action-input :input').val('');
+            ws_send(['user-input','/me '+msg]);
+        }
+        return false;
+    }
+
+    function send_ooc_input() {
+        var msg = $('#ooc-input :input').val();
+        if (msg) {
+            $('#ooc-input :input').val('');
             ws_send(['user-input',"/ooc "+msg]);
         }
         return false;
@@ -284,7 +302,9 @@ var sykosomatic =
 
     function install_onsubmits() {
         $("#ooc-input").submit(send_ooc_input);
-        $("#game-input").submit(send_input);
+        $("#action-input").submit(send_action);
+        $("#dialogue-input").submit(send_dialogue);
+        $("#parser-input").submit(send_input);
     }
 
     function init() {
@@ -303,7 +323,33 @@ var sykosomatic =
         // Not sure why this doesn't play nice with enable_input()
         $(".btn").button();
 
+        $("#game-input").tabs();
         install_onsubmits();
+
+        var current_tab = 0;
+        var inputs = ['dialogue-input','action-input','ooc-input','parser-input'];
+        $(document).keypress(function(e) {
+            if (e.keyCode == $.ui.keyCode.TAB) {
+                if (e.shiftKey) {
+                    current_tab--;
+                    if (current_tab < 0) {
+                        current_tab = inputs.length - 1;
+                    }
+                }
+                else {
+                    current_tab++;
+                    if (current_tab >= inputs.length) {
+                        current_tab = 0;
+                    };
+                };
+                $("#game-input").tabs("select",current_tab);
+                $("#"+inputs[current_tab]+" :input:first").focus();
+                return false;
+            }
+            return e;
+        });
+
+        $("#dialogue-input :input:first").focus();
 
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
