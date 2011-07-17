@@ -47,10 +47,10 @@
 
 (defun error-messages ()
   ;; This one's a bit leaky. It's pretty special, anyway.
-  (when-let ((errors (sykosomatic::session-value 'errors)))
+  (when-let ((errors (sykosomatic::session-value 'sykosomatic::errors)))
     (<:ul :class "errors"
           (mapc (lambda (err) (<:li (<:ah err))) errors))
-    (setf (sykosomatic::session-value 'errors) nil)))
+    (setf (sykosomatic::session-value 'sykosomatic::errors) nil)))
 
 ;;; 404
 (defpage not-found () ()
