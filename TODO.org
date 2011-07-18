@@ -318,6 +318,21 @@
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
 *** TODO Convert view code to use jsown, too.
     Because using mkhash in one place and mkdoc in another sucks.
+** Style
+*** TODO Fancy scene headers
+    Scene headers should all be images created specifically for the current area.
+*** TODO Nicer scrolling
+**** TODO Scrollbar
+     The default browser scrollbar is cool and all, but it would be nice to have a different one --
+     perhaps even one that can disappear.
+**** TODO Fade effect
+     Is it possible to have text "fade" near the top of the game area, instead of simply
+     disappearing? That would be -great-.
+**** TODO Scene headers
+     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
+     a particular scene -- always leaving clue of where the player currently is.  As new scene
+     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
+     reach the top of the screen, sticking there until the next header rolls by.
 ** Playtest
    These are features deemed necessary in order to do online no-game-engine playtests.
 *** TODO Change stylesheet to be more generic than just 'screenplay'
@@ -343,20 +358,20 @@
      For the purpose of playtesting, people should be able to type whatever they want as an action
      or adverb. We'll control it at the playtest level.
 
-*** TODO Storybuilder
+*** DONE Storybuilder
     Replace (or supplement) the simple command-line with a graphical story builder. Allow players to
     pick from a limited number of elements (action, dialogue(+parenthetical), description,
     transition), and insert them into the current 'screenplay'.
 **** DONE Separate OOC chat input into a separate input field.
-**** TODO Widget + Dialogue
+**** DONE Widget + Dialogue
      Create a widget that allows players to input two things: dialogue that their character will
      speak, and an optional parenthetical.
-**** TODO Action
+**** DONE Action
      Extend the widget (play with jquery-ui tabs, for now!), to also allow inserting an
      'action'. This will replace /me.
-**** TODO Description
+**** DONE Description
      In the actual game, this should be a "select object" widget. For now, just give players a plain
      input field where they can type whatever, that will be added to a new description element.
-**** TODO Parser
+**** DONE Parser
      Move the parser into its own tab. Make all the /me, /act, etc commands still available through
      there.
