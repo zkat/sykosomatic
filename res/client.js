@@ -17,13 +17,11 @@ var sykosomatic =
     }
 
     function enable_input () {
-        $('#user-input-area :input').attr('disabled', false);
-        $('#ooc-input-area :input').attr('disabled', false);
+        $("#game-input > div :input").attr('disabled',false);
     }
 
     function disable_input () {
-        $('#user-input-area :input').attr('disabled', true);
-        $('#ooc-input-area :input').attr('disabled', true);
+        $("#game-input > div :input").attr('disabled',true);
     }
 
     function get_url_parameter(name) {
