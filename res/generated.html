@@ -4,11 +4,12 @@
     <meta content="text/html;charset=UTF-8" http-equiv="Content-type">
     <link href="styles.css" rel="stylesheet" type="text/css">
     <link href="css/smoothness/jquery-ui-1.8.14.custom.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
     <script>
-      document.onready = function () {
-        var obj_div = document.getElementById('scene-display');
-        obj_div.scrollTop = obj_div.scrollHeight;
-      };
+      $(document).ready(function () {
+          var obj_div = document.getElementById('scene-display');
+          obj_div.scrollTop = obj_div.scrollHeight;
+      });
     </script>
   </head>
   <body>
