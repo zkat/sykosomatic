@@ -322,6 +322,9 @@ var sykosomatic =
         $(".btn").button();
 
         $("#game-input").tabs();
+        $("#game-input .ui-tabs-nav, #game-input .ui-tabs-nav > *")
+            .removeClass("ui-corner-all ui-corner-top")
+            .addClass("ui-corner-bottom");
         install_onsubmits();
 
         var current_tab = 0;
