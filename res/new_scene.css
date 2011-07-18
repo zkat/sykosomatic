@@ -60,6 +60,7 @@
     font-size: 15pt;
     font-family: sans-serif;
     font-weight: bold;
+    color: #663399;
 }
 
 .dialogue {
@@ -85,10 +86,12 @@
     /*margin-left: 32%;*/
     padding-right: 30%;
     display: inline;
+    color: #006699;
 }
 .parenthetical > input{
     width: 100px;
     font-style: italic;
+    color: #006699 !important;
 }
 
 /* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
