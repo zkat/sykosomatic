@@ -21,13 +21,12 @@
     margin-bottom: 0px;
 }
 
-.sceneheader-div, .character {
+.sceneheader-div {
     padding-top: 1.5ex;
 }
 
 .unit {
-    padding-top: 1em;
-    padding-bottom: 1em;
+    padding-top: 1.5em;
     /* gif stolen from http://www.cssnewbie.com/example/styling-blockquotes/ */
     /*
     background: transparent url(quote.gif) no-repeat;
@@ -37,7 +36,7 @@
 
 .action {
     padding-right: 5%;
-    padding-bottom: 1em;
+    padding-top: 1em;
     font-size: 12px;
     line-height: 14px;
     color: gray;
@@ -52,7 +51,6 @@
     color: 	#700000;
     font-family: sans-serif;
     font-weight: bold;
-    /*font-size: 1em;*/
 }
 
 .character {
