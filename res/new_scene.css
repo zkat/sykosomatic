@@ -43,7 +43,7 @@
     color: gray;
 }
 
-.actor, .direct-object {
+.actor, .object {
     color: black;
     font-weight: bold;
 }
