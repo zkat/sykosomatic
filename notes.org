@@ -20,6 +20,19 @@
 *** Quickly check object descriptions
     Instead of having to -click- on an object's name, display a little box above the cursor on
     hover?
+* Mechanics
+** Mentoring
+   You can become someone's mentor. You can also become mutual mentors. This is a strong bond. What
+   are the benefits?
+** Pets
+   Utility pets that can transform into various forms and perform useful tasks, such as guarding
+   areas, fetching things, and looking cool.
+** Oracles
+   There's something about every character that they must find out, such as, say, what skills they
+   are best at. They can either figure this out by brute-forcing it until they find it, or they can
+   talk to people. When someone comes across a person they're an 'oracle' for, they will get a
+   message that they sense <something> about that person. They may then choose to share it with
+   them, or not.
 * World
 ** Dreaming
    Interesting: http://en.wikipedia.org/wiki/Dreaming_(spirituality)
@@ -50,3 +63,19 @@
 
    IDEA: Have the story arc system encourage players to figure out these questions. Give them a
    system that helps them keep focused on the characters' goals for a particular story arc.
+
+** Elements of story
+*** Character development
+    ... is one of the most important parts of storytelling. Characters are story. Their flaws and
+    strengths guide the story wherever it's going to go. How can character development be made
+    explicit in the game? How can it be specifically rewarded? How can it be shaped in such a way
+    that it triggers/forces conflict between players, or players and setting?
+**** Character creation
+     Allow only between 3 and 5 'special' adjectives. Allow adjectives to be added to more than just
+     basic body parts.
+*** Setting
+    The place where it all happens.
+* Accessibility
+** WAI-ARIA
+   Seems to have wide support, and can handle the whole dynamic webpage thing:
+   http://en.wikipedia.org/wiki/WAI-ARIA

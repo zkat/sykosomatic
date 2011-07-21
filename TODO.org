@@ -333,9 +333,21 @@
      a particular scene -- always leaving clue of where the player currently is.  As new scene
      headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
      reach the top of the screen, sticking there until the next header rolls by.
+*** TODO Combo boxes
+    http://harvesthq.github.com/chosen/ Sexy as hell.
+** Accessibility
+*** WAI-ARIA
+    http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
+    start supporting this fairly early on, if possible.
 ** Playtest
    These are features deemed necessary in order to do online no-game-engine playtests.
-*** TODO Change stylesheet to be more generic than just 'screenplay'
+*** TODO Change stylesheet to something other than just a screenplay
+**** TODO Style the input fields.
+     Something more subtle than the deep abyss of standard input fields.
+**** TODO Expanding input fields
+     Check out Facebook's CSS/JS to figure out how they get their textboxes to expand. It's probably
+     pretty simple...
+**** TODO Do something about the awful OOC area.
 *** DONE Add OOC chat area
     It should include an /ooc command, and be separate from the main game window.
 *** DONE Add Action and Transition commands
