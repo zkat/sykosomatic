@@ -40,7 +40,7 @@
     padding-top: 1em;
     font-size: 12px;
     line-height: 14px;
-    color: gray;
+    /*color: #666;*/
 }
 
 .actor, .object {
@@ -50,7 +50,7 @@
 
 .verb {
     color: 	#700000;
-    font-family: sans-serif;
+    /*font-family: sans-serif;*/
     font-weight: bold;
 }
 
@@ -58,7 +58,7 @@
     display: inline;
     margin-left: 5%;
     margin-bottom: 0;
-    font-size: 15pt;
+    font-size: 14pt;
     font-family: sans-serif;
     font-weight: bold;
     /*color: #663399;*/
