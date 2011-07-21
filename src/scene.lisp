@@ -18,7 +18,7 @@
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (cond ((string= type "scene")
                                                     (emit (list (hashget doc "_id") 0) doc))
-                                                   ((string= type "scene-untry")
+                                                   ((string= type "scene-entry")
                                                     (emit (list (hashget doc "scene_id")
                                                                 1
                                                                 (hashget doc "timestamp"))
