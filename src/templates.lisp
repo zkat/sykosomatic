@@ -233,9 +233,20 @@
           (<:submit :value "Submit")))
 
 ;;; /newchar
+(defun creation-breadcrumb (focused)
+  (<:ul :class "breadcrumbs"
+   (loop
+      for i from 0
+      for title in '("Name" "Family" "History" "Appearance" "A New Beginning")
+      do (<:li :class (if (= i focused)
+                          "breadcrumb-focused"
+                          "breadcrumb-unfocused")
+               (<:ah title)))))
+
 (defpage newchar () ()
     "Create a character"
   (error-messages)
+  (creation-breadcrumb 0)
   (character-creation-component))
 
 (defun character-creation-component ()

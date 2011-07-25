@@ -61,6 +61,20 @@
 }
 */
 
+.breadcrumbs li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 20px;
+}
+
+.breadcrumb-focused {
+    color: red;
+}
+
+.breadcrumb-unfocused {
+    color: gray;
+}
+
 .field label {
     padding-right: 20px;
 }
