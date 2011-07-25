@@ -21,6 +21,19 @@
     Instead of having to -click- on an object's name, display a little box above the cursor on
     hover?
 * Mechanics
+** Character creation
+*** Trait selection
+    Allow only 3-5 traits (adjectives) to be selected.
+*** Talents/flaws
+    Players should be able to choose 1 talent and 1 flaw (or maybe a mixture of 1 or 2 of each,
+    which must balance each other out?) Talents and flaws must be concrete things that the game can
+    handle. Since character creation is supposed to help flesh out a character, perhaps add a little
+    box where players can explain -why- their character has that talent or flaw, although this would
+    be purely for notes.
+    Check out GURPS 4th edition for ideas on advantages/flaws.
+*** Other ideas
+    Apparently, Darklands had an interesting character creation process. It was more history-based
+    (which, in our case, could really help players hash out their characters)
 ** Mentoring
    You can become someone's mentor. You can also become mutual mentors. This is a strong bond. What
    are the benefits?

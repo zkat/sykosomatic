@@ -335,6 +335,8 @@
      reach the top of the screen, sticking there until the next header rolls by.
 *** TODO Combo boxes
     http://harvesthq.github.com/chosen/ Sexy as hell.
+*** TODO Character conversion
+    Convert -- to —.
 ** Accessibility
 *** WAI-ARIA
     http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
