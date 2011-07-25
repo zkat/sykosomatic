@@ -239,7 +239,7 @@
   (<:ul :class "breadcrumbs"
    (loop
       for i from 0
-      for title in '("Name" "Family" "History" "Appearance" "A New Beginning")
+      for title in '("Name" "Early life" "Later life" "Appearance")
       do (<:li :class (if (= i focused)
                           "breadcrumb-focused"
                           "breadcrumb-unfocused")
@@ -253,14 +253,57 @@
 
 (defun character-creation-component ()
   (<:form :name "create-character" :action "/newchar" :method "post"
+          ;; Pronoun
           (<:div :class "field"
            (<:label :for "pronoun" (<:ah "Pronoun"))
            (<:select :id "pronoun" :name "pronoun"
                      (<:option :value "she" "She")
                      (<:option :value "he" "He")
                      (<:option :value "they" "They")))
-          (text-input-field "first-name" "First Name")
-          (text-input-field "nickname" "Nickname" :max-length 24)
-          (text-input-field "last-name" "Last Name")
-          (<:submit :value "Next")))
+          ;; Name
+          (<:div
+           (<:br)
+           (text-input-field "first-name" "First Name")
+           (text-input-field "nickname" "Nickname" :max-length 24)
+           (text-input-field "last-name" "Last Name"))
+          ;; Early life
+          ;; TODO
+          (<:div
+           (<:br)
+           (text-input-field "origin" "Where from?")
+           (text-input-field "parents" "Parents?")
+           (text-input-field "siblings" "Siblings?")
+           (text-input-field "economics" "Financial situation?"))
 
+          ;; Later life
+          ;; TODO
+          (<:div
+           (<:br)
+           (text-input-field "tc-arrival" "How end up in Twin Cities?")
+           (text-input-field "where-now" "Where in the Twin Cities?")
+           (text-input-field "friends" "Any friends?")
+           (text-input-field "so" "Significant other?")
+           (<:br)
+           (text-input-field "career1" "What career?")
+           (text-input-field "career1-time" "How long?")
+           (<:br)
+           (text-input-field "career2" "What other career?")
+           (text-input-field "career2-time" "How long?")
+           (<:br)
+           (text-input-field "career3" "What other career?")
+           (text-input-field "career3-time" "How long?"))
+
+          ;; Appearance
+          ;; TODO
+          (<:div
+           (<:br)
+           (text-input-field "bodypart1" "Notable feature")
+           (text-input-field "bodypart1-adj" "Adjective")
+           (<:br)
+           (text-input-field "bodypart2" "Notable feature")
+           (text-input-field "bodypart2-adj" "Adjective")
+           (<:br)
+           (text-input-field "bodypart3" "Notable feature")
+           (text-input-field "bodypart3-adj" "Adjective"))
+
+          (<:submit :class "submit" :value "Done")))
