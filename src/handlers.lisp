@@ -106,7 +106,7 @@
          (setf (session-value 'account-name) (account-name account)
                (session-value 'display-name) (account-display-name account))
          (logit "~A logged in." account-name)
-         (redirect "/stage"))
+         (redirect "/role"))
        (progn
          (push "Invalid login or password." (session-value 'errors))
          (redirect "/login"))))))
