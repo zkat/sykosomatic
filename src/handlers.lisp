@@ -68,7 +68,7 @@
          (push (format nil "You must select a character before playing.")
                (session-value 'errors))
          (redirect "/role"))
-        (t (templ:stage))))
+        (t (templ:stage char))))
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
