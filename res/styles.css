@@ -61,4 +61,21 @@
 }
 */
 
+.field label {
+    padding-right: 20px;
+}
+.field label:after {
+    content: ":";
+}
+
+.field select {
+    display: inline;
+    width: 100px;
+}
+.field input {
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
 .logout-button { margin-right: auto; margin-left: auto; width: 80px;}

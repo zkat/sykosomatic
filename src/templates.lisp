@@ -31,16 +31,6 @@
   (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
   (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
 
-(defun login-component ()
-  (<:form :name "login" :action "/login" :method "post"
-          (<:label (<:ah "Log in"))
-          (<:label :for "account-name" (<:ah "Email"))
-          (<:text :name "account-name"
-                  :id "account-name")
-          (<:label :for "password" (<:ah "Password"))
-          (<:input :type "password" :name "password" :id "password")
-          (<:submit :value "Submit")))
-
 (defun logout-button ()
   (<:form :class "logout-button" :action "/logout" :method "post"
           (<:submit :class "btn" :value "Log Out")))
@@ -51,6 +41,11 @@
     (<:ul :class "errors"
           (mapc (lambda (err) (<:li (<:ah err))) errors))
     (setf (sykosomatic::session-value 'sykosomatic::errors) nil)))
+
+(defun text-input-field (name label &key (type "text") max-length)
+  (<:div :class "field"
+    (<:label :for name (<:ah label))
+    (<:input :name name :id name :type type :maxlength max-length)))
 
 ;;; 404
 (defpage not-found () ()
@@ -71,6 +66,12 @@
   (error-messages)
   (login-component)
   (<:href "/signup" (<:ah "Create account.")))
+
+(defun login-component ()
+  (<:form :name "login" :action "/login" :method "post"
+          (text-input-field "account-name" "Email")
+          (text-input-field "password" "Password" :type "password")
+          (<:submit :value "Log in")))
 
 ;;; /stage
 (defpage stage () ((gameplay-js-libs))
@@ -223,21 +224,12 @@
   (signup-component))
 
 (defun signup-component ()
+  (<:h2 (<:ah "Sign up"))
   (<:form :name "signup" :action "/signup" :method "post"
-          (<:label (<:ah "Sign up:"))
-          (<:br)
-          (<:label (<:ah "Email"))
-          (<:text :name "account-name")
-          (<:br)
-          (<:label (<:ah "Display name"))
-          (<:text :name "display-name")
-          (<:br)
-          (<:label (<:ah "Password"))
-          (<:input :type "password" :name "password")
-          (<:br)
-          (<:label (<:ah "Confirm password"))
-          (<:input :type "password" :name "confirmation")
-          (<:br)
+          (text-input-field "account-name" "Email")
+          (text-input-field "display-name" "Display Name" :max-length 32)
+          (text-input-field "password" "Password" :type "password")
+          (text-input-field "confirmation" "Confirm password" :type "password")
           (<:submit :value "Submit")))
 
 ;;; /newchar
@@ -248,12 +240,14 @@
 
 (defun character-creation-component ()
   (<:form :name "create-character" :action "/newchar" :method "post"
-          (<:label (<:ah "Create a character."))
-          (<:br)
-          (<:label (<:ah "Name"))
-          (<:text :name "name")
-          (<:br)
-          (<:label (<:ah "Description"))
-          (<:input :type "textfield" :name "description")
-          (<:br)
-          (<:submit :value "Submit")))
+          (<:div :class "field"
+           (<:label :for "pronoun" (<:ah "Pronoun"))
+           (<:select :id "pronoun" :name "pronoun"
+                     (<:option :value "she" "She")
+                     (<:option :value "he" "He")
+                     (<:option :value "they" "They")))
+          (text-input-field "first-name" "First Name")
+          (text-input-field "nickname" "Nickname" :max-length 24)
+          (text-input-field "last-name" "Last Name")
+          (<:submit :value "Next")))
+
