@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.scene
   (:use :cl :alexandria :chillax.core :sykosomatic.db)
-  (:export :create-scene :add-action :add-dialogue
+  (:export :create-scene :add-action :add-dialogue :ensure-scene-design-doc
            :find-scenes-by-account-name :find-scene-with-entries :find-scene-entries
            :scene-id :scene-upvote :scene-rating))
 (cl:in-package #:sykosomatic.scene)
@@ -18,7 +18,7 @@
                                            (couchfun (doc &aux (type (hashget doc "type")))
                                              (cond ((string= type "scene")
                                                     (emit (list (hashget doc "_id") 0) doc))
-                                                   ((string= type "scene-untry")
+                                                   ((string= type "scene-entry")
                                                     (emit (list (hashget doc "scene_id")
                                                                 1
                                                                 (hashget doc "timestamp"))

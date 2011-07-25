@@ -1,45 +1,64 @@
-/* From: http://scrippets.org/ */
-.chat-box {
-    list-style: none;
-    width: 475px;
-    height: 560;
-    background: #fffffc;
-    color: #000000;
-    border: 1px solid #333;
-    padding: 5px 14px 15px 14px !important;
+@import url('new_scene.css');
+
+#main-game-panel {
     margin-left: auto;
     margin-right: auto;
-    overflow:auto;
+    height: 600px;
+    width: 700px;
 }
 
-.chat-box p { font: 14px Courier, monospace, fixed !important;
-              text-align: left !important;
-              letter-spacing: 0 !important;
-              margin-top: 0px !important;
-              margin-bottom: 0px !important; }
+#ooc-panel {
+    float: right;
+    border: 1px solid #333;
+    width: 190px;
+    height: 520px;
+}
 
-.sceneheader { background: #d8d8d8; }
+#ooc-display {
+    overflow: scroll;
+    overflow-x: visible;
+    overflow-y: scroll;
+    height: 100%;
+    word-wrap: break-word;
+    font-size: 0.8em;
+}
 
-.sceneheader-div, .action, .character { padding-top: 1.5ex; }
+#game-panel {
+    float:left;
+    height: 500px;
+}
 
-.character, .sceneheader { text-transform:uppercase; }
+#game-input {
+    float:left;
+    width:100%;
+    position: relative;
+}
 
-.action { padding-right: 5%; font-size: 12px !important; line-height: 14px !important; }
+#game-input .ui-tabs-panel {
+    height: 140px;
+    overflow: auto;
+}
+#game-input .ui-tabs-nav {
+    position: absolute !important;
+    left: 0;
+    bottom: 0;
+    right:0;
+    padding: 0 0.2em 0.2em 0;
+}
+#game-input .ui-tabs-nav li {
+    margin-top: -2px !important;
+    margin-bottom: 1px !important;
+    border-top: none;
+    border-bottom-width: 1px;
+}
+.ui-tabs-selected {
+    margin-top: -3px !important;
+}
 
-.character { margin-left: 40%; }
+/*
+.btn {
+    clear: both;
+}
+*/
 
-.dialogue { margin-left: 20%; padding-right: 20%; }
-
-.parenthetical { margin-left: 32%; padding-right: 30%; }
-
-/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
-
-.dialogue + .parenthetical { padding-bottom: 0; }
-
-.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
-
-.user-story { margin-right: auto;
-              margin-left: auto;
-              width: 600px
-            }
 .logout-button { margin-right: auto; margin-left: auto; width: 80px;}

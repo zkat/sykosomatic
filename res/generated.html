@@ -1,0 +1,106 @@
+<html>
+  <head>
+    <title>All the World's a Stage</title>
+    <meta content="text/html;charset=UTF-8" http-equiv="Content-type">
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <link href="css/smoothness/jquery-ui-1.8.14.custom.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
+    <script>
+      $(document).ready(function () {
+          var obj_div = document.getElementById('scene-display');
+          obj_div.scrollTop = obj_div.scrollHeight;
+      });
+    </script>
+  </head>
+  <body>
+    <div id="main-game-panel">
+      <div id="game-panel">
+        <div class="scene-display" id="scene-display">
+          <img src="alsbar.png" class="sceneheader">
+          <p class="action">
+              A small single-bar restaurant squeezed between two buildings. The walls on either side
+              are the exteriors of the buildings around it. There is a bar here, with a line of
+              stools. <span class="actor">Thomas</span> is sitting on a <span class="object">stool</span>.
+          </p>
+          <p class="action">
+            <span class="actor">Thomas</span> <span class="verb">waves</span> at <span class="object">Sierra</span>.
+          </p>
+          <div class="unit">
+            <p class="character">Thomas</p>
+            <p class="parenthetical">(to <span class="object">Sierra</span>)</p>
+            <blockquote class="dialogue">Hey, how's it goin? Hungry?</blockquote>
+          </div>
+          <p class="action">
+            <span class="actor">Thomas</span>
+            <span class="verb">grins.</span> <span class="actor">He</span> <span class="verb">munches</span> on his
+            <span class="object">pancakes</span>.
+          </p>
+          <div class="unit">
+            <p class="character">Thomas</p>
+            <blockquote class="dialogue">
+              <p>
+              Have a seat. I wanted to talk to you about something — that water sprite.
+              </p>
+              <p>
+              She's trouble. We both know it.
+              </p>
+            </blockquote>
+          </div>
+          <div class="unit">
+            <p class="character">Sierra</p>
+            <p class="parenthetical">(bitterly)</p>
+            <blockquote class="dialogue">
+              Thomas. Charming. I didn't expect to see you here.
+            </blockquote>
+          </div>
+          <p class="action">
+            <span class="actor">Sierra</span>
+            warily <span class="verb">walks</span> to <span class="object">Thomas</span>.
+            <span class="actor">She</span> <span class="verb">sits down</span>
+            by <span class="object">Thomas</span>.
+        </div>
+        <div class="ui-tabs ui-widget ui-widget-content ui-corner-bottom" id="game-input">
+          <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-bottom">
+            <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active">
+              <a highlight="" href="#dialogue-tab">Dialogue</a>
+            </li>
+            <li class="ui-state-default ui-corner-top">
+              <a highlight="" href="#action-tab">Action</a>
+            </li>
+            <li class="ui-state-default ui-corner-top">
+              <a highlight="" href="#ooc-tab">OOC</a>
+            </li>
+            <li class="ui-state-default ui-corner-top">
+              <a highlight="" href="#parser-tab">Parser</a>
+            </li>
+          </ul>
+          <div class="ui-tabs-panel ui-widget-content ui-corner-bottom" id="dialogue-tab">
+            <form id="dialogue-input">
+              <p class="character">Sierra</p>
+              <p class="parenthetical">(<input highlight="">)</p>
+              <p class="dialogue">
+                <input highlight="">
+              </p>
+            </form>
+          </div>
+          <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"
+               id="action-tab">
+            <form id="action-input">&lt;your name&gt; <input></form>
+          </div>
+          <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide" id="ooc-tab">
+            <form id="ooc-input">OOC - <input></form>
+          </div>
+          <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"
+               id="parser-tab">
+            <form id="parser-input"><input></form>
+          </div>
+        </div>
+      </div>
+      <div id="ooc-panel">
+        <div id="ooc-display">
+            <p class="ooc-line">zkat: Well, I'll be damned.</p>
+        </div>
+      </div>
+    </div> 
+  </body>
+</html>
