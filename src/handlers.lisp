@@ -46,170 +46,6 @@
      collect session))
 
 ;;;
-;;; Components
-;;;
-(defun render-signup-component ()
-  (<:form :name "signup" :action "/signup" :method "post"
-          (<:label (<:ah "Sign up:"))
-          (<:br)
-          (<:label (<:ah "Email"))
-          (<:text :name "account-name")
-          (<:br)
-          (<:label (<:ah "Display name"))
-          (<:text :name "display-name")
-          (<:br)
-          (<:label (<:ah "Password"))
-          (<:input :type "password" :name "password")
-          (<:br)
-          (<:label (<:ah "Confirm password"))
-          (<:input :type "password" :name "confirmation")
-          (<:br)
-          (<:submit :value "Submit")))
-
-(defun render-error-messages ()
-  (when-let ((errors (session-value 'errors)))
-    (<:ul :class "errorlist"
-          (mapc (lambda (err) (<:li (<:ah err))) errors))
-    (setf (session-value 'errors) nil)))
-
-(defun render-character-creation-component ()
-  (<:form :name "create-character" :action "/newchar" :method "post"
-          (<:label (<:ah "Create a character."))
-          (<:br)
-          (<:label (<:ah "Name"))
-          (<:text :name "name")
-          (<:br)
-          (<:label (<:ah "Description"))
-          (<:input :type "textfield" :name "description")
-          (<:br)
-          (<:submit :value "Submit")))
-
-(defun render-login-component ()
-  (<:form :name "login" :action "/login" :method "post"
-          (<:label (<:ah "Log in"))
-          (<:br)
-          (<:label (<:ah "Email"))
-          (<:text :name "account-name")
-          (<:br)
-          (<:label (<:ah "Password"))
-          (<:input :type "password" :name "password")
-          (<:br)
-          (<:submit :value "Submit")))
-
-(defun render-chat-box ()
-  (<:div :class "chat-box" :id "chat-box"
-         (<:div :class "sceneheader-div"
-                (<:p :class "sceneheader"
-                     (<:ah "int. breakfast bar. night."))
-                (<:div :class "user-entry"
-                       (<:p :class "action"
-                            (<:ah "The entire 'bar' is only about 7 feed wide, with just enough depth and
-height to hold the bar, with stovetops behind it, and the 6 barstools. It is lit by a few dingy
-bulbs. The walls on either side are covered with tiny scraps of paper, old posters, and splatters of
-what used to be food.  This bar is literally an alley, and beneath the detritus you can tell the walls
-are actually the exteriors of two buildings.")))
-                (<:div :class "user-entry"
-                       (<:p :class "action"
-                            (<:ah "The smell of bacon. pancakes, and syrup is overpowering."))))))
-
-(defun render-user-input-area ()
-  (<:form :id "user-input-area" :name "user-input-area" :action "javascript:sykosomatic.send_input()"
-          (<:input :type "textarea" :id "user-input")
-          (<:submit :value "Send")))
-
-(defun render-logout-button ()
-  (<:form :class "logout-button" :action "/logout" :method "post"
-          (<:submit :value "Log Out")))
-
-(defun render-character-link (char)
-  (let ((name (character-name char)))
-    (<:href (format nil "/stage?char=~A" (string-downcase name))
-            (<:ah name))))
-
-(defun render-character-list (characters)
-  (<:ul
-   (mapc (lambda (char) (<:li (render-character-link char)))
-         characters)))
-
-(defun render-page (title body-fun &optional head-fun)
-  (with-yaclml-output-to-string
-    (<:html
-     (<:head
-      (<:title (<:ah title))
-      (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
-      (<:script  :type "text/javascript" :src "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
-      (when head-fun (funcall head-fun)))
-     (<:body
-      (funcall body-fun)))))
-
-(defun render-gameplay-js-libs ()
-  ;; When you feel like figuring out why optional loading fails, take the following
-  ;; two lines out...
-  (<:script :type "text/javascript" :src "res/swfobject.js")
-  (<:script :type "text/javascript" :src "res/web_socket.js")
-  (<:script :type "text/javascript" :src "res/json2.js")
-  (<:script :type "text/javascript" :src "res/client.js"))
-
-(defun render-scene-recording ()
-  (<:form :action "javascript:sykosomatic.start_recording()"
-          (<:submit :value "Start Recording"))
-  (<:form :action "javascript:sykosomatic.stop_recording()"
-          (<:submit :value "Stop Recording")))
-
-(defun render-scene-list-link ()
-  (<:href "/scenes" "My Scenes"))
-
-(defun render-scene-list ()
-  (<:ul :class "scene-list"
-   (mapc (lambda (scene &aux (id (scene-id scene)))
-           (<:li (<:href (format nil "/view-scene?id=~A" id) (<:ah id))))
-         (find-scenes-by-account-name (current-account-name)))))
-
-(defun render-user-action (user-action)
-  (let ((action (user-action-action user-action))
-        (dialogue (user-action-dialogue user-action)))
-    (<:div :class "user-entry"
-      (if (and (not (emptyp action)) (emptyp dialogue))
-          (<:p :class "action"
-               (<:ah (user-action-user user-action) " " action))
-          (progn
-            (<:p :class "character"
-                 (<:ah (user-action-user user-action)))
-            (unless (emptyp action)
-              (<:p :class "parenthetical"
-                   (<:ah "(" action ")")))
-            (<:p :class "dialogue"
-                 (<:ah
-                  (if (emptyp dialogue)
-                      "..."
-                      dialogue))))))))
-
-(defun render-scene (id)
-  (<:script :type "text/javascript" :src "res/client.js")
-  (<:div :class "chat-box" :id "chat-box")
-  (<:script
-   (mapc (lambda (entry-obj)
-           (let ((entry-type (jsown:val entry-obj "entry_type")))
-             (cond ((equal entry-type "dialogue")
-                    (let ((actor (jsown:val entry-obj "actor"))
-                          (dialogue (jsown:val entry-obj "dialogue"))
-                          (paren (jsown:val entry-obj "parenthetical")))
-                      (<:ai (format nil "sykosomatic.add_dialogue(~S,~S~@[,~S~]);~%"
-                                    actor dialogue paren))))
-                   ((equal entry-type "action")
-                    (let ((actor (jsown:val entry-obj "actor"))
-                          (action-txt (jsown:val entry-obj "action")))
-                      (<:ai (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
-         (find-scene-entries id))))
-
-(defun render-scene-rating (scene-id)
-  (<:p (<:ah "Rating: " (scene-rating scene-id))))
-
-(defun render-scene-upvote (scene-id)
-  (<:form :method "post" :action (format nil "/view-scene?id=~A" scene-id)
-          (<:submit :value "Vote for Scene")))
-
-;;;
 ;;; Handlers
 ;;;
 
@@ -217,64 +53,39 @@ are actually the exteriors of two buildings.")))
   (session-value 'account-name))
 
 (defun 404-handler ()
-  (render-page "404 Not Found"
-               (lambda ()
-                 (setf (return-code*) +http-not-found+)
-                 (<:p (<:ah "Sorry, that page does not exist.")))))
+  (setf (return-code*) +http-not-found+)
+  (templ:not-found))
 
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
-  (render-page "Sykosomatic.org Dev Site"
-               (lambda ()
-                 (<:p (<:ah "Sykosomatic is a cooperative storytelling system, currently in development. ")
-                      (<:href "/login" (<:ah "Log in.")))
-                 (<:p (<:ah "Already logged in? What are you doing here?! Head to the ")
-                      (<:href "/stage" (<:ah "Stage!"))))))
+  (templ:home))
 
 (define-easy-handler (play :uri "/stage") (char)
   (ensure-logged-in)
-  (render-page "All the World's a Stage"
-               (lambda ()
-                 (if (emptyp char)
-                     (progn
-                       (push (format nil "You must select a character before playing.")
-                             (session-value 'errors))
-                       (redirect "/role"))
-                     (progn
-                      (render-chat-box)
-                      (render-user-input-area)
-                      (render-scene-recording)
-                      (render-scene-list-link)
-                      (render-logout-button))))
-               (lambda ()
-                 (unless (emptyp char)
-                   (render-gameplay-js-libs)))))
+  ;; TODO - Check authorization. If the current session can't play that
+  ;; character, get the hell out of here asap.
+  (cond ((emptyp char)
+         (push (format nil "You must select a character before playing.")
+               (session-value 'errors))
+         (redirect "/role"))
+        (t (templ:stage))))
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
-  (render-page "What role shall you play?"
-               (lambda ()
-                 (render-error-messages)
-                 (let ((characters (find-characters-by-account-name (session-value 'account-name))))
-                   (render-character-list characters)
-                   (<:href "/newchar" "Create a new character.")
-                   (render-logout-button)))))
+  (templ:role (mapcar #'character-name
+                      (find-characters-by-account-name (session-value 'account-name)))))
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
-  (render-page "My scenes" #'render-scene-list))
+  (templ:scenes (mapcar #'scene-id (find-scenes-by-account-name (current-account-name)))))
 
 (define-easy-handler (view-scene :uri "/view-scene") (id)
   (case (request-method*)
     (:get
-     (render-page "Viewing Scene"
-                  (lambda ()
-                    (render-scene id)
-                    (when (session-value 'account-name)
-                      (render-scene-upvote id))
-                    (when (scene-rating id)
-                      (render-scene-rating id)))))
+     ;; TODO - validate scene id.
+     (templ:view-scene id (session-value 'account-name) (scene-rating id)))
     (:post
+     ;; TODO - Don't allow voting if user has already voted.
      (ensure-logged-in)
      (scene-upvote id (session-value 'account-name))
      (redirect (format nil "/view-scene?id=~A" id)))))
@@ -285,14 +96,10 @@ are actually the exteriors of two buildings.")))
     (start-session))
   (case (request-method*)
     (:get
-     (render-page "Log in"
-                  (lambda ()
-                    (when-let ((account-name (session-value 'account-name)))
-                      (push (format nil "Already logged in as ~A." account-name)
-                            (session-value 'errors)))
-                    (render-error-messages)
-                    (render-login-component)
-                    (<:href "/signup" (<:ah "Create account.")))))
+     (when-let ((account-name (session-value 'account-name)))
+       (push (format nil "Already logged in as ~A." account-name)
+             (session-value 'errors)))
+     (templ:login))
     (:post
      (if-let ((account (validate-credentials account-name password)))
        (progn
@@ -324,10 +131,7 @@ are actually the exteriors of two buildings.")))
              (appendf (session-value 'errors) errors)
              (redirect "/signup")))))
     (:get
-     (render-page "Sign up"
-                  (lambda ()
-                    (render-error-messages)
-                    (render-signup-component))))))
+     (templ:signup))))
 
 ;;; Characters
 (define-easy-handler (newchar :uri "/newchar") (name description)
@@ -344,10 +148,7 @@ are actually the exteriors of two buildings.")))
              (appendf (session-value 'errors) errors)
              (redirect "/newchar")))))
     (:get
-     (render-page "Create a character"
-                  (lambda ()
-                    (render-error-messages)
-                    (render-character-creation-component))))))
+     (templ:newchar))))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()

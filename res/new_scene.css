@@ -1,0 +1,106 @@
+/* From: http://scrippets.org/ */
+.scene-display {
+    list-style: none;
+    width: 475px;
+    height: 100%;
+    background: white;
+    color: #000000;
+    /*border: 1px solid #333;*/
+    /*padding: 5px 14px 15px 14px !important;*/
+    margin-left: 6%;
+    overflow: scroll;
+    overflow-x: visible;
+    overflow-y: scroll;
+    word-wrap: break-word;
+    font: 12pt;
+}
+
+.scene-display p {
+    text-align: left;
+    letter-spacing: 0;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.sceneheader-div {
+    padding-top: 1.5ex;
+}
+
+.unit {
+    padding-top: 1.5em;
+    /* gif stolen from http://www.cssnewbie.com/example/styling-blockquotes/ */
+    /*
+    background: transparent url(quote.gif) no-repeat;
+    background-position: top left 5%;
+    */
+}
+
+.action {
+    padding-right: 5%;
+    padding-top: 1em;
+    font-size: 12px;
+    line-height: 14px;
+    /*color: #666;*/
+}
+
+.actor, .object {
+    color: black;
+    font-weight: bold;
+}
+
+.verb {
+    color: 	#700000;
+    /*font-family: sans-serif;*/
+    font-weight: bold;
+}
+
+.character {
+    display: inline;
+    margin-left: 5%;
+    margin-bottom: 0;
+    font-size: 14pt;
+    font-family: sans-serif;
+    font-weight: bold;
+    /*color: #663399;*/
+}
+
+.dialogue {
+    margin-top: 0;
+    font-size: 0.75em;
+    margin-left: 10%;
+    padding-right: 20%;
+}
+
+.dialogue > input {
+    width: 250px;
+    font-size: 0.9em !important;
+    font-family: serif !important;
+}
+
+.dialogue p + p {
+    margin-top: 0.7em;
+}
+
+.parenthetical {
+    font-size: 0.7em;
+    font-style: italic;
+    /*margin-left: 32%;*/
+    padding-right: 30%;
+    display: inline;
+    color: #006699;
+}
+.parenthetical > input{
+    width: 100px;
+    font-style: italic;
+    color: #006699 !important;
+}
+
+/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
+
+.dialogue + .parenthetical { padding-bottom: 0; }
+
+.unit + .unit {
+    padding-top: 0;
+}
+
+.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }

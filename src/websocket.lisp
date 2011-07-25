@@ -22,7 +22,8 @@
 (defstruct client server uri host headers user-agent ws-client session account-name character-id)
 
 (defun client-write (client string)
-  (ws:write-to-client (client-ws-client client) string))
+  (continuable
+    (ws:write-to-client (client-ws-client client) string)))
 
 (defun find-client (chat-server ws-client)
   (gethash ws-client (slot-value chat-server 'clients)))
@@ -58,8 +59,6 @@
   (let ((ws-client (client-ws-client client))
         (session (client-session client)))
     (ws:write-to-client ws-client :close)
-    ;; Chrome doesn't seem to pay attention to :close.
-    (ws::client-disconnect ws-client :abort t)
     (when session
       (deletef (session-websocket-clients session)
                client))))
@@ -70,7 +69,7 @@
   (ws:register-global-resource
    "/chat"
    (setf *websocket-server* (make-instance 'chat-server :client-main client-main))
-   #'ws::any-origin))
+   (ws::origin-prefix "http://zushakon.sykosomatic.org")))
 
 (defmethod add-client ((srv chat-server) client)
   (logit "Adding Pending Client ~S." client)
@@ -93,26 +92,28 @@
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
   (logit "Got client connection.")
-  (let (alist-headers)
-    (maphash (lambda (k v)
-               (push (cons (intern (string-upcase k) :keyword)
-                           v)
-                     alist-headers))
-             headers)
-    (add-client res (make-client :uri resource-name :headers alist-headers :ws-client ws-client)))
+  (continuable
+    (let (alist-headers)
+      (maphash (lambda (k v)
+                 (push (cons (intern (string-upcase k) :keyword)
+                             v)
+                       alist-headers))
+               headers)
+      (add-client res (make-client :uri resource-name :headers alist-headers :ws-client ws-client))))
   t)
 
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
   (logit "Client ~S disconnected." client)
-  (remove-client res client))
+  (continuable (remove-client res client)))
 
 (defmethod ws:resource-received-frame ((res chat-server) ws-client message
                                        &aux (client (find-client res ws-client)))
   (logit "Received resource frame.")
-  (if (client-session client)
-      (process-client-message res client message)
-      (process-client-validation res client message)))
+  (continuable
+   (if (client-session client)
+       (process-client-message res client message)
+       (process-client-validation res client message))))
 
 (defgeneric actor-client (actor)
   (:method ((actor-id string))
@@ -131,7 +132,8 @@
     (logit "Saving action under scene ~A: ~A" scene-id action-txt)
     (add-action scene-id (character-name (find-character-by-id actor)) action-txt))
   (send-msg recipient `("action" (:obj
-                                  ("actor" . ,(character-name (find-character-by-id actor)))
+                                  ,@(when actor
+                                      `(("actor" . ,(character-name (find-character-by-id actor)))))
                                   ("action" . ,action-txt)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
@@ -143,6 +145,16 @@
                                       ("actor" . ,char-name)
                                       ("parenthetical" . ,parenthetical)
                                       ("dialogue" . ,dialogue))))))
+
+(defun send-transition (recipient text)
+  (send-msg recipient (list "transition" text)))
+
+(defun send-ooc (recipient actor text)
+  (let ((display-name (account-display-name
+                       (find-account (client-account-name (actor-client actor))))))
+    (send-msg recipient `("ooc" (:obj
+                                 ("display_name" . ,display-name)
+                                 ("text" . ,text))))))
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
@@ -208,11 +220,11 @@
 
 (defun teardown-websockets ()
   (when (and *websocket-thread* (bt:thread-alive-p *websocket-thread*))
-    (bt:destroy-thread *websocket-thread*)
-    (setf *websocket-thread* nil))
+    (bt:destroy-thread *websocket-thread*))
   (when (and *chat-resource-thread* (bt:thread-alive-p *chat-resource-thread*))
-    (bt:destroy-thread *chat-resource-thread*)
-    (setf *chat-resource-thread* nil)))
+    (bt:destroy-thread *chat-resource-thread*))
+  (setf *websocket-thread* nil
+        *chat-resource-thread* nil))
 
 ;; (defun send-user-action (client user-action)
 ;;   (when-let ((scene-id (session-value 'scene-id (client-session client))))

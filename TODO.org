@@ -285,11 +285,107 @@
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 *** TODO Styling
     Seriously. Make things -not- look like utter shit.
+** Security
+*** TODO XSS
+    There should be a specific method of handling all user input, and all redisplaying of
+    server-side data such that XSS is not possible. This should be handled within the
+    infrastructure.
+**** DONE De-XSS-ify client.js
+**** TODO De-XSS-ify server-side generated HTML.
+     This involves using yaclml's <:ah
+*** TODO CSRF
+    Pretty much nothing to defend against this right now.
+**** TODO Track down all URLs with side effects and attach CSRF tokens to them.
+**** TODO Figure out what sort of similar attacks can be mounted on websockets.
+*** DONE Password security
+    Use something like bcrypt to encrypt passwords. Find some information about good practices on
+    this. I read something along the lines of adding encryption iterations as CPU power
+    improves. This can probably be added later, though.
+*** TODO Injection
+    I wonder if Chillax has any dangerous injection vulnerabilities.
+*** TODO DoS
+**** TODO Throttle user input.
+     Length and regularity of user input should be somewhat limited, so players can't just spam a
+     ton of garbage onto the screen.
 ** Chillax
 *** DONE Fix the goddamn view server.
     It's switching the order of map functions in a view. :(
 *** DONE Figure out why the hell the view server is freezing up
+*** TODO Figure out how to stringify views properly.
+    Right now, symbols get printed out with package prefixes if ENSURE-* are called outside of their
+    home packages. This is ridiculous.
 *** TODO Build a view server that uses jsown.
     JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
 *** TODO Convert view code to use jsown, too.
     Because using mkhash in one place and mkdoc in another sucks.
+** Style
+*** TODO Fancy scene headers
+    Scene headers should all be images created specifically for the current area.
+*** TODO Nicer scrolling
+**** TODO Scrollbar
+     The default browser scrollbar is cool and all, but it would be nice to have a different one --
+     perhaps even one that can disappear.
+**** TODO Fade effect
+     Is it possible to have text "fade" near the top of the game area, instead of simply
+     disappearing? That would be -great-.
+**** TODO Scene headers
+     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
+     a particular scene -- always leaving clue of where the player currently is.  As new scene
+     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
+     reach the top of the screen, sticking there until the next header rolls by.
+*** TODO Combo boxes
+    http://harvesthq.github.com/chosen/ Sexy as hell.
+*** TODO Character conversion
+    Convert -- to —.
+** Accessibility
+*** WAI-ARIA
+    http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
+    start supporting this fairly early on, if possible.
+** Playtest
+   These are features deemed necessary in order to do online no-game-engine playtests.
+*** TODO Change stylesheet to something other than just a screenplay
+**** TODO Style the input fields.
+     Something more subtle than the deep abyss of standard input fields.
+**** TODO Expanding input fields
+     Check out Facebook's CSS/JS to figure out how they get their textboxes to expand. It's probably
+     pretty simple...
+**** TODO Do something about the awful OOC area.
+*** DONE Add OOC chat area
+    It should include an /ooc command, and be separate from the main game window.
+*** DONE Add Action and Transition commands
+    For use by whoever's running the actual playtest. /action will broadcast an action to all
+    connected players (without the usual appending of the character name). /transition will throw in
+    a scene transition, denoting that the location has changed.
+*** DONE Stability
+**** DONE Clean startup/shutdown
+     Even if there's an error, I should be able to start/stop the server without needing to restart
+     lisp.
+**** DONE Continuable
+     Killing the clws server threads every time there's some minor hiccup in the code is
+     ridiculous. Make it more robust, and use one of them fancy continuable restart macros so things
+     can proceed normally.
+*** DONE Commands
+**** DONE Typing a /slash command that doesn't exist shouldn't chat it.
+     If it starts with a /, and we can't find it, it's an error that should be reported (maybe in
+     the OOC area?)
+**** DONE Relax actions and adverbs
+     For the purpose of playtesting, people should be able to type whatever they want as an action
+     or adverb. We'll control it at the playtest level.
+
+*** DONE Storybuilder
+    Replace (or supplement) the simple command-line with a graphical story builder. Allow players to
+    pick from a limited number of elements (action, dialogue(+parenthetical), description,
+    transition), and insert them into the current 'screenplay'.
+**** DONE Separate OOC chat input into a separate input field.
+**** DONE Widget + Dialogue
+     Create a widget that allows players to input two things: dialogue that their character will
+     speak, and an optional parenthetical.
+**** DONE Action
+     Extend the widget (play with jquery-ui tabs, for now!), to also allow inserting an
+     'action'. This will replace /me.
+**** DONE Description
+     In the actual game, this should be a "select object" widget. For now, just give players a plain
+     input field where they can type whatever, that will be added to a new description element.
+**** DONE Parser
+     Move the parser into its own tab. Make all the /me, /act, etc commands still available through
+     there.

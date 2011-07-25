@@ -6,7 +6,7 @@
   (init-db)
   (init-websockets 'sykosomatic.parser:parse-input)
   (init-hunchentoot)
-  t)
+  (setf *runningp* t))
 
 (defun end-shared-hallucination ()
   (teardown-websockets)

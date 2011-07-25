@@ -19,6 +19,20 @@
              (:sentence
               (map nil (rcurry #'sykosomatic::send-action actor
                                (sentence->text (cdr result)))
+                   (sykosomatic::local-actors actor)))
+             (:action
+              (map nil (rcurry #'sykosomatic::send-action actor
+                               (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:actorless-action
+              (map nil (rcurry #'sykosomatic::send-action nil
+                               (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:transition
+              (map nil (rcurry #'sykosomatic::send-transition (cdr result))
+                   (sykosomatic::local-actors actor)))
+             (:ooc
+              (map nil (rcurry #'sykosomatic::send-ooc actor (cdr result))
                    (sykosomatic::local-actors actor))))))))
 
 (defun sentence->text (sentence)
@@ -35,9 +49,52 @@
   (=or (command)
        (dialogue)))
 
+(defvar *commands* (make-hash-table :test #'equalp))
 (defvar *command-char* #\/)
 (defun command ()
-  (action))
+  (=let* ((_ (=char *command-char*))
+          (command-name (text (=or (=satisfies #'alphanumericp) (=char #\-))))
+          (command-arg (maybe (=and (one-or-more (whitespace))
+                                    (text)))))
+    (if-let (command-parser (find-command command-name))
+      (result (caar (funcall command-parser (or command-arg ""))))
+      (fail :error "No such command."))))
+
+(defun add-command (name parser)
+  (setf (gethash (string name) *commands*) parser))
+(defun find-command (name)
+  (gethash (string name) *commands*))
+(defun remove-command (name)
+  (remhash (string name) *commands*))
+(defmacro defcommand (name-or-names () &body body)
+  (let ((names (ensure-list name-or-names)))
+    `(let ((cmd (funcall (lambda ()
+                           ,@body))))
+       ,@(loop for name in names
+            collect `(add-command ,(if (stringp name) name (string name))
+                                  cmd)))))
+
+(defcommand (me em) ()
+  (=let* ((action-text (text)))
+    (result `(:action . ,action-text))))
+
+(defcommand (action act) ()
+  (=let* ((action-text (text)))
+    (result `(:actorless-action . ,action-text))))
+
+(defcommand (transition trans) ()
+  (=let* ((text (text)))
+    (result `(:transition . ,text))))
+
+(defcommand ooc ()
+  (=let* ((text (text)))
+    (result `(:ooc . ,text))))
+
+(defcommand error ()
+  (=or
+   (=let* ((text (text)))
+     (fail :error text))
+   (fail :error "Kaboom")))
 
 ;; ws = one or more whitespace
 (defun ws ()
@@ -57,13 +114,15 @@
 ;; parenthetical = "(" adverb ")"
 ;; parenthetical =/ "@" name
 (defun parenthetical ()
-  (=or (=let* ((_ (=char #\@))
+  (=or (=let* ((_ (=and (=char #\@) (zero-or-more (whitespace))))
                (name (word)))
          (result `(:parenthetical . ,(concatenate 'string "to " name))))
        (=let* ((_ (=char #\())
-               (content (=or (to/at-someone) (adverb)))
+               ;; TODO - Temporary while testing.
+               (content (text (=and (=not (=char #\))) (item))) #+nil(=or (to/at-someone) (adverb)))
                (_ (=char #\))))
-         (result `(:parenthetical . ,(cdr content))))))
+         ;; TODO - This'll need to return ,(cdr content) when the above is uncommented.
+         (result `(:parenthetical . ,content)))))
 
 (defun to/at-someone ()
   (=let* ((at/to (=or (=string "at")
