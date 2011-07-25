@@ -12,7 +12,7 @@
     overflow-x: visible;
     overflow-y: scroll;
     word-wrap: break-word;
-    font: 12pt;
+    font-size: 12pt;
 }
 
 .scene-display p {
