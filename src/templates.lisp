@@ -28,7 +28,9 @@
 
 (defun jquery-libs ()
   (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")
+  (<:link :rel "stylesheet" :type "text/css" :href "res/chosen.css")
   (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
+  (<:script :type "text/javascript" :src "res/js/chosen.jquery.min.js")
   (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
 
 (defun logout-button ()

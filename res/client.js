@@ -354,6 +354,8 @@ var sykosomatic =
         });
         $("#game-input > div :input").get(0).focus();
 
+        $("select").chosen();
+
         // ping the server to keep the session and websocket alive.
         interval_id = setInterval(ping,1000*60*5);
         $(document).ajaxError(on_ajax_error);
