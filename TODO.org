@@ -390,3 +390,12 @@
 **** DONE Parser
      Move the parser into its own tab. Make all the /me, /act, etc commands still available through
      there.
+
+** Character creation
+*** TODO Proper inputs
+    Replace the mass of text input fields with appropriate stuff like dropdowns.
+*** TODO Update character.lisp
+    Make character.lisp accept the new character creation parameters.
+*** TODO Multi-page input
+    Convert the big fat form into a multi-page form split between logical parts of character
+    creation.
