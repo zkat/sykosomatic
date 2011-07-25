@@ -76,14 +76,17 @@
 }
 
 .field label {
-    padding-right: 20px;
+    padding-right: 0.5em;;
+    text-align: right;
+    width: 15em;
+    float: left;
 }
+
 .field label:after {
     content: ":";
 }
 
 .field select {
-    display: inline;
     width: 100px;
 }
 .field input {
