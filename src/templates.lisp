@@ -59,8 +59,8 @@
     "Sykosomatic.org Dev Site"
   (<:p (<:ah "Sykosomatic is a cooperative storytelling system, currently in development. ")
         (<:href "/login" (<:ah "Log in.")))
-  (<:p (<:ah "Already logged in? What are you doing here?! Head to the ")
-       (<:href "/stage" (<:ah "Stage!"))))
+  (<:p (<:ah "Already logged in? What are you doing here?! Go pick a ")
+       (<:href "/role" (<:ah "character!"))))
 
 ;;; /login
 (defpage login () ()
@@ -139,6 +139,7 @@
 (defpage role (characters) ()
     "What role shall you play?"
   (error-messages)
+  (<:h2 (<:ah "Choose a character"))
   (character-list characters)
   (<:href "/newchar" "Create a new character.")
   (logout-button))
@@ -259,7 +260,7 @@
            (<:select :id "pronoun" :name "pronoun"
                      (<:option :value "she" "She")
                      (<:option :value "he" "He")
-                     (<:option :value "they" "They")))
+                     (<:option :value "they" :selected "selected" "They")))
           ;; Name
           (<:div
            (<:br)
