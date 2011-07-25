@@ -76,9 +76,9 @@
           (<:submit :value "Log in")))
 
 ;;; /stage
-(defpage stage () ((gameplay-js-libs))
+(defpage stage (char-name) ((gameplay-js-libs))
     "All the World's a Stage"
-  (chat-area)
+  (chat-area char-name)
   #+nil
   (scene-recording)
   #+nil
@@ -94,12 +94,12 @@
   (<:script :type "text/javascript" :src "res/json2.js")
   (<:script :type "text/javascript" :src "res/client.js"))
 
-(defun chat-area ()
+(defun chat-area (char-name)
   (<:div :id "main-game-panel"
-         (game-panel)
+         (game-panel char-name)
          (ooc-panel)))
 
-(defun game-panel ()
+(defun game-panel (char-name)
   (<:div :id "game-panel"
          (<:div :class "scene-display" :id "scene-display")
          (<:div :id "game-input"
@@ -110,11 +110,11 @@
                  (<:li (<:href "#parser-tab" "Parser")))
                 (<:div :id "dialogue-tab"
                        (<:form :id "dialogue-input"
-                               (<:p :class "character" "<YOUR NAME>")
+                               (<:p :class "character" (<:ah (string-capitalize char-name)))
                                (<:input)))
                 (<:div :id "action-tab"
                        (<:form :id "action-input"
-                               "<your name> "
+                               (<:ah (string-capitalize char-name))
                                (<:input)))
                 (<:div :id "ooc-tab"
                        (<:form :id "ooc-input"
