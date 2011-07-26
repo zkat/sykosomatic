@@ -394,8 +394,53 @@
 ** Character creation
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
+**** DONE Identity
+**** TODO Early Life
+**** TODO Later Life
+**** TODO Appearance
+     Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
+     attached to it. Each bodypart has a particular set of adjectives that can go with it. Selecting
+     a bodypart from the dropdown should restrict the adjectives list only to those that are
+     selectable for that particular bodypart.
+     The obvious way to do this is with JavaScript -- perhaps some AJAX that fetches the most
+     current list as things are selected from the dropdown.
+**** TODO Here and Now
 *** TODO Update character.lisp
-    Make character.lisp accept the new character creation parameters.
+    Make character.lisp accept the new character creation parameters. This includes validating each
+    and every field, and keeping track of character creation progress through the multi-page flow.
 *** TODO Multi-page input
-    Convert the big fat form into a multi-page form split between logical parts of character
-    creation.
+**** DONE Templates
+     Convert the big fat form into a multi-page form split between logical parts of character
+     creation -- just the templates for now.
+**** TODO Submission progression
+     Each submit should accumulate the current selections until the current point.
+**** TODO Go back and fix
+     Should be able to jump back to an earlier part of character creation, fix something up, then
+     keep going. Editing something earlier should not erase work that was done later (unlike some
+     checkout flows)
+
+**** TODO Per-page previews
+     Each page should have an informative preview that shows how the player's selections are
+     affecting something about the character.
+***** TODO Identity
+      Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
+      Something like "You are creating a new character. His name is Thomas Janus, also known as
+      'Wolf'."
+***** TODO Early Life
+      A sentence that gives a basic blurb about the character's family and childhood information,
+      which also includes the identity:
+      "Thomas grew up in a middle class family of three children by his two parents."
+***** TODO Later Life
+      "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
+      really very close. He is also currently seeing someone. He has spent 10 years in Business."
+***** TODO Here and Now
+      For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
+      about what the Twin Cities are, and maybe even some outside links to more information. There
+      should be various places marked on the map, each corresponding to a possible starting location
+      for the character. Maybe have these places marked by Google Maps-style drops/pins.
+      Clicking on a location or choosing it from the dropdown makes it the current selection, and
+      also displays a short paragraph with more information about what the place is like --
+      something to give the player an idea of why it sets it apart from the other locations.
+***** TODO Confirm
+      Summarize all the other stuff that was accumulated during character creation, and have the
+      player confirm their decision.
