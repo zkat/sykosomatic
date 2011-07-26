@@ -240,71 +240,124 @@
   (<:ul :class "breadcrumbs"
    (loop
       for i from 0
-      for title in '("Name" "Early life" "Later life" "Appearance")
+      for title in '("Identity" "Early life" "Later life" "Appearance" "Here and Now" "Confirm")
       do (<:li :class (if (= i focused)
                           "breadcrumb-focused"
                           "breadcrumb-unfocused")
-               (<:ah title)))))
+               (if (= i focused)
+                   (<:ah title)
+                   (<:href (format nil "/newchar?cc-page=~A" i) (<:ah title)))))))
 
-(defpage newchar () ()
+;; Good enough for now, I think, but it kinda stinks: It would be better for each page to actually
+;; have its own resource identifier associated with it, and control page flow some other way.
+(defpage newchar (page-number) ()
     "Create a character"
   (error-messages)
-  (creation-breadcrumb 0)
-  (character-creation-component))
+  (creation-breadcrumb page-number)
+  (funcall
+   (elt '(cc-identity cc-early-life cc-later-life cc-appearance cc-here-and-now cc-confirm)
+        page-number)))
 
-(defun character-creation-component ()
-  (<:form :name "create-character" :action "/newchar" :method "post"
-          ;; Pronoun
+(defun cc-identity ()
+  (<:form :name "character-creation-identity" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 0)
           (<:div :class "field"
-           (<:label :for "pronoun" (<:ah "Pronoun"))
-           (<:select :id "pronoun" :name "pronoun"
-                     (<:option :value "she" "She")
-                     (<:option :value "he" "He")
-                     (<:option :value "they" :selected "selected" "They")))
-          ;; Name
+                 (<:label :for "pronoun" (<:ah "Pronoun"))
+                 (<:select :id "pronoun" :name "pronoun"
+                           (<:option :value "she" "She")
+                           (<:option :value "he" "He")
+                           (<:option :value "they" :selected "selected" "They")))
           (<:div
-           (<:br)
            (text-input-field "first-name" "First Name")
            (text-input-field "nickname" "Nickname" :max-length 24)
            (text-input-field "last-name" "Last Name"))
-          ;; Early life
-          ;; TODO
-          (<:div
-           (<:br)
-           (text-input-field "origin" "Where from?")
-           (text-input-field "parents" "Parents?")
-           (text-input-field "siblings" "Siblings?")
-           (text-input-field "economics" "Financial situation?"))
+          (<:submit :value "Next")))
 
-          ;; Later life
-          ;; TODO
-          (<:div
-           (<:br)
-           (text-input-field "tc-arrival" "How end up in Twin Cities?")
-           (text-input-field "where-now" "Where in the Twin Cities?")
-           (text-input-field "friends" "Any friends?")
-           (text-input-field "so" "Significant other?")
-           (<:br)
-           (text-input-field "career1" "What career?")
-           (text-input-field "career1-time" "How long?")
-           (<:br)
-           (text-input-field "career2" "What other career?")
-           (text-input-field "career2-time" "How long?")
-           (<:br)
-           (text-input-field "career3" "What other career?")
-           (text-input-field "career3-time" "How long?"))
+(defun cc-early-life ()
+  (<:form :name "character-creation-early-life" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 1)
+          (text-input-field "origin" "Where from?")
+          (<:div :class "field"
+                 (<:label :for "parents" (<:ah "Number of parents"))
+                 (<:select :id "parents" :name "parents"
+                           (<:option :value "none" "None")
+                           (<:option :value "one" "One")
+                           (<:option :value "two" :selected "selected" "Two")
+                           (<:option :value "more" "More than two")))
+          (<:div :class "field"
+                 (<:label :for "siblings" (<:ah "Number of siblings"))
+                 (<:select :id "siblings" :name "siblings"
+                           (<:option :value "none" "None")
+                           (<:option :value "one" :selected "selected" "One")
+                           (<:option :value "two" "Two")
+                           (<:option :value "three" "Three")
+                           (<:option :value "more" "More than three")))
+          (<:div :class "field"
+                 (<:label :for "childhood-finances" (<:ah "Financial class"))
+                 (<:select :id "childhood-finances" :name "childhood-finances"
+                           (<:option :value "poor" "Poor")
+                           (<:option :value "working-class" "Working Class")
+                           (<:option :value "middle-class" :selected "selected" "Middle Class")
+                           (<:option :value "upper-class" "Upper Class")))
+          (<:submit :value "Next")))
 
-          ;; Appearance
-          ;; TODO
-          (<:div
-           (<:br)
-           (text-input-field "bodypart1" "Notable feature")
-           (text-input-field "bodypart1-adj" "Adjective")
-           (<:br)
-           (text-input-field "bodypart2" "Notable feature")
-           (text-input-field "bodypart2-adj" "Adjective")
-           (<:br)
-           (text-input-field "bodypart3" "Notable feature")
-           (text-input-field "bodypart3-adj" "Adjective"))
+(defun cc-later-life ()
+  (<:form :name "character-creation-later-life" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 2)
+          (<:div :class "field"
+                 (<:label :for "friends" (<:ah "Any friends?"))
+                 (<:select :id "friends" :name "friends"
+                           (<:option :value "ronery" "No, character is all alone.")
+                           (<:option :value "acquaintances" "Not really, just some acquaintances/coworkers and such.")
+                           (<:option :value "tight" :selected "selected" "Yeah, but just one, or a couple of very close friends.")
+                           (<:option :value "social" "Yeah, the character has plenty of friends, but few are really close.")
+                           (<:option :value "loved-by-everyone" "Yes. The character has a relatively big circle of acquaintances and close friends.")))
+          (<:div :class "field"
+                 (<:label :for "so" (<:ah "Is there a special someone?"))
+                 (<:select :id "so" :name "so"
+                           (<:option :value "ronery" "No, the character is forever alone.")
+                           (<:option :value "dating" "Kinda, currently seeing someone.")
+                           (<:option :value "committed" :selected "selected" "Yes. The character has been with someone for a while.")
+                           (<:option :value "ball-and-chain" "Yes, the character is in a committed relationship and/or married.")))
+          (<:br)
+          (text-input-field "career1" "What career?")
+          (text-input-field "career1-time" "How long?")
+          (<:br)
+          (text-input-field "career2" "What other career?")
+          (text-input-field "career2-time" "How long?")
+          (<:br)
+          (text-input-field "career3" "What other career?")
+          (text-input-field "career3-time" "How long?")
+          (<:submit :value "Next")))
 
-          (<:submit :class "submit" :value "Done")))
+(defun cc-appearance ()
+  (<:form :name "character-creation-appearance" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 3)
+          (text-input-field "bodypart1" "Feature")
+          (text-input-field "bodypart1-adj" "Adjective")
+          (<:br)
+          (text-input-field "bodypart2" "Feature")
+          (text-input-field "bodypart2-adj" "Adjective")
+          (<:br)
+          (text-input-field "bodypart3" "Feature")
+          (text-input-field "bodypart3-adj" "Adjective")
+          (<:submit :value "Next")))
+
+(defun cc-here-and-now ()
+  (<:form :name "character-creation-here-and-now" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 4)
+          (<:div :class "field"
+                 (<:label :for "where" (<:ah "Where are they now?"))
+                 (<:select :id "where" :name "where"
+                           (<:option :value "midway" "Midway Area")
+                           (<:option :value "downtown" "Downtown Minneapolis")
+                           (<:option :value "dinkytown" "Dinkytown Neighborhood")
+                           (<:option :value "riverfront" "Riverfront District")
+                           (<:option :value "west-bank" "West Bank Neighborhood")))
+          (<:submit :value "Next")))
+
+(defun cc-confirm ()
+  (<:p (<:ah "<Character preview goes here>"))
+  (<:form :name "character-creation-confirm" :action "/newchar" :method "post"
+          (<:input :type "hidden" :name "cc-page" :value 5)
+          (<:submit :value "Okay, done!")))
