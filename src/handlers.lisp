@@ -134,21 +134,13 @@
      (templ:signup))))
 
 ;;; Characters
-(define-easy-handler (newchar :uri "/newchar") (name description)
-  (ensure-logged-in)
-  (case (request-method*)
-    (:post
-     (multiple-value-bind (createdp errors)
-         (create-character (session-value 'account-name) name description)
-       (if createdp
-           (progn
-             (logit "Character created: ~A" name)
-             (redirect "/stage"))
-           (progn
-             (appendf (session-value 'errors) errors)
-             (redirect "/newchar")))))
-    (:get
-     (templ:newchar))))
+(define-easy-handler (newchar :uri "/newchar") (cc-page)
+  #+nil(ensure-logged-in)
+  (if-let (page (when cc-page (parse-integer cc-page :junk-allowed t)))
+    (templ:newchar (if (eq :post (request-method*))
+                       (1+ page)
+                       page))
+    (templ:newchar 0)))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
