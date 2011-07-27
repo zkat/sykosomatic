@@ -394,6 +394,7 @@
 ** Character creation
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
+**** DONE Use <fieldset>
 **** DONE Identity
 **** DONE Early Life
      Dropdown for the 'where from'. SIMPLIFY SIMPLIFY
