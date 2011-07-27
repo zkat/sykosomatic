@@ -276,7 +276,16 @@
 (defun cc-early-life ()
   (<:form :name "character-creation-early-life" :action "/newchar" :method "post"
           (<:input :type "hidden" :name "cc-page" :value 1)
-          (text-input-field "origin" "Where from?")
+          (<:div :class "field"
+                 (<:label :for "origin" (<:ah "Where from?"))
+                 (<:select :id "origin" :name "origin"
+                           (<:option :value "local" (<:ah "Local -- is from the Twin Cities area."))
+                           (<:option :value "state" (<:ah "Minnesotan -- not from the Cities, but still from the state."))
+                           (<:option :value "midwest" (<:ah "Midwestern -- hails from elsewhere in the American Midwest."))
+                           (<:option :value "east-coast" (<:ah "East Coast -- is from the east coast of the US."))
+                           (<:option :value "south" (<:ah "Southern -- comes from the Southern US."))
+                           (<:option :value "west-coast" (<:ah "West Coast -- California, Pacific Northwest, etc."))
+                           (<:option :value "else" (<:ah "Elsewhere -- Not from the continental US. Alaska, Hawaii, other countries."))))
           (<:div :class "field"
                  (<:label :for "parents" (<:ah "Number of parents"))
                  (<:select :id "parents" :name "parents"

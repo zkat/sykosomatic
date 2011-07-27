@@ -395,7 +395,8 @@
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Identity
-**** TODO Early Life
+**** DONE Early Life
+     Dropdown for the 'where from'. SIMPLIFY SIMPLIFY
 **** TODO Later Life
 **** TODO Appearance
      Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
