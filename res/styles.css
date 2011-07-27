@@ -86,9 +86,9 @@
     content: ":";
 }
 
-.field select {
-    width: 100px;
-}
+/*.field select {
+    width: 300px;
+}*/
 .field input {
     border-style: solid;
     border-width: 1px;
