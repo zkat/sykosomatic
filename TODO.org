@@ -398,6 +398,10 @@
 **** DONE Early Life
      Dropdown for the 'where from'. SIMPLIFY SIMPLIFY
 **** TODO Later Life
+***** DONE Need to do the JS field-addition.
+      It's kinda crappy (just a .click() on a span), but it does the job for right now.
+***** TODO Need to do JS field-REMOVAL.
+      If they want fewer, they can have fewer.
 **** TODO Appearance
      Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
      attached to it. Each bodypart has a particular set of adjectives that can go with it. Selecting
@@ -405,7 +409,15 @@
      selectable for that particular bodypart.
      The obvious way to do this is with JavaScript -- perhaps some AJAX that fetches the most
      current list as things are selected from the dropdown.
+***** DONE JS feature addition
+***** TODO JS feature removal
+***** TODO AJAX valid adjective fetching
 **** TODO Here and Now
+***** TODO Draw up a map of the area
+***** TODO Highlight places in the map according to selection
+***** TODO Expand description of place according to selection
+**** TODO Confirmation
+     Need to gather the preview of everything done so far.
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters. This includes validating each
     and every field, and keeping track of character creation progress through the multi-page flow.
@@ -419,7 +431,6 @@
      Should be able to jump back to an earlier part of character creation, fix something up, then
      keep going. Editing something earlier should not erase work that was done later (unlike some
      checkout flows)
-
 **** TODO Per-page previews
      Each page should have an informative preview that shows how the player's selections are
      affecting something about the character.
