@@ -311,6 +311,27 @@
           (<:submit :value "Next")))
 
 (defun cc-later-life ()
+  (<:script
+"
+$(document).ready(function (){
+    var career_idx = 0;
+    text_input = function (name, label) {
+        return $(document.createElement('div'))
+            .addClass('field')
+            .append($(document.createElement('label')).attr('for',name).text(label))
+            .append($(document.createElement('input'))
+                    .attr('name',name)
+                    .attr('id',name)
+                    .attr('type','text'));
+    };
+    $('#add-career').click(function (){
+        career_idx++;
+        $('#careers')
+            .append(text_input('careers['+career_idx+']','Career #'+career_idx))
+            .append(text_input('career-times['+career_idx+']','How long?'));
+    });
+});
+")
   (<:form :name "character-creation-later-life" :action "/newchar" :method "post"
           (<:input :type "hidden" :name "cc-page" :value 2)
           (<:div :class "field"
@@ -328,28 +349,42 @@
                            (<:option :value "dating" "Kinda, currently seeing someone.")
                            (<:option :value "committed" :selected "selected" "Yes. The character has been with someone for a while.")
                            (<:option :value "ball-and-chain" "Yes, the character is in a committed relationship and/or married.")))
-          (<:br)
-          (text-input-field "careers[0]" "What career?")
-          (text-input-field "career-times[0]" "How long?")
-          (<:br)
-          (text-input-field "careers[1]" "What other career?")
-          (text-input-field "career-times[1]" "How long?")
-          (<:br)
-          (text-input-field "careers[2]" "What other career?")
-          (text-input-field "career-times[2]" "How long?")
+          (<:span :id "add-career" "Add Career")
+          (<:div :id "careers"
+                 (text-input-field "careers[0]" "Career #0")
+                 (text-input-field "career-times[0]" "How long?"))
           (<:submit :value "Next")))
 
 (defun cc-appearance ()
+  (<:script
+(<:ai "
+$(document).ready(function (){
+    var bodypart_idx = 0;
+    text_input = function (name, label) {
+        return $(document.createElement('div'))
+            .addClass('field')
+            .append($(document.createElement('label')).attr('for',name).text(label))
+            .append($(document.createElement('input'))
+                    .attr('name',name)
+                    .attr('id',name)
+                    .attr('type','text'));
+    };
+    $('#add-bodypart').click(function (){
+        bodypart_idx++;
+        if (bodypart_idx < 3) {
+            $('#bodyparts')
+                .append(text_input('bodyparts['+bodypart_idx+']','Feature #'+bodypart_idx))
+                .append(text_input('bodypart-adjs['+bodypart_idx+']','Adjective'));
+        };
+    });
+});
+"))
   (<:form :name "character-creation-appearance" :action "/newchar" :method "post"
           (<:input :type "hidden" :name "cc-page" :value 3)
-          (text-input-field "bodyparts[0]" "Feature")
-          (text-input-field "bodypart-adjs[0]" "Adjective")
-          (<:br)
-          (text-input-field "bodyparts[1]" "Feature")
-          (text-input-field "bodypart-adjs[1]" "Adjective")
-          (<:br)
-          (text-input-field "bodyparts[2]" "Feature")
-          (text-input-field "bodypart-adjs[2]" "Adjective")
+          (<:span :id "add-bodypart" "Add a feature")
+          (<:div :id "bodyparts"
+                 (text-input-field "bodyparts[0]" "Feature #0")
+                 (text-input-field "bodypart-adjs[0]" "Adjective"))
           (<:submit :value "Next")))
 
 (defun cc-here-and-now ()
