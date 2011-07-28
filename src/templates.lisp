@@ -318,7 +318,7 @@
 
 (defun cc-later-life ()
   (<:script
-"
+(<:ai "
 $(document).ready(function (){
     var career_idx = 0;
     text_input = function (name, label) {
@@ -332,12 +332,20 @@ $(document).ready(function (){
     };
     $('#add-career').click(function (){
         career_idx++;
-        $('#careers')
+        var career_field = document.createElement('div');
+        $(career_field).addClass('career-field')
             .append(text_input('careers['+career_idx+']','Career #'+career_idx))
             .append(text_input('career-times['+career_idx+']','How long?'));
+        $('#careers').append(career_field);
+    });
+    $('#remove-career').click(function (){
+        if (career_idx > 0) {
+            career_idx--;
+            $('#careers .career-field:last').remove();
+        };
     });
 });
-")
+"))
   (<:form :name "character-creation-later-life" :action "/newchar" :method "post"
           (<:input :type "hidden" :name "cc-page" :value 2)
           (<:fieldset
@@ -360,12 +368,14 @@ $(document).ready(function (){
           (<:fieldset
            (<:legend "Careers")
            (<:href "javascript:void(0)" :id "add-career" "Add Career")
+           (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
            (<:p :id "careers-desc" (<:ah "Choose some careers, and how long."))
            (<:div :id "careers" :aria-live "polite"
                   :aria-relevant "additions removals"
                   :aria-describedby "careers-desc"
-                  (text-input-field "careers[0]" "Career #0")
-                  (text-input-field "career-times[0]" "How long?")))
+                  (<:div :class "career-field"
+                   (text-input-field "careers[0]" "Career #0")
+                   (text-input-field "career-times[0]" "How long?"))))
           (<:submit :value "Next")))
 
 (defun cc-appearance ()
@@ -373,7 +383,7 @@ $(document).ready(function (){
 (<:ai "
 $(document).ready(function (){
     var bodypart_idx = 0;
-    text_input = function (name, label) {
+    function text_input (name, label) {
         return $(document.createElement('div'))
             .addClass('field')
             .append($(document.createElement('label')).attr('for',name).text(label))
@@ -383,11 +393,19 @@ $(document).ready(function (){
                     .attr('type','text'));
     };
     $('#add-bodypart').click(function (){
-        bodypart_idx++;
-        if (bodypart_idx < 3) {
-            $('#bodyparts')
+        if (bodypart_idx < 2) {
+            bodypart_idx++;
+            var bodypart_field = document.createElement('div');
+            $(bodypart_field).addClass('bodypart-field')
                 .append(text_input('bodyparts['+bodypart_idx+']','Feature #'+bodypart_idx))
                 .append(text_input('bodypart-adjs['+bodypart_idx+']','Adjective'));
+            $('#bodyparts').append(bodypart_field);
+        };
+    })
+    $('#remove-bodypart').click(function (){
+        if (bodypart_idx > 0) {
+            bodypart_idx--;
+            $('#bodyparts .bodypart-field:last').remove();
         };
     });
 });
@@ -397,11 +415,13 @@ $(document).ready(function (){
         (<:fieldset
          (<:legend :id "bodyparts-desc" (<:ah "Choose 1 to 3 distinguishing features"))
          (<:href "javascript:void(0)" :id "add-bodypart" "Add a feature")
+         (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
          (<:div :id "bodyparts" :aria-live "polite"
                 :aria-relevant "additions removals"
                 :aria-describedby "bodyparts-desc"
-                (text-input-field "bodyparts[0]" "Feature #0")
-                (text-input-field "bodypart-adjs[0]" "Adjective")))
+                (<:div :class "bodypart-field"
+                       (text-input-field "bodyparts[0]" "Feature #0")
+                       (text-input-field "bodypart-adjs[0]" "Adjective"))))
         (<:submit :value "Next")))
 
 (defun cc-here-and-now ()
