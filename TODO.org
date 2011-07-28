@@ -392,6 +392,9 @@
      there.
 
 ** Character creation
+*** TODO Shared js library
+    Throw together a 'common' JS library that includes all cross-page utilities that can simply be
+    loaded from all pagess.
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
@@ -401,8 +404,10 @@
 **** TODO Later Life
 ***** DONE Need to do the JS field-addition.
       It's kinda crappy (just a .click() on a span), but it does the job for right now.
-***** TODO Need to do JS field-REMOVAL.
+***** DONE Need to do JS field-REMOVAL.
       If they want fewer, they can have fewer.
+***** TODO Dropdown for careers
+***** TODO Integer-only 'how long?' field
 **** TODO Appearance
      Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
      attached to it. Each bodypart has a particular set of adjectives that can go with it. Selecting
@@ -411,7 +416,9 @@
      The obvious way to do this is with JavaScript -- perhaps some AJAX that fetches the most
      current list as things are selected from the dropdown.
 ***** DONE JS feature addition
-***** TODO JS feature removal
+***** DONE JS feature removal
+***** TODO Dropdown for bodyparts
+***** TODO Dropdown for adjectives
 ***** TODO AJAX valid adjective fetching
 **** TODO Here and Now
 ***** TODO Draw up a map of the area
