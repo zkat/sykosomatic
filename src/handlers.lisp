@@ -141,9 +141,16 @@
   #+nil(ensure-logged-in)
   (templ:newchar))
 
-(define-easy-handler (newchar-preview :uri "/newchar-preview") ()
+(define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
+                                                                nickname last-name
+                                                                origin)
   (setf (content-type*) "text/plain")
-  (format nil "~S" (hunchentoot:get-parameters*)))
+  (templ:newchar-preview-div :first-name first-name
+                             :nickname nickname
+                             :last-name last-name
+                             :pronoun pronoun
+                             :pluralp (when (string-equal pronoun "they") t)
+                             :origin origin))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
