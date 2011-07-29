@@ -305,7 +305,7 @@ function numerous_fields (max_count,
     });
 
 }
-numerous_fields(10,
+numerous_fields(5,
                 'add-career','remove-career',
                 'career-field','careers',
                 'careers','Career',
@@ -411,7 +411,7 @@ numerous_fields(3,
                       (<:option :value "ball-and-chain"
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
-     (<:legend :id "careers-desc" "Careers")
+     (<:legend :id "careers-desc" "Choose up to 5 careers")
      (<:href "javascript:void(0)" :id "add-career" "Add Career")
      (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
      (<:div :id "careers" :aria-live "polite"
@@ -421,7 +421,7 @@ numerous_fields(3,
 (defun cc-appearance ()
   (<:div :id "appearance"
          (<:fieldset
-          (<:legend :id "bodyparts-desc" (<:ah "Choose 1 to 3 distinguishing features"))
+          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 3 distinguishing features"))
           (<:href "javascript:void(0)" :id "add-bodypart" "Add a feature")
           (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
