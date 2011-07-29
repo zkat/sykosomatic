@@ -261,61 +261,47 @@ $('form').change(function(){
         $('#preview').text(data);
     });
 });
- (function () {
-    var career_idx = 0;
-    function text_input (name, label) {
-        return $(document.createElement('div'))
-            .addClass('field')
-            .append($(document.createElement('label')).attr('for',name).text(label))
-            .append($(document.createElement('input'))
-                    .attr('name',name)
-                    .attr('id',name)
-                    .attr('type','text'));
-    };
-    $('#add-career').click(function (){
-        career_idx++;
-        var career_field = document.createElement('div');
-        $(career_field).addClass('career-field')
-            .append(text_input('careers['+career_idx+']','Career #'+career_idx))
-            .append(text_input('career-times['+career_idx+']','How long?'));
-        $('#careers').append(career_field);
-    });
-    $('#remove-career').click(function (){
-        if (career_idx > 0) {
-            career_idx--;
-            $('#careers .career-field:last').remove();
+function text_input (name, label) {
+    return $(document.createElement('div'))
+        .addClass('field')
+        .append($(document.createElement('label')).attr('for',name).text(label))
+        .append($(document.createElement('input'))
+                .attr('name',name)
+                .attr('id',name)
+                .attr('type','text'));
+};
+function numerous_fields (max_count,
+                          add_button_id,remove_button_id,
+                          field_class,field_div_id,
+                          field1_name,field1_label,
+                          field2_name,field2_label) {
+    $('#'+add_button_id).click(function (){
+        var num_fields = $('.'+field_class).length;
+        if (num_fields < max_count) {
+            var field = document.createElement('div');
+            $(field).addClass(field_class)
+                .append(text_input(field1_name+'['+num_fields+']',field1_label+' #'+(num_fields+1)))
+                .append(text_input(field2_name+'['+num_fields+']',field2_label));
+            $('#'+field_div_id).append(field);
         };
     });
- })();
+    $('#'+remove_button_id).click(function (){
+        $('#'+field_div_id+' .'+field_class+':last').remove();
+    });
 
- (function (){
-    var bodypart_idx = 0;
-    function text_input (name, label) {
-        return $(document.createElement('div'))
-            .addClass('field')
-            .append($(document.createElement('label')).attr('for',name).text(label))
-            .append($(document.createElement('input'))
-                    .attr('name',name)
-                    .attr('id',name)
-                    .attr('type','text'));
-    };
-    $('#add-bodypart').click(function (){
-        if (bodypart_idx < 2) {
-            bodypart_idx++;
-            var bodypart_field = document.createElement('div');
-            $(bodypart_field).addClass('bodypart-field')
-                .append(text_input('bodyparts['+bodypart_idx+']','Feature #'+bodypart_idx))
-                .append(text_input('bodypart-adjs['+bodypart_idx+']','Adjective'));
-            $('#bodyparts').append(bodypart_field);
-        };
-    })
-    $('#remove-bodypart').click(function (){
-        if (bodypart_idx > 0) {
-            bodypart_idx--;
-            $('#bodyparts .bodypart-field:last').remove();
-        };
-    });
-})();
+}
+numerous_fields(10,
+                'add-career','remove-career',
+                'career-field','careers',
+                'careers','Career',
+                'career-times','How long?'
+               );
+numerous_fields(3,
+                'add-bodypart','remove-bodypart',
+                'bodypart-field','bodyparts',
+                'bodyparts','Feature',
+                'bodypart-adjs','Adjective'
+               );
 });"))
   (error-messages)
   (<:p :id "preview" "This is an experiment")
@@ -410,16 +396,12 @@ $('form').change(function(){
                       (<:option :value "ball-and-chain"
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
-     (<:legend "Careers")
+     (<:legend :id "careers-desc" "Careers")
      (<:href "javascript:void(0)" :id "add-career" "Add Career")
      (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
-     (<:p :id "careers-desc" (<:ah "Choose some careers, and how long."))
      (<:div :id "careers" :aria-live "polite"
             :aria-relevant "additions removals"
-            :aria-describedby "careers-desc"
-            (<:div :class "career-field"
-                   (text-input-field "careers[0]" "Career #0")
-                   (text-input-field "career-times[0]" "How long?"))))))
+            :aria-describedby "careers-desc"))))
 
 (defun cc-appearance ()
   (<:div :id "appearance"
@@ -429,10 +411,7 @@ $('form').change(function(){
           (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
                  :aria-relevant "additions removals"
-                 :aria-describedby "bodyparts-desc"
-                 (<:div :class "bodypart-field"
-                        (text-input-field "bodyparts[0]" "Feature #0")
-                        (text-input-field "bodypart-adjs[0]" "Adjective"))))))
+                 :aria-describedby "bodyparts-desc"))))
 
 (defun cc-here-and-now ()
   (<:div :id "here-and-now"
