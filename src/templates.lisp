@@ -254,6 +254,8 @@
 (defpage newchar () ()
     "Create a character"
   (<:script (<:ai "$(document).ready(function(){$('#tabs').tabs();
+$('#later-life a').button();
+$('#appearance a').button();
  (function () {
     var career_idx = 0;
     function text_input (name, label) {
@@ -309,9 +311,6 @@
         };
     });
 })();
-
-$('#later-life a').button();
-$('#appearance a').button();
 });"))
   (error-messages)
   (<:p "This is an experiment")
