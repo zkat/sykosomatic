@@ -429,6 +429,8 @@
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters. This includes validating each
     and every field, and keeping track of character creation progress through the multi-page flow.
+*** TODO One Big Form™
+    Use the magic of javascript to turn it into a single, big, multi-tabbed form.
 *** TODO Multi-page input
 **** DONE Templates
      Convert the big fat form into a multi-page form split between logical parts of character
