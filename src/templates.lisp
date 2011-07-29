@@ -227,12 +227,13 @@
   (signup-component))
 
 (defun signup-component ()
-  (<:h2 (<:ah "Sign up"))
   (<:form :name "signup" :action "/signup" :method "post"
-          (text-input-field "account-name" "Email")
-          (text-input-field "display-name" "Display Name" :max-length 32)
-          (text-input-field "password" "Password" :type "password")
-          (text-input-field "confirmation" "Confirm password" :type "password")
+          (<:fieldset
+           (<:legend "Sign up!")
+           (text-input-field "account-name" "Email")
+           (text-input-field "display-name" "Display Name" :max-length 32)
+           (text-input-field "password" "Password" :type "password")
+           (text-input-field "confirmation" "Confirm password" :type "password"))
           (<:submit :value "Submit")))
 
 ;;; /newchar
