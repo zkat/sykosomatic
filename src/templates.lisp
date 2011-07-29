@@ -256,6 +256,11 @@
   (<:script (<:ai "$(document).ready(function(){$('#tabs').tabs();
 $('#later-life a').button();
 $('#appearance a').button();
+$('form').change(function(){
+    $.get('/newchar-preview',$('form').serialize(),function (data){
+        $('#preview').text(data);
+    });
+});
  (function () {
     var career_idx = 0;
     function text_input (name, label) {
@@ -313,7 +318,7 @@ $('#appearance a').button();
 })();
 });"))
   (error-messages)
-  (<:p "This is an experiment")
+  (<:p :id "preview" "This is an experiment")
   (<:form :name "character-creation" :action "/newchar" :method "post"
    (<:div :id "tabs"
      (<:ul
