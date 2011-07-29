@@ -134,17 +134,12 @@
      (templ:signup))))
 
 ;;; Characters
-(define-easy-handler (newchar :uri "/newchar") ((cc-page :parameter-type 'integer)
-                                                (careers :parameter-type 'array)
+(define-easy-handler (newchar :uri "/newchar") ((careers :parameter-type 'array)
                                                 (career-times :parameter-type 'array)
                                                 (bodyparts :parameter-type 'array)
                                                 (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
-  (if cc-page
-      (templ:newchar (if (eq :post (request-method*))
-                         (1+ cc-page)
-                         cc-page))
-      (templ:newchar 0)))
+  (templ:newchar))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()

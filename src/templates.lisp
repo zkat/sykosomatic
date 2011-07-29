@@ -250,78 +250,12 @@
 
 ;; Good enough for now, I think, but it kinda stinks: It would be better for each page to actually
 ;; have its own resource identifier associated with it, and control page flow some other way.
-(defpage newchar (page-number) ()
+(defpage newchar () ()
     "Create a character"
-  (error-messages)
-  (creation-breadcrumb page-number)
-  (funcall
-   (elt '(cc-identity cc-early-life cc-later-life cc-appearance cc-here-and-now cc-confirm)
-        page-number)))
-
-(defun cc-identity ()
-  (<:form :name "character-creation-identity" :action "/newchar" :method "post"
-          (<:input :type "hidden" :name "cc-page" :value 0)
-          (<:fieldset
-           (<:div :class "field"
-                  (<:label :for "pronoun" (<:ah "Pronoun"))
-                  (<:select :id "pronoun" :name "pronoun"
-                            (<:option :value "she" "She")
-                            (<:option :value "he" "He")
-                            (<:option :value "they" :selected "selected" "They"))))
-          (<:fieldset
-           (<:legend "Names")
-            (text-input-field "first-name" "First Name")
-            (text-input-field "nickname" "Nickname" :max-length 24)
-            (text-input-field "last-name" "Last Name"))
-          (<:submit :value "Next")))
-
-(defun cc-early-life ()
-  (<:form :name "character-creation-early-life" :action "/newchar" :method "post"
-          (<:input :type "hidden" :name "cc-page" :value 1)
-          (<:fieldset
-           (<:legend (<:ah "Place of origin"))
-           (<:div :class "field"
-                  (<:label :for "origin" (<:ah "Where from?"))
-                  (<:select :id "origin" :name "origin"
-                            (<:option :value "local" (<:ah "Local -- is from the Twin Cities area."))
-                            (<:option :value "state" (<:ah "Minnesotan -- not from the Cities, but still from the state."))
-                            (<:option :value "midwest" (<:ah "Midwestern -- hails from elsewhere in the American Midwest."))
-                            (<:option :value "east-coast" (<:ah "East Coast -- is from the east coast of the US."))
-                            (<:option :value "south" (<:ah "Southern -- comes from the Southern US."))
-                            (<:option :value "west-coast" (<:ah "West Coast -- California, Pacific Northwest, etc."))
-                            (<:option :value "else" (<:ah "Elsewhere -- Not from the continental US. Alaska, Hawaii, other countries.")))))
-          (<:fieldset
-           (<:legend (<:ah "Family situation"))
-           (<:div :class "field"
-                  (<:label :for "parents" (<:ah "Number of parents"))
-                  (<:select :id "parents" :name "parents"
-                            (<:option :value "none" "None")
-                            (<:option :value "one" "One")
-                            (<:option :value "two" :selected "selected" "Two")
-                            (<:option :value "more" "More than two")))
-           (<:div :class "field"
-                  (<:label :for "siblings" (<:ah "Number of siblings"))
-                  (<:select :id "siblings" :name "siblings"
-                            (<:option :value "none" "None")
-                            (<:option :value "one" :selected "selected" "One")
-                            (<:option :value "two" "Two")
-                            (<:option :value "three" "Three")
-                            (<:option :value "more" "More than three")))
-           (<:div :class "field"
-                  (<:label :for "childhood-finances" (<:ah "Financial class"))
-                  (<:select :id "childhood-finances" :name "childhood-finances"
-                            (<:option :value "poor" "Poor")
-                            (<:option :value "working-class" "Working Class")
-                            (<:option :value "middle-class" :selected "selected" "Middle Class")
-                            (<:option :value "upper-class" "Upper Class"))))
-          (<:submit :value "Next")))
-
-(defun cc-later-life ()
-  (<:script
-(<:ai "
-$(document).ready(function (){
+  (<:script (<:ai "$(document).ready(function(){$('#tabs').tabs();
+ (function () {
     var career_idx = 0;
-    text_input = function (name, label) {
+    function text_input (name, label) {
         return $(document.createElement('div'))
             .addClass('field')
             .append($(document.createElement('label')).attr('for',name).text(label))
@@ -344,44 +278,9 @@ $(document).ready(function (){
             $('#careers .career-field:last').remove();
         };
     });
-});
-"))
-  (<:form :name "character-creation-later-life" :action "/newchar" :method "post"
-          (<:input :type "hidden" :name "cc-page" :value 2)
-          (<:fieldset
-           (<:legend "Friends and More")
-           (<:div :class "field"
-                  (<:label :for "friends" (<:ah "Any friends?"))
-                  (<:select :id "friends" :name "friends"
-                            (<:option :value "ronery" "No, character is all alone.")
-                            (<:option :value "acquaintances" "Not really, just some acquaintances/coworkers and such.")
-                            (<:option :value "tight" :selected "selected" "Yeah, but just one, or a couple of very close friends.")
-                            (<:option :value "social" "Yeah, the character has plenty of friends, but few are really close.")
-                            (<:option :value "loved-by-everyone" "Yes. The character has a relatively big circle of acquaintances and close friends.")))
-           (<:div :class "field"
-                  (<:label :for "so" (<:ah "Is there a special someone?"))
-                  (<:select :id "so" :name "so"
-                            (<:option :value "ronery" "No, the character is forever alone.")
-                            (<:option :value "dating" "Kinda, currently seeing someone.")
-                            (<:option :value "committed" :selected "selected" "Yes. The character has been with someone for a while.")
-                            (<:option :value "ball-and-chain" "Yes, the character is in a committed relationship and/or married."))))
-          (<:fieldset
-           (<:legend "Careers")
-           (<:href "javascript:void(0)" :id "add-career" "Add Career")
-           (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
-           (<:p :id "careers-desc" (<:ah "Choose some careers, and how long."))
-           (<:div :id "careers" :aria-live "polite"
-                  :aria-relevant "additions removals"
-                  :aria-describedby "careers-desc"
-                  (<:div :class "career-field"
-                   (text-input-field "careers[0]" "Career #0")
-                   (text-input-field "career-times[0]" "How long?"))))
-          (<:submit :value "Next")))
+ })();
 
-(defun cc-appearance ()
-  (<:script
-(<:ai "
-$(document).ready(function (){
+ (function (){
     var bodypart_idx = 0;
     function text_input (name, label) {
         return $(document.createElement('div'))
@@ -408,39 +307,137 @@ $(document).ready(function (){
             $('#bodyparts .bodypart-field:last').remove();
         };
     });
-});
-"))
-(<:form :name "character-creation-appearance" :action "/newchar" :method "post"
-        (<:input :type "hidden" :name "cc-page" :value 3)
-        (<:fieldset
-         (<:legend :id "bodyparts-desc" (<:ah "Choose 1 to 3 distinguishing features"))
-         (<:href "javascript:void(0)" :id "add-bodypart" "Add a feature")
-         (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
-         (<:div :id "bodyparts" :aria-live "polite"
-                :aria-relevant "additions removals"
-                :aria-describedby "bodyparts-desc"
-                (<:div :class "bodypart-field"
-                       (text-input-field "bodyparts[0]" "Feature #0")
-                       (text-input-field "bodypart-adjs[0]" "Adjective"))))
-        (<:submit :value "Next")))
+})();
+
+$('#later-life a').button();
+$('#appearance a').button();
+});"))
+  (error-messages)
+  (<:p "This is an experiment")
+  (<:form :name "character-creation" :action "/newchar" :method "post"
+   (<:div :id "tabs"
+     (<:ul
+      (<:li (<:href "#identity" "Identity"))
+      (<:li (<:href "#early-life" "Early Life"))
+      (<:li (<:href "#later-life" "Later Life"))
+      (<:li (<:href "#appearance" "Appearance"))
+      (<:li (<:href "#here-and-now" "Here and Now")))
+     (cc-identity)
+     (cc-early-life)
+     (cc-later-life)
+     (cc-appearance)
+     (cc-here-and-now))
+   (<:submit :value "Done")))
+
+(defun cc-identity ()
+  (<:div
+   :id "identity"
+   (<:fieldset
+    (<:div :class "field"
+           (<:label :for "pronoun" (<:ah "Pronoun"))
+           (<:select :id "pronoun" :name "pronoun"
+                     (<:option :value "she" "She")
+                     (<:option :value "he" "He")
+                     (<:option :value "they" :selected "selected" "They"))))
+   (<:fieldset
+    (<:legend "Name")
+    (text-input-field "first-name" "First Name")
+    (text-input-field "nickname" "Nickname" :max-length 24)
+    (text-input-field "last-name" "Last Name"))))
+
+(defun cc-early-life ()
+   (<:div :id "early-life"
+     (<:fieldset
+      (<:legend (<:ah "Place of origin"))
+      (<:div :class "field"
+             (<:label :for "origin" (<:ah "Where from?"))
+             (<:select :id "origin" :name "origin"
+                       (<:option :value "local" (<:ah "Local -- is from the Twin Cities area."))
+                       (<:option :value "state" (<:ah "Minnesotan -- not from the Cities, but still from the state."))
+                       (<:option :value "midwest" (<:ah "Midwestern -- hails from elsewhere in the American Midwest."))
+                       (<:option :value "east-coast" (<:ah "East Coast -- is from the east coast of the US."))
+                       (<:option :value "south" (<:ah "Southern -- comes from the Southern US."))
+                       (<:option :value "west-coast" (<:ah "West Coast -- California, Pacific Northwest, etc."))
+                       (<:option :value "else" (<:ah "Elsewhere -- Alaska, Hawaii, or other countries.")))))
+     (<:fieldset
+      (<:legend (<:ah "Family situation"))
+      (<:div :class "field"
+             (<:label :for "parents" (<:ah "Number of parents"))
+             (<:select :id "parents" :name "parents"
+                       (<:option :value "none" "None")
+                       (<:option :value "one" "One")
+                       (<:option :value "two" :selected "selected" "Two")
+                       (<:option :value "more" "More than two")))
+      (<:div :class "field"
+             (<:label :for "siblings" (<:ah "Number of siblings"))
+             (<:select :id "siblings" :name "siblings"
+                       (<:option :value "none" "None")
+                       (<:option :value "one" :selected "selected" "One")
+                       (<:option :value "two" "Two")
+                       (<:option :value "three" "Three")
+                       (<:option :value "more" "More than three")))
+      (<:div :class "field"
+             (<:label :for "childhood-finances" (<:ah "Financial class"))
+             (<:select :id "childhood-finances" :name "childhood-finances"
+                       (<:option :value "poor" "Poor")
+                       (<:option :value "working-class" "Working Class")
+                       (<:option :value "middle-class" :selected "selected" "Middle Class")
+                       (<:option :value "upper-class" "Upper Class"))))))
+
+(defun cc-later-life ()
+  (<:div :id "later-life"
+    (<:fieldset
+     (<:legend "Friends and More")
+     (<:div :class "field"
+            (<:label :for "friends" (<:ah "Any friends?"))
+            (<:select :id "friends" :name "friends"
+                      (<:option :value "ronery" "No, character is all alone.")
+                      (<:option :value "acquaintances" "Not really, just some acquaintances/coworkers and such.")
+                      (<:option :value "tight" :selected "selected" "Yeah, but just one, or a couple of very close friends.")
+                      (<:option :value "social" "Yeah, the character has plenty of friends, but few are really close.")
+                      (<:option :value "loved-by-everyone" "Yes. The character has a relatively big circle of acquaintances and close friends.")))
+     (<:div :class "field"
+            (<:label :for "so" (<:ah "Is there a special someone?"))
+            (<:select :id "so" :name "so"
+                      (<:option :value "ronery" "No, the character is forever alone.")
+                      (<:option :value "dating" "Kinda, currently seeing someone.")
+                      (<:option :value "committed" :selected "selected" "Yes. The character has been with someone for a while.")
+                      (<:option :value "ball-and-chain"
+                                "Yes, the character is in a committed relationship and/or married."))))
+    (<:fieldset
+     (<:legend "Careers")
+     (<:href "javascript:void(0)" :id "add-career" "Add Career")
+     (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
+     (<:p :id "careers-desc" (<:ah "Choose some careers, and how long."))
+     (<:div :id "careers" :aria-live "polite"
+            :aria-relevant "additions removals"
+            :aria-describedby "careers-desc"
+            (<:div :class "career-field"
+                   (text-input-field "careers[0]" "Career #0")
+                   (text-input-field "career-times[0]" "How long?"))))))
+
+(defun cc-appearance ()
+  (<:div :id "appearance"
+         (<:fieldset
+          (<:legend :id "bodyparts-desc" (<:ah "Choose 1 to 3 distinguishing features"))
+          (<:href "javascript:void(0)" :id "add-bodypart" "Add a feature")
+          (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
+          (<:div :id "bodyparts" :aria-live "polite"
+                 :aria-relevant "additions removals"
+                 :aria-describedby "bodyparts-desc"
+                 (<:div :class "bodypart-field"
+                        (text-input-field "bodyparts[0]" "Feature #0")
+                        (text-input-field "bodypart-adjs[0]" "Adjective"))))))
 
 (defun cc-here-and-now ()
-  (<:form :name "character-creation-here-and-now" :action "/newchar" :method "post"
-          (<:input :type "hidden" :name "cc-page" :value 4)
-          (<:fieldset
-           (<:legend "Current location")
-           (<:div :class "field"
-                  (<:label :for "where" (<:ah "Where are they now?"))
-                  (<:select :id "where" :name "where"
-                            (<:option :value "midway" "Midway Area")
-                            (<:option :value "downtown" "Downtown Minneapolis")
-                            (<:option :value "dinkytown" "Dinkytown Neighborhood")
-                            (<:option :value "riverfront" "Riverfront District")
-                            (<:option :value "west-bank" "West Bank Neighborhood"))))
-          (<:submit :value "Next")))
-
-(defun cc-confirm ()
-  (<:p (<:ah "<Character preview goes here>"))
-  (<:form :name "character-creation-confirm" :action "/newchar" :method "post"
-          (<:input :type "hidden" :name "cc-page" :value 5)
-          (<:submit :value "Okay, done!")))
+  (<:div :id "here-and-now"
+         (<:fieldset
+          (<:legend "Current location")
+          (<:div :class "field"
+                 (<:label :for "where" (<:ah "Where are they now?"))
+                 (<:select :id "where" :name "where"
+                           (<:option :value "midway" "Midway Area")
+                           (<:option :value "downtown" "Downtown Minneapolis")
+                           (<:option :value "dinkytown" "Dinkytown Neighborhood")
+                           (<:option :value "riverfront" "Riverfront District")
+                           (<:option :value "west-bank" "West Bank Neighborhood"))))))
