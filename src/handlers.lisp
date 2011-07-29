@@ -141,6 +141,10 @@
   #+nil(ensure-logged-in)
   (templ:newchar))
 
+(define-easy-handler (newchar-preview :uri "/newchar-preview") ()
+  (setf (content-type*) "text/plain")
+  (format nil "~S" (hunchentoot:get-parameters*)))
+
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
   (ensure-logged-in)
