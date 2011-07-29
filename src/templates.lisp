@@ -1,7 +1,9 @@
 (cl:defpackage :sykosomatic.templ
   (:use :cl :yaclml :alexandria)
   (:nicknames :templ)
-  (:export :not-found :home :login :stage :role :scenes :view-scene :signup :newchar))
+  (:export :not-found :home :login :stage :role
+           :scenes :view-scene :signup :newchar
+           :newchar-preview-div))
 (cl:in-package :templ)
 
 ;;; General
@@ -236,31 +238,44 @@
            (text-input-field "confirmation" "Confirm password" :type "password"))
           (<:submit :value "Submit")))
 
-;;; /newchar
-(defun creation-breadcrumb (focused)
-  (<:ul :class "breadcrumbs"
-   (loop
-      for i from 0
-      for title in '("Identity" "Early life" "Later life" "Appearance" "Here and Now" "Confirm")
-      do (<:li :class (if (= i focused)
-                          "breadcrumb-focused"
-                          "breadcrumb-unfocused")
-               (if (= i focused)
-                   (<:ah title)
-                   (<:href (format nil "/newchar?cc-page=~A" i) (<:ah title)))))))
+;;; /newchar-preview
+(defun newchar-preview-div (&key first-name nickname last-name pronoun pluralp origin)
+  (yaclml:with-yaclml-output-to-string
+    (when (notany #'emptyp (list first-name nickname last-name))
+      (print (list first-name nickname last-name))
+      (<:p (<:ah (format nil "~:(~A~) ~:(~A~), also known as \"~A\", is coming to life before your very eyes..."
+                         first-name last-name nickname))))
+    (when origin
+      (<:p (<:ah (format nil "~:(~A~) ~A originally from ~A."
+                         pronoun (if pluralp "are" "is")
+                         (cond
+                           ((string= origin "local")
+                            "the Twin Cities")
+                           ((string= origin "state")
+                            "Minnesota")
+                           ((string= origin "midwest")
+                            "somewhere in the Midwest")
+                           ((string= origin "east-coast")
+                            "the East Coast")
+                           ((string= origin "south")
+                            "the South")
+                           ((string= origin "west-coast")
+                            "the West Coast")
+                           (t "outside the continental US"))))))))
 
-;; Good enough for now, I think, but it kinda stinks: It would be better for each page to actually
-;; have its own resource identifier associated with it, and control page flow some other way.
+;;; /newchar
 (defpage newchar () ()
     "Create a character"
   (<:script (<:ai "$(document).ready(function(){$('#tabs').tabs();
 $('#later-life a').button();
 $('#appearance a').button();
-$('form').change(function(){
+function update_preview () {
     $.get('/newchar-preview',$('form').serialize(),function (data){
-        $('#preview').text(data);
+        $('#preview').html(data);
     });
-});
+}
+update_preview();
+$('form').change(update_preview);
 function text_input (name, label) {
     return $(document.createElement('div'))
         .addClass('field')
