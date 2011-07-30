@@ -427,22 +427,11 @@
 **** TODO Confirmation
      Need to gather the preview of everything done so far.
 *** TODO Update character.lisp
-    Make character.lisp accept the new character creation parameters. This includes validating each
-    and every field, and keeping track of character creation progress through the multi-page flow.
+    Make character.lisp accept the new character creation parameters.
 *** TODO One Big Form™
     Use the magic of javascript to turn it into a single, big, multi-tabbed form.
-*** TODO Multi-page input
-**** DONE Templates
-     Convert the big fat form into a multi-page form split between logical parts of character
-     creation -- just the templates for now.
-**** TODO Submission progression
-     Each submit should accumulate the current selections until the current point.
-**** TODO Go back and fix
-     Should be able to jump back to an earlier part of character creation, fix something up, then
-     keep going. Editing something earlier should not erase work that was done later (unlike some
-     checkout flows)
-**** TODO Per-page previews
-     Each page should have an informative preview that shows how the player's selections are
+**** TODO Per-tab previews
+     Each tab should have an informative preview that shows how the player's selections are
      affecting something about the character.
 ***** TODO Identity
       Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
@@ -465,4 +454,6 @@
       something to give the player an idea of why it sets it apart from the other locations.
 ***** TODO Confirm
       Summarize all the other stuff that was accumulated during character creation, and have the
-      player confirm their decision.
+      player confirm their decision. The actual submit button will be in here.
+**** TODO Wizardize
+     Make it more like a wizard by putting 'next' buttons in each tab.
