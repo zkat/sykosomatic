@@ -305,11 +305,17 @@
       (<:p (<:ah (format nil "~:(~A~)'s journey is about to begin." nickname))))))
 
 ;;; /newchar
-(defpage newchar () ()
-    "Create a character"
-  (<:script (<:ai "$(document).ready(function(){$('#tabs').tabs();
-$('#later-life a').button();
-$('#appearance a').button();
+(defun newchar-js ()
+  (<:script (<:ai "$(document).ready(function(){
+
+$('.button').button();
+$('.next-tab').click(function (){
+    var tab_id = $(this).parent('div').attr('id');
+    var tab_index = $('#tabs .ui-tabs-panel').index(document.getElementById(tab_id));
+    console.log(tab_index);
+    $('#tabs').tabs('select',tab_index+1);
+});
+
 function update_preview () {
     $.get('/newchar-preview',$('form').serialize(),function (data){
         $('#preview').html(data);
@@ -358,7 +364,10 @@ numerous_fields(3,
                 'bodyparts','Feature',
                 'bodypart-adjs','Adjective'
                );
-});"))
+});")))
+
+(defpage newchar () ((newchar-js))
+    "Create a character"
   (error-messages)
   (<:p :id "preview" "This is an experiment")
   (<:form :name "character-creation" :action "/newchar" :method "post"
@@ -382,7 +391,10 @@ numerous_fields(3,
    :id "confirm"
    (<:fieldset
     (<:p "All done? Are you sure you wish to create this character?")
-    (<:submit :value "All Done"))))
+    (<:submit :class "button" :value "All Done"))))
+
+(defun next-tab-button ()
+  (<:href "#" :class "button next-tab" "Next"))
 
 (defun cc-identity ()
   (<:div
@@ -398,7 +410,8 @@ numerous_fields(3,
     (<:legend "Name")
     (text-input-field "first-name" "First Name")
     (text-input-field "nickname" "Nickname" :max-length 24)
-    (text-input-field "last-name" "Last Name"))))
+    (text-input-field "last-name" "Last Name"))
+   (next-tab-button)))
 
 (defun cc-early-life ()
    (<:div :id "early-life"
@@ -437,7 +450,8 @@ numerous_fields(3,
                        (<:option :value "poor" "Poor")
                        (<:option :value "working-class" "Working Class")
                        (<:option :value "middle-class" :selected "selected" "Middle Class")
-                       (<:option :value "upper-class" "Upper Class"))))))
+                       (<:option :value "upper-class" "Upper Class"))))
+     (next-tab-button)))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
@@ -461,21 +475,23 @@ numerous_fields(3,
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
      (<:legend :id "careers-desc" "Choose up to 5 careers")
-     (<:href "javascript:void(0)" :id "add-career" "Add Career")
-     (<:href "javascript:void(0)" :id "remove-career" "Remove Career")
+     (<:href "#" :id "add-career" :class "button" "Add Career")
+     (<:href "#" :id "remove-career" :class "button" "Remove Career")
      (<:div :id "careers" :aria-live "polite"
             :aria-relevant "additions removals"
-            :aria-describedby "careers-desc"))))
+            :aria-describedby "careers-desc"))
+    (next-tab-button)))
 
 (defun cc-appearance ()
   (<:div :id "appearance"
          (<:fieldset
           (<:legend :id "bodyparts-desc" (<:ah "Choose up to 3 distinguishing features"))
-          (<:href "javascript:void(0)" :id "add-bodypart" "Add a feature")
-          (<:href "javascript:void(0)" :id "remove-bodypart" "Remove a feature")
+          (<:href "#" :id "add-bodypart" :class "button" "Add a feature")
+          (<:href "#" :id "remove-bodypart" :class "button" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
                  :aria-relevant "additions removals"
-                 :aria-describedby "bodyparts-desc"))))
+                 :aria-describedby "bodyparts-desc"))
+         (next-tab-button)))
 
 (defun cc-here-and-now ()
   (<:div :id "here-and-now"
@@ -488,4 +504,5 @@ numerous_fields(3,
                            (<:option :value "downtown" "Downtown Minneapolis")
                            (<:option :value "dinkytown" "Dinkytown Neighborhood")
                            (<:option :value "riverfront" "Riverfront District")
-                           (<:option :value "west-bank" "West Bank Neighborhood"))))))
+                           (<:option :value "west-bank" "West Bank Neighborhood"))))
+         (next-tab-button)))
