@@ -1,5 +1,6 @@
 (cl:defpackage #:sykosomatic
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:sykosomatic.account #:sykosomatic.character
+  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:string-case
+        #:sykosomatic.account #:sykosomatic.character
         #:sykosomatic.scene #:sykosomatic.utils)
   (:import-from #:sykosomatic.db #:init-db))
 (cl:in-package #:sykosomatic)

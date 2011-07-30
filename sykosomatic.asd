@@ -6,7 +6,8 @@
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad
-               #:chillax.core #:chillax.jsown)
+               #:chillax.core #:chillax.jsown
+               #:string-case)
   :components
   ((:module src
             :serial t
