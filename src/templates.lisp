@@ -335,20 +335,46 @@ function numerous_fields (max_count,
                           field_class,field_div_id,
                           field1_name,field1_label,
                           field2_name,field2_label) {
+    function enable_button(button_id) {
+        $('#'+button_id).button('enable');
+    }
+    function disable_button(button_id) {
+        $('#'+button_id).button('disable');
+    }
+    function count_fields() {
+        return $('.'+field_class).length;
+    }
+    function check_enabled_p() {
+        var num_fields = count_fields();
+        if (num_fields >= max_count) {
+            disable_button(add_button_id);
+        }
+        else {
+            enable_button(add_button_id);
+        }
+        if (num_fields >= 1) {
+            enable_button(remove_button_id);
+        }
+        else {
+            disable_button(remove_button_id);
+        }
+    }
     $('#'+add_button_id).click(function (){
-        var num_fields = $('.'+field_class).length;
+        var num_fields = count_fields();
         if (num_fields < max_count) {
             var field = document.createElement('div');
             $(field).addClass(field_class)
                 .append(text_input(field1_name+'['+num_fields+']',field1_label+' #'+(num_fields+1)))
                 .append(text_input(field2_name+'['+num_fields+']',field2_label));
             $('#'+field_div_id).append(field);
+            check_enabled_p();
         };
     });
     $('#'+remove_button_id).click(function (){
         $('#'+field_div_id+' .'+field_class+':last').remove();
+        check_enabled_p();
     });
-
+    disable_button(remove_button_id);
 }
 numerous_fields(5,
                 'add-career','remove-career',
