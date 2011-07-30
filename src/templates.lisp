@@ -397,17 +397,17 @@ numerous_fields(3,
   (<:form :name "character-creation" :action "/newchar" :method "post"
    (<:div
     :id "creation-forms"
-    (<:h3 "Identity")
+    #+nil(<:h3 "Identity")
     (cc-identity)
-    (<:h3 "Early Life")
+    #+nil(<:h3 "Early Life")
     (cc-early-life)
-    (<:h3 "Later Life")
+    #+nil(<:h3 "Later Life")
     (cc-later-life)
-    (<:h3 "Appearance")
+    #+nil(<:h3 "Appearance")
     (cc-appearance)
-    (<:h3 "Here and Now")
+    #+nil(<:h3 "Here and Now")
     (cc-here-and-now)
-    (<:h3 "Confirm")
+    #+nil(<:h3 "Confirm")
     (cc-confirm))))
 
 (defun cc-confirm ()
