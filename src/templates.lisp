@@ -305,6 +305,7 @@
 (defun newchar-js ()
   (<:script (<:ai "$(document).ready(function(){
 
+//$('#creation-forms').accordion();
 $('.button').button();
 $('.next-tab').click(function (){
     var tab_id = $(this).parent('div').attr('id');
@@ -318,8 +319,8 @@ function update_preview () {
         $('#preview').html(data);
     });
 }
-update_preview();
-$('form').change(update_preview);
+//update_preview();
+//$('form').change(update_preview);
 function text_input (name, label) {
     return $(document.createElement('div'))
         .addClass('field')
@@ -366,22 +367,22 @@ numerous_fields(3,
 (defpage newchar () ((newchar-js))
     "Create a character"
   (error-messages)
-  (<:p :id "preview" "This is an experiment")
+  #+nil(<:p :id "preview" "This is an experiment")
   (<:form :name "character-creation" :action "/newchar" :method "post"
-   (<:div :id "tabs"
-     (<:ul
-      (<:li (<:href "#identity" "Identity"))
-      (<:li (<:href "#early-life" "Early Life"))
-      (<:li (<:href "#later-life" "Later Life"))
-      (<:li (<:href "#appearance" "Appearance"))
-      (<:li (<:href "#here-and-now" "Here and Now"))
-      (<:li (<:href "#confirm" "Confirm")))
-     (cc-identity)
-     (cc-early-life)
-     (cc-later-life)
-     (cc-appearance)
-     (cc-here-and-now)
-     (cc-confirm))))
+   (<:div
+    :id "creation-forms"
+    (<:h3 "Identity")
+    (cc-identity)
+    (<:h3 "Early Life")
+    (cc-early-life)
+    (<:h3 "Later Life")
+    (cc-later-life)
+    (<:h3 "Appearance")
+    (cc-appearance)
+    (<:h3 "Here and Now")
+    (cc-here-and-now)
+    (<:h3 "Confirm")
+    (cc-confirm))))
 
 (defun cc-confirm ()
   (<:div
@@ -391,7 +392,7 @@ numerous_fields(3,
     (<:submit :class "button" :value "All Done"))))
 
 (defun next-tab-button ()
-  (<:href "#" :class "button next-tab" "Next"))
+  (<:href "javascript:void(0)" :class "button next-tab" "Next"))
 
 (defun cc-identity ()
   (<:div
@@ -407,8 +408,7 @@ numerous_fields(3,
     (<:legend "Name")
     (text-input-field "first-name" "First Name")
     (text-input-field "nickname" "Nickname" :max-length 24)
-    (text-input-field "last-name" "Last Name"))
-   (next-tab-button)))
+    (text-input-field "last-name" "Last Name"))))
 
 (defun cc-early-life ()
    (<:div :id "early-life"
@@ -447,8 +447,7 @@ numerous_fields(3,
                        (<:option :value "poor" "Poor")
                        (<:option :value "working-class" "Working Class")
                        (<:option :value "middle-class" :selected "selected" "Middle Class")
-                       (<:option :value "upper-class" "Upper Class"))))
-     (next-tab-button)))
+                       (<:option :value "upper-class" "Upper Class"))))))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
@@ -472,23 +471,21 @@ numerous_fields(3,
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
      (<:legend :id "careers-desc" "Choose up to 5 careers")
-     (<:href "#" :id "add-career" :class "button" "Add Career")
-     (<:href "#" :id "remove-career" :class "button" "Remove Career")
+     (<:href "javascript:void(0)" :id "add-career" :class "button" "Add Career")
+     (<:href "javascript:void(0)" :id "remove-career" :class "button" "Remove Career")
      (<:div :id "careers" :aria-live "polite"
             :aria-relevant "additions removals"
-            :aria-describedby "careers-desc"))
-    (next-tab-button)))
+            :aria-describedby "careers-desc"))))
 
 (defun cc-appearance ()
   (<:div :id "appearance"
          (<:fieldset
           (<:legend :id "bodyparts-desc" (<:ah "Choose up to 3 distinguishing features"))
-          (<:href "#" :id "add-bodypart" :class "button" "Add a feature")
-          (<:href "#" :id "remove-bodypart" :class "button" "Remove a feature")
+          (<:href "javascript:void(0)" :id "add-bodypart" :class "button" "Add a feature")
+          (<:href "javascript:void(0)" :id "remove-bodypart" :class "button" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
                  :aria-relevant "additions removals"
-                 :aria-describedby "bodyparts-desc"))
-         (next-tab-button)))
+                 :aria-describedby "bodyparts-desc"))))
 
 (defun cc-here-and-now ()
   (<:div :id "here-and-now"
@@ -501,5 +498,4 @@ numerous_fields(3,
                            (<:option :value "downtown" "Downtown Minneapolis")
                            (<:option :value "dinkytown" "Dinkytown Neighborhood")
                            (<:option :value "riverfront" "Riverfront District")
-                           (<:option :value "west-bank" "West Bank Neighborhood"))))
-         (next-tab-button)))
+                           (<:option :value "west-bank" "West Bank Neighborhood"))))))
