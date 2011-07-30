@@ -368,13 +368,21 @@ numerous_fields(3,
       (<:li (<:href "#early-life" "Early Life"))
       (<:li (<:href "#later-life" "Later Life"))
       (<:li (<:href "#appearance" "Appearance"))
-      (<:li (<:href "#here-and-now" "Here and Now")))
+      (<:li (<:href "#here-and-now" "Here and Now"))
+      (<:li (<:href "#confirm" "Confirm")))
      (cc-identity)
      (cc-early-life)
      (cc-later-life)
      (cc-appearance)
-     (cc-here-and-now))
-   (<:submit :value "Done")))
+     (cc-here-and-now)
+     (cc-confirm))))
+
+(defun cc-confirm ()
+  (<:div
+   :id "confirm"
+   (<:fieldset
+    (<:p "All done? Are you sure you wish to create this character?")
+    (<:submit :value "All Done"))))
 
 (defun cc-identity ()
   (<:div
