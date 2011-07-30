@@ -143,15 +143,19 @@
 
 (define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
                                                                 nickname last-name
-                                                                origin)
+                                                                origin parents
+                                                                siblings childhood-finances)
+  ;; TODO - *all* of these need to be validated.
   (setf (content-type*) "text/plain")
   (templ:newchar-preview-div :first-name first-name
                              :nickname nickname
                              :last-name last-name
                              :pronoun pronoun
                              :pluralp (when (string-equal pronoun "they") t)
-                             :origin origin))
-
+                             :origin origin
+                             :parents parents
+                             :siblings siblings
+                             :class childhood-finances))
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
   (ensure-logged-in)

@@ -1,5 +1,5 @@
 (cl:defpackage :sykosomatic.templ
-  (:use :cl :yaclml :alexandria)
+  (:use :cl :yaclml :alexandria :string-case)
   (:nicknames :templ)
   (:export :not-found :home :login :stage :role
            :scenes :view-scene :signup :newchar
@@ -239,13 +239,22 @@
           (<:submit :value "Submit")))
 
 ;;; /newchar-preview
-(defun newchar-preview-div (&key first-name nickname last-name pronoun pluralp origin)
+(defun possessive (pronoun)
+  (string-case (pronoun)
+    ("he" "his")
+    ("she" "her")
+    ("they" "their")))
+
+(defun newchar-preview-div (&key first-name nickname last-name pronoun pluralp origin
+                            parents siblings class
+                            &aux (fully-named (notany #'emptyp
+                                                      (list first-name nickname last-name pronoun))))
   (yaclml:with-yaclml-output-to-string
-    (when (notany #'emptyp (list first-name nickname last-name))
-      (print (list first-name nickname last-name))
-      (<:p (<:ah (format nil "~:(~A~) ~:(~A~), also known as \"~A\", is coming to life before your very eyes..."
-                         first-name last-name nickname))))
-    (when origin
+    (<:p (<:ah "You are creating a new character.")
+         (<:ah (when fully-named
+                 (format nil " ~:(~A~) name is ~:(~A~) ~:(~A~), also known as \"~A\"."
+                         (possessive pronoun) first-name last-name nickname))))
+    (when fully-named
       (<:p (<:ah (format nil "~:(~A~) ~A originally from ~A."
                          pronoun (if pluralp "are" "is")
                          (cond
@@ -261,7 +270,39 @@
                             "the South")
                            ((string= origin "west-coast")
                             "the West Coast")
-                           (t "outside the continental US"))))))))
+                           (t "outside the continental US"))))))
+    (when fully-named
+     (<:p (<:ah (format nil "Brought up ~A ~A parent~P, ~:(~A~) was one of ~A
+    children in a ~A family."
+                        (string-case (parents)
+                          ("none" "without")
+                          (t "by"))
+                        (string-case (parents)
+                          ("more" "several")
+                          ("none" "any")
+                          (t parents))
+                        (string-case (parents)
+                          ("one" 1)
+                          (t 3))
+                        nickname
+                        (string-case (siblings)
+                          ("more" "several")
+                          ("one" "two")
+                          ("two" "three")
+                          ("three" "four"))
+                        class))))
+    (when fully-named
+      (<:p (<:ah (format nil "Now ~:(~A~) is ~A years old. ~:(~A~) ~A
+      ~A. Also, ~(~A~) ~A ~A. Having built a career in ~A for the
+      past ~A, ~A has ~A."
+                         nickname "AGE" pronoun (if pluralp "have" "has") "FRIENDSHIP-STATUS"
+                         pronoun (if pluralp "are" "is") "DATING-STATUS"
+                         "CAREER1" "CAREER1-LENGTH" pronoun "OTHER-CAREERS"))))
+    (when fully-named
+      (<:p (<:ah (format nil "~:(~A~) is currently staying in ~A."
+                         nickname "HERE-AND-NOW"))))
+    (when fully-named
+      (<:p (<:ah (format nil "~:(~A~)'s journey is about to begin." nickname))))))
 
 ;;; /newchar
 (defpage newchar () ()
