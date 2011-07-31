@@ -34,10 +34,10 @@ function mk_career_dropdown(idx) {
     var select = $(document.createElement('select'))
             .attr('name','careers['+idx+']')
             .attr('id','careers['+idx+']');
-    var careers = {'':'Choose a career...',
-                   'lumberjack':'Lumberjack',
-                   'programmer':'Software Developer',
-                   'messiah':'Savior'};
+    var careers = {''           :'Choose a career...',
+                   'lumberjack' :'Lumberjack',
+                   'programmer' :'Software Developer',
+                   'messiah'    :'Savior'};
     var curr_career;
     for (var i in careers) {
         curr_career = $(document.createElement('option'))
