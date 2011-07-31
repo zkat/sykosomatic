@@ -427,9 +427,10 @@ numerous_fields(3,
     (<:div :class "field"
            (<:label :for "pronoun" (<:ah "Pronoun"))
            (<:select :id "pronoun" :name "pronoun"
+                     (<:option :value "" "Choose pronoun...")
                      (<:option :value "she" "She")
                      (<:option :value "he" "He")
-                     (<:option :value "they" :selected "selected" "They"))))
+                     (<:option :value "they" "They"))))
    (<:fieldset
     (<:legend "Name")
     (text-input-field "first-name" "First Name")
@@ -443,6 +444,7 @@ numerous_fields(3,
       (<:div :class "field"
              (<:label :for "origin" (<:ah "Where from?"))
              (<:select :id "origin" :name "origin"
+                       (<:option :value "" :selected "selected" (<:ah "Choose origin..."))
                        (<:option :value "local" (<:ah "Local -- is from the Twin Cities area."))
                        (<:option :value "state" (<:ah "Minnesotan -- not from the Cities, but still from the state."))
                        (<:option :value "midwest" (<:ah "Midwestern -- hails from elsewhere in the American Midwest."))
@@ -455,24 +457,27 @@ numerous_fields(3,
       (<:div :class "field"
              (<:label :for "parents" (<:ah "Number of parents"))
              (<:select :id "parents" :name "parents"
+                       (<:option :value "" :selected "selected" (<:ah "Choose parents..."))
                        (<:option :value "none" "None")
                        (<:option :value "one" "One")
-                       (<:option :value "two" :selected "selected" "Two")
+                       (<:option :value "two" "Two")
                        (<:option :value "more" "More than two")))
       (<:div :class "field"
              (<:label :for "siblings" (<:ah "Number of siblings"))
              (<:select :id "siblings" :name "siblings"
+                       (<:option :value "" :selected "selected" (<:ah "Choose siblings..."))
                        (<:option :value "none" "None")
-                       (<:option :value "one" :selected "selected" "One")
+                       (<:option :value "one" "One")
                        (<:option :value "two" "Two")
                        (<:option :value "three" "Three")
                        (<:option :value "more" "More than three")))
       (<:div :class "field"
              (<:label :for "childhood-finances" (<:ah "Financial class"))
              (<:select :id "childhood-finances" :name "childhood-finances"
+                       (<:option :value "" :selected "selected" (<:ah "Choose class..."))
                        (<:option :value "poor" "Poor")
                        (<:option :value "working-class" "Working Class")
-                       (<:option :value "middle-class" :selected "selected" "Middle Class")
+                       (<:option :value "middle-class" "Middle Class")
                        (<:option :value "upper-class" "Upper Class"))))))
 
 (defun cc-later-life ()
@@ -482,17 +487,19 @@ numerous_fields(3,
      (<:div :class "field"
             (<:label :for "friends" (<:ah "Any friends?"))
             (<:select :id "friends" :name "friends"
+                      (<:option :value "" :selected "selected" (<:ah "Choose friends..."))
                       (<:option :value "ronery" "No, character is all alone.")
                       (<:option :value "acquaintances" "Not really, just some acquaintances/coworkers and such.")
-                      (<:option :value "tight" :selected "selected" "Yeah, but just one, or a couple of very close friends.")
+                      (<:option :value "tight" "Yeah, but just one, or a couple of very close friends.")
                       (<:option :value "social" "Yeah, the character has plenty of friends, but few are really close.")
                       (<:option :value "loved-by-everyone" "Yes. The character has a relatively big circle of acquaintances and close friends.")))
      (<:div :class "field"
             (<:label :for "so" (<:ah "Is there a special someone?"))
             (<:select :id "so" :name "so"
+                      (<:option :value "" :selected "selected" (<:ah "Choose significant other..."))
                       (<:option :value "ronery" "No, the character is forever alone.")
                       (<:option :value "dating" "Kinda, currently seeing someone.")
-                      (<:option :value "committed" :selected "selected" "Yes. The character has been with someone for a while.")
+                      (<:option :value "committed" "Yes. The character has been with someone for a while.")
                       (<:option :value "ball-and-chain"
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
@@ -520,6 +527,7 @@ numerous_fields(3,
           (<:div :class "field"
                  (<:label :for "where" (<:ah "Where are they now?"))
                  (<:select :id "where" :name "where"
+                           (<:option :value "" :selected "selected" (<:ah "Choose current location..."))
                            (<:option :value "midway" "Midway Area")
                            (<:option :value "downtown" "Downtown Minneapolis")
                            (<:option :value "dinkytown" "Dinkytown Neighborhood")
