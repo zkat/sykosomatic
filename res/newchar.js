@@ -46,7 +46,7 @@ function init_career_buttons() {
     });
 }
 init_career_buttons();
-var max_bodypart_count = 3;
+var max_bodypart_count = 5;
 function add_bodypart_choice() {
     var num_fields = count_fields('bodyparts');
     if (num_fields < max_bodypart_count) {
@@ -54,7 +54,7 @@ function add_bodypart_choice() {
             $('#bodyparts').append($(data));
             $('#bodyparts-'+num_fields).change(function(){
                 var div = $(this).parent('.field');
-                $.get('/newchar/bodypart-adjs',{'idx':num_fields},function(data){
+                $.get('/newchar/bodypart-adjs',{'idx':num_fields,'adj':$(this).val()},function(data){
                     $(div).children('.adj').html(data);
                 });
             });

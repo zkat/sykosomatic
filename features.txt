@@ -1,0 +1,188 @@
+(
+("hair"
+ ("colors"
+  ("blonde" "black" "blue-black" "dark brown" "tan" "golden" "sandy" "scarlet"
+   "strawberry-blonde" "red" "dark red" "brown with blonde highlights"
+   "platinum" "orange" "ginger" "white" "grey" "black streaked with grey"
+   "brown streaked with grey" "dyed dark green" "dyed blue" "dyed rainbow"
+   "dyed red underneath" "dyed purple" "dyed turquise" "dyed lemon yellow"
+   "dyed fire red" "dyed lime green" "dyed sky blue" "dyed pink"))
+ ("textures"
+  ("straight" "silky" "smooth" "greasy" "slick" "flowing" "wavy" "curly"
+   "frizzy" "kinky"))
+ ("thickness" ("thick" "lush" "wispy" "thin" "thinning" "bald"))
+ ("length and style"
+  ("toe-length" "waist-length" "long" "shoulder-length" "bobbed" "chin-length"
+   "afro" "short" "ponytail" "pigtails" "bun" "two buns" "mass of ringlets"
+   "buzzed" "shaved" "spiked" "feathered" "piled" "tangled"))
+ ("general"
+  ("wild" "untamed" "mussed" "smelly" "crusted" "shredded" "vivid" "striking"
+   "classy" "mutinous" "gleaming" "unremarkable" "limp")))
+ ("eyes"
+  ("colors"
+   ("forest green" "jade green" "mint green" "emerald" "lime green" "olive"
+    "grey-green" "sea green" "hazel" "amber" "golden" "black" "ebony" "grey"
+    "aquamarine" "sky blue" "icy blue" "ocean blue" "indigo" "cornflower blue"
+    "electric blue" "dark blue" "brown" "chestnut" "chocolate" "honey" "russet"
+    "amethyst" "violet"))
+  ("size" ("small" "large" "wide" "beady"))
+  ("shape" ("round" "almond" "doe-eyed" "narrow"))
+  ("position" ("close-set" "wide-set" "slanted" "even"))
+  ("other"
+   ("fierce" "calm" "penetrating" "candid" "unremarkable" "unreadable"
+    "mismatched" "nervous" "twitchy" "red-rimmed" "watery" "dry" "reddened"
+    "puffy" "clear" "knowing" "eager" "sleepy" "haunted")))
+ ("nose"
+  ("size"
+   ("enormous" "large" "huge" "prominent" "average" "small" "tiny" "fat"))
+  ("shape"
+   ("pointed" "sharp" "wide" "rounded" "hooked" "beak-like" "squashed" "lumpy"
+    "upturned" "gaping" "crooked" "crushed" "perfect"))
+  ("other" ("scarred" "burned" "pockmarked")))
+ ("mouth"
+  ("size"
+   ("enormous" "large" "huge" "prominent" "gaping" "average" "small" "tiny"
+    "fat"))
+  ("shape"
+   ("rounded" "thin" "pointed" "uneven" "full" "voluminous" "puckered"
+    "sagging" "pouty" "lipless"))
+  ("other" ("scarred" "burned" "scabbed")))
+ ("build"
+  ("type"
+   ("well-muscled" "brawny" "buff" "beefy" "strong" "average" "curvy" "wide"
+    "rounded" "padded" "doughy" "meaty" "skinny" "twiggy" "lean" "athletic"
+    "emaciated" "scrawny" "fat"))
+  ("height" ("tall" "towering" "short" "tiny" "diminuative" "dwindling"))
+  ("other" ("hunched?")))
+ ("arms"
+  ("size"
+   ("oversized" "long" "skinny" "chubby" "thick" "club-like" "twiggy" "stumpy"
+    "fat"))
+  ("other"
+   ("withered" "missing" "twisted" "firm" "well-muscled" "scarred" "burned")))
+ ("leg"
+  ("size"
+   ("long" "elegant" "skinny" "chubby" "thick" "trunk-like" "stumpy" "fat"))
+  ("other"
+   ("unshaven" "hairy" "fuzzy" "withered" "missing" "twisted" "firm"
+    "well-muscled" "scarred" "burned")))
+ ("hands"
+  ("size" ("large" "small" "tiny" "dainty" "chubby" "over-sized" "fat"))
+  ("other"
+   ("withered" "missing" "twisted" "firm" "strong" "scarred" "burned" "sweaty"
+    "greasy" "oily" "dry")))
+ ("feet"
+  ("size"
+   ("narrow" "wide" "flat" "skinny" "big" "over-sized" "tiny" "small" "dainty"
+    "fat"))
+  ("other"
+   ("withered" "missing" "twisted" "scarred" "burned" "smelly" "stinky"
+    "hairy")))
+ ("skin"
+  ("colors"
+   ("albino" "cream" "ivory" "sand" "tan" "peach" "pink" "rose" "golden"
+    "saffron" "russet" "coffee" "chocolate" "brown" "mahogany" "ebony"))
+  ("textures"
+   ("smooth" "soft" "rough" "coarse" "wrinkled" "bumpy" "gritty" "silky"))
+  ("other"
+   ("weathered" "sallow" "thin" "parchment" "papery" "dry" "oily" "moist"
+    "sweaty" "diseased" "scarred" "reddened" "peeling" "freckled")))
+ ("forehead" ("all" ("large" "small" "wrinkled" "burned" "scarred")))
+ ("eyebrows"
+  ("size"
+   ("huge" "large" "thick" "long" "wide" "small" "tiny" "barely there" "thin"
+    "pencil-line" "mono-brow"))
+  ("other" ("shiny" "lush" "hairy" "missing" "thinning")))
+ ("teeth"
+  ("size"
+   ("large" "huge" "big" "small" "narrow" "-color (stained" "yellowed" "ivory"
+    "white" "pearly" "brown" "blackened" "silver" "gold"))
+  ("other"
+   ("missing" "even" "perfect" "uneven" "crooked" "crowded" "broken" "fake")))
+ ("chin"
+  ("size"
+   ("large" "prominent" "jutting" "mountainous" "weak" "small" "strong" "fat"))
+  ("other"
+   ("stubbly" "cleft" "dimpled" "rounded" "pointed" "double" "triple")))
+ ("cheeks" ("size" ("plump" "fat"))
+  ("shape" ("rounded" "concave" "puffed" "drooping" "sunken"))
+  ("color" ("rosy" "reddened" "purple" "pale" "bloodless"))
+  ("other" ("sallow" "scarred" "burned" "wrinkled")))
+ ("jaw" ("shape" ("square" "round" "pointed" "prominent")))
+ ("face"
+  ("shape" ("round" "squared" "angular" "sculpted" "narrow" "wide" "average"))
+  ("other" ("wrinkled" "scarred" "burned" "weathered" "hardened" "fat")))
+ ("neck"
+  ("all"
+   ("long" "elegant" "hairy" "smooth" "fair" "burned" "scarred" "thin" "thick"
+    "fat")))
+ ("shoulders"
+  ("all"
+   ("broad" "narrow" "strong" "muscled" "sagging" "curved" "weak" "small"
+    "pointed" "rounded" "scarred" "burned")))
+ ("armpits" ("all" ("smelly" "hairy" "smooth" "moist" "rank" "unshaven")))
+ ("waist"
+  ("all"
+   ("small" "large" "thick" "muscled" "firm" "flabby" "pot-bellied" "chubby"
+    "thin" "waspish" "curved" "hourglass" "tiny" "average" "scarred" "burned"
+    "fat")))
+ ("hips" ("all" ("wide" "narrow" "padded" "fat")))
+ ("muscles" ("all" ("rippling" "ample" "taut" "lean" "tiny" "weak")))
+ ("back"
+  ("all"
+   ("scarred" "burned" "well-muscled" "strong" "blemished" "smooth" "hairy")))
+ ("chest"
+  ("all"
+   ("large" "small" "wide" "strong" "flat" "small" "modest" "under-developed"
+    "average" "soft" "firm" "ample" "large" "wide" "flabby" "fat")))
+ ("fingers"
+  ("all"
+   ("long" "spidery" "spindly" "narrow" "thin" "skinny" "knobby" "sallow"
+    "thick" "chubby" "strong" "short" "stubby" "scarred" "missing" "burned"
+    "fat")))
+ ("fingernails"
+  ("all"
+   ("clean" "well-kept" "trimmed" "neat" "yellowed" "stained" "long" "jagged"
+    "rough" "bitten" "missing")))
+ ("wrists" ("all" ("burned" "scarred")))
+ ("navel"
+  ("all" ("missing" "concave" "convex" "large" "small")))
+ ("bottom" ("size" ("ample" "large" "average" "small" "wide" "fat"))
+  ("other"
+   ("round" "curving" "firm" "flabby" "chubby" "bouncy" "muscled" "sagging"
+    "burned" "scarred")))
+ ("thighs"
+  ("all"
+   ("thick" "thin" "muscled" "flabby" "chubby" "wide" "fat" "burned"
+    "scarred")))
+ ("knees" ("all" ("knobby" "scarred" "burned" "thick")))
+ ("calves"
+  ("all"
+   ("well-muscled" "strong" "thick" "sturdy" "firm" "skinny" "weak" "sagging"
+    "burned" "scarred")))
+ ("ankles" ("all" ("knobby" "lumpy" "slim" "skinny" "burned" "scarred")))
+ ("toes"
+  ("all"
+   ("thin" "skinny" "stubby" "long" "thick" "fat" "burned" "scarred"
+    "missing")))
+ ("ears"
+  ("all"
+   ("large" "big" "protruding" "round" "small" "burned" "scarred" "missing")))
+ ("facial-hair"
+  ("color"
+   ("blonde" "black" "blue-black" "dark brown" "tan" "golden" "sandy" "scarlet"
+    "strawberry-blonde" "red" "dark red" "brown with blonde highlights"
+    "platinum" "orange" "ginger" "white" "grey" "black streaked with grey"
+    "brown streaked with grey"))
+  ("all"
+   ("large" "bushy" "lush" "smooth" "braided" "pointed" "thin" "modest"
+    "scraggly" "tufted" "fluffy" "wide" "square" "rounded" "shaggy" "patchy"
+    "uneven" "faint" "curled" "long" "short" "clipped" "trimmed" "manicured"
+    "wavy" "strait")))
+ ("eyelids" ("all" ("droopy" "pale" "reddened" "large")))
+ ("eyelashes"
+  ("all"
+   ("long" "short" "missing" "sparse" "thin" "thick" "lush" "dark" "blonde"
+    "fine")))
+ ("smile"
+  ("all" ("easy" "wide" "crooked" "lop-sided" "dopey" "tiny" "pointed"))))
