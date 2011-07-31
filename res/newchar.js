@@ -28,61 +28,23 @@ function count_fields(field_class) {
  * Career UI
  */
 var max_career_count = 5;
-var career_field_group_class = 'career_field';
-
-function mk_career_dropdown(idx) {
-    var select = $(document.createElement('select'))
-            .attr('name','careers['+idx+']')
-            .attr('id','careers['+idx+']');
-    var careers = {''           :'Choose a career...',
-                   'lumberjack' :'Lumberjack',
-                   'programmer' :'Software Developer',
-                   'messiah'    :'Savior'};
-    var curr_career;
-    for (var i in careers) {
-        curr_career = $(document.createElement('option'))
-            .text(careers[i])
-            .val(i);
-        $(select).append(curr_career);
-    }
-    return select;
-}
-
-function mk_career_dropdown_div(idx) {
-    var label = $(document.createElement('label'))
-            .attr('for','careers['+idx+']')
-            .text('Career #'+(idx+1));
-    var dropdown = mk_career_dropdown(idx);
-    var years_spent = mk_years_spent(idx);
-    var years_lbl = $(document.createElement('label'))
-            .attr('for','career-times['+idx+']')
-            .text(' years');
-    return $(document.createElement('div')).addClass('field careers')
-        .append(label,dropdown,document.createTextNode(' for '),years_spent,years_lbl);
-}
-
-function mk_years_spent(idx) {
-    return $(document.createElement('input'))
-        .addClass('career-times')
-        .attr('name','career-times['+idx+']')
-        .attr('id','career-times['+idx+']');
-}
 
 function add_career_choice() {
     var num_fields = count_fields('careers');
     if (num_fields < max_career_count) {
-        var dropdown = mk_career_dropdown_div(num_fields);
-        var field = $(document.createElement('div'))
-                .addClass(career_field_group_class)
-                .append(dropdown);
-        $('#careers').append(field);
+        $.get('/newchar/career',{'idx':num_fields},function(data){
+            $('#careers').append($(data));
+        });
         //check_enabled_p();
     };
 }
-$('#add-career').click(add_career_choice);
-$('#remove-career').click(function(){
-    $('#careers .careers:last').remove();
-});
+
+function init_career_buttons() {
+    $('#add-career').click(add_career_choice);
+    $('#remove-career').click(function(){
+        $('#careers .careers:last').remove();
+    });
+}
 
 // function text_input (name, label) {
 //     return $(document.createElement('div'))

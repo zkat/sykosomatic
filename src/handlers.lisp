@@ -141,6 +141,10 @@
   #+nil(ensure-logged-in)
   (templ:newchar))
 
+(define-easy-handler (newchar-career :uri "/newchar/career") ((idx :parameter-type 'integer))
+  (when idx
+    (with-yaclml-output-to-string (templ:career-div idx))))
+
 (define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
                                                                 nickname last-name
                                                                 origin parents

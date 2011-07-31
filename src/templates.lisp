@@ -3,6 +3,7 @@
   (:nicknames :templ)
   (:export :not-found :home :login :stage :role
            :scenes :view-scene :signup :newchar
+           :career-div
            :newchar-preview-div))
 (cl:in-package :templ)
 
@@ -395,6 +396,21 @@
                        (<:option :value "working-class" "Working Class")
                        (<:option :value "middle-class" "Middle Class")
                        (<:option :value "upper-class" "Upper Class"))))))
+
+(defun career-div (idx &aux
+                   (career-id (format nil "careers[~A]" idx))
+                   (years-id (format nil "career-times[~A]" idx)))
+  (<:div :class "field careers"
+         (<:label :for career-id (<:ah (format nil "Career #~A" (1+ idx))))
+         (<:select :name career-id :id career-id
+                   (loop for (value . label) in '(("" . "Choose a career...")
+                                                  ("lumberjack" . "Lumberjack")
+                                                  ("programmer" . "Software Developer")
+                                                  ("messiah" . "Savior"))
+                      do (<:option :value value (<:ah label))))
+         " for "
+         (<:input :class "career-times" :name years-id :id years-id)
+         " years."))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
