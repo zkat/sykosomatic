@@ -27,25 +27,30 @@ function count_fields(field_class) {
 /**
  * Career UI
  */
-var max_career_count = 5;
-
-function add_career_choice() {
-    var num_fields = count_fields('careers');
-    if (num_fields < max_career_count) {
-        $.get('/newchar/career',{'idx':num_fields},function(data){
-            $('#careers').append($(data));
-        });
-        //check_enabled_p();
-    };
+function enable_career() {
+    var hidden_fields = $('.careers:hidden');
+    var num_fields = hidden_fields.length;
+    if (num_fields <= $('.careers').length) {
+        $('.careers:hidden:first').show();
+    }
 }
 
 function init_career_buttons() {
-    $('#add-career').click(add_career_choice);
-    $('#remove-career').click(function(){
-        $('#careers .careers:last').remove();
+    $('#add-career').click(enable_career);
+    $('.careers > button').click(function() {
+        var div = $(this).parent('.careers');
+        div.find(':input').each(function () {
+            $(this).val('');
+        });
+        div.hide();
     });
+    $('.careers').hide();
 }
 init_career_buttons();
+
+/**
+ * Feature UI
+ */
 var max_bodypart_count = 5;
 function add_bodypart_choice() {
     var num_fields = count_fields('bodyparts');
