@@ -392,6 +392,9 @@
      there.
 
 ** Character creation
+*** TODO Data-driven
+    Move all the character-creation options into the database. Have the -handlers- provide the data
+    to display to the template generators. There's too much logic/data in templates.lisp.
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
