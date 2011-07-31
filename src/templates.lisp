@@ -329,6 +329,7 @@
   (<:div
    :id "confirm"
    (<:fieldset
+    (<:legend "Confirmation")
     (<:p "All done? Are you sure you wish to create this character?")
     (<:submit :class "button" :value "All Done"))))
 
