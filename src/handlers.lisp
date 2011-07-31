@@ -149,9 +149,10 @@
   (when idx
     (with-yaclml-output-to-string (templ:bodypart-div idx))))
 
-(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") ((idx :parameter-type 'integer))
-  (when idx
-    (with-yaclml-output-to-string (templ:bodypart-adj-select idx))))
+(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") ((idx :parameter-type 'integer)
+                                                                            adj)
+  (when (and idx adj)
+    (with-yaclml-output-to-string (templ:bodypart-adj-select idx adj))))
 
 (define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
                                                                 nickname last-name
@@ -169,37 +170,6 @@
                              :siblings siblings
                              :class childhood-finances))
 
-(define-easy-handler (newchar-careers :uri "/newchar-careers") ()
-  (setf (content-type*) "application/json")
-  (jsown:to-json (list "hairdresser")))
-
-(define-easy-handler (newchar-bodyparts :uri "/newchar-bodyparts") ()
-  (setf (content-type*) "application/json")
-  (jsown:to-json (list "hair")))
-
-(define-easy-handler (newchar-adjectives :uri "/newchar-adjectives") (bodypart)
-  ;; (setf (content-type*) "application/json")
-  (jsown:to-json (cond ((string= bodypart "hair")
-                        '(:obj
-                          ("colors" .
-                           ("blonde" "black" "blue-black" "dark brown" "tan" "golden" "sandy" "scarlet"
-                            "strawberry-blonde" "red" "dark red" "brown with blonde highlights"
-                            "platinum" "orange" "ginger" "white" "grey" "black streaked with grey"
-                            "brown streaked with grey" "dyed dark green" "dyed blue" "dyed rainbow"
-                            "dyed red underneath" "dyed purple" "dyed turquise" "dyed lemon yellow"
-                            "dyed fire red" "dyed lime green" "dyed sky blue" "dyed pink"))
-                          ("textures" .
-                           ("straight" "silky" "smooth" "greasy" "slick" "flowing" "wavy" "curly"
-                            "frizzy" "kinky"))
-                          ("thickness" . ("thick" "lush" "wispy" "thin" "thinning" "bald"))
-                          ("length and style" .
-                           ("toe-length" "waist-length" "long" "shoulder-length" "bobbed" "chin-length"
-                            "afro" "short" "ponytail" "pigtails" "bun" "two buns" "mass of ringlets"
-                            "buzzed" "shaved" "spiked" "feathered" "piled" "tangled"))
-                          ("general" .
-                           ("wild" "untamed" "mussed" "smelly" "crusted" "shredded" "vivid" "striking"
-                            "classy" "mutinous" "gleaming" "unremarkable" "limp")))
-))))
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()
   (ensure-logged-in)

@@ -414,29 +414,33 @@
          (<:input :class "career-times" :name years-name :id years-id)
          " years."))
 
+(defparameter *adjectives*
+  (with-open-file (s (asdf:system-relative-pathname 'sykosomatic "features.txt"))
+    (read s)))
+   
 (defun bodypart-div (idx &aux
                      (bodypart-name (format nil "bodyparts[~A]" idx))
                      (bodypart-id (format nil "bodyparts-~A" idx)))
   (<:div :class "field bodyparts"
          (<:label :for bodypart-id (<:ah (format nil "Feature")))
          (<:select :name bodypart-name :id bodypart-id
-                   (loop for (value . label) in '(("" . "Choose a feature to describe...")
-                                                  ("head" . "Head")
-                                                  ("shoulder" . "Shoulder")
-                                                  ("knee" . "Knee")
-                                                  ("toe" . "Toe"))
-                      do (<:option :value value (<:ah label))))
+                   (<:option :value "" (<:ah "Choose feature..."))
+                   (map nil (lambda (entry &aux (val (car entry)))
+                              (<:option :value val (<:ah val)))
+                        *adjectives*))
          (<:span :class "adj")))
 
-(defun bodypart-adj-select (idx &aux
+(defun bodypart-adj-select (idx feature &aux
                             (name (format nil "bodypart-adjs[~a]" idx))
                             (id (format nil "bodypart-adjs-~a" idx)))
   (<:select :name name :id id
-            (loop for (value . label) in '(("" . "Choose an adjective...")
-                                           ("big" . "Big")
-                                           ("small" . "Small")
-                                           ("very" . "Verisimilitude"))
-               do (<:option :value value (<:ah label)))))
+            (<:option :value "" (<:ah "Choose an adjective..."))
+            (loop for (category adjectives) in (cdr (assoc feature *adjectives* :test #'string-equal))
+               do (unless (string= category "all")
+                    (<:optgroup (<:ah category)))
+                 (map nil (lambda (adj)
+                            (<:option :value adj (<:ah adj)))
+                      adjectives))))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
@@ -471,7 +475,7 @@
 (defun cc-appearance ()
   (<:div :id "appearance"
          (<:fieldset
-          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 3 distinguishing features"))
+          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 5 distinguishing features"))
           (<:href "javascript:void(0)" :id "add-bodypart" :class "button" "Add a feature")
           (<:href "javascript:void(0)" :id "remove-bodypart" :class "button" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
