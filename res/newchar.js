@@ -35,7 +35,7 @@ function enable_career() {
     }
 }
 
-function init_career_buttons() {
+function init_career_section() {
     $('#add-career').click(enable_career);
     $('.careers > button').click(function() {
         var div = $(this).parent('.careers');
@@ -46,12 +46,19 @@ function init_career_buttons() {
     });
     $('.careers').hide();
 }
-init_career_buttons();
+init_career_section();
 
 /**
  * Feature UI
  */
-var max_bodypart_count = 5;
+
+function enable_bodypart() {
+    var hidden_fields = $('.bodyparts:hidden');
+    var num_fields = hidden_fields.length;
+    if (num_fields <= $('.bodyparts').length) {
+        $('.bodyparts:hidden:first').show();
+    }
+}
 function add_bodypart_choice() {
     var num_fields = count_fields('bodyparts');
     if (num_fields < max_bodypart_count) {
@@ -67,11 +74,22 @@ function add_bodypart_choice() {
     }
 }
 
-function init_bodypart_buttons() {
-    $('#add-bodypart').click(add_bodypart_choice);
-    $('#remove-bodypart').click(function(){
-        $('#bodyparts .bodyparts:last').remove();
+function init_bodypart_section() {
+    $('#add-bodypart').click(enable_bodypart);
+    $('.bodyparts > button').click(function () {
+        var div = $(this).parent('.bodyparts');
+        div.find(':input').each(function () {
+            $(this).val('');
+        });
+        div.hide();
     });
+    $('.bodypart-name').change(function(){
+        var div = $(this).parent('.field');
+        $.get('/newchar/bodypart-adjs',{'adj':$(this).val()},function(data){
+            $(div).children('.bodypart-adjs').html(data);
+        });
+    });
+    $('.bodyparts').hide();
 }
-init_bodypart_buttons();
+init_bodypart_section();
 });

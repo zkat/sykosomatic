@@ -140,19 +140,9 @@
                                                 (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
   (templ:newchar))
-
-(define-easy-handler (newchar-career :uri "/newchar/career") ((idx :parameter-type 'integer))
-  (when idx
-    (with-yaclml-output-to-string (templ:career-div idx))))
-
-(define-easy-handler (newchar-bodypart :uri "/newchar/bodypart") ((idx :parameter-type 'integer))
-  (when idx
-    (with-yaclml-output-to-string (templ:bodypart-div idx))))
-
-(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") ((idx :parameter-type 'integer)
-                                                                            adj)
-  (when (and idx adj)
-    (with-yaclml-output-to-string (templ:bodypart-adj-select idx adj))))
+(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") (adj)
+  (when adj
+    (with-yaclml-output-to-string (templ:bodypart-adj-select adj))))
 
 (define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
                                                                 nickname last-name
