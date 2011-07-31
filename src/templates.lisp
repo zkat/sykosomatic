@@ -335,7 +335,7 @@
     (<:submit :class "button" :value "All Done"))))
 
 (defun next-tab-button ()
-  (<:href "javascript:void(0)" :class "button next-tab" "Next"))
+  (<:button :type "button" :class "button next-tab" "Next"))
 
 (defun cc-identity ()
   (<:div
@@ -465,8 +465,8 @@
                                 "Yes, the character is in a committed relationship and/or married."))))
     (<:fieldset
      (<:legend :id "careers-desc" "Choose up to 5 careers")
-     (<:href "javascript:void(0)" :id "add-career" :class "button" "Add Career")
-     (<:href "javascript:void(0)" :id "remove-career" :class "button" "Remove Career")
+     (<:button :type "button" :id "add-career" :class "button" "Add Career")
+     (<:button :type "button" :id "remove-career" :class "button" "Remove Career")
      (<:div :id "careers" :aria-live "polite"
             :aria-relevant "additions removals"
             :aria-describedby "careers-desc"))))
@@ -475,8 +475,8 @@
   (<:div :id "appearance"
          (<:fieldset
           (<:legend :id "bodyparts-desc" (<:ah "Choose up to 5 distinguishing features"))
-          (<:href "javascript:void(0)" :id "add-bodypart" :class "button" "Add a feature")
-          (<:href "javascript:void(0)" :id "remove-bodypart" :class "button" "Remove a feature")
+          (<:button :type "button" :id "add-bodypart" :class "button" "Add a feature")
+          (<:button :type "button" :id "remove-bodypart" :class "button" "Remove a feature")
           (<:div :id "bodyparts" :aria-live "polite"
                  :aria-relevant "additions removals"
                  :aria-describedby "bodyparts-desc"))))
