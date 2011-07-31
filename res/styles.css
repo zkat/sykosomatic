@@ -75,14 +75,14 @@
     color: gray;
 }
 
-.field label {
+.field label:first-child {
     padding-right: 0.5em;;
     text-align: right;
     width: 15em;
     float: left;
 }
 
-.field label:after {
+.field label:first-child:after {
     content: ":";
 }
 
