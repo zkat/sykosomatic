@@ -95,4 +95,8 @@
     border-color: black;
 }
 
+.career-times {
+    width:3em;
+}
+
 .logout-button { margin-right: auto; margin-left: auto; width: 80px;}
