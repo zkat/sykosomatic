@@ -3,7 +3,7 @@
   (:nicknames :templ)
   (:export :not-found :home :login :stage :role
            :scenes :view-scene :signup :newchar
-           :career-div
+           :career-div :bodypart-div :bodypart-adj-select
            :newchar-preview-div))
 (cl:in-package :templ)
 
@@ -398,19 +398,45 @@
                        (<:option :value "upper-class" "Upper Class"))))))
 
 (defun career-div (idx &aux
-                   (career-id (format nil "careers[~A]" idx))
-                   (years-id (format nil "career-times[~A]" idx)))
+                   (career-name (format nil "careers[~A]" idx))
+                   (career-id (format nil "career-~A" idx))
+                   (years-name (format nil "career-times[~A]" idx))
+                   (years-id (format nil "career-times-~A" idx)))
   (<:div :class "field careers"
          (<:label :for career-id (<:ah (format nil "Career #~A" (1+ idx))))
-         (<:select :name career-id :id career-id
+         (<:select :name career-name :id career-id
                    (loop for (value . label) in '(("" . "Choose a career...")
                                                   ("lumberjack" . "Lumberjack")
                                                   ("programmer" . "Software Developer")
                                                   ("messiah" . "Savior"))
                       do (<:option :value value (<:ah label))))
          " for "
-         (<:input :class "career-times" :name years-id :id years-id)
+         (<:input :class "career-times" :name years-name :id years-id)
          " years."))
+
+(defun bodypart-div (idx &aux
+                     (bodypart-name (format nil "bodyparts[~A]" idx))
+                     (bodypart-id (format nil "bodyparts-~A" idx)))
+  (<:div :class "field bodyparts"
+         (<:label :for bodypart-id (<:ah (format nil "Feature")))
+         (<:select :name bodypart-name :id bodypart-id
+                   (loop for (value . label) in '(("" . "Choose a feature to describe...")
+                                                  ("head" . "Head")
+                                                  ("shoulder" . "Shoulder")
+                                                  ("knee" . "Knee")
+                                                  ("toe" . "Toe"))
+                      do (<:option :value value (<:ah label))))
+         (<:span :class "adj")))
+
+(defun bodypart-adj-select (idx &aux
+                            (name (format nil "bodypart-adjs[~a]" idx))
+                            (id (format nil "bodypart-adjs-~a" idx)))
+  (<:select :name name :id id
+            (loop for (value . label) in '(("" . "Choose an adjective...")
+                                           ("big" . "Big")
+                                           ("small" . "Small")
+                                           ("very" . "Verisimilitude"))
+               do (<:option :value value (<:ah label)))))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
