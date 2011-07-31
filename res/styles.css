@@ -100,3 +100,7 @@
 }
 
 .logout-button { margin-right: auto; margin-left: auto; width: 80px;}
+
+.button {
+    font-size: 0.8em !important;
+}
