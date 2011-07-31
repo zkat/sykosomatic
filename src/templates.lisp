@@ -436,11 +436,10 @@
   (<:select :name name :id id
             (<:option :value "" (<:ah "Choose an adjective..."))
             (loop for (category adjectives) in (cdr (assoc feature *adjectives* :test #'string-equal))
-               do (unless (string= category "all")
-                    (<:optgroup (<:ah category)))
-                 (map nil (lambda (adj)
-                            (<:option :value adj (<:ah adj)))
-                      adjectives))))
+               do (<:optgroup :label (if (string= category "all") "general" category)
+                              (map nil (lambda (adj)
+                                         (<:option :value adj (<:ah adj)))
+                                   adjectives)))))
 
 (defun cc-later-life ()
   (<:div :id "later-life"
