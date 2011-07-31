@@ -56,9 +56,9 @@ function mk_career_dropdown_div(idx) {
     var years_spent = mk_years_spent(idx);
     var years_lbl = $(document.createElement('label'))
             .attr('for','career-times['+idx+']')
-            .text('years');
-    return $(document.createElement('div')).addClass('careers')
-        .append(label,dropdown,years_spent,years_lbl);
+            .text(' years');
+    return $(document.createElement('div')).addClass('field careers')
+        .append(label,dropdown,document.createTextNode(' for '),years_spent,years_lbl);
 }
 
 function mk_years_spent(idx) {
@@ -71,10 +71,10 @@ function mk_years_spent(idx) {
 function add_career_choice() {
     var num_fields = count_fields('careers');
     if (num_fields < max_career_count) {
-        var field = document.createElement('div');
         var dropdown = mk_career_dropdown_div(num_fields);
-        $(field).addClass(career_field_group_class)
-            .append(dropdown);
+        var field = $(document.createElement('div'))
+                .addClass(career_field_group_class)
+                .append(dropdown);
         $('#careers').append(field);
         //check_enabled_p();
     };
