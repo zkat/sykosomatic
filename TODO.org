@@ -395,6 +395,9 @@
 *** TODO Data-driven
     Move all the character-creation options into the database. Have the -handlers- provide the data
     to display to the template generators. There's too much logic/data in templates.lisp.
+**** DONE Out of templates.lisp
+**** TODO Load from database
+     Can easily do this later. They're just in defparameters now.
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
@@ -423,8 +426,9 @@
 **** TODO Here and Now
 ***** TODO Draw up a map of the area
 ***** TODO Highlight places in the map according to selection
-***** DONE Expand description of place according to selection
-      Not using 'real' data yet, but the setup is there and simply needs to be adjusted.
+***** TODO Expand description of place according to selection
+****** DONE Load a description through AJAX
+****** TODO Pull up waifu's descriptions
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters.
 *** TODO One Big Form™
