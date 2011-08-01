@@ -401,14 +401,13 @@
 **** DONE Identity
 **** DONE Early Life
      Dropdown for the 'where from'. SIMPLIFY SIMPLIFY
-**** TODO Later Life
+**** DONE Later Life
 ***** DONE Need to do the JS field-addition.
       It's kinda crappy (just a .click() on a span), but it does the job for right now.
-***** TODO Need to do JS field-REMOVAL.
+***** DONE Need to do JS field-REMOVAL.
       Instead of a 'Remove' button, add a small 'remove' link next to each field.
 ***** DONE Dropdown for careers
-***** TODO Integer-only 'how long?' field
-**** TODO Appearance
+**** DONE Appearance
      Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
      attached to it. Each bodypart has a particular set of adjectives that can go with it. Selecting
      a bodypart from the dropdown should restrict the adjectives list only to those that are
@@ -416,7 +415,7 @@
      The obvious way to do this is with JavaScript -- perhaps some AJAX that fetches the most
      current list as things are selected from the dropdown.
 ***** DONE JS feature addition
-***** TODO JS feature removal
+***** DONE JS feature removal
       Instead of just a 'Remove' button, add a small remove link next to each individual feature.
 ***** DONE Dropdown for bodyparts
 ***** DONE Dropdown for adjectives
@@ -425,8 +424,6 @@
 ***** TODO Draw up a map of the area
 ***** TODO Highlight places in the map according to selection
 ***** TODO Expand description of place according to selection
-**** TODO Confirmation
-     Need to gather the preview of everything done so far.
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters.
 *** TODO One Big Form™
