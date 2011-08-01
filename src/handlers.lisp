@@ -144,6 +144,19 @@
   (when adj
     (with-yaclml-output-to-string (templ:bodypart-adj-select adj))))
 
+(defparameter *location-descriptions* '(("midway" . "Midway Area")
+                                        ("downtown" . "Downtown MPLS")
+                                        ("dinkytown" . "Da 'hood")
+                                        ("riverfront" . "Front o' the river.")
+                                        ("west-bank" . "West Bank.")))
+
+
+(define-easy-handler (newchar-location-description :uri "/newchar/location-description") (loc)
+  (let ((desc (cdr (assoc loc *location-descriptions* :test #'string-equal))))
+    (when desc
+      (setf (content-type*) "text/plain")
+      desc)))
+
 (define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
                                                                 nickname last-name
                                                                 origin parents

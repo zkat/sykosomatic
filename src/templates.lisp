@@ -493,4 +493,5 @@
                            (<:option :value "downtown" "Downtown Minneapolis")
                            (<:option :value "dinkytown" "Dinkytown Neighborhood")
                            (<:option :value "riverfront" "Riverfront District")
-                           (<:option :value "west-bank" "West Bank Neighborhood"))))))
+                           (<:option :value "west-bank" "West Bank Neighborhood")))
+          (<:p :id "location-description"))))
