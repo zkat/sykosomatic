@@ -423,7 +423,8 @@
 **** TODO Here and Now
 ***** TODO Draw up a map of the area
 ***** TODO Highlight places in the map according to selection
-***** TODO Expand description of place according to selection
+***** DONE Expand description of place according to selection
+      Not using 'real' data yet, but the setup is there and simply needs to be adjusted.
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters.
 *** TODO One Big Form™

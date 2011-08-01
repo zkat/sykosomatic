@@ -92,4 +92,13 @@ function init_bodypart_section() {
     $('.bodyparts').hide();
 }
 init_bodypart_section();
+
+function init_here_and_now() {
+    $('#where').change(function() {
+        $.get('/newchar/location-description',{'loc':$(this).val()},function(data){
+            $('#location-description').text(data);
+        });
+    });
+}
+init_here_and_now();
 });
