@@ -140,9 +140,6 @@
                                                 (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
   (templ:newchar))
-(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") (adj)
-  (when adj
-    (with-yaclml-output-to-string (templ:bodypart-adj-select adj))))
 
 (defparameter *location-descriptions* '(("midway" . "Midway Area")
                                         ("downtown" . "Downtown MPLS")
@@ -150,28 +147,15 @@
                                         ("riverfront" . "Front o' the river.")
                                         ("west-bank" . "West Bank.")))
 
+(define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") (adj)
+  (when adj
+    (with-yaclml-output-to-string (templ:bodypart-adj-select adj))))
 
 (define-easy-handler (newchar-location-description :uri "/newchar/location-description") (loc)
   (let ((desc (cdr (assoc loc *location-descriptions* :test #'string-equal))))
     (when desc
       (setf (content-type*) "text/plain")
       desc)))
-
-(define-easy-handler (newchar-preview :uri "/newchar-preview") (pronoun first-name
-                                                                nickname last-name
-                                                                origin parents
-                                                                siblings childhood-finances)
-  ;; TODO - *all* of these need to be validated.
-  (setf (content-type*) "text/plain")
-  (templ:newchar-preview-div :first-name first-name
-                             :nickname nickname
-                             :last-name last-name
-                             :pronoun pronoun
-                             :pluralp (when (string-equal pronoun "they") t)
-                             :origin origin
-                             :parents parents
-                             :siblings siblings
-                             :class childhood-finances))
 
 ;;; Misc
 (define-easy-handler (ajax-ping :uri "/pingme") ()

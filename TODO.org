@@ -454,9 +454,3 @@
 ***** TODO Confirm
       Summarize all the other stuff that was accumulated during character creation, and have the
       player confirm their decision. The actual submit button will be in here.
-**** TODO Wizardize
-***** DONE 'Next' buttons
-      There should be a 'next' button in each tab that takes you to the next one.
-***** TODO No preview until tab has been visited.
-      Instead of spamming the screen with the entire preview, fill out the preview incrementally as
-      different tabs are visited.
