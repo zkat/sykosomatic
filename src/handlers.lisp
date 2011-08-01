@@ -195,7 +195,6 @@
         (bodyparts :parameter-type 'array)
         (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
-  (push-error "Testing")
   (with-form-errors
     (templ:newchar :origins *origins*
                    :parents *parents*
