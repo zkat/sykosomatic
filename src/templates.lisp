@@ -4,8 +4,24 @@
   (:export :not-found :home :login :stage :role
            :scenes :view-scene :signup :newchar
            :career-div :bodypart-div :bodypart-adj-select
-           :newchar-preview-div))
+           :newchar-preview-div
+
+           :optgroup-label
+           :optgroup-options
+           :option-value
+           :option-text))
 (cl:in-package :templ)
+
+(defgeneric optgroup-label (optgroup))
+(defgeneric optgroup-options (optgroup))
+(defgeneric option-value (opt)
+  (:documentation "The text to be used for the :value attribute of this opt.")
+  (:method ((opt cons))
+    (car opt)))
+(defgeneric option-text (opt)
+  (:documentation "Used for the label of the opt.")
+  (:method ((opt cons))
+    (cdr opt)))
 
 ;;; General
 (defun page (title body-fun &optional head-fun)
@@ -51,6 +67,16 @@
   (<:div :class "field"
     (<:label :for name (<:ah label))
     (<:input :name name :id name :type type :maxlength max-length)))
+
+(defun mk-select (name opts default-opt-label &key (id name) class)
+  (<:select :id id :name name :class class
+            (<:option :value "" :selected "selected" (<:ah default-opt-label))
+            (load-opts opts)))
+
+(defun mk-select-field (name label opts default-opt-label &key (id name))
+  (<:div :class "field"
+         (<:label :for id (<:ah label))
+         (mk-select name opts default-opt-label :id id)))
 
 ;;; 404
 (defpage not-found () ()
@@ -243,158 +269,90 @@
 (defun newchar-js ()
   (<:script :type "text/javascript" :src "res/newchar.js"))
 
-(defpage newchar () ((newchar-js))
+(defpage newchar (&key origins parents siblings situations
+                       friends so careers
+                       location-opts adjectives)
+    ((newchar-js))
     "Create a character"
   (error-messages)
   #+nil(<:p :id "preview" "This is an experiment")
   (<:form :name "character-creation" :action "/newchar" :method "post"
    (<:div
     :id "creation-forms"
-    #+nil(<:h3 "Identity")
-    (cc-identity)
-    #+nil(<:h3 "Early Life")
-    (cc-early-life)
-    #+nil(<:h3 "Later Life")
-    (cc-later-life)
-    #+nil(<:h3 "Appearance")
-    (cc-appearance)
-    #+nil(<:h3 "Here and Now")
-    (cc-here-and-now)
-    #+nil(<:h3 "Confirm")
+    (cc-identity '(("she" . "She")
+                   ("he" . "He")
+                   ("they" . "They")))
+    (cc-early-life origins parents siblings situations)
+    (cc-later-life friends so careers)
+    (cc-appearance adjectives)
+    (cc-here-and-now location-opts)
     (cc-confirm))))
 
-(defun cc-confirm ()
-  (<:div
-   :id "confirm"
-   (<:fieldset
-    (<:legend "Confirmation")
-    (<:p "All done? Are you sure you wish to create this character?")
-    (<:submit :class "button" :value "All Done"))))
+(defun load-opts (opts)
+  (map nil (lambda (opt)
+             (<:option :value (option-value opt)
+                       (<:ah (option-text opt))))
+       opts))
 
-(defun next-tab-button ()
-  (<:button :type "button" :class "button next-tab" "Next"))
+(defun load-optgroups (optgroups)
+  (map nil (lambda (optgroup)
+             (<:optgroup :label (optgroup-label optgroup)
+                         (load-opts (optgroup-options optgroup))))
+       optgroups))
 
-(defun cc-identity ()
+(defun cc-identity (genders)
   (<:div
    :id "identity"
    (<:fieldset
     (<:div :class "field"
            (<:label :for "pronoun" (<:ah "Pronoun"))
            (<:select :id "pronoun" :name "pronoun"
-                     (<:option :value "" "Choose pronoun...")
-                     (<:option :value "she" "She")
-                     (<:option :value "he" "He")
-                     (<:option :value "they" "They"))))
+                     (<:option :value "they" "Choose pronoun...")
+                     (load-opts genders))))
    (<:fieldset
     (<:legend "Name")
     (text-input-field "first-name" "First Name")
     (text-input-field "nickname" "Nickname" :max-length 24)
     (text-input-field "last-name" "Last Name"))))
 
-(defun cc-early-life ()
+(defun cc-early-life (origins parents siblings situations)
    (<:div :id "early-life"
      (<:fieldset
       (<:legend (<:ah "Place of origin"))
-      (<:div :class "field"
-             (<:label :for "origin" (<:ah "Where from?"))
-             (<:select :id "origin" :name "origin"
-                       (<:option :value "" :selected "selected" (<:ah "Choose origin..."))
-                       (<:option :value "local" (<:ah "Local -- is from the Twin Cities area."))
-                       (<:option :value "state" (<:ah "Minnesotan -- not from the Cities, but still from the state."))
-                       (<:option :value "midwest" (<:ah "Midwestern -- hails from elsewhere in the American Midwest."))
-                       (<:option :value "east-coast" (<:ah "East Coast -- is from the east coast of the US."))
-                       (<:option :value "south" (<:ah "Southern -- comes from the Southern US."))
-                       (<:option :value "west-coast" (<:ah "West Coast -- California, Pacific Northwest, etc."))
-                       (<:option :value "else" (<:ah "Elsewhere -- Alaska, Hawaii, or other countries.")))))
+      (mk-select-field "origin" "Where from?" origins "Choose origin..."))
      (<:fieldset
       (<:legend (<:ah "Family situation"))
-      (<:div :class "field"
-             (<:label :for "parents" (<:ah "Number of parents"))
-             (<:select :id "parents" :name "parents"
-                       (<:option :value "" :selected "selected" (<:ah "Choose parents..."))
-                       (<:option :value "none" "None")
-                       (<:option :value "one" "One")
-                       (<:option :value "two" "Two")
-                       (<:option :value "more" "More than two")))
-      (<:div :class "field"
-             (<:label :for "siblings" (<:ah "Number of siblings"))
-             (<:select :id "siblings" :name "siblings"
-                       (<:option :value "" :selected "selected" (<:ah "Choose siblings..."))
-                       (<:option :value "none" "None")
-                       (<:option :value "one" "One")
-                       (<:option :value "two" "Two")
-                       (<:option :value "three" "Three")
-                       (<:option :value "more" "More than three")))
-      (<:div :class "field"
-             (<:label :for "childhood-finances" (<:ah "Financial class"))
-             (<:select :id "childhood-finances" :name "childhood-finances"
-                       (<:option :value "" :selected "selected" (<:ah "Choose class..."))
-                       (<:option :value "poor" "Poor")
-                       (<:option :value "working-class" "Working Class")
-                       (<:option :value "middle-class" "Middle Class")
-                       (<:option :value "upper-class" "Upper Class"))))))
+      (mk-select-field "parents" "Number of parents" parents "Choose parents...")
+      (mk-select-field "siblings" "Number of siblings" siblings "Choose siblings...")
+      (mk-select-field "situation" "Financial situation" situations "Choose situation..."))))
 
-(defun career-div (idx &aux
+(defun career-div (idx careers &aux
                    (career-name (format nil "careers[~A]" idx))
                    (career-id (format nil "career-~A" idx))
                    (years-name (format nil "career-times[~A]" idx))
                    (years-id (format nil "career-times-~A" idx)))
   (<:div :class "field careers"
          (<:label :for career-id (<:ah "Career"))
-         (<:select :name career-name :id career-id
-                   (loop for (value . label) in '(("" . "Choose a career...")
-                                                  ("lumberjack" . "Lumberjack")
-                                                  ("programmer" . "Software Developer")
-                                                  ("messiah" . "Savior"))
-                      do (<:option :value value (<:ah label))))
+         (mk-select career-name careers "Choose a career..." :id career-id)
          " for "
          (<:input :class "career-times" :name years-name :id years-id)
          " years."
          (<:button :type "button" (<:ah "remove"))))
 
-(defun cc-later-life ()
+(defun cc-later-life (friends so careers)
   (<:div :id "later-life"
     (<:fieldset
      (<:legend "Friends and More")
-     (<:div :class "field"
-            (<:label :for "friends" (<:ah "Any friends?"))
-            (<:select :id "friends" :name "friends"
-                      (<:option :value "" :selected "selected" (<:ah "Choose friends..."))
-                      (<:option :value "ronery" "No, character is all alone.")
-                      (<:option :value "acquaintances" "Not really, just some acquaintances/coworkers and such.")
-                      (<:option :value "tight" "Yeah, but just one, or a couple of very close friends.")
-                      (<:option :value "social" "Yeah, the character has plenty of friends, but few are really close.")
-                      (<:option :value "loved-by-everyone" "Yes. The character has a relatively big circle of acquaintances and close friends.")))
-     (<:div :class "field"
-            (<:label :for "so" (<:ah "Is there a special someone?"))
-            (<:select :id "so" :name "so"
-                      (<:option :value "" :selected "selected" (<:ah "Choose significant other..."))
-                      (<:option :value "ronery" "No, the character is forever alone.")
-                      (<:option :value "dating" "Kinda, currently seeing someone.")
-                      (<:option :value "committed" "Yes. The character has been with someone for a while.")
-                      (<:option :value "ball-and-chain"
-                                "Yes, the character is in a committed relationship and/or married."))))
+     (mk-select-field "friends" "Any friends?" friends "Choose friends...")
+     (mk-select-field "so" "Special someone?" so "Choose significant other..."))
     (<:fieldset
      (<:legend :id "careers-desc" "Choose up to 5 careers")
      (<:button :type "button" :id "add-career" :class "button" "Add Career")
      (<:div :id "careers"
             (loop for i below 5
-               do (career-div i))))))
+               do (career-div i careers))))))
 
-(defun cc-appearance ()
-  (<:div :id "appearance"
-         (<:fieldset
-          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 5 distinguishing features"))
-          (<:button :type "button" :id "add-bodypart" :class "button" "Add a feature")
-          (<:div :id "bodyparts"
-                 (loop for i below 5
-                    do (bodypart-div i))))))
-
-(defparameter *adjectives*
-  (with-open-file (s (asdf:system-relative-pathname 'sykosomatic "features.txt"))
-    (read s)))
-
-(defun bodypart-div (idx &aux
+(defun bodypart-div (idx adjectives &aux
                      (bodypart-name (format nil "bodyparts[~A]" idx))
                      (bodypart-id (format nil "bodyparts-~A" idx))
                      (adj-name (format nil "bodypart-adjs[~a]" idx))
@@ -405,30 +363,41 @@
                    (<:option :value "" (<:ah "Choose feature..."))
                    (map nil (lambda (entry &aux (val (car entry)))
                               (<:option :value val (<:ah val)))
-                        *adjectives*))
-         (<:select :name adj-name :id adj-id :class "bodypart-adjs"
-                   (<:option :value "" (<:ah "Choose an adjective...")))
+                        adjectives))
+         (mk-select adj-name nil "Choose an adjective..." :id adj-id :class "bodypart-adjs")
          (<:button :type "button" (<:ah "remove"))))
 
-(defun bodypart-adj-select (feature)
+(defun cc-appearance (adjectives)
+  (<:div :id "appearance"
+         (<:fieldset
+          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 5 distinguishing features"))
+          (<:button :type "button" :id "add-bodypart" :class "button" "Add a feature")
+          (<:div :id "bodyparts"
+                 (loop for i below 5
+                    do (bodypart-div i adjectives))))))
+
+(defun bodypart-adj-select (adjective-categories)
   (<:option :value "" (<:ah "Choose an adjective..."))
-  (loop for (category adjectives) in (cdr (assoc feature *adjectives* :test #'string-equal))
+  (loop for (category adjectives) in adjective-categories
      do (<:optgroup :label (if (string= category "all") "general" category)
                     (map nil (lambda (adj)
                                (<:option :value adj (<:ah adj)))
                          adjectives))))
 
-(defun cc-here-and-now ()
+(defun cc-here-and-now (locations)
   (<:div :id "here-and-now"
          (<:fieldset
           (<:legend "Current location")
-          (<:div :class "field"
-                 (<:label :for "where" (<:ah "Where are they now?"))
-                 (<:select :id "where" :name "where"
-                           (<:option :value "" :selected "selected" (<:ah "Choose current location..."))
-                           (<:option :value "midway" "Midway Area")
-                           (<:option :value "downtown" "Downtown Minneapolis")
-                           (<:option :value "dinkytown" "Dinkytown Neighborhood")
-                           (<:option :value "riverfront" "Riverfront District")
-                           (<:option :value "west-bank" "West Bank Neighborhood")))
-          (<:p :id "location-description"))))
+          (mk-select-field "where" "Where are they now?"
+                           locations "Choose current location...")
+          (<:h3 :id "description-header" "Description")
+          (<:p :id "location-description" :aria-live "polite" :aria-relevant "additions removals"
+               :aria-describedby "description-header"))))
+
+(defun cc-confirm ()
+  (<:div
+   :id "confirm"
+   (<:fieldset
+    (<:legend "Confirmation")
+    (<:p "All done? Are you sure you wish to create this character?")
+    (<:submit :class "button" :value "All Done"))))
