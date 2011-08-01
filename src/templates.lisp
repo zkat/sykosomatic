@@ -6,6 +6,8 @@
            :career-div :bodypart-div :bodypart-adj-select
            :newchar-preview-div
 
+           :*errors*
+
            :optgroup-label
            :optgroup-options
            :option-value
@@ -56,12 +58,11 @@
   (<:form :class "logout-button" :action "/logout" :method "post"
           (<:submit :class "btn" :value "Log Out")))
 
+(defvar *errors* nil)
 (defun error-messages ()
-  ;; This one's a bit leaky. It's pretty special, anyway.
-  (when-let ((errors (sykosomatic::session-value 'sykosomatic::errors)))
+  (when *errors*
     (<:ul :class "errors"
-          (mapc (lambda (err) (<:li (<:ah err))) errors))
-    (setf (sykosomatic::session-value 'sykosomatic::errors) nil)))
+          (mapc (lambda (err) (<:li (<:ah err))) *errors*))))
 
 (defun text-input-field (name label &key (type "text") max-length)
   (<:div :class "field"

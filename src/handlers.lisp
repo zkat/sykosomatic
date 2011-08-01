@@ -34,8 +34,7 @@
 
 (defun ensure-logged-in ()
   (unless (and *session* (session-value 'account-name))
-    (push "You must be logged in to access that page."
-          (session-value 'errors))
+    (push-error "You must be logged in to access that page.")
     (redirect "/login")))
 
 (defun active-account-sessions (account-name)
@@ -45,9 +44,17 @@
      when (and session-user (string-equal session-user account-name))
      collect session))
 
+(defun push-error (format-string &rest format-args)
+  (push (apply #'format nil format-string format-args)
+        (session-value 'errors)))
+
 ;;;
 ;;; Handlers
 ;;;
+(defmacro with-form-errors (&body body)
+  `(let ((templ:*errors* (session-value 'errors)))
+     (unwind-protect (progn ,@body)
+       (setf (session-value 'errors) nil))))
 
 (defun current-account-name (&optional (*session* *session*))
   (session-value 'account-name))
@@ -65,25 +72,27 @@
   ;; TODO - Check authorization. If the current session can't play that
   ;; character, get the hell out of here asap.
   (cond ((emptyp char)
-         (push (format nil "You must select a character before playing.")
-               (session-value 'errors))
+         (push-error "You must select a character before playing.")
          (redirect "/role"))
-        (t (templ:stage char))))
+        (t (with-form-errors (templ:stage char)))))
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
-  (templ:role (mapcar #'character-name
-                      (find-characters-by-account-name (session-value 'account-name)))))
+  (with-form-errors
+    (templ:role (mapcar #'character-name
+                        (find-characters-by-account-name (session-value 'account-name))))))
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
-  (templ:scenes (mapcar #'scene-id (find-scenes-by-account-name (current-account-name)))))
+  (with-form-errors
+    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-name (current-account-name))))))
 
 (define-easy-handler (view-scene :uri "/view-scene") (id)
   (case (request-method*)
     (:get
      ;; TODO - validate scene id.
-     (templ:view-scene id (session-value 'account-name) (scene-rating id)))
+     (with-form-errors
+       (templ:view-scene id (session-value 'account-name) (scene-rating id))))
     (:post
      ;; TODO - Don't allow voting if user has already voted.
      (ensure-logged-in)
@@ -97,9 +106,8 @@
   (case (request-method*)
     (:get
      (when-let ((account-name (session-value 'account-name)))
-       (push (format nil "Already logged in as ~A." account-name)
-             (session-value 'errors)))
-     (templ:login))
+       (push-error "Already logged in as ~A." account-name))
+     (with-form-errors (templ:login)))
     (:post
      (if-let ((account (validate-credentials account-name password)))
        (progn
@@ -108,7 +116,7 @@
          (logit "~A logged in." account-name)
          (redirect "/role"))
        (progn
-         (push "Invalid login or password." (session-value 'errors))
+         (push-error "Invalid login or password.")
          (redirect "/login"))))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
@@ -131,7 +139,8 @@
              (appendf (session-value 'errors) errors)
              (redirect "/signup")))))
     (:get
-     (templ:signup))))
+     (with-form-errors
+       (templ:signup)))))
 
 ;;; Characters
 (defparameter *origins* '(("local" . "Local -- is from the Twin Cities area.")
@@ -186,15 +195,17 @@
         (bodyparts :parameter-type 'array)
         (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
-  (templ:newchar :origins *origins*
-                 :parents *parents*
-                 :siblings *siblings*
-                 :situations *situations*
-                 :friends *friends*
-                 :so *so*
-                 :careers *careers*
-                 :location-opts *location-descriptions*
-                 :adjectives *adjectives*))
+  (push-error "Testing")
+  (with-form-errors
+    (templ:newchar :origins *origins*
+                   :parents *parents*
+                   :siblings *siblings*
+                   :situations *situations*
+                   :friends *friends*
+                   :so *so*
+                   :careers *careers*
+                   :location-opts *location-descriptions*
+                   :adjectives *adjectives*)))
 
 (defparameter *adjectives*
   (with-open-file (s (asdf:system-relative-pathname 'sykosomatic "features.txt"))
