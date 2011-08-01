@@ -22,5 +22,6 @@
              (:file "websocket")
              (:file "parser")
              (:file "templates")
+             (:file "newchar-templates")
              (:file "handlers")
              (:file "main")))))
