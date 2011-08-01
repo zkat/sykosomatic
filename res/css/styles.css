@@ -104,3 +104,8 @@
 .button {
     font-size: 0.8em !important;
 }
+
+.errors {
+    color:red;
+    list-style-type:none;
+}
