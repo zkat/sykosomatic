@@ -342,8 +342,7 @@
     Convert -- to —.
 *** TODO Do something about the awful OOC area.
 *** TODO Style the input fields.
-     Something more subtle than the deep abyss of standard input fields.
-
+    Something more subtle than the deep abyss of standard input fields.
 ** Accessibility
 *** WAI-ARIA
     http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
@@ -392,12 +391,24 @@
      there.
 
 ** Character creation
+*** TODO Cleanup
+**** TODO Separate file(s?)
+     Move character creation out into a separate file from all the other templates. Perhaps also
+     move out the character creation handlers.
 *** TODO Data-driven
     Move all the character-creation options into the database. Have the -handlers- provide the data
     to display to the template generators. There's too much logic/data in templates.lisp.
 **** DONE Out of templates.lisp
 **** TODO Load from database
      Can easily do this later. They're just in defparameters now.
+**** TODO Configuration UI
+     Set up a nice web interface that waifu can use to do basic CRUD on all the different character
+     creation options.
+*** TODO Usability
+**** TODO Make sure any live areas use the appropriate WAI-ARIA attributes.
+**** TODO Headings
+     I think headings are supposed to be helpful for folks using screen readers and the like. Look
+     into this, and add them where appropriate.
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
@@ -429,32 +440,51 @@
 ***** TODO Expand description of place according to selection
 ****** DONE Load a description through AJAX
 ****** TODO Pull up waifu's descriptions
+*** TODO Prettify
+**** TODO Chosen
+     Use Chosen for the dropdowns. Looks like this'll need to wait until issues with width are
+     fixed.
+**** TODO Design brainstorm
+***** TODO What goes where?
+      UX that shit.
+***** TODO Make it pretty
+      Seriously, do something. It's pretty hideous. Make it something appealing. Fun. Pleasing to
+      the eye.
+*** TODO Validation
+    Need to do validation, give the user feedback, etc.
+**** TODO Basic validation and error reporting.
+     Hook up the Big Fat Form to the error reporting system.
+**** TODO Repopulate
+     They shouldn't have to redo the ENTIRE CHARACTER just because they made one mistake in one of
+     the fields. Have the form properly re-populate on error.
+**** TODO (nice-to-have) Javascript validation
+     Once the important bits are done, consider doing another round of validation JS-side, to
+     report any problems as they fill out the form, instead of forcing them to submit over and over.
+     Hooking into the preview mechanism may end up making this easier than it might seem.
 *** TODO Update character.lisp
     Make character.lisp accept the new character creation parameters.
-*** TODO One Big Form™
-    Use the magic of javascript to turn it into a single, big, multi-tabbed form.
-**** TODO Per-tab previews
-     Each tab should have an informative preview that shows how the player's selections are
-     affecting something about the character.
-***** TODO Identity
-      Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
-      Something like "You are creating a new character. His name is Thomas Janus, also known as
-      'Wolf'."
-***** TODO Early Life
-      A sentence that gives a basic blurb about the character's family and childhood information,
-      which also includes the identity:
-      "Thomas grew up in a middle class family of three children by his two parents."
-***** TODO Later Life
-      "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
-      really very close. He is also currently seeing someone. He has spent 10 years in Business."
-***** TODO Here and Now
-      For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
-      about what the Twin Cities are, and maybe even some outside links to more information. There
-      should be various places marked on the map, each corresponding to a possible starting location
-      for the character. Maybe have these places marked by Google Maps-style drops/pins.
-      Clicking on a location or choosing it from the dropdown makes it the current selection, and
-      also displays a short paragraph with more information about what the place is like --
-      something to give the player an idea of why it sets it apart from the other locations.
-***** TODO Confirm
-      Summarize all the other stuff that was accumulated during character creation, and have the
-      player confirm their decision. The actual submit button will be in here.
+*** TODO Previews
+    Each section should have an informative preview that shows how the player's selections are
+    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
+**** TODO Identity
+     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
+     Something like "You are creating a new character. His name is Thomas Janus, also known as
+     'Wolf'."
+**** TODO Early Life
+     A sentence that gives a basic blurb about the character's family and childhood information,
+     which also includes the identity:
+     "Thomas grew up in a middle class family of three children by his two parents."
+**** TODO Later Life
+     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
+     really very close. He is also currently seeing someone. He has spent 10 years in Business."
+**** TODO Here and Now
+     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
+     about what the Twin Cities are, and maybe even some outside links to more information. There
+     should be various places marked on the map, each corresponding to a possible starting location
+     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
+     on a location or choosing it from the dropdown makes it the current selection, and also
+     displays a short paragraph with more information about what the place is like -- something to
+     give the player an idea of why it sets it apart from the other locations.
+**** TODO Confirm
+     Summarize all the other stuff that was accumulated during character creation, and have the
+     player confirm their decision. The actual submit button will be in here.
