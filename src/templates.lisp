@@ -31,7 +31,7 @@
       (<:title (<:ah title))
       (<:meta :http-equiv "Content-type"
               :content "text/html;charset=UTF-8")
-      (<:link :rel "stylesheet" :type "text/css" :href "res/styles.css")
+      (<:link :rel "stylesheet" :type "text/css" :href "res/css/styles.css")
       (jquery-libs)
       (when head-fun (funcall head-fun)))
      (<:body
@@ -47,7 +47,7 @@
 
 (defun jquery-libs ()
   (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")
-  (<:link :rel "stylesheet" :type "text/css" :href "res/chosen.css")
+  (<:link :rel "stylesheet" :type "text/css" :href "res/css/chosen.css")
   (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
   (<:script :type "text/javascript" :src "res/js/chosen.jquery.min.js")
   (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
@@ -118,10 +118,10 @@
 (defun gameplay-js-libs ()
   ;; When you feel like figuring out why optional loading fails, take the following
   ;; two lines out...
-  (<:script :type "text/javascript" :src "res/swfobject.js")
-  (<:script :type "text/javascript" :src "res/web_socket.js")
-  (<:script :type "text/javascript" :src "res/json2.js")
-  (<:script :type "text/javascript" :src "res/client.js"))
+  (<:script :type "text/javascript" :src "res/js/swfobject.js")
+  (<:script :type "text/javascript" :src "res/js/web_socket.js")
+  (<:script :type "text/javascript" :src "res/js/json2.js")
+  (<:script :type "text/javascript" :src "res/js/client.js"))
 
 (defun chat-area (char-name)
   (<:div :id "main-game-panel"
@@ -230,7 +230,7 @@
 ;; TODO - fixme
 (defun scene (id)
   ;; TODO - THIS IS DANGEROUS AND LEAKY. XSS GALORE.
-  (<:script :type "text/javascript" :src "res/client.js")
+  (<:script :type "text/javascript" :src "res/js/client.js")
   (<:div :class "chat-box" :id "chat-box")
   (<:script
    (mapc (lambda (entry-obj)
@@ -267,7 +267,7 @@
 
 ;;; /newchar
 (defun newchar-js ()
-  (<:script :type "text/javascript" :src "res/newchar.js"))
+  (<:script :type "text/javascript" :src "res/js/newchar.js"))
 
 (defpage newchar (&key origins parents siblings situations
                        friends so careers
