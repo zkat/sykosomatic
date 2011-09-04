@@ -409,6 +409,7 @@
 **** TODO Headings
      I think headings are supposed to be helpful for folks using screen readers and the like. Look
      into this, and add them where appropriate.
+**** TODO Disable 'add' buttons when appropriate
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
