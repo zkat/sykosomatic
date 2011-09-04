@@ -1,56 +1,62 @@
 (cl:defpackage #:sykosomatic.db
-  (:use :cl :alexandria :chillax.core :chillax.jsown)
-  (:export :init-db :mkdoc :doc-val :ensure-doc :get-uuid :couchfun :mapfun :view-query-value
-           :assert-validation :with-validation :assert-required :*db*))
+  (:use :cl :alexandria :postmodern)
+  (:export :id :defdao :init-db :with-db :dblog :rebuild :drop-table :drop-all-tables
+           :assert-validation :with-validation :assert-required))
 (cl:in-package #:sykosomatic.db)
 
-(defparameter *server* (make-instance 'jsown-server))
-(defvar *db* nil)
+(defparameter *db-name* "sykosomatic")
+(defparameter *db-user* "postgres")
+(defparameter *db-password* "")
+(defparameter *db-host* "localhost")
+
+;;; SQL utils
+(defun pomo::\!unique (&rest target-fields &aux (target-fields (mapcar #'pomo::to-sql-name target-fields)))
+  (format nil "ALTER TABLE ~A ADD CONSTRAINT ~A UNIQUE (~{~A~^, ~})"
+          (pomo::to-sql-name *table-name*)
+          (format nil "~A_~{~A~^_~}_unique" (pomo::to-sql-name *table-name*) target-fields)
+          target-fields))
+(export 'pomo::\!unique (find-package :postmodern))
+
+(defmacro defdao (name superclasses slots &body dao-options)
+  (flet ((parsed-opts (keyword deftable-func-name)
+           (mapcar (lambda (statement)
+                     `(,deftable-func-name ,@(cdr statement)))
+                   (remove-if-not (lambda (opt) (eq keyword (car opt)))
+                                  dao-options))))
+    `(progn
+       (defclass ,name ,superclasses
+         ,slots
+         (:metaclass dao-class)
+         ,@(when-let (keys (assoc :keys dao-options)) `(,keys)))
+       (deftable ,name
+         (!dao-def)
+         ,@(parsed-opts :index '!index)
+         ,@(parsed-opts :unique-index '!unique-index)
+         ,@(parsed-opts :foreign-key '!foreign)
+         ,@(parsed-opts :unique '!unique)))))
+
+(defun drop-table (symbol)
+  (query (format nil "drop table if exists ~A" (sql-compile symbol))))
+(defun drop-all-tables ()
+  (map nil (compose #'drop-table #'car) pomo::*tables*))
+
+(defun rebuild ()
+  (drop-all-tables)
+  (create-all-tables))
+
+(defun dblog (format-string &rest format-args)
+  (format t "~&LOG - ~A~%" (apply #'format nil format-string format-args)))
 
 (defun init-db ()
-  (setf *db* (ensure-db *server* "sykosomatic")))
+  (rebuild))
 
-(defun mkdoc (&rest keys-and-values)
-  (cons :obj (plist-alist keys-and-values)))
+(defmacro with-db (() &body body)
+  `(with-connection (*db-name* *db-user* *db-password* *db-host*)
+     ,@body))
 
-(defun doc-val (document key)
-  (jsown:val document key))
-(defun (setf doc-val) (new-value document key)
-  (setf (jsown:val document key) new-value)
-  new-value)
+(defgeneric id (dao))
 
-(defun ensure-doc (id document)
-  (handler-case
-      (put-document *db* id document)
-    (document-conflict ()
-      (ensure-doc id (progn
-                       (setf (doc-val document "_rev")
-                             (get-document-revision *db* id))
-                       document)))))
-
-(defun get-uuid ()
-  (car (doc-val (get-uuids *server* :number 1) "uuids")))
-
-(defmacro mapfun (doc-name target-types &body body)
-  (let ((type-var (gentemp "TYPE"))
-        (target-types (ensure-list target-types)))
-    `(couchfun (,doc-name &aux (,type-var (,(intern "HASHGET") ,doc-name "type")))
-       (,(intern "WHEN") (,(intern "OR")
-                           ,@(mapcar (lambda (type) `(equal ,type-var ,type))
-                                     target-types))
-         ,@body))))
-
-(defmacro couchfun (lambda-list &body body)
-  `(prin1-to-string '(lambda ,lambda-list ,@body)))
-
-(defun view-query-value (design-doc-name view-name key &optional (singlep t))
-  (when-let ((results (doc-val (query-view *db* design-doc-name view-name
-                                           :key key)
-                               "rows")))
-    (if singlep
-        (doc-val (car results) "value")
-        (mapcar (rcurry #'doc-val "value") results))))
-
+;; Forms
 (defvar *validation-errors*)
 
 (defmacro assert-validation (test failure-message)
