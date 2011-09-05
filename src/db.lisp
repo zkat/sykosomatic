@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.db
   (:use :cl :alexandria :postmodern)
-  (:export :id :defdao :init-db :with-db :dblog :rebuild :drop-table :drop-all-tables
+  (:export :id :defdao :init-db :with-db :dblog :rebuild-table
+           :rebuild :drop-table :drop-all-tables
            :assert-validation :with-validation :assert-required))
 (cl:in-package #:sykosomatic.db)
 
@@ -44,6 +45,12 @@
     (query (format nil "drop table if exists ~A" (sql-compile symbol)))))
 (defun drop-all-tables ()
   (map nil (compose #'drop-table #'car) pomo::*tables*))
+
+(defun rebuild-table (table-name)
+  (with-db ()
+    (with-transaction ()
+      (drop-table table-name)
+      (create-table table-name))))
 
 (defun rebuild ()
   (with-db ()
