@@ -13,7 +13,7 @@
 (defun pomo::\!unique (&rest target-fields &aux (target-fields (mapcar #'pomo::to-sql-name target-fields)))
   (format nil "ALTER TABLE ~A ADD CONSTRAINT ~A UNIQUE (~{~A~^, ~})"
           (pomo::to-sql-name *table-name*)
-          (format nil "~A_~{~A~^_~}_unique" (pomo::to-sql-name *table-name*) target-fields)
+          (pomo::to-sql-name (format nil "~A_~{~A~^_~}_unique" *table-name* target-fields))
           target-fields))
 (export 'pomo::\!unique (find-package :postmodern))
 
