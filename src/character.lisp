@@ -10,17 +10,19 @@
 (optimizations)
 
 (defun find-character (name)
-  (query (:order-by (:select 'entity-id :from 'modifier
-                             :where (:and (:= 'type "character-name")
-                                          (:= 'text-value name)))
-                    (:desc 'precedence))
-         :single))
+  (with-db ()
+    (query (:order-by (:select 'entity-id :from 'modifier
+                               :where (:and (:= 'type "character-name")
+                                            (:= 'text-value name)))
+                      (:desc 'precedence))
+           :single)))
 
 (defun account-characters (account-id)
-  (query (:select 'entity-id :from 'modifier
-                  :where (:and (:= 'type "character-account")
-                               (:= 'numeric-value account-id)))
-         :column))
+  (with-db ()
+    (query (:select 'entity-id :from 'modifier
+                    :where (:and (:= 'type "character-account")
+                                 (:= 'numeric-value account-id)))
+           :column)))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
@@ -41,16 +43,17 @@
     (assert-validation (<= (length description) 500) "Descriptions must be under 500 characters long.")))
 
 (defun create-character (account-id name description)
-  (multiple-value-bind (validp errors)
-      (validate-new-character name description)
-    (if validp
-        (with-transaction ()
-          (let ((entity (create-entity)))
-            (add-modifier entity "character-name" :text-value name)
-            (add-modifier entity "character-description" :text-value description)
-            (add-modifier entity "character-account" :numeric-value account-id)
-            entity))
-        (values nil errors))))
+  (with-transaction ()
+    (multiple-value-bind (validp errors)
+        (validate-new-character name description)
+      (if validp
+          (with-transaction ()
+            (let ((entity (create-entity)))
+              (add-modifier entity "character-name" :text-value name)
+              (add-modifier entity "character-description" :text-value description)
+              (add-modifier entity "character-account" :numeric-value account-id)
+              entity))
+          (values nil errors)))))
 
 (defun character-name (character-id)
   (text-modifier-value character-id "character-name"))
@@ -59,5 +62,7 @@
 (defun character-account (character-id)
   (numeric-modifier-value character-id "character-account"))
 (defun character-account-email (character-id)
-  (let ((account-id (character-account character-id)))
-    (query (:select 'email :from 'account :where (:= 'id account-id)))))
+  (with-db ()
+    (with-transaction ()
+      (let ((account-id (character-account character-id)))
+        (query (:select 'email :from 'account :where (:= 'id account-id)))))))
