@@ -66,11 +66,15 @@
   (templ:home))
 
 (define-easy-handler (play :uri "/stage") (char)
+  ;; TODO - make 'char' something other than the name. Some kind of external ID for the character.
+  ;;        'find-character' is more useful for the parser, not as a unique identifier.
   (ensure-logged-in)
-  ;; TODO - Check authorization. If the current session can't play that
-  ;; character, get the hell out of here asap.
   (cond ((emptyp char)
          (push-error "You must select a character before playing.")
+         (redirect "/role"))
+        ((not (eql (character-account (find-character char))
+                   (current-account)))
+         (push-error "You're not authorized to play that character.")
          (redirect "/role"))
         (t (with-form-errors (templ:stage char)))))
 
@@ -86,17 +90,22 @@
   (with-form-errors
     (templ:scenes (mapcar #'scene-id (find-scenes-by-account-id (current-account))))))
 
-(define-easy-handler (view-scene :uri "/view-scene") (id)
+(define-easy-handler (view-scene :uri "/view-scene") ((id :parameter-type 'integer))
   (case (request-method*)
     (:get
-     ;; TODO - validate scene id.
-     (with-form-errors
-       (templ:view-scene id (not (null (current-account))) (scene-rating id))))
+     (cond ((scene-exists-p id)
+            (with-form-errors
+              (templ:view-scene id (not (null (current-account))) (scene-rating id))))
+           (t (push-error "No scene with ID ~A." id)
+              (redirect "/scenes"))))
     (:post
-     ;; TODO - Don't allow voting if user has already voted.
      (ensure-logged-in)
-     (scene-upvote id (current-account))
-     (redirect (format nil "/view-scene?id=~A" id)))))
+     (cond ((account-voted-p id (current-account))
+            (push-error "You've already voted for this scene.")
+            (redirect "/view-scene"))
+           (t
+            (scene-upvote id (current-account))
+            (redirect (format nil "/view-scene?id=~A" id)))))))
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (account-email password)
@@ -108,7 +117,8 @@
        (push-error "Already logged in as ~A." account-email))
      (with-form-errors (templ:login)))
     (:post
-     ;; TODO - if they try to post while already logged in, just redirect them.
+     (when (current-account)
+       (redirect "/login"))
      (if-let ((account (validate-account account-email password)))
        (progn
          (setf (current-account) (sykosomatic.db:id account))
