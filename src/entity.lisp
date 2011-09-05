@@ -85,3 +85,46 @@
                   :where (:and (:= 'type "entity-uid")
                                (:= 'text-value uid)))
          :single))
+
+;;; Events
+(defdao event-execution ()
+  ((id :col-type serial :reader id)
+   (event-id :col-type bigint :initarg :event-id)
+   (type :col-type text :initarg :type)
+   (execution-time :col-type timestamp :col-default (:now) :initarg :execution-time)
+   (completedp :col-type boolean :col-default nil))
+  (:keys id))
+
+(defdao ev-remove-modifier ()
+  ((id :col-type serial :reader id)
+   (modifier-id :col-type bigint :initarg :modifier-id))
+  (:keys id))
+
+(defprepared expired-modifiers
+    (:select 'ex.id 'mod.id :from (:as 'event-execution 'ex)
+             :inner-join (:as 'ev-remove-modifier 'ev)
+             :on (:and (:= 'ex.type "remove-modifier")
+                       (:= 'ex.event-id 'ev.id))
+             :inner-join (:as 'modifier 'mod)
+             :on (:= 'ev.modifier-id 'mod.id)
+             :where (:and (:<= 'ex.execution-time (:now))
+                          (:not 'ex.completedp))))
+
+(defun expire-modifier (modifier-id &key (expiration (get-universal-time)))
+  (with-transaction ()
+    (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
+      (make-dao 'event-execution :type "remove-modifier"
+                :event-id (id removal)
+                :execution-time (local-time:to-rfc3339-timestring
+                                 (local-time:universal-to-timestamp expiration))))))
+
+(defun clear-expired-modifiers ()
+  (flet ((process-penalty (p)
+           (destructuring-bind (event-execution-id modifier-id)
+               p
+             (dblog "Removing modifier ~A" modifier-id)
+             (query (:delete-from 'modifier :where (:= 'id modifier-id)))
+             (query (:update 'event-execution :set 'completedp t
+                             :where (:= 'id event-execution-id))))))
+    (with-transaction ()
+      (map nil #'process-penalty (expired-modifiers)))))
