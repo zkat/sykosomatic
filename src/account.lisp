@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.account
-  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :postmodern)
+  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.utils :postmodern)
   (:export :create-account :find-account :validate-account
            :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
@@ -96,10 +96,6 @@
     (assert-validation (valid-display-name-p display-name) "Invalid display name. Display name must be between 4 and 32 alphanumeric characters.")
     (assert-validation (not (display-name-exists-p display-name)) "Display name already in use.")
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
-
-(defun random-string (length &optional (dictionary "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
-  (map-into (make-array length :element-type 'character)
-            (curry #'random-elt dictionary)))
 
 (defun create-account (email display-name password confirmation)
   (with-transaction ()
