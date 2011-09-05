@@ -12,6 +12,7 @@
 **** DONE Use emails as logins, and replace usernames with 'display names'.
 **** DONE Limit characters and number of characters allowed for usernames and passwords
 **** DONE Prevent duplicate account creation.
+*** DONE Passwords -> byte arrays
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
