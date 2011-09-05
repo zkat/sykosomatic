@@ -1,35 +1,24 @@
 (cl:defpackage #:sykosomatic.character
-  (:use :cl :alexandria :sykosomatic.db :chillax.core :cl-ppcre)
-  (:export :find-character :find-characters-by-account-name
-           :find-character-by-id
-           :ensure-character-design-doc :create-character
-           :character-id :character-account-name
+  (:use :cl :alexandria :sykosomatic.db :sykosomatic.entity :postmodern :cl-ppcre)
+  (:export :find-character :account-characters
+           :create-character :character-account-email
            :character-name :character-description))
 (cl:in-package #:sykosomatic.character)
 
-(defun ensure-character-design-doc ()
-  (ensure-doc "_design/character"
-              (mkdoc "language" "common-lisp"
-                     "views" (mkdoc "by_account_name"
-                                    (mkdoc "map"
-                                           (mapfun doc "character"
-                                             (emit (string-downcase (hashget doc "account_name"))
-                                                   doc)))
-                                    "by_name"
-                                    (mkdoc "map"
-                                           (mapfun doc "character"
-                                             (emit (string-downcase (hashget doc "name"))
-                                                   doc)))))))
-
 (defun find-character (name)
-  (view-query-value "character" "by_name" (string-downcase name)))
+  (query (:order-by (:select 'entity-id :from 'modifier
+                             :where (:and (:= 'type "character-name")
+                                          (:= 'text-value name)))
+                    (:desc 'precedence))
+         :single))
 
-(defun find-characters-by-account-name (account-name)
-  (view-query-value "character" "by_account_name" (string-downcase account-name) nil))
+(defun account-characters (account-id)
+  (query (:select 'entity-id :from 'modifier
+                  :where (:and (:= 'type "character-account")
+                               (:= 'numeric-value account-id)))
+         :column))
 
-(defun find-character-by-id (id)
-  (get-document *db* id :errorp nil))
-
+;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
                                                      :case-insensitive-mode t))
 
@@ -47,22 +36,22 @@
     (assert-validation (not (find-character name)) "Character with that name already exists.")
     (assert-validation (<= (length description) 500) "Descriptions must be under 500 characters long.")))
 
-(defun create-character (account-name name description)
+(defun create-character (account-id name description)
   (multiple-value-bind (validp errors)
       (validate-new-character name description)
     (if validp
-        (ensure-doc (get-uuid)
-                    (mkdoc "type" "character"
-                           "account_name" account-name
-                           "name" name
-                           "description" description))
+        (with-transaction ()
+          (let ((entity (create-entity)))
+            (add-modifier entity "character-name" :text-value name)
+            (add-modifier entity "character-description" :text-value description)
+            (add-modifier entity "character-account" :numeric-value account-id)
+            entity))
         (values nil errors))))
 
-(defun character-id (character)
-  (doc-val character "_id"))
-(defun character-name (character)
-  (doc-val character "name"))
-(defun character-description (character)
-  (doc-val character "description"))
-(defun character-account-name (character)
-  (doc-val character "account_name"))
+(defun character-name (character-id)
+  (text-modifier-value character-id "character-name"))
+(defun character-description (character-id)
+  (text-modifier-value character-id "character-description"))
+(defun character-account-email (character-id)
+  (let ((account-id (numeric-modifier-value character-id "character-account")))
+    (query (:select 'email :from 'account :where (:= 'id account-id)))))

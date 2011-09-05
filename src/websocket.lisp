@@ -36,20 +36,20 @@
   (let ((character (find-character (jsown:val message "char"))))
     (if (and (validate-client res client)
              character
-             (string-equal (character-account-name character)
+             (string-equal (character-account-email character)
                            (client-account-name client)))
         (progn
           (logit "Client validated: ~S. It's now playing as ~A."
                   client (character-name character))
-          (setf (client-character-id client) (character-id character))
+          (setf (client-character-id client) (sykosomatic.db:id character))
           (push (session-websocket-clients (client-session client)) client))
         (progn
           (logit "No session. Disconnecting client. (~S)" client)
           (disconnect-client res client)))))
 
 (defun client-character-name (client)
-  (when-let ((character (find-character-by-id (client-character-id client))))
-    (character-name character)))
+  (when-let ((character-id (client-character-id client)))
+    (character-name character-id)))
 
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test #'eq))
@@ -130,14 +130,14 @@
 (defun send-action (recipient actor action-txt)
   (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
     (logit "Saving action under scene ~A: ~A" scene-id action-txt)
-    (add-action scene-id (character-name (find-character-by-id actor)) action-txt))
+    (add-action scene-id actor action-txt))
   (send-msg recipient `("action" (:obj
                                   ,@(when actor
-                                      `(("actor" . ,(character-name (find-character-by-id actor)))))
+                                          `(("actor" . ,(character-name actor))))
                                   ("action" . ,action-txt)))))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (let ((char-name (character-name (find-character-by-id actor))))
+  (let ((char-name (character-name actor)))
     (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
       (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
       (add-dialogue scene-id char-name dialogue parenthetical))

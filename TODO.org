@@ -1,4 +1,7 @@
 * Features
+** DB
+*** DONE Convert to postgres
+    Whatever's left can be taken care of later.
 ** Misc
 *** DONE s/belletrist/sykosomatic/
     It is time.
@@ -123,14 +126,6 @@
     The box should broadcast whatever is typed into it as the 'dialogue' for the current character.
 *** DONE Add basic dialogue parser
     Instead of just typing anything into the box, dialogue should be delimited by a '.
-*** TODO Basic I/O protocol
-    The parser needs a specific IO protocol that works around some simple objects it can learn to
-    manipulate. Write two generic functions that the websocket server can implement that will
-    function as a basic API for the parser to send out input as it needs.
-**** send-to-actor
-     Only sends a message to the actor.
-**** send-to-all
-     Sends the message to all present.
 *** DONE Basic actions
     Add the ability to take actions by using 'verbs'. These verbs can be inserted before
     dialogue. They should be entered in their infinitive form. The application should then convert
@@ -142,6 +137,25 @@
 **** laugh
 **** cry
 **** wave
+*** DONE Event system
+**** DONE Plan out some ideas for a fully-persistent event system.
+**** DONE Implement a simple, non-persistent, asynchronous event system.
+**** DONE Persist an event.
+     Make an event that will output a message in 10 minutes, then shut down the server and bring it
+     back up -- the event should still fire.
+*** TODO Game objects - basic entities
+    Time to start coding up some game objects!
+    http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
+**** DONE Convert characters to use entity system (start with Describable?)
+**** DONE Get the old code to work again with new entity system
+**** DONE Set up system initialization system.
+**** TODO Clamp rate of execute-all-callbacks.
+     Can probably yank the old UID code with some modifications.
+**** TODO Cleaner es-thread shutdown
+     Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
+**** TODO Hook up the parser to the entity system.
+***** TODO Allow parser to target characters by name.
+***** TODO Allow parser to target locations by name.
 *** TODO Add concept of a 'location'
     Once characters exist, we can start adding the concept of a 'location' to the game. Locations
     should have a description, and should be able to 'contain' other characters. Characters can only
@@ -163,21 +177,6 @@
      transitions, but an arrival message is good enough for now.
 *** TODO Location building.
     Write an interface that can be used to easily build and connect locations.
-*** TODO Game objects - basic entities
-    Time to start coding up some game objects!
-    http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
-**** TODO Convert characters to use entity system (start with Describable?)
-**** TODO Convert locations to use entity system.
-**** TODO Hook up the parser to the entity system.
-***** TODO Allow parser to target characters by name.
-***** TODO Allow parser to target locations by name.
-*** TODO Event system
-**** TODO Plan out some ideas for a fully-persistent event system.
-**** TODO Implement a simple, non-persistent, asynchronous event system.
-**** TODO Persist an event.
-     Make an event that will output a message in 10 minutes, then shut down the server and bring it
-     back up -- the event should still fire.
-
 ** Game client
 *** DONE Refactor code to use a simple CouchDB-view-server-like protocol.
     Just so we have a nice open window for expansion. Something like
@@ -307,17 +306,6 @@
 **** TODO Throttle user input.
      Length and regularity of user input should be somewhat limited, so players can't just spam a
      ton of garbage onto the screen.
-** Chillax
-*** DONE Fix the goddamn view server.
-    It's switching the order of map functions in a view. :(
-*** DONE Figure out why the hell the view server is freezing up
-*** TODO Figure out how to stringify views properly.
-    Right now, symbols get printed out with package prefixes if ENSURE-* are called outside of their
-    home packages. This is ridiculous.
-*** TODO Build a view server that uses jsown.
-    JSOWN ftw. For bonus points, make the view server *not* decode JSON by default, for top speed.
-*** TODO Convert view code to use jsown, too.
-    Because using mkhash in one place and mkdoc in another sucks.
 ** Style
 *** TODO Expanding input fields
     Check out Facebook's CSS/JS to figure out how they get their textboxes to expand. It's probably
