@@ -16,10 +16,6 @@
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
 *** DONE Add display names for accounts.
-*** TODO Use (strcat "account/" email "/" display-name) as the _id for accounts.
-    CouchDB doesn't have unique constraints for general document fields. Gotta encode this stuff in
-    the _id.
-*** TODO Write a function that will return all currently-chatting accounts.
 ** Storybuilding
    In general, players can hang around and play casually however they want. If/when they have an
    idea or want to play out something more seriously, they can choose to start a 'scene' to earn
@@ -179,6 +175,10 @@
 *** TODO Location building.
     Write an interface that can be used to easily build and connect locations.
 ** Game client
+*** TODO Persistent messaging events
+    Messages being passed around to/from the client should be data-driven -- a 'dialogue' message is
+    sint to the client, for example, by a loop that looks for messages to send. That means all the
+    parser has to do is insert some rows into a table.
 *** DONE Refactor code to use a simple CouchDB-view-server-like protocol.
     Just so we have a nice open window for expansion. Something like
     ["message_type","contents"]. It'll allow things like ["ping",1], as well as any future
