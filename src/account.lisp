@@ -18,13 +18,12 @@
 (defparameter *key-length* 32)
 (defun hash-password (password salt)
   "Password hashing function."
-  (ironclad:byte-array-to-hex-string
-   (ironclad:derive-key
-    (make-instance 'ironclad:pbkdf2 :digest :sha256)
-    (ironclad:ascii-string-to-byte-array password)
-    (ironclad:ascii-string-to-byte-array salt)
-    *key-derivation-iterations*
-    *key-length*)))
+  (ironclad:derive-key
+   (make-instance 'ironclad:pbkdf2 :digest :sha256)
+   (ironclad:ascii-string-to-byte-array password)
+   salt
+   *key-derivation-iterations*
+   *key-length*))
 
 ;;;
 ;;; DB
@@ -45,8 +44,8 @@
   ((id :col-type serial :reader id)
    (display-name :col-type text :initarg :display-name :reader account-display-name)
    (email :col-type text :initarg :email :reader account-email)
-   (password :col-type text :initarg :password :reader account-password)
-   (salt :col-type text :initarg :salt :reader account-password-salt)
+   (password :col-type bytea :initarg :password :reader account-password)
+   (salt :col-type bytea :initarg :salt :reader account-password-salt)
    (created-at :col-type timestamp :col-default (:now)))
   (:keys id)
   (:unique-index 'id)
@@ -65,9 +64,9 @@
 (defun validate-account (email password)
   (with-db ()
     (with-transaction ()
-      (when-let (account (find-account email))
+      (when-let (account (find-account-by-email email))
         (let ((hashed-pass (hash-password password (account-password-salt account))))
-          (when (string= hashed-pass (account-password account))
+          (when (equalp hashed-pass (account-password account))
             account))))))
 
 (defun display-name-exists-p (display-name)
@@ -105,7 +104,7 @@
     (assert-required "Password" password)
     (assert-required "Confirmation" confirmation)
     (assert-validation (valid-email-p email) "Invalid email.")
-    (assert-validation (not (find-account email)) "Account already exists.")
+    (assert-validation (not (find-account-by-email email)) "Account already exists.")
     (assert-validation (valid-password-p password) "Password must be at least 6 characters long and can't contain funky characters.")
     (assert-validation (valid-display-name-p display-name) "Invalid display name. Display name must be between 4 and 32 alphanumeric characters.")
     (assert-validation (not (display-name-exists-p display-name)) "Display name already in use.")
@@ -117,7 +116,8 @@
       (multiple-value-bind (validp errors)
           (validate-new-account email display-name password confirmation)
         (if validp
-            (let ((salt (random-string 32)))
+            (let ((salt (map-into (make-array 32 :element-type '(unsigned-byte 8))
+                                  (curry #'random 256))))
               (make-dao 'account
                         :email email
                         :display-name display-name
