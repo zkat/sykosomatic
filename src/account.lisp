@@ -42,24 +42,27 @@
    (salt :col-type text :initarg :salt :reader account-password-salt)
    (created-at :col-type timestamp :col-default (:now)))
   (:keys email)
-  (:index 'id)
-  (:index 'email)
+  (:unique-index 'id)
+  (:unique-index 'email)
   (:unique 'email)
   (:unique 'display-name))
 
 (defun find-account (email)
-  (get-dao 'account (string-downcase email)))
+  (with-db ()
+    (get-dao 'account (string-downcase email))))
 
 (defun validate-account (email password)
-  (with-transaction ()
-    (when-let (account (find-account email))
-      (let ((hashed-pass (hash-password password (account-password-salt account))))
-        (when (string= hashed-pass (account-password account))
-          account)))))
+  (with-db ()
+    (with-transaction ()
+      (when-let (account (find-account email))
+        (let ((hashed-pass (hash-password password (account-password-salt account))))
+          (when (string= hashed-pass (account-password account))
+            account))))))
 
 (defun display-name-exists-p (display-name)
-  (query (:select t :from 'account :where (:= 'display-name display-name))
-         :single))
+  (with-db ()
+    (query (:select t :from 'account :where (:= 'display-name display-name))
+           :single)))
 
 ;;;
 ;;; Creation and validation
@@ -98,14 +101,15 @@
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
 
 (defun create-account (email display-name password confirmation)
-  (with-transaction ()
-    (multiple-value-bind (validp errors)
-        (validate-new-account email display-name password confirmation)
-      (if validp
-          (let ((salt (random-string 32)))
-            (make-dao 'account
-                      :email email
-                      :display-name display-name
-                      :password (hash-password password salt)
-                      :salt salt))
-          (values nil errors)))))
+  (with-db ()
+    (with-transaction ()
+      (multiple-value-bind (validp errors)
+          (validate-new-account email display-name password confirmation)
+        (if validp
+            (let ((salt (random-string 32)))
+              (make-dao 'account
+                        :email email
+                        :display-name display-name
+                        :password (hash-password password salt)
+                        :salt salt))
+            (values nil errors))))))

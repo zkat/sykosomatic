@@ -78,14 +78,16 @@
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
-  (with-form-errors
-    (templ:role (mapcar #'character-name
-                        (find-characters-by-account-name (session-value 'account-name))))))
+  (with-db ()
+    (with-form-errors
+      (templ:role (mapcar #'character-name
+                          (account-characters (sykosomatic.db:id
+                                               (find-account (session-value 'account-name)))))))))
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
   (with-form-errors
-    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-name (current-account-name))))))
+    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-email (current-account-name))))))
 
 (define-easy-handler (view-scene :uri "/view-scene") (id)
   (case (request-method*)
@@ -109,9 +111,9 @@
        (push-error "Already logged in as ~A." account-name))
      (with-form-errors (templ:login)))
     (:post
-     (if-let ((account (validate-credentials account-name password)))
+     (if-let ((account (validate-account account-name password)))
        (progn
-         (setf (session-value 'account-name) (account-name account)
+         (setf (session-value 'account-name) (account-email account)
                (session-value 'display-name) (account-display-name account))
          (logit "~A logged in." account-name)
          (redirect "/role"))
