@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.scene
   (:use :cl :alexandria :postmodern :sykosomatic.db)
   (:export :create-scene :add-action :add-dialogue :find-scenes-by-account-id
+           :scene-exists-p :account-voted-p
            :find-scenes-by-account-email :find-scene-with-entries :find-scene-entries
            :scene-id :scene-upvote :scene-rating))
 (cl:in-package #:sykosomatic.scene)
@@ -54,6 +55,10 @@
 
 (defun scene-id (scene)
   (id scene))
+
+(defun scene-exists-p (scene-id)
+  (query (:select t :from 'scene :where (:= 'id scene-id))
+         :single))
 
 (defun account-voted-p (scene-id account-id)
   (query (:select t :from 'scene-upvote
