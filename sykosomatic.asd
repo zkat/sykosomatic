@@ -12,9 +12,9 @@
             :serial t
             :components
             ((:file "utils")
+             (:file "smug")
              (:file "db")
              (:file "entity")
-             (:file "smug")
              (:file "account")
              (:file "character")
              (:file "scene")
