@@ -11,14 +11,6 @@
 
 ;;; SQL utils
 ;;; TODO - s-sql doesn't support FOR UPDATE. :(
-
-(defun pomo::\!unique (&rest target-fields &aux (target-fields (mapcar #'pomo::to-sql-name target-fields)))
-  (format nil "ALTER TABLE ~A ADD CONSTRAINT ~A UNIQUE (~{~A~^, ~})"
-          (pomo::to-sql-name *table-name*)
-          (pomo::to-sql-name (format nil "~A_~{~A~^_~}_unique" *table-name* target-fields))
-          target-fields))
-(export 'pomo::\!unique (find-package :postmodern))
-
 (defmacro defdao (name superclasses slots &body dao-options)
   (flet ((parsed-opts (keyword deftable-func-name)
            (mapcar (lambda (statement)
@@ -53,7 +45,7 @@
   (rebuild))
 
 (defmacro with-db (() &body body)
-  `(with-connection (*db-name* *db-user* *db-password* *db-host*)
+  `(with-connection (list *db-name* *db-user* *db-password* *db-host*)
      ,@body))
 
 (defgeneric id (dao))

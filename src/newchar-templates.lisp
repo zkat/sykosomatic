@@ -125,8 +125,8 @@
           (mk-select-field "where" "Where are they now?"
                            locations "Choose current location...")
           (<:h3 :id "description-header" "Description")
-          (<:p :id "location-description" :aria-live "polite" :aria-relevant "additions removals"
-               :aria-describedby "description-header"))))
+          (<:p :id "location-description" #+aria(:aria-live "polite" :aria-relevant "additions removals"
+                                                      :aria-describedby "description-header")))))
 
 (defun cc-confirm ()
   (<:div
