@@ -26,7 +26,7 @@
   (setf *es-thread*
         (bt:make-thread (lambda ()
                           ;; TODO - clamp this.
-                          (loop (execute-all-callbacks)))
+                          (loop (continuable (execute-all-callbacks))))
                         :name "entity-system-processing")))
 
 (defun teardown-entity-system ()
