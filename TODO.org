@@ -245,13 +245,15 @@
 *** DONE Split up handlers between POST and GET
 *** DONE Move handlers to a separate file.
 *** DONE Make / an actual homepage, /play the playing page.
+*** DONE Make the session values simply be IDs
+    Instead of stuffing email addresses into places.
 *** TODO Improve form error reporting.
     The GET version should accept an optional 'errors' argument that it can be called with to handle
     error messages. This may involve not using define-easy-handler anymore.
 *** TODO Loading screen
     Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
     show the whole chat box.
-*** TODO Templatify code
+*** DONE Templatify code
     belletrist.lisp is starting to look like a big ball of pseudo-HTML in some places. It might be
     worthwhile to start looking into moving that HTML out into template, or pseudo-template files.
 *** TODO New template system
