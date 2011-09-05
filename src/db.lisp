@@ -47,8 +47,12 @@
   (rebuild))
 
 (defmacro with-db (() &body body)
-  `(with-connection (list *db-name* *db-user* *db-password* *db-host*)
-     ,@body))
+  `(let ((reusing-connection-p *database*)
+         (*database* (or *database*
+                         (apply #'connect (list *db-name* *db-user* *db-password* *db-host*)))))
+     (unwind-protect (progn ,@body)
+       (unless reusing-connection-p
+         (disconnect *database*)))))
 
 (defgeneric id (dao))
 
