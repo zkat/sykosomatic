@@ -21,7 +21,7 @@
   (defun execute-all-callbacks ()
     (maphash-values #'funcall callbacks)))
 
-(defparameter *ticks-per-second* 30)
+(defparameter *ticks-per-second* 5)
 (defvar *es-thread* nil)
 (defun init-entity-system ()
   (setf *es-thread*
