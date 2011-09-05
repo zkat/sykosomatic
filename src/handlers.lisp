@@ -108,21 +108,21 @@
             (redirect (format nil "/view-scene?id=~A" id)))))))
 
 ;;; Login/logout
-(define-easy-handler (login :uri "/login") (account-email password)
+(define-easy-handler (login :uri "/login") (email password)
   (unless *session*
     (start-session))
   (case (request-method*)
     (:get
-     (when-let ((account-email (account-email (current-account))))
-       (push-error "Already logged in as ~A." account-email))
+     (when-let ((account-id (current-account)))
+       (push-error "Already logged in as ~A." (account-email account-id)))
      (with-form-errors (templ:login)))
     (:post
      (when (current-account)
        (redirect "/login"))
-     (if-let ((account (validate-account account-email password)))
+     (if-let ((account (validate-account email password)))
        (progn
          (setf (current-account) (sykosomatic.db:id account))
-         (logit "~A logged in." account-email)
+         (logit "~A logged in." email)
          (redirect "/role"))
        (progn
          (push-error "Invalid login or password.")
@@ -135,14 +135,14 @@
   (redirect "/login"))
 
 ;;; Account creation and management
-(define-easy-handler (signup :uri "/signup") (account-email display-name password confirmation)
+(define-easy-handler (signup :uri "/signup") (email display-name password confirmation)
   (case (request-method*)
     (:post
      (multiple-value-bind (account-created-p errors)
-         (create-account account-email display-name password confirmation)
+         (create-account email display-name password confirmation)
        (if account-created-p
            (progn
-             (logit "Account created: ~A" account-email)
+             (logit "Account created: ~A" email)
              (redirect "/login"))
            (progn
              (appendf (session-value 'errors) errors)

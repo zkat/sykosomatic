@@ -101,7 +101,7 @@
 
 (defun login-component ()
   (<:form :name "login" :action "/login" :method "post"
-          (text-input-field "account-name" "Email")
+          (text-input-field "email" "Email")
           (text-input-field "password" "Password" :type "password")
           (<:submit :value "Log in")))
 
@@ -260,7 +260,7 @@
   (<:form :name "signup" :action "/signup" :method "post"
           (<:fieldset
            (<:legend "Sign up!")
-           (text-input-field "account-name" "Email")
+           (text-input-field "email" "Email")
            (text-input-field "display-name" "Display Name" :max-length 32)
            (text-input-field "password" "Password" :type "password")
            (text-input-field "confirmation" "Confirm password" :type "password"))
