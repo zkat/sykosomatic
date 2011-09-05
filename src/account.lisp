@@ -25,6 +25,10 @@
    *key-derivation-iterations*
    *key-length*))
 
+(defun gensalt (&key (length 32) (size 256))
+  (map-into (make-array length :element-type '(unsigned-byte 8))
+            (curry #'random size)))
+
 ;;;
 ;;; DB
 ;;;
@@ -89,7 +93,7 @@
 
 (defun valid-password-p (password)
   (and (>= (length password) 6)
-       (not (find-if-not #'standard-char-p password))))
+       (every #'standard-char-p password)))
 
 (defun valid-display-name-p (display-name)
   (when (and (>= (length display-name) 4)
@@ -116,8 +120,7 @@
       (multiple-value-bind (validp errors)
           (validate-new-account email display-name password confirmation)
         (if validp
-            (let ((salt (map-into (make-array 32 :element-type '(unsigned-byte 8))
-                                  (curry #'random 256))))
+            (let ((salt (gensalt)))
               (make-dao 'account
                         :email email
                         :display-name display-name
