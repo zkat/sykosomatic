@@ -1,9 +1,36 @@
 (cl:defpackage #:sykosomatic.entity
-  (:use :cl :postmodern :sykosomatic.db)
-  (:export :list-modifiers :add-modifier :create-entity
+  (:use :cl :alexandria :postmodern :sykosomatic.db)
+  (:export :init-entity-system :teardown-entity-system
+           :list-systems :register-system :unregister-system
+           :list-modifiers :add-modifier :create-entity
            :text-modifier-value :numeric-modifier-value
-           :entity-uid :find-entity-by-uid))
+           :entity-uid :find-entity-by-uid
+           :event-execution :expire-modifier
+           :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
+
+(let ((callbacks (make-hash-table)))
+  (defun list-systems ()
+    (hash-table-keys callbacks))
+  (defun register-system (system-name callback)
+    (setf (gethash system-name callbacks) callback))
+  (defun unregister-system (system-name)
+    (remhash system-name callbacks))
+  (defun execute-all-callbacks ()
+    (maphash-values #'funcall callbacks)))
+
+(defvar *es-thread* nil)
+(defun init-entity-system ()
+  (setf *es-thread*
+        (bt:make-thread (lambda ()
+                          ;; TODO - clamp this.
+                          (loop (execute-all-callbacks)))
+                        :name "entity-system-processing")))
+
+(defun teardown-entity-system ()
+  (when (and *es-thread* (bt:thread-alive-p *es-thread*))
+    (bt:destroy-thread *es-thread*))
+  (setf *es-thread* nil))
 
 (defdao entity ()
   ((id :col-type serial :reader id)
@@ -128,3 +155,5 @@
                              :where (:= 'id event-execution-id))))))
     (with-transaction ()
       (map nil #'process-penalty (expired-modifiers)))))
+
+(register-system 'modifier-expiration 'clear-expired-modifiers)
