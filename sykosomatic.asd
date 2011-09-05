@@ -6,6 +6,7 @@
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad #:postmodern
+               #:local-time
                #:string-case)
   :components
   ((:module src
