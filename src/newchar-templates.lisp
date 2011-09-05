@@ -1,5 +1,7 @@
 (cl:in-package :templ)
 
+(sykosomatic.utils:optimizations)
+
 (defun newchar-js ()
   (<:script :type "text/javascript" :src "res/js/newchar.js"))
 

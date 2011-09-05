@@ -6,6 +6,8 @@
   (:import-from #:sykosomatic.db #:init-db))
 (cl:in-package #:sykosomatic)
 
+(optimizations)
+
 (defvar *server* nil)
 (defparameter *web-server-port* 8888)
 (defparameter *chat-server-port*

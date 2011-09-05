@@ -14,6 +14,8 @@
            :option-text))
 (cl:in-package :templ)
 
+(sykosomatic.utils:optimizations)
+
 (defgeneric optgroup-label (optgroup))
 (defgeneric optgroup-options (optgroup))
 (defgeneric option-value (opt)

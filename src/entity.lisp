@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.entity
-  (:use :cl :alexandria :postmodern :sykosomatic.db)
+  (:use :cl :alexandria :postmodern :sykosomatic.db :sykosomatic.utils)
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
@@ -8,6 +8,8 @@
            :event-execution :expire-modifier
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
+
+(optimizations)
 
 (let ((callbacks (make-hash-table)))
   (defun list-systems ()

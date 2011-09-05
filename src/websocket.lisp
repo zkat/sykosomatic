@@ -1,5 +1,7 @@
 (in-package :sykosomatic)
 
+(optimizations)
+
 (defstruct (user-action (:constructor make-user-action (user action dialogue
                                                         &optional (timestamp (get-universal-time)))))
   user timestamp action dialogue)

@@ -1,6 +1,6 @@
 (cl:in-package :sykosomatic)
 
-(declaim (optimize debug))
+(optimizations)
 
 ;;;
 ;;; HT

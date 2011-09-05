@@ -1,7 +1,13 @@
 (cl:defpackage #:sykosomatic.utils
   (:use :cl :alexandria)
-  (:export :logit :dbg :continuable :random-string))
+  (:export :logit :dbg :continuable :random-string :optimizations))
 (cl:in-package :sykosomatic.utils)
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro optimizations ()
+    `(declaim (optimize debug safety))))
+
+(optimizations)
 
 (defmacro continuable (&body body)
   "helper macro since we use continue restarts a lot
