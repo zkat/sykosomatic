@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.entity
   (:use :cl :postmodern :sykosomatic.db)
   (:export :list-modifiers :add-modifier :create-entity
+           :text-modifier-value :numeric-modifier-value
            :entity-uid :find-entity-by-uid))
 (cl:in-package #:sykosomatic.entity)
 
@@ -39,6 +40,20 @@
               :timestamp-value (or timestamp-value :null)
               :description (or description :null)
               :precedence (or precedence 0))))
+
+(defun text-modifier-value (entity type)
+  (query (:order-by (:select 'text-value :from 'modifier
+                             :where (:and (:= 'entity-id (entity-id entity))
+                                          (:= 'type type)))
+                    'precedence)
+         :single))
+
+(defun numeric-modifier-value (entity type)
+  (query (:order-by (:select 'numeric-value :from 'modifier
+                             :where (:and (:= 'entity-id (entity-id entity))
+                                          (:= 'type type)))
+                    'precedence)
+         :single))
 
 (defun create-entity (&key comment)
   (id (make-dao 'entity :comment (or comment :null))))

@@ -10,6 +10,8 @@
 (defparameter *db-host* "localhost")
 
 ;;; SQL utils
+;;; TODO - s-sql doesn't support FOR UPDATE. :(
+
 (defun pomo::\!unique (&rest target-fields &aux (target-fields (mapcar #'pomo::to-sql-name target-fields)))
   (format nil "ALTER TABLE ~A ADD CONSTRAINT ~A UNIQUE (~{~A~^, ~})"
           (pomo::to-sql-name *table-name*)
