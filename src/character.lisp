@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.character
-  (:use :cl :alexandria :sykosomatic.db :sykosomatic.entity :postmodern)
+  (:use :cl :alexandria :sykosomatic.db :sykosomatic.entity :postmodern :cl-ppcre)
   (:export :find-character :account-characters
            :create-character :character-account-email
            :character-name :character-description))
