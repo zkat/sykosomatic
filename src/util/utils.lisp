@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.utils
   (:use :cl :alexandria)
-  (:export :logit :dbg :continuable :random-string :optimizations))
+  (:export :logit :dbg :continuable :random-string :optimizations
+           :make-timer :timer-tick))
 (cl:in-package :sykosomatic.utils)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
