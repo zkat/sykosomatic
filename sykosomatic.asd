@@ -5,16 +5,17 @@
   :depends-on (#:alexandria
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads #:cl-ppcre
-               #:jsown #:ironclad
-               #:chillax.core #:chillax.jsown
+               #:jsown #:ironclad #:postmodern
+               #:local-time
                #:string-case)
   :components
   ((:module src
             :serial t
             :components
             ((:file "utils")
-             (:file "db")
              (:file "smug")
+             (:file "db")
+             (:file "entity")
              (:file "account")
              (:file "character")
              (:file "scene")

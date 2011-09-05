@@ -1,8 +1,7 @@
 (cl:defpackage #:sykosomatic.account
-  (:use :cl :alexandria :cl-ppcre :sykosomatic.db)
-  (:export :ensure-account-design-doc :create-account :find-account :validate-credentials
-           :account-name
-           :account-display-name))
+  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.utils :postmodern)
+  (:export :create-account :find-account :validate-account
+           :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
 
 (declaim (optimize debug))
@@ -11,10 +10,9 @@
 ;;; Utils
 ;;;
 
-;;; The password confirmation scheme uses PDKDF2. CouchDB's randomly-generated document id for the
-;;; particular account is used as a salt for the password. The two parameters should be adjusted
-;;; according to your server's capabilities. Do some profiling and make these numbers as high as you
-;;; can without lagging under heavy load.
+;;; The password confirmation scheme uses PBKDF2.  The two parameters should be adjusted according
+;;; to your server's capabilities. Do some profiling and make these numbers as high as you can
+;;; without lagging under heavy load.
 
 (defparameter *key-derivation-iterations* 1056)
 (defparameter *key-length* 32)
@@ -26,56 +24,45 @@
     (ironclad:ascii-string-to-byte-array password)
     (ironclad:ascii-string-to-byte-array salt)
     *key-derivation-iterations*
-    *key-length*))
-  #+nil
-  (ironclad:byte-array-to-hex-string
-   (ironclad:digest-sequence
-    :sha256
-    (ironclad:ascii-string-to-byte-array
-     password))))
+    *key-length*)))
 
 ;;;
-;;; Design and querying
+;;; DB
 ;;;
-(defun ensure-account-design-doc ()
-  (ensure-doc "_design/account"
-              (mkdoc "language" "common-lisp"
-                     "views" (mkdoc "by_account_name"
-                                    (mkdoc "map"
-                                           (mapfun doc "account"
-                                             (emit (string-downcase (hashget doc "account_name"))
-                                                   doc)))
-                                    "by_account_name_password"
-                                    (mkdoc "map"
-                                           (mapfun doc "account"
-                                             (emit (list (string-downcase (hashget doc "account_name"))
-                                                         (hashget doc "password"))
-                                                   doc)))
-                                    "by_display_name"
-                                    (mkdoc "map"
-                                           (mapfun doc "account"
-                                             (emit (string-downcase (hashget doc "display_name"))
-                                                   doc)))))))
+(defgeneric account-email (account))
+(defgeneric account-display-name (account))
+(defgeneric account-password (account))
+(defgeneric account-password-salt (account))
 
-(defun account-view-value (view-name key)
-  (view-query-value "account" view-name key))
+(defdao account ()
+  ((id :col-type serial :reader id)
+   (display-name :col-type text :initarg :display-name :reader account-display-name)
+   (email :col-type text :initarg :email :reader account-email)
+   (password :col-type text :initarg :password :reader account-password)
+   (salt :col-type text :initarg :salt :reader account-password-salt)
+   (created-at :col-type timestamp :col-default (:now)))
+  (:keys email)
+  (:unique-index 'id)
+  (:unique-index 'email)
+  (:unique 'email)
+  (:unique 'display-name))
 
-(defun find-account-by-display-name (display-name)
-  (account-view-value "by_display_name" display-name))
+(defun find-account (email)
+  (with-db ()
+    (get-dao 'account (string-downcase email))))
 
-(defun find-account (account-name)
-  (account-view-value "by_account_name" (string-downcase account-name)))
+(defun validate-account (email password)
+  (with-db ()
+    (with-transaction ()
+      (when-let (account (find-account email))
+        (let ((hashed-pass (hash-password password (account-password-salt account))))
+          (when (string= hashed-pass (account-password account))
+            account))))))
 
-(defun validate-credentials (account-name password)
-  (when-let (account (account-view-value "by_account_name" (string-downcase account-name)))
-    (let ((hashed-pass (hash-password password (doc-val account "_id"))))
-      (when (string= hashed-pass (doc-val account "password"))
-        account))))
-
-(defun account-name (account)
-  (doc-val account "account_name"))
-(defun account-display-name (account)
-  (doc-val account "display_name"))
+(defun display-name-exists-p (display-name)
+  (with-db ()
+    (query (:select t :from 'account :where (:= 'display-name display-name))
+           :single)))
 
 ;;;
 ;;; Creation and validation
@@ -100,28 +87,29 @@
              (scan *display-name-regex* display-name))
     t))
 
-(defun validate-new-account (account-name display-name password confirmation)
+(defun validate-new-account (email display-name password confirmation)
   (with-validation
-    (assert-required "Account name" account-name)
+    (assert-required "Email" email)
     (assert-required "Display Name" display-name)
     (assert-required "Password" password)
     (assert-required "Confirmation" confirmation)
-    (assert-validation (valid-email-p account-name) "Invalid email.")
-    (assert-validation (not (find-account account-name)) "Account already exists.")
+    (assert-validation (valid-email-p email) "Invalid email.")
+    (assert-validation (not (find-account email)) "Account already exists.")
     (assert-validation (valid-password-p password) "Password must be at least 6 characters long and can't contain funky characters.")
     (assert-validation (valid-display-name-p display-name) "Invalid display name. Display name must be between 4 and 32 alphanumeric characters.")
-    (assert-validation (not (find-account-by-display-name display-name)) "Display name already in use.")
+    (assert-validation (not (display-name-exists-p display-name)) "Display name already in use.")
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
 
-(defun create-account (account-name display-name password confirmation)
-  (multiple-value-bind (validp errors)
-      (validate-new-account account-name display-name password confirmation)
-    (if validp
-        (let ((uuid (get-uuid)))
-          (ensure-doc uuid
-                      (mkdoc "type" "account"
-                             "account_name" account-name
-                             "display_name" display-name
-                             "password" (hash-password password uuid)
-                             "created_at" (get-universal-time))))
-        (values nil errors))))
+(defun create-account (email display-name password confirmation)
+  (with-db ()
+    (with-transaction ()
+      (multiple-value-bind (validp errors)
+          (validate-new-account email display-name password confirmation)
+        (if validp
+            (let ((salt (random-string 32)))
+              (make-dao 'account
+                        :email email
+                        :display-name display-name
+                        :password (hash-password password salt)
+                        :salt salt))
+            (values nil errors))))))
