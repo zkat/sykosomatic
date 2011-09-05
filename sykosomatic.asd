@@ -13,6 +13,7 @@
             :components
             ((:file "utils")
              (:file "db")
+             (:file "entity")
              (:file "smug")
              (:file "account")
              (:file "character")
