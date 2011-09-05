@@ -1,10 +1,13 @@
 (cl:defpackage #:sykosomatic.character
-  (:use :cl :alexandria :sykosomatic.db :sykosomatic.entity :postmodern :cl-ppcre)
+  (:use :cl :alexandria :sykosomatic.utils
+        :sykosomatic.db :sykosomatic.entity :postmodern :cl-ppcre)
   (:export :find-character :account-characters
            :create-character :character-account
            :character-account-email
            :character-name :character-description))
 (cl:in-package #:sykosomatic.character)
+
+(optimizations)
 
 (defun find-character (name)
   (query (:order-by (:select 'entity-id :from 'modifier

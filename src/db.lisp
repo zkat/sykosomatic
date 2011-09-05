@@ -4,6 +4,8 @@
            :assert-validation :with-validation :assert-required))
 (cl:in-package #:sykosomatic.db)
 
+(sykosomatic.utils:optimizations)
+
 (defparameter *db-name* "sykosomatic")
 (defparameter *db-user* "postgres")
 (defparameter *db-password* "")

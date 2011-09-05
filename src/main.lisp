@@ -1,5 +1,7 @@
 (in-package :sykosomatic)
 
+(optimizations)
+
 (defvar *runningp* nil)
 (defun begin-shared-hallucination ()
   (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
