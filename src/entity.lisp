@@ -21,12 +21,14 @@
   (defun execute-all-callbacks ()
     (maphash-values #'funcall callbacks)))
 
+(defparameter *ticks-per-second* 30)
 (defvar *es-thread* nil)
 (defun init-entity-system ()
   (setf *es-thread*
         (bt:make-thread (lambda ()
-                          ;; TODO - clamp this.
-                          (loop (continuable (execute-all-callbacks))))
+                          (loop with timer = (make-timer *ticks-per-second*)
+                             do (timer-tick timer)
+                               (continuable (execute-all-callbacks))))
                         :name "entity-system-processing")))
 
 (defun teardown-entity-system ()

@@ -16,7 +16,9 @@
                       :serial t
                       :components
                       ((:file "utils")
-                       (:file "smug")))
+                       (:file "smug")
+                       (:file "queue")
+                       (:file "timer")))
              (:file "db")
              (:file "entity")
              (:file "account")
