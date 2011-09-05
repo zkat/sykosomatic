@@ -198,6 +198,10 @@
                                         ("riverfront" . "Riverfront District")
                                         ("west-bank" . "West Bank Neighborhood")))
 
+(defparameter *adjectives*
+  (with-open-file (s (asdf:system-relative-pathname 'sykosomatic "features.txt"))
+    (read s)))
+
 (define-easy-handler (newchar :uri "/newchar") ()
   #+nil((careers :parameter-type 'array)
         (career-times :parameter-type 'array)
@@ -214,10 +218,6 @@
                    :careers *careers*
                    :location-opts *location-descriptions*
                    :adjectives *adjectives*)))
-
-(defparameter *adjectives*
-  (with-open-file (s (asdf:system-relative-pathname 'sykosomatic "features.txt"))
-    (read s)))
 
 (define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") (adj)
   (when-let (opts (cdr (assoc adj *adjectives* :test #'string-equal)))
