@@ -38,11 +38,13 @@
 (defgeneric account-password-salt (account))
 
 (defmethod account-email ((acc-id integer))
-  (query (:select 'email :from 'account :where (:= 'id acc-id))
-         :single))
+  (with-db ()
+    (query (:select 'email :from 'account :where (:= 'id acc-id))
+           :single)))
 (defmethod account-display-name ((acc-id integer))
-  (query (:select 'display-name :from 'account :where (:= 'id acc-id))
-         :single))
+  (with-db ()
+    (query (:select 'display-name :from 'account :where (:= 'id acc-id))
+           :single)))
 
 (defdao account ()
   ((id :col-type serial :reader id)

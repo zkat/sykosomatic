@@ -31,21 +31,6 @@
          ,@(parsed-opts :foreign-key '!foreign)
          ,@(parsed-opts :unique '!unique)))))
 
-(defun drop-table (symbol)
-  (query (format nil "drop table if exists ~A" (sql-compile symbol))))
-(defun drop-all-tables ()
-  (map nil (compose #'drop-table #'car) pomo::*tables*))
-
-(defun rebuild ()
-  (drop-all-tables)
-  (create-all-tables))
-
-(defun dblog (format-string &rest format-args)
-  (format t "~&LOG - ~A~%" (apply #'format nil format-string format-args)))
-
-(defun init-db ()
-  (rebuild))
-
 (defmacro with-db (() &body body)
   `(let ((reusing-connection-p *database*)
          (*database* (or *database*
@@ -53,6 +38,24 @@
      (unwind-protect (progn ,@body)
        (unless reusing-connection-p
          (disconnect *database*)))))
+
+(defun drop-table (symbol)
+  (with-db ()
+    (query (format nil "drop table if exists ~A" (sql-compile symbol)))))
+(defun drop-all-tables ()
+  (map nil (compose #'drop-table #'car) pomo::*tables*))
+
+(defun rebuild ()
+  (with-db ()
+    (with-transaction ()
+      (drop-all-tables)
+      (create-all-tables))))
+
+(defun dblog (format-string &rest format-args)
+  (format t "~&LOG - ~A~%" (apply #'format nil format-string format-args)))
+
+(defun init-db ()
+  (rebuild))
 
 (defgeneric id (dao))
 
