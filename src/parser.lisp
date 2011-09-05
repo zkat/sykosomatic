@@ -117,7 +117,7 @@
 ;; parenthetical =/ "@" name
 (defun parenthetical ()
   (=or (=let* ((_ (=and (=char #\@) (zero-or-more (whitespace))))
-               (name (word)))
+               (name (dashed-word)))
          (result `(:parenthetical . ,(concatenate 'string "to " name))))
        (=let* ((_ (=char #\())
                ;; TODO - Temporary while testing.
@@ -130,15 +130,15 @@
   (=let* ((at/to (=or (=string "at")
                       (=string "to")))
           (_ (ws))
-          (target-name (word)))
+          (target-name (dashed-word)))
     (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
 
-;; adverb = word that satisfies adverbp
+;; adverb = dashed-word that satisfies adverbp
 (defun adverb ()
-  (=let* ((word (text (alpha-char))))
-    (if (adverbp word)
-        (result `(:adverb . ,word))
-        (fail :error (format nil "'~A' is not an adverb." word)))))
+  (=let* ((dashed-word (text (alpha-char))))
+    (if (adverbp dashed-word)
+        (result `(:adverb . ,dashed-word))
+        (fail :error (format nil "'~A' is not an adverb." dashed-word)))))
 
 ;; action = action-delimiter 0*ws sentence
 (defun action ()
@@ -229,13 +229,13 @@
   (=or (=string "the")
        (=string "a")))
 
-;; adjective = A word. Later validated against the noun it's attached to.
+;; adjective = A dashed-word. Later validated against the noun it's attached to.
 (defun adjective ()
-  (word))
+  (dashed-word))
 
-;; noun = A word that identifies a present, visible object.
+;; noun = A dashed-word that identifies a present, visible object.
 (defun noun ()
-  (word))
+  (dashed-word))
 
 ;; possessive-noun = noun ("'"/"'s")
 (defun possessive-noun ()
@@ -243,7 +243,7 @@
           (_ (=and (=char #\') (maybe (=char #\s)))))
     (result (cons :possessive name))))
 
-(defun word ()
+(defun dashed-word ()
   (text (=or (alpha-char) (=char #\-))))
 ;;;
 ;;; Word identifiers
