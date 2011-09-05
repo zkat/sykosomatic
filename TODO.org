@@ -1,5 +1,7 @@
 * Features
 ** DB
+*** TODO Remove s-sql patch
+    When/if marijn accepts my pull request.
 ** Misc
 ** Accounts
 *** TODO Allow changing passwords.
@@ -69,10 +71,6 @@
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
-*** TODO OOC pane
-    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
-    chatting can happen without interrupting the flow of the scene.
-
 *** TODO OOC messaging
     Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
     OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
@@ -81,11 +79,13 @@
 *** TODO Game objects - basic entities
     Time to start coding up some game objects!
     http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
-**** DONE Convert characters to use entity system (start with Describable?)
-**** DONE Get the old code to work again with new entity system
-**** DONE Set up system initialization system.
-**** TODO Clamp rate of execute-all-callbacks.
+**** TODO Convert characters to use entity system (start with Describable?)
+**** TODO Get the old code to work again with new entity system
+**** DONE Clamp rate of execute-all-callbacks.
      Can probably yank the old UID code with some modifications.
+**** TODO Fix timer
+     It's not quite working right now, although there's a reasonable rate limit. that might be okay
+     for now.
 **** TODO Cleaner es-thread shutdown
      Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
 **** TODO Hook up the parser to the entity system.
@@ -116,6 +116,9 @@
     Should validate what comes down the pipe: when a description request is received, there should
     be validation that the character can, in fact, see the object.
 ** JS client
+*** TODO OOC pane
+    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
+    chatting can happen without interrupting the flow of the scene.
 *** TODO Put descriptions somewhere more sane than an alert()
 *** TODO Back-button-friendliness.
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
@@ -302,7 +305,6 @@
 **** TODO Confirm
      Summarize all the other stuff that was accumulated during character creation, and have the
      player confirm their decision. The actual submit button will be in here.
-
 
 ** Security
 *** TODO XSS
