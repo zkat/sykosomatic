@@ -44,7 +44,8 @@
           (let ((entity (create-entity)))
             (add-modifier entity "character-name" :text-value name)
             (add-modifier entity "character-description" :text-value description)
-            (add-modifier entity "character-account" :numeric-value account-id)))
+            (add-modifier entity "character-account" :numeric-value account-id)
+            entity))
         (values nil errors))))
 
 (defun character-name (character-id)

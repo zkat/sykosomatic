@@ -45,14 +45,14 @@
   (query (:order-by (:select 'text-value :from 'modifier
                              :where (:and (:= 'entity-id (entity-id entity))
                                           (:= 'type type)))
-                    'precedence)
+                    (:desc 'precedence))
          :single))
 
 (defun numeric-modifier-value (entity type)
   (query (:order-by (:select 'numeric-value :from 'modifier
                              :where (:and (:= 'entity-id (entity-id entity))
                                           (:= 'type type)))
-                    'precedence)
+                    (:desc 'precedence))
          :single))
 
 (defun create-entity (&key comment)
