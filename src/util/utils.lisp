@@ -19,7 +19,7 @@
   (format t "~&~A~%" (apply #'format nil format-string format-args)))
 
 (defun dbg (comment obj)
-  (format t "DBG XXX: ~A (~S)" comment obj)
+  (format t "DBG - ~A (~S)" comment obj)
   obj)
 
 (defun pomo::\!unique (&rest target-fields &aux (target-fields (mapcar #'pomo::to-sql-name target-fields)))
@@ -40,7 +40,7 @@
          (no-wait-position (position :nowait args))
          (of-tables (when of-position (subseq args (1+ of-position) no-wait-position))))
     `("(" ,@(sql-expand form) ,(format nil " FOR ~:@(~A~)" share-or-update)
-          ,@(when of-tables (list (format nil " OF ~{~A~^, ~}" (mapcar #'sql-expand of-tables))))
+          ,@(when of-tables (list (format nil " OF ~{~A~^, ~}" (mapcar #'sql-compile of-tables))))
           ,@(when no-wait-position (list " NOWAIT"))
           ")")))
 
