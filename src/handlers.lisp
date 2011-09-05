@@ -143,6 +143,7 @@
        (if account-created-p
            (progn
              (logit "Account created: ~A" email)
+             (push-error "Please log in.")
              (redirect "/login"))
            (progn
              (appendf (session-value 'errors) errors)
