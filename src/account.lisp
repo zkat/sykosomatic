@@ -10,7 +10,7 @@
 ;;; Utils
 ;;;
 
-;;; The password confirmation scheme uses PDKDF2.  The two parameters should be adjusted according
+;;; The password confirmation scheme uses PBKDF2.  The two parameters should be adjusted according
 ;;; to your server's capabilities. Do some profiling and make these numbers as high as you can
 ;;; without lagging under heavy load.
 
@@ -24,13 +24,7 @@
     (ironclad:ascii-string-to-byte-array password)
     (ironclad:ascii-string-to-byte-array salt)
     *key-derivation-iterations*
-    *key-length*))
-  #+nil
-  (ironclad:byte-array-to-hex-string
-   (ironclad:digest-sequence
-    :sha256
-    (ironclad:ascii-string-to-byte-array
-     password))))
+    *key-length*)))
 
 ;;;
 ;;; DB
