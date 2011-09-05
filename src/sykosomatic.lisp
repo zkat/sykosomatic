@@ -17,3 +17,8 @@
   (session-value 'websocket-clients session))
 (defun (setf session-websocket-clients) (new-value session)
   (setf (session-value 'websocket-clients session) new-value))
+
+(defun current-account (&optional (*session* *session*))
+  (session-value 'account-id))
+(defun (setf current-account) (new-value &optional (*session* *session*))
+  (setf (session-value 'account-id) new-value))

@@ -1,7 +1,8 @@
 (cl:defpackage #:sykosomatic.character
   (:use :cl :alexandria :sykosomatic.db :sykosomatic.entity :postmodern :cl-ppcre)
   (:export :find-character :account-characters
-           :create-character :character-account-email
+           :create-character :character-account
+           :character-account-email
            :character-name :character-description))
 (cl:in-package #:sykosomatic.character)
 
@@ -52,6 +53,8 @@
   (text-modifier-value character-id "character-name"))
 (defun character-description (character-id)
   (text-modifier-value character-id "character-description"))
+(defun character-account (character-id)
+  (numeric-modifier-value character-id "character-account"))
 (defun character-account-email (character-id)
-  (let ((account-id (numeric-modifier-value character-id "character-account")))
+  (let ((account-id (character-account character-id)))
     (query (:select 'email :from 'account :where (:= 'id account-id)))))

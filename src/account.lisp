@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.account
   (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.utils :postmodern)
-  (:export :create-account :find-account :validate-account
+  (:export :create-account :find-account :find-account-by-email :validate-account
            :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
 
@@ -34,6 +34,13 @@
 (defgeneric account-password (account))
 (defgeneric account-password-salt (account))
 
+(defmethod account-email ((acc-id integer))
+  (query (:select 'email :from 'account :where (:= 'id acc-id))
+         :single))
+(defmethod account-display-name ((acc-id integer))
+  (query (:select 'display-name :from 'account :where (:= 'id acc-id))
+         :single))
+
 (defdao account ()
   ((id :col-type serial :reader id)
    (display-name :col-type text :initarg :display-name :reader account-display-name)
@@ -41,15 +48,19 @@
    (password :col-type text :initarg :password :reader account-password)
    (salt :col-type text :initarg :salt :reader account-password-salt)
    (created-at :col-type timestamp :col-default (:now)))
-  (:keys email)
+  (:keys id)
   (:unique-index 'id)
   (:unique-index 'email)
   (:unique 'email)
   (:unique 'display-name))
 
-(defun find-account (email)
+(defun find-account (id)
   (with-db ()
-    (get-dao 'account (string-downcase email))))
+    (get-dao 'account id)))
+
+(defun find-account-by-email (email)
+  (with-db ()
+    (car (select-dao 'account (:= 'email (string-downcase email))))))
 
 (defun validate-account (email password)
   (with-db ()

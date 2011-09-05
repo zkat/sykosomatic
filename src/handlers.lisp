@@ -21,10 +21,10 @@
   (when *server* (stop *server*) (setf *server* nil)))
 
 (defun logout (session)
-  (let ((account-name (session-value 'account-name session))
+  (let ((account-id (session-value 'account-id session))
         (websocket-clients (session-websocket-clients session)))
-    (when account-name
-      (logit "~A logged out." account-name))
+    (when account-id
+      (logit "~A logged out." (account-email account-id)))
     (when websocket-clients
       (mapc #'disconnect-client websocket-clients))))
 
@@ -33,15 +33,16 @@
   (logout session))
 
 (defun ensure-logged-in ()
-  (unless (and *session* (session-value 'account-name))
+  (unless (and *session* (current-account))
     (push-error "You must be logged in to access that page.")
     (redirect "/login")))
 
-(defun active-account-sessions (account-name)
-  "Finds all sessions that are logged in as ACCOUNT-NAME."
+(defun active-account-sessions (account-email)
+  "Finds all sessions that are logged in as ACCOUNT-EMAIL."
   (loop for (nil . session) in (session-db *server*)
-     for session-user = (session-value 'account-name session)
-     when (and session-user (string-equal session-user account-name))
+     for session-user = (session-value 'account-id session)
+     when (and session-user (string-equal (account-email session-user)
+                                          account-email))
      collect session))
 
 (defun push-error (format-string &rest format-args)
@@ -55,9 +56,6 @@
   `(let ((templ:*errors* (session-value 'errors)))
      (unwind-protect (progn ,@body)
        (setf (session-value 'errors) nil))))
-
-(defun current-account-name (&optional (*session* *session*))
-  (session-value 'account-name))
 
 (defun 404-handler ()
   (setf (return-code*) +http-not-found+)
@@ -81,61 +79,60 @@
   (with-db ()
     (with-form-errors
       (templ:role (mapcar #'character-name
-                          (account-characters (sykosomatic.db:id
-                                               (find-account (session-value 'account-name)))))))))
+                          (account-characters (current-account)))))))
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
   (with-form-errors
-    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-email (current-account-name))))))
+    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-id (current-account))))))
 
 (define-easy-handler (view-scene :uri "/view-scene") (id)
   (case (request-method*)
     (:get
      ;; TODO - validate scene id.
      (with-form-errors
-       (templ:view-scene id (session-value 'account-name) (scene-rating id))))
+       (templ:view-scene id (not (null (current-account))) (scene-rating id))))
     (:post
      ;; TODO - Don't allow voting if user has already voted.
      (ensure-logged-in)
-     (scene-upvote id (session-value 'account-name))
+     (scene-upvote id (current-account))
      (redirect (format nil "/view-scene?id=~A" id)))))
 
 ;;; Login/logout
-(define-easy-handler (login :uri "/login") (account-name password)
+(define-easy-handler (login :uri "/login") (account-email password)
   (unless *session*
     (start-session))
   (case (request-method*)
     (:get
-     (when-let ((account-name (session-value 'account-name)))
-       (push-error "Already logged in as ~A." account-name))
+     (when-let ((account-email (account-email (current-account))))
+       (push-error "Already logged in as ~A." account-email))
      (with-form-errors (templ:login)))
     (:post
-     (if-let ((account (validate-account account-name password)))
+     ;; TODO - if they try to post while already logged in, just redirect them.
+     (if-let ((account (validate-account account-email password)))
        (progn
-         (setf (session-value 'account-name) (account-email account)
-               (session-value 'display-name) (account-display-name account))
-         (logit "~A logged in." account-name)
+         (setf (current-account) (sykosomatic.db:id account))
+         (logit "~A logged in." account-email)
          (redirect "/role"))
        (progn
          (push-error "Invalid login or password.")
          (redirect "/login"))))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
-  (when (and *session* (session-value 'account-name))
+  (when (and *session* (current-account))
     (logout *session*)
     (remove-session *session*))
   (redirect "/login"))
 
 ;;; Account creation and management
-(define-easy-handler (signup :uri "/signup") (account-name display-name password confirmation)
+(define-easy-handler (signup :uri "/signup") (account-email display-name password confirmation)
   (case (request-method*)
     (:post
      (multiple-value-bind (account-created-p errors)
-         (create-account account-name display-name password confirmation)
+         (create-account account-email display-name password confirmation)
        (if account-created-p
            (progn
-             (logit "Account created: ~A" account-name)
+             (logit "Account created: ~A" account-email)
              (redirect "/login"))
            (progn
              (appendf (session-value 'errors) errors)
