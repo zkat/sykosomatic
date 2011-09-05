@@ -12,8 +12,11 @@
   ((:module src
             :serial t
             :components
-            ((:file "utils")
-             (:file "smug")
+            ((:module util
+                      :serial t
+                      :components
+                      ((:file "utils")
+                       (:file "smug")))
              (:file "db")
              (:file "entity")
              (:file "account")
