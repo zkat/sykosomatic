@@ -19,7 +19,7 @@
 (defgeneric validate-client (chat-server client))
 (defgeneric disconnect-client (chat-server client))
 
-(defstruct client server uri host headers user-agent ws-client session account-name character-id)
+(defstruct client server uri host headers user-agent ws-client session account-id character-id)
 
 (defun client-write (client string)
   (continuable
@@ -33,15 +33,14 @@
                                   (message (jsown:parse json-message)))
   (push (cons :user-agent (jsown:val message "useragent"))
         (client-headers client))
-  (let ((character (find-character (jsown:val message "char"))))
+  (let ((character-id (find-character (jsown:val message "char"))))
     (if (and (validate-client res client)
-             character
-             (string-equal (character-account-email character)
-                           (client-account-name client)))
+             character-id
+             (eql (character-account character-id) (client-account-id client)))
         (progn
           (logit "Client validated: ~S. It's now playing as ~A."
-                  client (character-name character))
-          (setf (client-character-id client) (sykosomatic.db:id character))
+                 client (character-name character-id))
+          (setf (client-character-id client) character-id)
           (push (session-websocket-clients (client-session client)) client))
         (progn
           (logit "No session. Disconnecting client. (~S)" client)
@@ -85,9 +84,9 @@
                                                 :remote-addr (client-host client)
                                                 :headers-in (client-headers client)
                                                 :acceptor *server*))))
-    (when (and session (session-value 'account-name session))
+    (when (and session (current-account session))
       (setf (client-session client) session
-            (client-account-name client) (session-value 'account-name session))
+            (client-account-id client) (current-account session))
       client)))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
@@ -150,8 +149,7 @@
   (send-msg recipient (list "transition" text)))
 
 (defun send-ooc (recipient actor text)
-  (let ((display-name (account-display-name
-                       (find-account (client-account-name (actor-client actor))))))
+  (let ((display-name (account-display-name (client-account-id (actor-client actor)))))
     (send-msg recipient `("ooc" (:obj
                                  ("display_name" . ,display-name)
                                  ("text" . ,text))))))
@@ -193,7 +191,7 @@
       (logit "Scene already being recorded. Ignoring request.")
       (let ((*acceptor* *server*))
         (setf (session-value 'scene-id (client-session client))
-              (create-scene (client-account-name client))))))
+              (create-scene (client-account-id client))))))
 
 (defun stop-recording (res client)
   (declare (ignore res))

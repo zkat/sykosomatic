@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.scene
   (:use :cl :alexandria :postmodern :sykosomatic.db)
-  (:export :create-scene :add-action :add-dialogue
+  (:export :create-scene :add-action :add-dialogue :find-scenes-by-account-id
            :find-scenes-by-account-email :find-scene-with-entries :find-scene-entries
            :scene-id :scene-upvote :scene-rating))
 (cl:in-package #:sykosomatic.scene)
@@ -9,9 +9,8 @@
   ((id :col-type serial :reader id)
    (account-id :col-type bigint :initarg :account-id))
   (:keys id))
-(defun create-scene (account-email)
-  (make-dao 'scene :account-id (query (:select 'id :from 'account :where (:= 'email account-email))
-                                      :single)))
+(defun create-scene (account-id)
+  (make-dao 'scene :account-id account-id))
 
 (defdao scene-action ()
   ((id :col-type serial :reader id)
@@ -47,32 +46,33 @@
    (account-id :col-type bigint :initarg :account-id))
   (:keys id))
 
-(defun scene-upvote (scene-id account-email)
+(defun scene-upvote (scene-id account-id)
   (with-transaction ()
-    (unless (account-voted-p scene-id account-email)
+    (unless (account-voted-p scene-id account-id)
       (make-dao 'scene-upvote))
     t))
 
 (defun scene-id (scene)
   (id scene))
 
-(defun account-voted-p (scene-id account-email)
-  (query (:select t :from (:as 'scene-upvote 'uv)
-                  :inner-join (:as 'account 'acc)
-                  :on (:= 'acc.id 'uv.account-id)
-                  :where (:and (:= 'uv.scene-id scene-id)
-                               (:= 'acc.email (string-downcase account-email))))
+(defun account-voted-p (scene-id account-id)
+  (query (:select t :from 'scene-upvote
+                  :where (:and (:= 'scene-id scene-id)
+                               (:= 'account-id account-id)))
          :single))
 
 (defun scene-rating (scene-id)
   (query (:select (:count :*) :from 'scene-upvote
                   :where (:= 'scene-id scene-id))))
 
+(defun find-scenes-by-account-id (account-id)
+  (select-dao 'scene (:= 'account-id account-id)))
+
 (defun find-scenes-by-account-email (account-email)
   (when-let (account-id (query (:select 'id :from 'account
                                         :where (:= 'email (string-downcase account-email)))
                                :single))
-    (select-dao 'scene (:= 'account-id account-id))))
+    (find-scenes-by-account-id account-id)))
 
 (defun find-scene-with-entries (scene-id)
   (query (:select :* :from (:as 'scene 's)
