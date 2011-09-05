@@ -32,12 +32,14 @@
 (defgeneric account-email (account))
 (defgeneric account-display-name (account))
 (defgeneric account-password (account))
+(defgeneric account-password-salt (account))
 
 (defdao account ()
   ((id :col-type serial :reader id)
    (display-name :col-type text :initarg :display-name :reader account-display-name)
    (email :col-type text :initarg :email :reader account-email)
    (password :col-type text :initarg :password :reader account-password)
+   (salt :col-type text :initarg :salt :reader account-password-salt)
    (created-at :col-type timestamp :col-default (:now)))
   (:keys email)
   (:index 'id)
@@ -51,7 +53,7 @@
 (defun validate-account (email password)
   (with-transaction ()
     (when-let (account (find-account email))
-      (let ((hashed-pass (hash-password password (account-email account))))
+      (let ((hashed-pass (hash-password password (account-password-salt account))))
         (when (string= hashed-pass (account-password account))
           account)))))
 
@@ -95,13 +97,19 @@
     (assert-validation (not (display-name-exists-p display-name)) "Display name already in use.")
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
 
+(defun random-string (length &optional (dictionary "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+  (map-into (make-array length :element-type 'character)
+            (curry #'random-elt dictionary)))
+
 (defun create-account (email display-name password confirmation)
   (with-transaction ()
     (multiple-value-bind (validp errors)
         (validate-new-account email display-name password confirmation)
       (if validp
-          (make-dao 'account
-                    :email email
-                    :display-name display-name
-                    :password (hash-password password email))
+          (let ((salt (random-string 32)))
+            (make-dao 'account
+                      :email email
+                      :display-name display-name
+                      :password (hash-password password salt)
+                      :salt salt))
           (values nil errors)))))
