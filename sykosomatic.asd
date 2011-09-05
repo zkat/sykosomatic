@@ -17,6 +17,9 @@
              (:file "db")
              (:file "entity")
              (:file "account")
+             (:module game-objects
+                      :components
+                      ((:file "describable")))
              (:file "character")
              (:file "scene")
              (:file "sykosomatic")
