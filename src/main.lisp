@@ -3,7 +3,6 @@
 (defvar *runningp* nil)
 (defun begin-shared-hallucination ()
   (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
-  (init-db)
   (init-websockets 'sykosomatic.parser:parse-input)
   (init-hunchentoot)
   (setf *runningp* t))
