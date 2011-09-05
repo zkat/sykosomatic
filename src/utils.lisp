@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.utils
-  (:use :cl)
-  (:export :logit :dbg :continuable))
+  (:use :cl :alexandria)
+  (:export :logit :dbg :continuable :random-string))
 (cl:in-package :sykosomatic.utils)
 
 (defmacro continuable (&body body)
@@ -21,3 +21,7 @@
           (pomo::to-sql-name (format nil "~A_~{~A~^_~}_unique" pomo::*table-name* target-fields))
           target-fields))
 (export 'pomo::\!unique (find-package :postmodern))
+
+(defun random-string (length &optional (dictionary "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+  (map-into (make-array length :element-type 'character)
+            (curry #'random-elt dictionary)))
