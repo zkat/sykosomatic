@@ -55,13 +55,14 @@
   entity)
 
 (defun list-modifiers (entity)
-  (query (:select :* :from 'modifier :where (:= 'entity-id (entity-id entity)))
-         :alists))
+  (with-db ()
+    (query (:select :* :from 'modifier :where (:= 'entity-id (entity-id entity)))
+           :alists)))
 
 (defun add-modifier (entity type &key
                      text-value numeric-value timestamp-value
                      precedence description)
-  (with-transaction ()
+  (with-db ()
     (make-dao 'modifier
               :entity-id (entity-id entity)
               :type type :text-value (or text-value :null)
@@ -70,50 +71,56 @@
               :description (or description :null)
               :precedence (or precedence 0))))
 
+(defun delete-modifier (modifier-id)
+  (with-db ()
+    (query (:delete-from 'modifier :where (:= 'id modifier-id)))))
+
+(defun %modifier-value (entity type value-column)
+  (with-db ()
+    (query (:order-by (:select value-column :from 'modifier
+                               :where (:and (:= 'entity-id (entity-id entity))
+                                            (:= 'type type)))
+                      (:desc 'precedence)
+                      (:desc 'id))
+           :single)))
+
 (defun text-modifier-value (entity type)
-  (query (:order-by (:select 'text-value :from 'modifier
-                             :where (:and (:= 'entity-id (entity-id entity))
-                                          (:= 'type type)))
-                    (:desc 'precedence))
-         :single))
+  (%modifier-value entity type 'text-value))
 
 (defun numeric-modifier-value (entity type)
-  (query (:order-by (:select 'numeric-value :from 'modifier
-                             :where (:and (:= 'entity-id (entity-id entity))
-                                          (:= 'type type)))
-                    (:desc 'precedence))
-         :single))
+  (%modifier-value entity type 'numeric-value))
 
 (defun create-entity (&key comment)
-  (id (make-dao 'entity :comment (or comment :null))))
+  (id (with-db () (make-dao 'entity :comment (or comment :null)))))
 
 (defun entity-uid (entity)
-  (query (:select 'text-value :from 'modifier
-                  :where (:and (:= 'entity-id (entity-id entity))
-                               (:= 'type "entity-uid")))
-         :single))
+  (with-db ()
+    (query (:select 'text-value :from 'modifier
+                    :where (:and (:= 'entity-id (entity-id entity))
+                                 (:= 'type "entity-uid")))
+           :single)))
 
 (defun (setf entity-uid) (new-value entity)
-  (with-transaction ()
-    (if (entity-uid entity)
-        (query (:update 'modifier
-                        :set 'text-value new-value
-                        :where (:and (:= 'entity-id (entity-id entity))
-                                     (:= 'type "entity-uid"))))
-        (progn
-          (assert (not (query (:select t :from 'modifier
-                                       :where (:and (:= 'type "entity-uid")
-                                                    (:= 'text-value new-value)))
-                              :single))
-                  () "~S is not a globally unique entity identifier." new-value)
-          (add-modifier entity "entity-uid" :text-value new-value :description
-                        "Unique human-usable identifier for entity.")))))
+  (with-db ()
+    (with-transaction ()
+      (cond ((entity-uid entity)
+             (query (:update 'modifier
+                          :set 'text-value new-value
+                          :where (:and (:= 'entity-id (entity-id entity))
+                                       (:= 'type "entity-uid")))))
+            ((find-entity-by-uid new-value)
+             (error "~S must be a globally unique identifier, but it already identifies entity ~A."
+                    new-value (find-entity-by-uid new-value)))
+            (t
+             (add-modifier entity "entity-uid" :text-value new-value :description
+                           "Unique human-usable identifier for entity."))))))
 
 (defun find-entity-by-uid (uid)
-  (query (:select 'entity-id :from 'modifier
-                  :where (:and (:= 'type "entity-uid")
-                               (:= 'text-value uid)))
-         :single))
+  (with-db ()
+    (query (:select 'entity-id :from 'modifier
+                    :where (:and (:= 'type "entity-uid")
+                                 (:= 'text-value uid)))
+           :single)))
 
 ;;; Events
 (defdao event-execution ()
@@ -140,22 +147,24 @@
                           (:not 'ex.completedp))))
 
 (defun expire-modifier (modifier-id &key (expiration (get-universal-time)))
-  (with-transaction ()
-    (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
-      (make-dao 'event-execution :type "remove-modifier"
-                :event-id (id removal)
-                :execution-time (local-time:to-rfc3339-timestring
-                                 (local-time:universal-to-timestamp expiration))))))
+  (with-db ()
+    (with-transaction ()
+      (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
+        (make-dao 'event-execution :type "remove-modifier"
+                  :event-id (id removal)
+                  :execution-time (local-time:to-rfc3339-timestring
+                                   (local-time:universal-to-timestamp expiration)))))))
 
 (defun clear-expired-modifiers ()
-  (flet ((process-penalty (p)
-           (destructuring-bind (event-execution-id modifier-id)
-               p
-             (dblog "Removing modifier ~A" modifier-id)
-             (query (:delete-from 'modifier :where (:= 'id modifier-id)))
-             (query (:update 'event-execution :set 'completedp t
-                             :where (:= 'id event-execution-id))))))
-    (with-transaction ()
-      (map nil #'process-penalty (expired-modifiers)))))
+  (with-db ()
+    (flet ((process-penalty (p)
+             (destructuring-bind (event-execution-id modifier-id)
+                 p
+               (dblog "Removing modifier ~A" modifier-id)
+               (query (:delete-from 'modifier :where (:= 'id modifier-id)))
+               (query (:update 'event-execution :set 'completedp t
+                               :where (:= 'id event-execution-id))))))
+      (with-transaction ()
+        (map nil #'process-penalty (expired-modifiers))))))
 
 (register-system 'modifier-expiration 'clear-expired-modifiers)
