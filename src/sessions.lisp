@@ -48,6 +48,12 @@
         #+nil(persistent-session-gc)
         (setf *session* (id session)))))
 
+(defmethod session-cookie-value ((session-id integer))
+  (with-db ()
+    (query (:select 'cookie-value :from 'persistent-session
+                    :where (:= 'id session-id))
+           :single)))
+
 (defmethod session-verify ((request persistent-session-request))
   (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
                                 (get-parameter (session-cookie-name *acceptor*) request))))
