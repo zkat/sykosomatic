@@ -27,10 +27,17 @@
          ,@(when-let (keys (assoc :keys dao-options)) `(,keys)))
        (deftable ,name
          (!dao-def)
-         ,@(parsed-opts :index '!index)
-         ,@(parsed-opts :unique-index '!unique-index)
-         ,@(parsed-opts :foreign-key '!foreign)
-         ,@(parsed-opts :unique '!unique)))))
+         ,@(loop for (opt . args) in dao-options
+              for form = (case opt
+                           (:index `(!index ,@(mapcar (curry #'list 'quote) args )))
+                           (:unique-index `(!unique-index ,@(mapcar (curry #'list 'quote) args )))
+                           (:foreign-key `(!foreign ,@args))
+                           (:unique `(!unique ,@(mapcar (curry #'list 'quote) args )))
+                           (:query `(query ,@args))
+                           (:keys nil)
+                           (otherwise (error "Unknown defdao option: ~S" opt)))
+              when form
+              collect form)))))
 
 (defmacro with-db (() &body body)
   `(let ((reusing-connection-p *database*)
