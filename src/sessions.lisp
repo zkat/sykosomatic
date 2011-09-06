@@ -7,14 +7,15 @@
 
 (defdao persistent-session ()
   ((id :col-type serial :reader sykosomatic.db:id)
-   (cookie-value :col-type text :initform (random-string 32) :reader session-cookie-value)
+   (cookie-value :col-type text :initform (random-string 64) :reader session-cookie-value)
    (account-id :col-type bigint :initarg :account-id)
    (user-agent :col-type text :initform (user-agent *request*))
    (remote-addr :col-type text :initform (real-remote-addr *request*))
    (session-start :col-type timestamp :col-default (:now))
    (last-seen :col-type timestamp :col-default (:now))
-   (max-time :col-type interval :initarg :max-time :initform (format nil "~A seconds"
-                                                                     *session-max-time*)))
+   (max-time :col-type interval :initarg :max-time
+             :initform (format nil "~A seconds"
+                               *session-max-time*)))
   (:keys cookie-value)
   (:unique cookie-value))
 
@@ -86,6 +87,9 @@
   (logit "Session timed out. Trying to log it out...")
   (logout session-id))
 
+;;; Transient session values
+
+;; TODO - put a lock on these.
 (defvar *transient-session-values* (make-hash-table))
 
 (defun remove-transient-session-values (&optional (session *session*))
