@@ -2,6 +2,9 @@
 
 (optimizations)
 
+(defclass sykosomatic-acceptor (acceptor)
+  ())
+
 (defclass persistent-session-request (hunchentoot:request)
   ())
 
@@ -31,7 +34,7 @@
     (push-error "You must be logged in to access that page.")
     (redirect "/login")))
 
-(defun sykosomatic-cookie-name ()
+(defmethod session-cookie-name ((acceptor sykosomatic-acceptor))
   "sykosomatic-session")
 
 (defun persistent-session-gc ()
@@ -45,7 +48,7 @@
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
       (let ((session (with-db () (make-dao 'persistent-session :account-id account-id))))
-        (set-cookie (sykosomatic-cookie-name)
+        (set-cookie (session-cookie-name *acceptor*)
                     :value (session-cookie-value session)
                     :path "/"
                     :secure *ssl-enabled-p*
@@ -61,8 +64,8 @@
            :single)))
 
 (defmethod session-verify ((request persistent-session-request))
-  (let ((session-identifier (or (cookie-in (sykosomatic-cookie-name) request)
-                                (get-parameter (sykosomatic-cookie-name) request))))
+  (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
+                                (get-parameter (session-cookie-name *acceptor*) request))))
     (when (and session-identifier
                (stringp session-identifier)
                (not (emptyp session-identifier)))
