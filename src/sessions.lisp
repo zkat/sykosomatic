@@ -76,8 +76,9 @@
                         (:select t :from 'persistent-session
                                  :where (:and (:= 'id session-id)
                                               (:< (:+ 'last-seen 'max-time)
-                                                  (:now))))))
-                (logout session-id)
+                                                  (:now)))))
+                       :single)
+                (session-cleanup session-id)
                 (prog1 session-id
                   (query (:update 'persistent-session
                                   :set 'last-seen (:now)
@@ -95,7 +96,7 @@
       (query (:delete-from 'persistent-session :where (:= 'id session-id))))))
 
 (defun session-cleanup (session-id)
-  (logit "Session timed out. Trying to log it out...")
+  (logit "Session timed out. Logging it out.")
   (logout session-id))
 
 ;;; Transient session values
