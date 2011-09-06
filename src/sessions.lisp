@@ -42,8 +42,6 @@
                                   :column)))
       (map nil #'session-cleanup old-session-ids))))
 
-(defparameter *ssl-enabled-p* nil)
-
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
       (let ((session (with-db () (make-dao 'persistent-session :account-id account-id))))

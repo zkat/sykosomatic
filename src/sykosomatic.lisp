@@ -15,3 +15,4 @@
   ;; 843 ; makes flash load faster, but can only do this as root.
   8889)
 (defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
+(defparameter *ssl-enabled-p* nil)
