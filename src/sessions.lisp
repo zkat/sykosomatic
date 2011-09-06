@@ -50,6 +50,7 @@
                     :path "/"
                     :secure *ssl-enabled-p*
                     :http-only t)
+        (setf (session *request*) session)
         #+nil(persistent-session-gc)
         (setf *session* (id session)))))
 
