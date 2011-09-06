@@ -28,6 +28,7 @@
              (:file "character")
              (:file "scene")
              (:file "sykosomatic")
+             (:file "sessions")
              (:file "websocket")
              (:file "parser")
              (:file "templates")
