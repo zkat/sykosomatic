@@ -13,49 +13,21 @@
               'default-dispatcher))
   (setf *default-handler* '404-handler)
   (pushnew 404 *approved-return-codes*)
-  (setf *session-removal-hook* 'session-cleanup)
-  (start (setf *server* (make-instance 'acceptor :port *web-server-port*)))
+  (start (setf *server* (make-instance 'acceptor
+                                       :port *web-server-port*
+                                       :request-class 'persistent-session-request)))
   (setf *catch-errors-p* nil))
 
 (defun teardown-hunchentoot ()
   (when *server* (stop *server*) (setf *server* nil)))
 
-(defun logout (session)
-  (let ((account-id (session-value 'account-id session))
-        (websocket-clients (session-websocket-clients session)))
-    (when account-id
-      (logit "~A logged out." (account-email account-id)))
-    (when websocket-clients
-      (mapc #'disconnect-client websocket-clients))))
-
-(defun session-cleanup (session)
-  (logit "Session timed out. Trying to log it out...")
-  (logout session))
-
-(defun ensure-logged-in ()
-  (unless (and *session* (current-account))
-    (push-error "You must be logged in to access that page.")
-    (redirect "/login")))
-
-(defun active-account-sessions (account-email)
-  "Finds all sessions that are logged in as ACCOUNT-EMAIL."
-  (loop for (nil . session) in (session-db *server*)
-     for session-user = (session-value 'account-id session)
-     when (and session-user (string-equal (account-email session-user)
-                                          account-email))
-     collect session))
-
-(defun push-error (format-string &rest format-args)
-  (push (apply #'format nil format-string format-args)
-        (session-value 'errors)))
-
 ;;;
 ;;; Handlers
 ;;;
 (defmacro with-form-errors (&body body)
-  `(let ((templ:*errors* (session-value 'errors)))
+  `(let ((templ:*errors* (session-errors)))
      (unwind-protect (progn ,@body)
-       (setf (session-value 'errors) nil))))
+       (setf (session-errors) nil))))
 
 (defun 404-handler ()
   (setf (return-code*) +http-not-found+)
@@ -109,8 +81,6 @@
 
 ;;; Login/logout
 (define-easy-handler (login :uri "/login") (email password)
-  (unless *session*
-    (start-session))
   (case (request-method*)
     (:get
      (when-let ((account-id (current-account)))
@@ -121,7 +91,7 @@
        (redirect "/login"))
      (if-let ((account (validate-account email password)))
        (progn
-         (setf (current-account) (sykosomatic.db:id account))
+         (start-persistent-session (sykosomatic.db:id account))
          (logit "~A logged in." email)
          (redirect "/role"))
        (progn
@@ -129,9 +99,8 @@
          (redirect "/login"))))))
 
 (define-easy-handler (logout-page :uri "/logout") ()
-  (when (and *session* (current-account))
-    (logout *session*)
-    (remove-session *session*))
+  (when *session*
+    (logout *session*))
   (redirect "/login"))
 
 ;;; Account creation and management
@@ -146,7 +115,7 @@
              (push-error "Please log in.")
              (redirect "/login"))
            (progn
-             (appendf (session-value 'errors) errors)
+             (appendf (session-errors) errors)
              (redirect "/signup")))))
     (:get
      (with-form-errors
