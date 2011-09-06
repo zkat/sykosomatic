@@ -86,7 +86,7 @@
                                                 :remote-addr (client-host client)
                                                 :headers-in (client-headers client)
                                                 :acceptor *server*))))
-    (when (and session (current-account session))
+    (when session
       (setf (client-session client) session
             (client-account-id client) (current-account session))
       client)))

@@ -10,7 +10,7 @@
    (cookie-value :col-type text :initform (random-string 64) :reader session-cookie-value)
    (account-id :col-type bigint :initarg :account-id)
    (user-agent :col-type text :initform (user-agent *request*))
-   (remote-addr :col-type text :initform (real-remote-addr *request*))
+   (last-remote-addr :col-type text :initform (real-remote-addr *request*))
    (session-start :col-type timestamp :col-default (:now))
    (last-seen :col-type timestamp :col-default (:now))
    (max-time :col-type interval :initarg :max-time
@@ -65,8 +65,7 @@
           (when-let (session-id (query (:for-update
                                         (:select 'id :from 'persistent-session
                                                  :where (:and (:= 'cookie-value session-identifier)
-                                                              (:= 'user-agent (user-agent request))
-                                                              (:= 'remote-addr (remote-addr request)))))
+                                                              (:= 'user-agent (user-agent request)))))
                                        :single))
             (if (query (:for-update
                         (:select t :from 'persistent-session
@@ -77,6 +76,7 @@
                 (prog1 session-id
                   (query (:update 'persistent-session
                                   :set 'last-seen (:now)
+                                       'last-remote-addr (remote-addr request)
                                   :where (:= 'id session-id)))))))))))
 
 (defun logout (session-id)
