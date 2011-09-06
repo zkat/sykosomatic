@@ -147,8 +147,7 @@
 *** TODO FUTURE separate websockets client from hunchentoot.
     This'll make it possible to switch the frontend.
 ** Webapp
-*** TODO Persistent sessions
-    Migrate all the session stuff to the database.
+*** DONE Persistent sessions
 *** TODO Improve form error reporting.
     The GET version should accept an optional 'errors' argument that it can be called with to handle
     error messages. This may involve not using define-easy-handler anymore.
