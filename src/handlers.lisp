@@ -13,6 +13,7 @@
               'default-dispatcher))
   (setf *default-handler* '404-handler)
   (pushnew 404 *approved-return-codes*)
+  (setf *rewrite-for-session-urls* nil)
   (start (setf *server* (make-instance 'sykosomatic-acceptor
                                        :port *web-server-port*
                                        :request-class 'persistent-session-request)))
