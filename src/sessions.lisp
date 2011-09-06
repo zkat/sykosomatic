@@ -7,7 +7,7 @@
 
 (defdao persistent-session ()
   ((id :col-type serial :reader sykosomatic.db:id)
-   (cookie-value :col-type text :initform (random-string 64) :reader session-cookie-value)
+   (cookie-value :col-type text :initform (random-string 256) :reader session-cookie-value)
    (account-id :col-type bigint :initarg :account-id)
    (user-agent :col-type text :initform (user-agent *request*))
    (last-remote-addr :col-type text :initform (real-remote-addr *request*))
@@ -31,6 +31,9 @@
     (push-error "You must be logged in to access that page.")
     (redirect "/login")))
 
+(defun sykosomatic-cookie-name ()
+  "sykosomatic-session")
+
 (defun persistent-session-gc ()
   (with-db ()
     (let ((old-session-ids (query (:select 'id :from 'persistent-session
@@ -39,12 +42,16 @@
                                   :column)))
       (map nil #'session-cleanup old-session-ids))))
 
+(defparameter *ssl-enabled-p* nil)
+
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
       (let ((session (with-db () (make-dao 'persistent-session :account-id account-id))))
-        (set-cookie (session-cookie-name *acceptor*)
+        (set-cookie (sykosomatic-cookie-name)
                     :value (session-cookie-value session)
-                    :path "/")
+                    :path "/"
+                    :secure *ssl-enabled-p*
+                    :http-only t)
         #+nil(persistent-session-gc)
         (setf *session* (id session)))))
 
@@ -55,8 +62,8 @@
            :single)))
 
 (defmethod session-verify ((request persistent-session-request))
-  (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
-                                (get-parameter (session-cookie-name *acceptor*) request))))
+  (let ((session-identifier (or (cookie-in (sykosomatic-cookie-name) request)
+                                (get-parameter (sykosomatic-cookie-name) request))))
     (when (and session-identifier
                (stringp session-identifier)
                (not (emptyp session-identifier)))
