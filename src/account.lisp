@@ -69,11 +69,10 @@
 
 (defun validate-account (email password)
   (with-db ()
-    (with-transaction ()
-      (when-let (account (find-account-by-email email))
-        (let ((hashed-pass (hash-password password (account-password-salt account))))
-          (when (equalp hashed-pass (account-password account))
-            account))))))
+    (when-let (account (find-account-by-email email))
+      (let ((hashed-pass (hash-password password (account-password-salt account))))
+        (when (equalp hashed-pass (account-password account))
+          account)))))
 
 (defun display-name-exists-p (display-name)
   (with-db ()
