@@ -7,5 +7,5 @@
 
 (define-easy-handler (logout-page :uri "/logout") ()
   (when *session*
-    (logout *session*))
+    (end-session *session*))
   (redirect "/login"))
