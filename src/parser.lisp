@@ -3,8 +3,6 @@
   (:export :parse-input))
 (cl:in-package #:sykosomatic.parser)
 
-(optimizations)
-
 (defun parse-input (actor input)
   (let ((result (car (invoke-parser (either (input) 'error) input))))
     (cond ((typep result 'error)

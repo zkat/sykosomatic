@@ -1,14 +1,8 @@
 (cl:defpackage #:sykosomatic.util
   (:use :cl :alexandria)
-  (:export :logit :dbg :continuable :random-string :optimizations
+  (:export :logit :dbg :continuable :random-string
            :make-timer :timer-tick))
 (cl:in-package :sykosomatic.util)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defmacro optimizations ()
-    `(declaim (optimize debug safety))))
-
-(optimizations)
 
 (defmacro continuable (&body body)
   "helper macro since we use continue restarts a lot

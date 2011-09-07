@@ -30,8 +30,6 @@
 
 (in-package :sykosomatic.util)
 
-(optimizations)
-
 (defmacro define-speedy-function (name args &body body)
   `(progn (declaim (inline ,name))
           (defun ,name ,args

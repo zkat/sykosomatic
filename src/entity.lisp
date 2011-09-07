@@ -9,8 +9,6 @@
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
 
-(optimizations)
-
 (let ((callbacks (make-hash-table)))
   (defun list-systems ()
     (hash-table-keys callbacks))

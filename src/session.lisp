@@ -12,8 +12,6 @@
            :push-error :session-errors :session-websocket-clients))
 (cl:in-package :sykosomatic.session)
 
-(optimizations)
-
 (defclass sykosomatic-acceptor (acceptor)
   ())
 

@@ -2,8 +2,6 @@
   (:use :cl :alexandria :sykosomatic.entity :sykosomatic.db :sykosomatic.util :postmodern))
 (cl:in-package #:sykosomatic.game-objects.describable)
 
-(optimizations)
-
 (defun short-name (entity)
   (text-modifier-value entity "desc:short-name"))
 

@@ -6,8 +6,6 @@
            :scene-id :scene-upvote :scene-rating))
 (cl:in-package #:sykosomatic.scene)
 
-(optimizations)
-
 (defdao scene ()
   ((id :col-type serial :reader id)
    (account-id :col-type bigint :initarg :account-id))
