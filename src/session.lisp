@@ -21,7 +21,7 @@
   ())
 
 (defdao persistent-session ()
-  ((id :col-type serial :reader sykosomatic.db:id)
+  ((id :col-type serial :reader id)
    (cookie-value :col-type text :initform (random-string 256) :reader session-cookie-value)
    (account-id :col-type bigint :initarg :account-id)
    (user-agent :col-type text :initform (user-agent *request*))
