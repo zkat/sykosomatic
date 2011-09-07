@@ -7,8 +7,6 @@
            :character-name :character-description))
 (cl:in-package #:sykosomatic.character)
 
-(optimizations)
-
 (defun find-character (name)
   (with-db ()
     (query (:order-by (:select 'entity-id :from 'modifier

@@ -4,8 +4,6 @@
            :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
 
-(declaim (optimize debug))
-
 ;;;
 ;;; Utils
 ;;;

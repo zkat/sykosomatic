@@ -10,8 +10,6 @@
            :teardown-websockets))
 (cl:in-package #:sykosomatic.websocket)
 
-(optimizations)
-
 (defun session-websocket-clients (session)
   (transient-session-value 'websocket-clients session))
 (defun (setf session-websocket-clients) (new-value session)
