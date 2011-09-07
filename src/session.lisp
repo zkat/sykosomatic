@@ -7,6 +7,8 @@
   (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
            :current-account :ensure-logged-in :start-persistent-session
            :persistent-session-gc :end-session :session-cleanup
+           :register-session-finalizer :unregister-session-finalizer
+           :transient-session-value
            :push-error :session-errors :session-websocket-clients))
 (cl:in-package :sykosomatic.session)
 
@@ -100,12 +102,10 @@
                                   :where (:= 'id session-id)))))))))))
 
 (defun end-session (session-id)
-  (let ((account-id (current-account session-id))
-        #+nil(websocket-clients (session-websocket-clients session-id)))
+  (let ((account-id (current-account session-id)))
     (when account-id
       (logit "~A logged out." (account-email account-id)))
-    #+nil(when websocket-clients
-      (mapc #'sykosomatic.websocket::disconnect-client websocket-clients))
+    (map nil (rcurry #'funcall session-id) (all-finalizers))
     (with-db ()
       (query (:delete-from 'persistent-session :where (:= 'id session-id))))))
 
@@ -113,9 +113,25 @@
   (logit "Session timed out. Logging it out.")
   (end-session session-id))
 
-;;; Transient session values
-
 ;; TODO - put a lock on these.
+
+;;; Session finalizers
+;;; - When end-session is called, it will execute all registered finalizers, in no particular order,
+;;;   by calling them on the session-id. These finalizers will all be called before the persistent
+;;;   session is deleted.
+
+(defvar *session-finalizers* (make-hash-table))
+
+(defun register-session-finalizer (name function)
+  (setf (gethash name *session-finalizers*) function))
+(defun unregister-session-finalizer (name)
+  (remhash name *session-finalizers*))
+(defun find-finalizer (name)
+  (gethash name *session-finalizers*))
+(defun all-finalizers ()
+  (hash-table-values *session-finalizers*))
+
+;;; Transient session values
 (defvar *transient-session-values* (make-hash-table))
 
 (defun remove-transient-session-values (&optional (session *session*))
@@ -129,11 +145,6 @@
                            (setf (gethash session *transient-session-values*)
                                  (make-hash-table)))))
     (setf (gethash key session-table) new-value)))
-
-(defun session-websocket-clients (session)
-  (transient-session-value 'websocket-clients session))
-(defun (setf session-websocket-clients) (new-value session)
-  (setf (transient-session-value 'websocket-clients session) new-value))
 
 (defun push-error (format-string &rest format-args)
   (push (apply #'format nil format-string format-args)

@@ -150,6 +150,7 @@
 *** DONE Persistent sessions
 *** DONE More generic template generation.
     So templates can be invoked symbolically, and easily swapped out for 'normal' templates.
+*** TODO Put locks on session value and finalizer hash tables
 *** TODO Improve form error reporting.
     The GET version should accept an optional 'errors' argument that it can be called with to handle
     error messages. This may involve not using define-easy-handler anymore.

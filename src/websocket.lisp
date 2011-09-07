@@ -12,6 +12,11 @@
 
 (optimizations)
 
+(defun session-websocket-clients (session)
+  (transient-session-value 'websocket-clients session))
+(defun (setf session-websocket-clients) (new-value session)
+  (setf (transient-session-value 'websocket-clients session) new-value))
+
 (defstruct (user-action (:constructor make-user-action (user action dialogue
                                                         &optional (timestamp (get-universal-time)))))
   user timestamp action dialogue)
@@ -218,6 +223,10 @@
 
 (defun init-websockets (client-main &optional (port *chat-server-port*))
   (register-chat-server client-main)
+  (register-session-finalizer 'websocket-clients
+                              (lambda (session-id)
+                                (when-let (clients (session-websocket-clients session-id))
+                                  (map nil #'disconnect-client clients))))
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
          (lambda ()
