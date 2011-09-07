@@ -148,6 +148,8 @@
     This'll make it possible to switch the frontend.
 ** Webapp
 *** DONE Persistent sessions
+*** DONE More generic template generation.
+    So templates can be invoked symbolically, and easily swapped out for 'normal' templates.
 *** TODO Improve form error reporting.
     The GET version should accept an optional 'errors' argument that it can be called with to handle
     error messages. This may involve not using define-easy-handler anymore.
