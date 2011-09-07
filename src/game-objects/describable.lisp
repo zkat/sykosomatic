@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.game-objects.describable
-  (:use :cl :alexandria :sykosomatic.entity :sykosomatic.db :sykosomatic.utils :postmodern))
+  (:use :cl :alexandria :sykosomatic.entity :sykosomatic.db :sykosomatic.util :postmodern))
 (cl:in-package #:sykosomatic.game-objects.describable)
 
 (optimizations)

@@ -1,18 +1,26 @@
 (cl:defpackage #:sykosomatic
-  (:use #:cl #:alexandria #:hunchentoot #:yaclml #:string-case
-        #:postmodern
-        #:sykosomatic.db #:sykosomatic.entity
-        #:sykosomatic.account #:sykosomatic.character
-        #:sykosomatic.scene #:sykosomatic.utils)
-  (:import-from #:sykosomatic.db #:init-db))
-(cl:in-package #:sykosomatic)
+  (:use :cl
+        :sykosomatic.util
+        :sykosomatic.entity
+        :sykosomatic.websocket
+        :sykosomatic.handler)
+  (:export :begin-shared-hallucination
+           :end-shared-hallucination))
+(cl:in-package :sykosomatic)
 
 (optimizations)
 
-(defvar *server* nil)
-(defparameter *web-server-port* 8888)
-(defparameter *chat-server-port*
-  ;; 843 ; makes flash load faster, but can only do this as root.
-  8889)
-(defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
-(defparameter *ssl-enabled-p* nil)
+(defvar *runningp* nil)
+(defun begin-shared-hallucination ()
+  (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
+  (init-entity-system)
+  (init-websockets 'sykosomatic.parser:parse-input)
+  (init-hunchentoot)
+  (setf *runningp* t))
+
+(defun end-shared-hallucination ()
+  (teardown-websockets)
+  (teardown-hunchentoot)
+  (teardown-entity-system)
+  (setf *runningp* nil)
+  t)

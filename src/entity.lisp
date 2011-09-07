@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.entity
-  (:use :cl :alexandria :postmodern :sykosomatic.db :sykosomatic.utils)
+  (:use :cl :alexandria :postmodern :sykosomatic.db :sykosomatic.util)
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity

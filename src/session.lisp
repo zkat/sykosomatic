@@ -1,11 +1,21 @@
-(cl:in-package :sykosomatic)
+(cl:defpackage #:sykosomatic.session
+  (:use :cl :hunchentoot :alexandria :postmodern
+        :sykosomatic.db
+        :sykosomatic.config
+        :sykosomatic.account
+        :sykosomatic.util)
+  (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
+           :current-account :ensure-logged-in :start-persistent-session
+           :persistent-session-gc :logout :session-cleanup
+           :push-error :session-errors :session-websocket-clients))
+(cl:in-package :sykosomatic.session)
 
 (optimizations)
 
 (defclass sykosomatic-acceptor (acceptor)
   ())
 
-(defclass persistent-session-request (hunchentoot:request)
+(defclass persistent-session-request (request)
   ())
 
 (defdao persistent-session ()
@@ -91,11 +101,11 @@
 
 (defun logout (session-id)
   (let ((account-id (current-account session-id))
-        (websocket-clients (session-websocket-clients session-id)))
+        #+nil(websocket-clients (session-websocket-clients session-id)))
     (when account-id
       (logit "~A logged out." (account-email account-id)))
-    (when websocket-clients
-      (mapc #'disconnect-client websocket-clients))
+    #+nil(when websocket-clients
+      (mapc #'sykosomatic.websocket::disconnect-client websocket-clients))
     (with-db ()
       (query (:delete-from 'persistent-session :where (:= 'id session-id))))))
 

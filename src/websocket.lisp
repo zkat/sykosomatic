@@ -1,4 +1,14 @@
-(in-package :sykosomatic)
+(cl:defpackage #:sykosomatic.websocket
+  (:use :cl :alexandria :hunchentoot
+        :sykosomatic.util
+        :sykosomatic.config
+        :sykosomatic.session
+        :sykosomatic.character
+        :sykosomatic.account
+        :sykosomatic.scene)
+  (:export :init-websockets
+           :teardown-websockets))
+(cl:in-package #:sykosomatic.websocket)
 
 (optimizations)
 

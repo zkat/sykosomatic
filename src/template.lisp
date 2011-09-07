@@ -1,7 +1,7 @@
-(cl:defpackage :sykosomatic.templ
+(cl:defpackage :sykosomatic.template
   (:use :cl :yaclml :alexandria :string-case)
   (:nicknames :templ)
-  (:export :not-found :home :login :stage :role
+  (:export :not-found :index :login :stage :role
            :scenes :view-scene :signup :newchar
            :career-div :bodypart-div :bodypart-adj-select
            :newchar-preview-div
@@ -16,7 +16,7 @@
            :option-text))
 (cl:in-package :templ)
 
-(sykosomatic.utils:optimizations)
+(sykosomatic.util:optimizations)
 
 (defgeneric optgroup-label (optgroup))
 (defgeneric optgroup-options (optgroup))
@@ -103,7 +103,7 @@
   (<:p (<:ah "Sorry, that page does not exist.")))
 
 ;;; /
-(defpage home () ()
+(defpage index () ()
     "Sykosomatic.org Dev Site"
   (<:p (<:ah "Sykosomatic is a cooperative storytelling system, currently in development. ")
         (<:href "/login" (<:ah "Log in.")))
@@ -227,26 +227,6 @@
           (<:submit :value "Vote for Scene")))
 
 ;; TODO - fixme
-(defun user-action (user-action)
-  (let ((action (sykosomatic::user-action-action user-action))
-        (dialogue (sykosomatic::user-action-dialogue user-action)))
-    (<:div :class "user-entry"
-      (if (and (not (emptyp action)) (emptyp dialogue))
-          (<:p :class "action"
-               (<:ah (sykosomatic::user-action-user user-action) " " action))
-          (progn
-            (<:p :class "character"
-                 (<:ah (sykosomatic::user-action-user user-action)))
-            (unless (emptyp action)
-              (<:p :class "parenthetical"
-                   (<:ah "(" action ")")))
-            (<:p :class "dialogue"
-                 (<:ah
-                  (if (emptyp dialogue)
-                      "..."
-                      dialogue))))))))
-
-;; TODO - fixme
 (defun scene (id)
   ;; TODO - THIS IS DANGEROUS AND LEAKY. XSS GALORE.
   (<:script :type "text/javascript" :src "res/js/client.js")
@@ -266,7 +246,7 @@
                           (action-txt (jsown:val entry-obj "action")))
                       ;; TODO - Smelly, smelly.
                       (<:ah (format nil "sykosomatic.add_action(~S,~S);~%" actor action-txt)))))))
-         (sykosomatic::find-scene-entries id))))
+         (sykosomatic.scene::find-scene-entries id))))
 
 ;;; /signup
 (defpage signup () ()

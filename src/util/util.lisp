@@ -1,8 +1,8 @@
-(cl:defpackage #:sykosomatic.utils
+(cl:defpackage #:sykosomatic.util
   (:use :cl :alexandria)
   (:export :logit :dbg :continuable :random-string :optimizations
            :make-timer :timer-tick))
-(cl:in-package :sykosomatic.utils)
+(cl:in-package :sykosomatic.util)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro optimizations ()
