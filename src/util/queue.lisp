@@ -28,7 +28,7 @@
 ;;;     (dequeue queue) -- Dequeue queue, return dequeued object.
 ;;; All other functions in here should be marked as unsafe and apocalyptic.
 
-(in-package :sykosomatic.utils)
+(in-package :sykosomatic.util)
 
 (optimizations)
 

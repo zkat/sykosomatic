@@ -1,4 +1,4 @@
-(in-package :sykosomatic.utils)
+(in-package :sykosomatic.util)
 
 (defun now ()
   (/ (get-internal-real-time) internal-time-units-per-second))

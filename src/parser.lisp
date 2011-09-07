@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.parser
-  (:use :cl :alexandria :smug :sykosomatic.utils)
+  (:use :cl :alexandria :smug :sykosomatic.util)
   (:export :parse-input))
 (cl:in-package #:sykosomatic.parser)
 
@@ -8,34 +8,34 @@
 (defun parse-input (actor input)
   (let ((result (car (invoke-parser (either (input) 'error) input))))
     (cond ((typep result 'error)
-           (sykosomatic::send-msg actor (list "parse-error" (princ-to-string result))))
+           (sykosomatic.websocket::send-msg actor (list "parse-error" (princ-to-string result))))
           ((null result)
-           (sykosomatic::send-msg actor (list "parse-error" "Sorry, I couldn't understand what you said.")))
+           (sykosomatic.websocket::send-msg actor (list "parse-error" "Sorry, I couldn't understand what you said.")))
           (t
            (case (car result)
              (:dialogue
-              (map nil (rcurry #'sykosomatic::send-dialogue actor
+              (map nil (rcurry #'sykosomatic.websocket::send-dialogue actor
                                (cdr (assoc :dialogue (cdr result)))
                                (cdr (assoc :parenthetical (cdr result))))
-                   (sykosomatic::local-actors actor)))
+                   (sykosomatic.websocket::local-actors actor)))
              (:sentence
-              (map nil (rcurry #'sykosomatic::send-action actor
+              (map nil (rcurry #'sykosomatic.websocket::send-action actor
                                (sentence->text (cdr result)))
-                   (sykosomatic::local-actors actor)))
+                   (sykosomatic.websocket::local-actors actor)))
              (:action
-              (map nil (rcurry #'sykosomatic::send-action actor
+              (map nil (rcurry #'sykosomatic.websocket::send-action actor
                                (cdr result))
-                   (sykosomatic::local-actors actor)))
+                   (sykosomatic.websocket::local-actors actor)))
              (:actorless-action
-              (map nil (rcurry #'sykosomatic::send-action nil
+              (map nil (rcurry #'sykosomatic.websocket::send-action nil
                                (cdr result))
-                   (sykosomatic::local-actors actor)))
+                   (sykosomatic.websocket::local-actors actor)))
              (:transition
-              (map nil (rcurry #'sykosomatic::send-transition (cdr result))
-                   (sykosomatic::local-actors actor)))
+              (map nil (rcurry #'sykosomatic.websocket::send-transition (cdr result))
+                   (sykosomatic.websocket::local-actors actor)))
              (:ooc
-              (map nil (rcurry #'sykosomatic::send-ooc actor (cdr result))
-                   (sykosomatic::local-actors actor))))))))
+              (map nil (rcurry #'sykosomatic.websocket::send-ooc actor (cdr result))
+                   (sykosomatic.websocket::local-actors actor))))))))
 
 (defun sentence->text (sentence)
   (format nil "~A." (cdr (assoc :verb sentence))))
