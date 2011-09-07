@@ -6,6 +6,8 @@
            :career-div :bodypart-div :bodypart-adj-select
            :newchar-preview-div
 
+           :render-template
+
            :*errors*
 
            :optgroup-label
@@ -27,6 +29,19 @@
   (:method ((opt cons))
     (cdr opt)))
 
+(defvar *templates* (make-hash-table :test #'equalp))
+
+(defun add-template (name function)
+  (setf (gethash name *templates*) function))
+(defun remove-template (name)
+  (remhash name *templates*))
+(defun find-template (name)
+  (gethash name *templates*))
+
+(defun render-template (name &rest template-args)
+  (when-let (template-fun (find-template name))
+    (apply template-fun template-args)))
+
 ;;; General
 (defun page (title body-fun &optional head-fun)
   (with-yaclml-output-to-string
@@ -42,12 +57,13 @@
       (funcall body-fun)))))
 
 (defmacro defpage (name lambda-list (&rest head) title &body body)
-  `(defun ,name ,lambda-list
-     (page ,title
-                  (lambda ()
-                    ,@body)
-                  ,@(when head
-                     `((lambda () ,@head))))))
+  `(add-template ,(string name)
+                 (lambda ,lambda-list
+                   (page ,title
+                         (lambda ()
+                           ,@body)
+                         ,@(when head
+                                 `((lambda () ,@head)))))))
 
 (defun jquery-libs ()
   (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")

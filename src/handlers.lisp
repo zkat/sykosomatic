@@ -32,11 +32,11 @@
 
 (defun 404-handler ()
   (setf (return-code*) +http-not-found+)
-  (templ:not-found))
+  (templ:render-template "not-found"))
 
 ;;; Main page
 (define-easy-handler (home :uri "/") ()
-  (templ:home))
+  (templ:render-template "home"))
 
 (define-easy-handler (play :uri "/stage") (char)
   ;; TODO - make 'char' something other than the name. Some kind of external ID for the character.
@@ -49,26 +49,26 @@
                    (current-account)))
          (push-error "You're not authorized to play that character.")
          (redirect "/role"))
-        (t (with-form-errors (templ:stage char)))))
+        (t (with-form-errors (templ:render-template "stage" char)))))
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
   (with-db ()
     (with-form-errors
-      (templ:role (mapcar #'character-name
-                          (account-characters (current-account)))))))
+      (templ:render-template "role" (mapcar #'character-name
+                                            (account-characters (current-account)))))))
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
   (with-form-errors
-    (templ:scenes (mapcar #'scene-id (find-scenes-by-account-id (current-account))))))
+    (templ:render-template "scenes" (mapcar #'scene-id (find-scenes-by-account-id (current-account))))))
 
 (define-easy-handler (view-scene :uri "/view-scene") ((id :parameter-type 'integer))
   (case (request-method*)
     (:get
      (cond ((scene-exists-p id)
             (with-form-errors
-              (templ:view-scene id (not (null (current-account))) (scene-rating id))))
+              (templ:render-template "view-scene" id (not (null (current-account))) (scene-rating id))))
            (t (push-error "No scene with ID ~A." id)
               (redirect "/scenes"))))
     (:post
@@ -86,7 +86,7 @@
     (:get
      (when-let ((account-id (current-account)))
        (push-error "Already logged in as ~A." (account-email account-id)))
-     (with-form-errors (templ:login)))
+     (with-form-errors (templ:render-template "login")))
     (:post
      (when (current-account)
        (redirect "/login"))
@@ -120,7 +120,7 @@
              (redirect "/signup")))))
     (:get
      (with-form-errors
-       (templ:signup)))))
+       (templ:render-template "signup")))))
 
 ;;; Characters
 (defparameter *origins* '(("local" . "Local -- is from the Twin Cities area.")
@@ -180,19 +180,19 @@
         (bodypart-adjs :parameter-type 'array))
   #+nil(ensure-logged-in)
   (with-form-errors
-    (templ:newchar :origins *origins*
-                   :parents *parents*
-                   :siblings *siblings*
-                   :situations *situations*
-                   :friends *friends*
-                   :so *so*
-                   :careers *careers*
-                   :location-opts *location-descriptions*
-                   :adjectives *adjectives*)))
+    (templ:render-template "newchar" :origins *origins*
+                           :parents *parents*
+                           :siblings *siblings*
+                           :situations *situations*
+                           :friends *friends*
+                           :so *so*
+                           :careers *careers*
+                           :location-opts *location-descriptions*
+                           :adjectives *adjectives*)))
 
 (define-easy-handler (newchar-bodypart-adjs :uri "/newchar/bodypart-adjs") (adj)
   (when-let (opts (cdr (assoc adj *adjectives* :test #'string-equal)))
-    (with-yaclml-output-to-string (templ:bodypart-adj-select opts))))
+    (with-yaclml-output-to-string (templ:render-template "bodypart-adj-select" opts))))
 
 (define-easy-handler (newchar-location-description :uri "/newchar/location-description") (loc)
   (let ((desc (cdr (assoc loc *location-descriptions* :test #'string-equal))))
