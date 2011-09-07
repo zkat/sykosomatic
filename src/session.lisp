@@ -6,7 +6,7 @@
         :sykosomatic.util)
   (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
            :current-account :ensure-logged-in :start-persistent-session
-           :persistent-session-gc :logout :session-cleanup
+           :persistent-session-gc :end-session :session-cleanup
            :push-error :session-errors :session-websocket-clients))
 (cl:in-package :sykosomatic.session)
 
@@ -99,7 +99,7 @@
                                        'last-remote-addr (remote-addr request)
                                   :where (:= 'id session-id)))))))))))
 
-(defun logout (session-id)
+(defun end-session (session-id)
   (let ((account-id (current-account session-id))
         #+nil(websocket-clients (session-websocket-clients session-id)))
     (when account-id
@@ -111,7 +111,7 @@
 
 (defun session-cleanup (session-id)
   (logit "Session timed out. Logging it out.")
-  (logout session-id))
+  (end-session session-id))
 
 ;;; Transient session values
 
