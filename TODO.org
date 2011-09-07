@@ -116,11 +116,11 @@
     Should validate what comes down the pipe: when a description request is received, there should
     be validation that the character can, in fact, see the object.
 ** JS client
-*** TODO OOC pane
+*** DONE OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
 *** TODO Put descriptions somewhere more sane than an alert()
-*** TODO Back-button-friendliness.
+*** TODO Back-button-friendliness
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
     javascripty way to reconnect the websocket on back-button?
@@ -154,33 +154,6 @@
 *** TODO Improve form error reporting.
     The GET version should accept an optional 'errors' argument that it can be called with to handle
     error messages. This may involve not using define-easy-handler anymore.
-*** TODO New template system
-    All templating systems suck. This one won't. No logic goes into a template, and templates should
-    be kept small (like functions). Additionally, multiple templates will be kept in a single file,
-    which will generate either lisp functions or CLOS objects to correspond to each individual
-    template, which the programmer can compose with the logic (much like pages are strung together
-    with logic). The template files will basically look like lisp files, and require parameter
-    declaration for clarity, as well as accept an optional docstring.
-   
-    Example:
-    (deftempl standard-page (title head-contents body-contents)
-      "This template renders the standard page thingy."
-      <html>
-        <head>
-          <title>{title}</title>
-          {head}
-        </head>
-        <body>
-        {body-contents}
-        </body>
-      </html>)
-   
-    The above can be loaded (probably with a special reader macro), and could then create a function
-    to be called on a stream, with the required parameters:
-    (load "page.templ")
-    (render-template 'standard-page *standard-output* :title "My special page" :body-contents "<p>Hello, World!</p>")
-   
-    Question: Do even minor instances of HTML need to be templated out?
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 ** Style
@@ -208,6 +181,25 @@
 *** TODO Do something about the awful OOC area.
 *** TODO Style the input fields.
     Something more subtle than the deep abyss of standard input fields.
+** Security
+*** TODO XSS
+    There should be a specific method of handling all user input, and all redisplaying of
+    server-side data such that XSS is not possible. This should be handled within the
+    infrastructure.
+**** DONE De-XSS-ify client.js
+**** TODO De-XSS-ify server-side generated HTML.
+     This involves using yaclml's <:ah
+*** TODO CSRF
+    Pretty much nothing to defend against this right now.
+**** TODO Track down all URLs with side effects and attach CSRF tokens to them.
+**** TODO Figure out what sort of similar attacks can be mounted on websockets.
+*** TODO Injection
+    This is mostly taken care of by using s-sql. Keep an eye out, though.
+*** TODO DoS
+**** TODO Throttle user input.
+     Length and regularity of user input should be somewhat limited, so players can't just spam a
+     ton of garbage onto the screen.
+
 ** TODO Character creation
 *** TODO Cleanup
 **** TODO Separate file(s?)
@@ -222,12 +214,38 @@
 **** TODO Configuration UI
      Set up a nice web interface that waifu can use to do basic CRUD on all the different character
      creation options.
-*** TODO Usability
-**** TODO Make sure any live areas use the appropriate WAI-ARIA attributes.
-**** TODO Headings
-     I think headings are supposed to be helpful for folks using screen readers and the like. Look
-     into this, and add them where appropriate.
-**** TODO Disable 'add' buttons when appropriate
+*** TODO Update character.lisp
+    Make character.lisp accept the new character creation parameters. This should be using the new
+    entity system.
+**** TODO Use the CC parameters
+     Actually -use- the character creation parameters somewhere. This'll exercise the entity system
+     a bit.
+*** TODO Previews
+    Each section should have an informative preview that shows how the player's selections are
+    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
+**** TODO Identity
+     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
+     Something like "You are creating a new character. His name is Thomas Janus, also known as
+     'Wolf'."
+**** TODO Early Life
+     A sentence that gives a basic blurb about the character's family and childhood information,
+     which also includes the identity:
+     "Thomas grew up in a middle class family of three children by his two parents."
+**** TODO Later Life
+     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
+     really very close. He is also currently seeing someone. He has spent 10 years in Business."
+**** TODO Here and Now
+     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
+     about what the Twin Cities are, and maybe even some outside links to more information. There
+     should be various places marked on the map, each corresponding to a possible starting location
+     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
+     on a location or choosing it from the dropdown makes it the current selection, and also
+     displays a short paragraph with more information about what the place is like -- something to
+     give the player an idea of why it sets it apart from the other locations.
+**** TODO Confirm
+     Summarize all the other stuff that was accumulated during character creation, and have the
+     player confirm their decision. The actual submit button will be in here.
+
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** DONE Use <fieldset>
@@ -280,49 +298,9 @@
      Once the important bits are done, consider doing another round of validation JS-side, to
      report any problems as they fill out the form, instead of forcing them to submit over and over.
      Hooking into the preview mechanism may end up making this easier than it might seem.
-*** TODO Update character.lisp
-    Make character.lisp accept the new character creation parameters.
-*** TODO Previews
-    Each section should have an informative preview that shows how the player's selections are
-    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
-**** TODO Identity
-     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
-     Something like "You are creating a new character. His name is Thomas Janus, also known as
-     'Wolf'."
-**** TODO Early Life
-     A sentence that gives a basic blurb about the character's family and childhood information,
-     which also includes the identity:
-     "Thomas grew up in a middle class family of three children by his two parents."
-**** TODO Later Life
-     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
-     really very close. He is also currently seeing someone. He has spent 10 years in Business."
-**** TODO Here and Now
-     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
-     about what the Twin Cities are, and maybe even some outside links to more information. There
-     should be various places marked on the map, each corresponding to a possible starting location
-     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
-     on a location or choosing it from the dropdown makes it the current selection, and also
-     displays a short paragraph with more information about what the place is like -- something to
-     give the player an idea of why it sets it apart from the other locations.
-**** TODO Confirm
-     Summarize all the other stuff that was accumulated during character creation, and have the
-     player confirm their decision. The actual submit button will be in here.
-
-** Security
-*** TODO XSS
-    There should be a specific method of handling all user input, and all redisplaying of
-    server-side data such that XSS is not possible. This should be handled within the
-    infrastructure.
-**** DONE De-XSS-ify client.js
-**** TODO De-XSS-ify server-side generated HTML.
-     This involves using yaclml's <:ah
-*** TODO CSRF
-    Pretty much nothing to defend against this right now.
-**** TODO Track down all URLs with side effects and attach CSRF tokens to them.
-**** TODO Figure out what sort of similar attacks can be mounted on websockets.
-*** TODO Injection
-    This is mostly taken care of by using s-sql. Keep an eye out, though.
-*** TODO DoS
-**** TODO Throttle user input.
-     Length and regularity of user input should be somewhat limited, so players can't just spam a
-     ton of garbage onto the screen.
+*** TODO Usability
+**** TODO Make sure any live areas use the appropriate WAI-ARIA attributes.
+**** TODO Headings
+     I think headings are supposed to be helpful for folks using screen readers and the like. Look
+     into this, and add them where appropriate.
+**** TODO Disable 'add' buttons when appropriate
