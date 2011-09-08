@@ -71,7 +71,7 @@
          " for "
          (<:input :class "career-times" :name years-name :id years-id)
          " years."
-         (<:button :type "button" (<:ah "remove"))))
+         (<:button :type "button" :class "button" (<:ah "remove"))))
 
 (defun cc-later-life (friends so careers)
   (<:div :id "later-life"
@@ -99,7 +99,7 @@
                               (<:option :value val (<:ah val)))
                         adjectives))
          (mk-select adj-name nil "Choose an adjective..." :id adj-id :class "bodypart-adjs")
-         (<:button :type "button" (<:ah "remove"))))
+         (<:button :type "button" :class "button" (<:ah "remove"))))
 
 (defun cc-appearance (adjectives)
   (<:div :id "appearance"
