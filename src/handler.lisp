@@ -12,8 +12,8 @@
                "/res/" *sykosomatic-path*)
               'dispatch-easy-handlers
               'default-dispatcher))
-  (setf *default-handler* '404-handler)
-  (pushnew 404 *approved-return-codes*)
+  ;; (setf *default-handler* 'sykosomatic.handler.404:404-handler)
+  ;; (pushnew 404 *approved-return-codes*)
   (setf *rewrite-for-session-urls* nil)
   (start (setf *server* (make-instance 'sykosomatic-acceptor
                                        :port *web-server-port*
