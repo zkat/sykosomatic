@@ -87,7 +87,7 @@ function init_bodypart_section() {
     $('.bodypart-name').change(function(){
         var div = $(this).parent('.field');
         $.get('/newchar/bodypart-adjs',{'adj':$(this).val()},function(data){
-            $(div).children('.bodypart-adjs').html(data);
+            $(div).children('.bodypart-adjs').html(data).trigger("liszt:updated");
         });
     });
     $('.bodyparts').hide();

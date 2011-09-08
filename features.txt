@@ -20,7 +20,7 @@
    "classy" "mutinous" "gleaming" "unremarkable" "limp")))
  ("eyes"
   ("colors"
-   ("forest green" "jade green" "mint green" "emerald" "lime green" "olive"
+   ("forest green" "jade green" "mint green" "emerald" "lime green" "olive" "hazel green"
     "grey-green" "sea green" "hazel" "amber" "golden" "black" "ebony" "grey"
     "aquamarine" "sky blue" "icy blue" "ocean blue" "indigo" "cornflower blue"
     "electric blue" "dark blue" "brown" "chestnut" "chocolate" "honey" "russet"
@@ -185,4 +185,4 @@
    ("long" "short" "missing" "sparse" "thin" "thick" "lush" "dark" "blonde"
     "fine")))
  ("smile"
-  ("all" ("easy" "wide" "crooked" "lop-sided" "dopey" "tiny" "pointed"))))
+  ("all" ("easy" "wide" "crooked" "lop-sided" "dopey" "tiny" "pointed")))))

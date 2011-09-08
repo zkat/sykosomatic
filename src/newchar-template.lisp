@@ -110,13 +110,14 @@
                  (loop for i below 5
                     do (bodypart-div i adjectives))))))
 
-(defun bodypart-adj-select (adjective-categories)
-  (<:option :value "" (<:ah "Choose an adjective..."))
-  (loop for (category adjectives) in adjective-categories
-     do (<:optgroup :label (if (string= category "all") "general" category)
-                    (map nil (lambda (adj)
-                               (<:option :value adj (<:ah adj)))
-                         adjectives))))
+(add-template "bodypart-adj-select"
+              (lambda (adjective-categories)
+                (<:option :value "" (<:ah "Choose an adjective..."))
+                (loop for (category adjectives) in adjective-categories
+                   do (<:optgroup :label (if (string= category "all") "general" category)
+                                  (map nil (lambda (adj)
+                                             (<:option :value adj (<:ah adj)))
+                                       adjectives)))))
 
 (defun cc-here-and-now (locations)
   (<:div :id "here-and-now"
