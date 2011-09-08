@@ -17,7 +17,7 @@ function prettify_ui() {
         var tab_index = $('#tabs .ui-tabs-panel').index(document.getElementById(tab_id));
         $('#tabs').tabs('select',tab_index+1);
     });
-    //$('select').chosen();
+    $('select').chosen();
 }
 prettify_ui();
 
