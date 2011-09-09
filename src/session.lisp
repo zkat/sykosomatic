@@ -18,9 +18,12 @@
 (defclass persistent-session-request (request)
   ())
 
+(defun generate-session-string (byte-count)
+  (ironclad:byte-array-to-hex-string (cl+ssl:random-bytes byte-count)))
+
 (defdao persistent-session ()
   ((id :col-type serial :reader id)
-   (cookie-value :col-type text :initform (random-string 256) :reader session-cookie-value)
+   (cookie-value :col-type text :initform (generate-session-string 128) :reader session-cookie-value)
    (account-id :col-type bigint :initarg :account-id)
    (user-agent :col-type text :initform (user-agent *request*))
    (last-remote-addr :col-type text :initform (real-remote-addr *request*))
