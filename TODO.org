@@ -182,6 +182,8 @@
 *** TODO Style the input fields.
     Something more subtle than the deep abyss of standard input fields.
 ** Security
+*** DONE Sessions
+    Use cl+ssl to generate session strings.
 *** TODO XSS
     There should be a specific method of handling all user input, and all redisplaying of
     server-side data such that XSS is not possible. This should be handled within the
