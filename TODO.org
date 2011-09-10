@@ -205,22 +205,20 @@
      ton of garbage onto the screen.
 
 ** TODO Character creation
-*** TODO Cleanup
-**** TODO Separate file(s?)
+*** DONE Cleanup
+**** DONE Separate file(s?)
      Move character creation out into a separate file from all the other templates. Perhaps also
      move out the character creation handlers.
 *** TODO Data-driven
     Move all the character-creation options into the database. Have the -handlers- provide the data
     to display to the template generators. There's too much logic/data in templates.lisp.
 **** DONE Out of templates.lisp
-**** TODO Load from database
+**** DONE Load from database
      Can easily do this later. They're just in defparameters now.
 **** TODO Configuration UI
      Set up a nice web interface that waifu can use to do basic CRUD on all the different character
      creation options.
-*** TODO Update character.lisp
-    Make character.lisp accept the new character creation parameters. This should be using the new
-    entity system.
+*** TODO Update sykosomatic.character
 **** TODO Use the CC parameters
      Actually -use- the character creation parameters somewhere. This'll exercise the entity system
      a bit.
@@ -282,7 +280,7 @@
 ****** DONE Load a description through AJAX
 ****** TODO Pull up waifu's descriptions
 *** TODO Prettify
-**** TODO Chosen
+**** DONE Chosen
      Use Chosen for the dropdowns. Looks like this'll need to wait until issues with width are
      fixed.
 **** TODO Design brainstorm
