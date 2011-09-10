@@ -50,49 +50,32 @@
 ;;;
 ;;; Using terminology from the wikipedia article on English Conjugation:
 ;;; https://secure.wikimedia.org/wikipedia/en/wiki/English_conjugation
-;;;
-;;; For the purposes of the parser, etc, we assume that we can just conjugate them, unless there's a
-;;; value present in the irregular-blah fields.
 (defdao verb ()
   ((id :col-type serial :reader id)
    (bare :col-type text :initarg :bare)
-   (irregular-third-person :col-type (or db-null text) :initarg :irregular-third-person)
-   (irregular-preterite :col-type (or db-null text) :initarg :irregular-preterite))
+   (third-person :col-type text :initarg :third-person)
+   (preterite :col-type text :initarg :preterite))
   (:keys bare)
   (:unique-index bare)
   (:unique bare))
 
-(defun add-verb (bare &optional irregular-third-person irregular-preterite)
-  (with-db () (make-dao 'verb
-                        :bare bare :irregular-preterite (or irregular-preterite :null)
-                        :irregular-third-person (or irregular-third-person :null)))
+(defun add-verb (bare &optional third-person preterite)
+  (with-db ()
+    (make-dao 'verb
+              :bare bare
+              :third-person (cond (third-person)
+                                  ((or (ends-with #\x bare)
+                                       (ends-with #\s bare))
+                                   (concatenate 'string bare "es"))
+                                  (t (concatenate 'string bare "s")))
+              :preterite (cond (preterite)
+                               ((ends-with #\e bare)
+                                (concatenate 'string bare "d"))
+                               (t (concatenate 'string bare "ed")))))
   t)
 (defun remove-verb (bare)
   (with-db () (query (:delete-from 'verb :where (:= 'bare bare))))
   t)
-
-(defun third-person-singular (verb)
-  "If VERB is a bare-form verb listed in the database, this function returns it in the third person
-singular form."
-  (when-let (from-db (with-db () (query (:select 'irregular-third-person :from 'verb
-                                                 :where (:= 'bare verb))
-                                        :single)))
-    (cond ((stringp from-db) from-db)
-          ((or (ends-with #\x verb)
-               (ends-with #\s verb))
-           (concatenate 'string verb "es"))
-          (t (concatenate 'string verb "s")))))
-
-(defun preterite (verb)
-  "If VERB is a bare-form verb listed in the database, this function returns it in preterite form."
-  (when-let (from-db (with-db () (query (:select 'irregular-preterite :from 'verb
-                                                 :where (:= 'bare verb))
-                                        :single)))
-    (cond ((stringp from-db) from-db)
-          ((ends-with #\e verb)
-           (concatenate 'string verb "d"))
-          (t
-           (concatenate 'string verb "ed")))))
 
 ;;; Testing
 (defparameter *test-data*
@@ -108,6 +91,9 @@ singular form."
                  ("pout") ("cackle") ("fix") ("preen") ("smile") ("frown")
                  ("cheer") ("laugh") ("wave")
                  ("cry" "cries" "cried")))))
+
+(defun reset ()
+  (map nil #'rebuild-table '(verb adverb pronoun)))
 
 (defun import-test-data ()
   (with-db ()
