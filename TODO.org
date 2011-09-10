@@ -7,6 +7,8 @@
 *** TODO Allow changing passwords.
 *** TODO Password recovery.
 ** Game
+*** DONE Vocabulary module
+    Define a vocabulary module for defining and maintaining the game's dictionary.
 *** TODO Persistent messaging events
     Messages being passed around to/from the client should be data-driven -- a 'dialogue' message is
     sint to the client, for example, by a loop that looks for messages to send. That means all the

@@ -22,6 +22,7 @@
              (:file "config")
              (:file "db")
              (:file "entity")
+             (:file "vocabulary")
              (:file "account")
              (:module game-objects
                       :components
