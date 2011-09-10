@@ -53,21 +53,21 @@ init_career_section();
  * Feature UI
  */
 
-function enable_bodypart() {
-    var hidden_fields = $('.bodyparts:hidden');
+function enable_feature() {
+    var hidden_fields = $('.features:hidden');
     var num_fields = hidden_fields.length;
-    if (num_fields <= $('.bodyparts').length) {
-        $('.bodyparts:hidden:first').show();
+    if (num_fields <= $('.features').length) {
+        $('.features:hidden:first').show();
     }
 }
-function add_bodypart_choice() {
-    var num_fields = count_fields('bodyparts');
-    if (num_fields < max_bodypart_count) {
-        $.get('/newchar/bodypart',{'idx':num_fields},function(data){
-            $('#bodyparts').append($(data));
-            $('#bodyparts-'+num_fields).change(function(){
+function add_feature_choice() {
+    var num_fields = count_fields('features');
+    if (num_fields < max_feature_count) {
+        $.get('/newchar/feature',{'idx':num_fields},function(data){
+            $('#features').append($(data));
+            $('#features-'+num_fields).change(function(){
                 var div = $(this).parent('.field');
-                $.get('/newchar/bodypart-adjs',{'idx':num_fields,'adj':$(this).val()},function(data){
+                $.get('/newchar/feature-adjs',{'idx':num_fields,'feature-name':$(this).val()},function(data){
                     $(div).children('.adj').html(data);
                 });
             });
@@ -75,24 +75,24 @@ function add_bodypart_choice() {
     }
 }
 
-function init_bodypart_section() {
-    $('#add-bodypart').click(enable_bodypart);
-    $('.bodyparts > button').click(function () {
-        var div = $(this).parent('.bodyparts');
+function init_feature_section() {
+    $('#add-feature').click(enable_feature);
+    $('.features > button').click(function () {
+        var div = $(this).parent('.features');
         div.find(':input').each(function () {
             $(this).val('');
         });
         div.hide();
     });
-    $('.bodypart-name').change(function(){
+    $('.feature-name').change(function(){
         var div = $(this).parent('.field');
-        $.get('/newchar/bodypart-adjs',{'adj':$(this).val()},function(data){
-            $(div).children('.bodypart-adjs').html(data).trigger("liszt:updated");
+        $.get('/newchar/feature-adjs',{'feature-name':$(this).val()},function(data){
+            $(div).children('.feature-adjs').html(data).trigger("liszt:updated");
         });
     });
-    $('.bodyparts').hide();
+    $('.features').hide();
 }
-init_bodypart_section();
+init_feature_section();
 
 function init_here_and_now() {
     $('#where').change(function() {

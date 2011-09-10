@@ -13,7 +13,8 @@
            :optgroup-label
            :optgroup-options
            :option-value
-           :option-text))
+           :option-text
+           :option-detail))
 (cl:in-package :templ)
 
 (defgeneric optgroup-label (optgroup))
@@ -25,7 +26,11 @@
 (defgeneric option-text (opt)
   (:documentation "Used for the label of the opt.")
   (:method ((opt cons))
-    (cdr opt)))
+    (second opt)))
+(defgeneric option-detail (opt)
+  (:documentation "Used for more verbose display of what the option is.")
+  (:method ((opt cons))
+    (third opt)))
 
 (defvar *templates* (make-hash-table :test #'equalp))
 

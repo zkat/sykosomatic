@@ -3,9 +3,9 @@
 (defun newchar-js ()
   (<:script :type "text/javascript" :src "res/js/newchar.js"))
 
-(defpage newchar (&key origins parents siblings situations
+(defpage newchar (&key pronouns origins parents siblings situations
                        friends so careers
-                       location-opts adjectives)
+                       location-opts features)
     ((newchar-js))
     "Create a character"
   (error-messages)
@@ -13,12 +13,10 @@
   (<:form :name "character-creation" :action "/newchar" :method "post"
    (<:div
     :id "creation-forms"
-    (cc-identity '(("she" . "She")
-                   ("he" . "He")
-                   ("they" . "They")))
+    (cc-identity pronouns)
     (cc-early-life origins parents siblings situations)
     (cc-later-life friends so careers)
-    (cc-appearance adjectives)
+    (cc-appearance features)
     (cc-here-and-now location-opts)
     (cc-confirm))))
 
@@ -86,31 +84,31 @@
             (loop for i below 5
                do (career-div i careers))))))
 
-(defun bodypart-div (idx adjectives &aux
-                     (bodypart-name (format nil "bodyparts[~A]" idx))
-                     (bodypart-id (format nil "bodyparts-~A" idx))
-                     (adj-name (format nil "bodypart-adjs[~a]" idx))
-                     (adj-id (format nil "bodypart-adjs-~a" idx)))
-  (<:div :class "field bodyparts"
-         (<:label :for bodypart-id (<:ah (format nil "Feature")))
-         (<:select :name bodypart-name :id bodypart-id :class "bodypart-name"
+(defun feature-div (idx features &aux
+                     (feature-name (format nil "features[~A]" idx))
+                     (feature-id (format nil "features-~A" idx))
+                     (adj-name (format nil "feature-adjs[~a]" idx))
+                     (adj-id (format nil "feature-adjs-~a" idx)))
+  (<:div :class "field features"
+         (<:label :for feature-id (<:ah (format nil "Feature")))
+         (<:select :name feature-name :id feature-id :class "feature-name"
                    (<:option :value "" (<:ah "Choose feature..."))
-                   (map nil (lambda (entry &aux (val (car entry)))
+                   (map nil (lambda (val)
                               (<:option :value val (<:ah val)))
-                        adjectives))
-         (mk-select adj-name nil "Choose an adjective..." :id adj-id :class "bodypart-adjs")
+                        features))
+         (mk-select adj-name nil "Choose an adjective..." :id adj-id :class "feature-adjs")
          (<:button :type "button" :class "button" (<:ah "remove"))))
 
-(defun cc-appearance (adjectives)
+(defun cc-appearance (features)
   (<:div :id "appearance"
          (<:fieldset
-          (<:legend :id "bodyparts-desc" (<:ah "Choose up to 5 distinguishing features"))
-          (<:button :type "button" :id "add-bodypart" :class "button" "Add a feature")
-          (<:div :id "bodyparts"
+          (<:legend :id "features-desc" (<:ah "Choose up to 5 distinguishing features"))
+          (<:button :type "button" :id "add-feature" :class "button" "Add a feature")
+          (<:div :id "features"
                  (loop for i below 5
-                    do (bodypart-div i adjectives))))))
+                    do (feature-div i features))))))
 
-(add-template "bodypart-adj-select"
+(add-template "feature-adj-select"
               (lambda (adjective-categories)
                 (<:option :value "" (<:ah "Choose an adjective..."))
                 (loop for (category adjectives) in adjective-categories
