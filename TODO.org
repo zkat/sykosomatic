@@ -306,3 +306,5 @@
      I think headings are supposed to be helpful for folks using screen readers and the like. Look
      into this, and add them where appropriate.
 **** TODO Disable 'add' buttons when appropriate
+** TODO Generic CRUD interface
+   To be used with all the various data thingies.
