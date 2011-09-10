@@ -94,16 +94,10 @@
 (defun cc-adjectives (feature-name)
   ;; TODO - can this be done in a single query?
   (with-db ()
-    (mapcar (lambda (category)
-              (list category (query (:select 'adjective :from 'cc-adjective
-                                             :where (:= 'category category))
-                                    :column)))
-            (query (:order-by
-                    (:select 'category :distinct
-                             :from 'cc-adjective
-                             :where (:= 'feature feature-name))
-                    'category)
-                   :column))))
+    (query (:select 'category (:as (:array-agg 'adjective) 'adjectives)
+                    :from 'cc-adjective
+                    :where (:= 'feature feature-name)
+                    :group-by 'category))))
 
 (defun cc-location-description (location-name)
   (with-db ()
