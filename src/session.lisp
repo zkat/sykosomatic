@@ -64,7 +64,7 @@
         (set-cookie (session-cookie-name *acceptor*)
                     :value (session-cookie-value session)
                     :path "/"
-                    :secure *ssl-enabled-p*
+                    :secure (ssl-p)
                     :http-only t)
         (setf (session *request*) session)
         #+nil(persistent-session-gc)
