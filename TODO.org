@@ -134,7 +134,7 @@
 *** TODO Fix clws to work on CCL.
 *** TODO Optional Flash loading
     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
-*** TODO Loading screen
+*** DONE Loading screen
     Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
     show the whole chat box.
 *** TODO Use WAI-ARIA in the client
@@ -218,6 +218,8 @@
 **** TODO Configuration UI
      Set up a nice web interface that waifu can use to do basic CRUD on all the different character
      creation options.
+*** TODO Handle POST
+    Capture the POST parameters.
 *** TODO Update sykosomatic.character
 **** TODO Use the CC parameters
      Actually -use- the character creation parameters somewhere. This'll exercise the entity system
@@ -250,30 +252,9 @@
 
 *** TODO Proper inputs
     Replace the mass of text input fields with appropriate stuff like dropdowns.
-**** DONE Use <fieldset>
-**** DONE Identity
-**** DONE Early Life
-     Dropdown for the 'where from'. SIMPLIFY SIMPLIFY
-**** DONE Later Life
-***** DONE Need to do the JS field-addition.
-      It's kinda crappy (just a .click() on a span), but it does the job for right now.
-***** DONE Need to do JS field-REMOVAL.
-      Instead of a 'Remove' button, add a small 'remove' link next to each field.
-***** DONE Dropdown for careers
-**** DONE Appearance
-     Three 'features' are selectable. Each feature is something like a bodypart, with an adjective
-     attached to it. Each bodypart has a particular set of adjectives that can go with it. Selecting
-     a bodypart from the dropdown should restrict the adjectives list only to those that are
-     selectable for that particular bodypart.
-     The obvious way to do this is with JavaScript -- perhaps some AJAX that fetches the most
-     current list as things are selected from the dropdown.
-***** DONE JS feature addition
-***** DONE JS feature removal
-      Instead of just a 'Remove' button, add a small remove link next to each individual feature.
-***** DONE Dropdown for bodyparts
-***** DONE Dropdown for adjectives
-***** DONE AJAX valid adjective fetching
-**** TODO Here and Now
+**** TODO Careers
+***** TODO Use jQuery UI 1.9's spinner widget for number input
+**** TODO Location
 ***** TODO Draw up a map of the area
 ***** TODO Highlight places in the map according to selection
 ***** TODO Expand description of place according to selection
