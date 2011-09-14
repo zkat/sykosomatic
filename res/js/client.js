@@ -20,6 +20,10 @@ var sykosomatic =
         $("#game-input > div :input").attr('disabled',false);
     }
 
+    function hide_loading_spinner() {
+        $('#loading-spinner').hide('fast');
+    }
+
     function disable_input () {
         $("#game-input > div :input").attr('disabled',true);
     }
@@ -174,6 +178,7 @@ var sykosomatic =
                         'char' : current_char() };
             ws.send(JSON.stringify(obj));
             enable_input();
+            hide_loading_spinner();
         };
         ws.onmessage = function(e) {
             dispatch_message(JSON.parse(e.data));

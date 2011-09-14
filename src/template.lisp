@@ -152,7 +152,8 @@
 
 (defun game-panel (char-name)
   (<:div :id "game-panel"
-         (<:div :class "scene-display" :id "scene-display")
+         (<:div :class "scene-display" :id "scene-display"
+                (<:img :src "res/loading.gif" :id "loading-spinner"))
          (<:div :id "game-input"
                 (<:ul
                  (<:li (<:href "#dialogue-tab" "Dialogue"))
