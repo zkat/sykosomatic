@@ -94,7 +94,7 @@
   (remhash (client-ws-client client) (slot-value srv 'clients)))
 
 (defmethod validate-client ((srv chat-server) client &aux (*acceptor* *server*))
-  (let ((session (session-verify (make-instance 'request
+  (let ((session (session-verify (make-instance 'persistent-session-request
                                                 :uri (client-uri client)
                                                 :remote-addr (client-host client)
                                                 :headers-in (client-headers client)
@@ -129,20 +129,19 @@
        (process-client-message res client message)
        (process-client-validation res client message))))
 
-(defgeneric actor-client (actor)
-  (:method ((actor-id string))
-    (maphash-values (lambda (client)
-                      (when (string= actor-id (client-character-id client))
-                        (return-from actor-client client)))
-                    (slot-value *websocket-server* 'clients))
-    nil))
+(defun actor-client (actor-id)
+  (maphash-values (lambda (client)
+                    (when (eql actor-id (client-character-id client))
+                      (return-from actor-client client)))
+                  (slot-value *websocket-server* 'clients))
+  nil)
 
 (defun send-msg (actor msg)
   (client-write (actor-client actor)
                 (jsown:to-json msg)))
 
 (defun send-action (recipient actor action-txt)
-  (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
+  #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
     (logit "Saving action under scene ~A: ~A" scene-id action-txt)
     (add-action scene-id actor action-txt))
   (send-msg recipient `("action" (:obj
@@ -152,7 +151,7 @@
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
   (let ((char-name (character-name actor)))
-    (when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
+    #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
       (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
       (add-dialogue scene-id char-name dialogue parenthetical))
     (send-msg recipient `("dialogue" (:obj

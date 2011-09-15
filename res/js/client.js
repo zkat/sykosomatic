@@ -1,4 +1,4 @@
-WEB_SOCKET_SWF_LOCATION = 'res/WebSocketMain.swf';
+WEB_SOCKET_SWF_LOCATION = 'res/js/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
 
 var sykosomatic =
