@@ -165,7 +165,7 @@
 (defun send-ooc (recipient actor text)
   (let ((display-name (account-display-name (client-account-id (actor-client actor)))))
     (send-msg recipient `("ooc" (:obj
-                                 ("display_name" . ,display-name)
+                                 ("display-name" . ,display-name)
                                  ("text" . ,text))))))
 
 (defun local-actors (actor-id)

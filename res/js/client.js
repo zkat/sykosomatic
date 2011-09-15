@@ -284,7 +284,7 @@ var sykosomatic =
     };
 
     dispatch_table['ooc'] = function (msg) {
-        add_ooc(msg[1]['display_name'],msg[1]['text']);
+        add_ooc(msg[1]['display-name'],msg[1]['text']);
     };
 
     ///
