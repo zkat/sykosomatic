@@ -13,15 +13,15 @@
 (defun find-character (name)
   (with-db ()
     (query (:order-by (:select 'entity-id :from 'modifier
-                               :where (:and (:= 'type "character-name")
-                                            (:= 'text-value name)))
+                               :where (:and (:= 'type "character:nickname")
+                                            (:ilike 'text-value name)))
                       (:desc 'precedence))
            :single)))
 
 (defun account-characters (account-id)
   (with-db ()
     (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'type "character-account")
+                    :where (:and (:= 'type "character:account")
                                  (:= 'numeric-value account-id)))
            :column)))
 
@@ -36,32 +36,84 @@
              (scan *character-name-regex* name))
     t))
 
-(defun validate-new-character (name description)
+(defun validate-new-character (name)
   (with-validation
-    (assert-required "Character name" name)
-    (assert-validation (valid-character-name-p name) "Invalid character name.")
-    (assert-validation (not (find-character name)) "Character with that name already exists.")
-    (assert-validation (<= (length description) 500) "Descriptions must be under 500 characters long.")))
+    (assert-required "Nickname" name)
+    (assert-validation (valid-character-name-p name) "Invalid nickname.")
+    (assert-validation (not (find-character name)) "Character with that name already exists.")))
 
-(defun create-character (account-id name description)
-  (with-transaction ()
-    (multiple-value-bind (validp errors)
-        (validate-new-character name description)
-      (if validp
-          (with-transaction ()
-            (let ((entity (create-entity)))
-              (add-modifier entity "character-name" :text-value name)
-              (add-modifier entity "character-description" :text-value description)
-              (add-modifier entity "character-account" :numeric-value account-id)
-              entity))
-          (values nil errors)))))
+(defdao cc-values ()
+  ((id :col-type serial :reader id)
+   (entity-id :col-type bigint :initarg :entity-id)
+   (pronoun :col-type text :initarg :pronoun)
+   (first-name :col-type text :initarg :first-name)
+   (nickname :col-type text :initarg :nickname)
+   (last-name :col-type text :initarg :last-name)
+   (origin :col-type text :initarg :origin)
+   (parents :col-type text :initarg :parents)
+   (siblings :col-type text :initarg :siblings)
+   (friends :col-type text :initarg :friends)
+   (so :col-type text :initarg :so)
+   (where :col-type text :initarg :where))
+  (:keys id))
+
+(defdao cc-career-info ()
+  ((id :col-type serial :reader id)
+   (cc-values-id :col-type bigint :initarg :cc-values-id)
+   (career :col-type text :initarg :career)
+   (years-spent :col-type numeric :initarg :years-spent))
+  (:keys id))
+
+(defdao cc-feature-info ()
+  ((id :col-type serial :reader id)
+   (cc-values-id :col-type bigint :initarg :cc-values-id)
+   (feature :col-type text :initarg :feature)
+   (adjective :col-type text :initarg :adjective))
+  (:keys id))
+
+(defun create-character (account-id &key
+                         pronoun first-name nickname last-name
+                         origin parents siblings situation friends
+                         so career-info feature-info where)
+  (with-db ()
+    (with-transaction ()
+      (multiple-value-bind (validp errors)
+          (validate-new-character nickname)
+        (if validp
+            (with-transaction ()
+              (let ((entity (create-entity)))
+                (add-modifier entity "character:nickname" :text-value nickname)
+                (add-modifier entity "character:account" :numeric-value account-id)
+                (let ((cc-values-id (id (make-dao 'cc-values
+                                                  :entity-id entity
+                                                  :pronoun  pronoun
+                                                  :first-name first-name
+                                                  :nickname nickname
+                                                  :last-name last-name
+                                                  :origin origin
+                                                  :parents parents
+                                                  :siblings siblings
+                                                  :situation situation
+                                                  :friends friends
+                                                  :so so
+                                                  :where where))))
+                  (loop for (career . years-spent) in career-info
+                     when years-spent
+                     do (make-dao 'cc-career-info :cc-values-id cc-values-id
+                                  :career career :years-spent years-spent))
+                  (loop for (feature . adjective) in feature-info
+                     when adjective
+                     do (make-dao 'cc-feature-info :cc-values-id cc-values-id
+                                  :feature feature :adjective adjective)))
+                entity))
+            (values nil errors))))))
 
 (defun character-name (character-id)
-  (text-modifier-value character-id "character-name"))
+  (text-modifier-value character-id "character:nickname"))
 (defun character-description (character-id)
   (text-modifier-value character-id "character-description"))
 (defun character-account (character-id)
-  (numeric-modifier-value character-id "character-account"))
+  (numeric-modifier-value character-id "character:account"))
 (defun character-account-email (character-id)
   (with-db ()
     (with-transaction ()
@@ -92,7 +144,6 @@
            :column)))
 
 (defun cc-adjectives (feature-name)
-  ;; TODO - can this be done in a single query?
   (with-db ()
     (query (:select 'category (:as (:array-agg 'adjective) 'adjectives)
                     :from 'cc-adjective
