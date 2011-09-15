@@ -219,11 +219,10 @@
      Set up a nice web interface that waifu can use to do basic CRUD on all the different character
      creation options.
 *** TODO Handle POST
-    Capture the POST parameters.
-*** TODO Update sykosomatic.character
-**** TODO Use the CC parameters
-     Actually -use- the character creation parameters somewhere. This'll exercise the entity system
-     a bit.
+    Capture the POST parameters, validate them, insert them.
+**** DONE Drop them into a database table.
+**** TODO Validate the values
+**** TODO Create appropriate entities and modifiers
 *** TODO Previews
     Each section should have an informative preview that shows how the player's selections are
     affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
