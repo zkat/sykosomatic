@@ -121,6 +121,7 @@
 *** DONE OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
+*** TODO Instead of using web session, make web clients identify with a CSRF token.
 *** TODO Put descriptions somewhere more sane than an alert()
 *** TODO Back-button-friendliness
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
@@ -186,6 +187,8 @@
 ** Security
 *** DONE Sessions
     Use cl+ssl to generate session strings.
+*** TODO HTTPS
+    Need to set up SSL for both hunchentoot and the websocket server.
 *** TODO XSS
     There should be a specific method of handling all user input, and all redisplaying of
     server-side data such that XSS is not possible. This should be handled within the
@@ -286,5 +289,9 @@
      I think headings are supposed to be helpful for folks using screen readers and the like. Look
      into this, and add them where appropriate.
 **** TODO Disable 'add' buttons when appropriate
-** TODO Generic CRUD interface
-   To be used with all the various data thingies.
+** TODO Generic form component/handler interface
+   I want to be able to define forms and their fields once, and have those easily hook up to a
+   template for layout, and easily hook up to a handler and its parameters, so I don't have to
+   repeatedly pass around all the values. It should also automagically take care of validation and
+   validation error reporting, and reloading values into the form. (should reload all values by
+   default, unless a :noreload flag or something is provided)
