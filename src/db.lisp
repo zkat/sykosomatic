@@ -11,7 +11,6 @@
 (defparameter *db-host* "localhost")
 
 ;;; SQL utils
-;;; TODO - s-sql doesn't support FOR UPDATE. :(
 (defmacro defdao (name superclasses slots &body dao-options)
   (flet ((parsed-opts (keyword deftable-func-name)
            (mapcar (lambda (statement)
