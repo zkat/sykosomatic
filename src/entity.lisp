@@ -3,8 +3,7 @@
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
-           :text-modifier-value :numeric-modifier-value
-           :entity-uid :find-entity-by-uid
+           :modifier-value :entity-uid :find-entity-by-uid
            :event-execution :expire-modifier
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
@@ -43,11 +42,11 @@
   ((id :col-type serial :reader id)
    (entity-id :col-type bigint :initarg :entity-id)
    (precedence :col-type bigint :initarg :precedence :col-default 0)
-   (type :col-type text :initarg :type)
+   (ns :col-type text :initarg :ns)
+   (name :col-type text :initarg :name)
    (description :col-type (or db-null text) :initarg :description)
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
-   (text-value :col-type (or db-null text) :initarg :text-value)
-   (timestamp-value :col-type (or db-null timestamp) :initarg :timestamp-value))
+   (text-value :col-type (or db-null text) :initarg :text-value))
   (:keys id))
 
 (defun entity-id (entity)
@@ -55,50 +54,46 @@
   entity)
 
 (defun list-modifiers (entity)
+  ;; TODO - make this accept an 'ns' argument to filter by namespace.
   (with-db ()
     (query (:select :* :from 'modifier :where (:= 'entity-id (entity-id entity)))
            :alists)))
 
-(defun add-modifier (entity type &key
-                     text-value numeric-value timestamp-value
+(defun add-modifier (entity ns name value &key
                      precedence description)
   (with-db ()
-    (make-dao 'modifier
-              :entity-id (entity-id entity)
-              :type type :text-value (or text-value :null)
-              :numeric-value (or numeric-value :null)
-              :timestamp-value (or timestamp-value :null)
-              :description (or description :null)
-              :precedence (or precedence 0))))
+    (apply #'make-dao 'modifier
+           :entity-id (entity-id entity)
+           :ns ns :name name
+           :description (or description :null)
+           :precedence (or precedence 0)
+           (typecase value
+             (number (list :numeric-value value))
+             (otherwise (list :text-value (princ-to-string value)))))))
 
 (defun delete-modifier (modifier-id)
   (with-db ()
     (query (:delete-from 'modifier :where (:= 'id modifier-id)))))
 
-(defun %modifier-value (entity type value-column)
+(defun modifier-value (entity ns name value-column)
   (with-db ()
-    (query (:order-by (:select value-column :from 'modifier
+    (query (:order-by (:select (ecase value-column
+                                 (:text 'text-value)
+                                 (:num 'numeric-value)
+                                 (:time 'timestamp-value))
+                               :from 'modifier
                                :where (:and (:= 'entity-id (entity-id entity))
-                                            (:= 'type type)))
+                                            (:= 'ns ns)
+                                            (:= 'name name)))
                       (:desc 'precedence)
                       (:desc 'id))
            :single)))
-
-(defun text-modifier-value (entity type)
-  (%modifier-value entity type 'text-value))
-
-(defun numeric-modifier-value (entity type)
-  (%modifier-value entity type 'numeric-value))
 
 (defun create-entity (&key comment)
   (id (with-db () (make-dao 'entity :comment (or comment :null)))))
 
 (defun entity-uid (entity)
-  (with-db ()
-    (query (:select 'text-value :from 'modifier
-                    :where (:and (:= 'entity-id (entity-id entity))
-                                 (:= 'type "entity-uid")))
-           :single)))
+  (with-db () (modifier-value entity "entity" "uid" :text)))
 
 (defun (setf entity-uid) (new-value entity)
   (with-db ()
@@ -107,18 +102,20 @@
              (query (:update 'modifier
                           :set 'text-value new-value
                           :where (:and (:= 'entity-id (entity-id entity))
-                                       (:= 'type "entity-uid")))))
+                                       (:= 'ns "entity")
+                                       (:= 'name "uid")))))
             ((find-entity-by-uid new-value)
              (error "~S must be a globally unique identifier, but it already identifies entity ~A."
                     new-value (find-entity-by-uid new-value)))
             (t
-             (add-modifier entity "entity-uid" :text-value new-value :description
+             (add-modifier entity "entity" "uid" new-value :description
                            "Unique human-usable identifier for entity."))))))
 
 (defun find-entity-by-uid (uid)
   (with-db ()
     (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'type "entity-uid")
+                    :where (:and (:= 'ns "entity")
+                                 (:= 'name "uid")
                                  (:= 'text-value uid)))
            :single)))
 
