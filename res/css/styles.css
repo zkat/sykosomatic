@@ -110,3 +110,7 @@
     color:red;
     list-style-type:none;
 }
+
+#dialogue-input {
+    display:block !important;
+}

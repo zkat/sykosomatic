@@ -162,8 +162,9 @@
                  (<:li (<:href "#parser-tab" "Parser")))
                 (<:div :id "dialogue-tab"
                        (<:form :id "dialogue-input"
-                               (<:p :class "character" (<:ah (string-capitalize char-name)))
-                               (<:input)))
+                               (<:div
+                                (<:p :class "character" (<:ah (string-capitalize char-name)))
+                                (<:textarea :class "dialogue"))))
                 (<:div :id "action-tab"
                        (<:form :id "action-input"
                                (<:ah (string-capitalize char-name))
