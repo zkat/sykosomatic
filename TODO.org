@@ -224,7 +224,6 @@
 *** TODO Handle POST
     Capture the POST parameters, validate them, insert them.
 **** DONE Drop them into a database table.
-**** TODO Validate the values
 **** TODO Create appropriate entities and modifiers
 *** TODO Previews
     Each section should have an informative preview that shows how the player's selections are
@@ -256,6 +255,7 @@
     Replace the mass of text input fields with appropriate stuff like dropdowns.
 **** TODO Careers
 ***** TODO Use jQuery UI 1.9's spinner widget for number input
+      ...meh. Maybe wait for 1.9 to get released.
 **** TODO Location
 ***** TODO Draw up a map of the area
 ***** TODO Highlight places in the map according to selection
@@ -273,7 +273,7 @@
       Seriously, do something. It's pretty hideous. Make it something appealing. Fun. Pleasing to
       the eye.
 *** TODO Validation
-    Need to do validation, give the user feedback, etc.
+    All of this should be automagically taken care of by the form builder, once it's ready.
 **** TODO Basic validation and error reporting.
      Hook up the Big Fat Form to the error reporting system.
 **** TODO Repopulate
