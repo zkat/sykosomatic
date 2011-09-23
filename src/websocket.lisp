@@ -38,7 +38,7 @@
 
 (defun client-write (client string)
   (continuable
-    (ws:write-to-client (client-ws-client client) string)))
+    (ws:write-to-client-text (client-ws-client client) string)))
 
 (defun find-client (chat-server ws-client)
   (gethash ws-client (slot-value chat-server 'clients)))
@@ -72,7 +72,7 @@
 (defmethod disconnect-client ((server chat-server) client)
   (let ((ws-client (client-ws-client client))
         (session (client-session client)))
-    (ws:write-to-client ws-client :close)
+    (ws:write-to-client-close ws-client)
     (when session
       (deletef (session-websocket-clients session)
                client))))
@@ -83,10 +83,10 @@
   (ws:register-global-resource
    "/chat"
    (setf *websocket-server* (make-instance 'chat-server :client-main client-main))
-   (ws::origin-prefix "http://zushakon.sykosomatic.org")))
+   (ws:origin-prefix "http://zushakon.sykosomatic.org")))
 
 (defmethod add-client ((srv chat-server) client)
-  (logit "Adding Pending Client ~S." client)
+  (logit "Adding pending client ~S." client)
   (setf (gethash (client-ws-client client) (slot-value srv 'clients))
         client))
 
@@ -105,7 +105,6 @@
       client)))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (logit "Got client connection.")
   (continuable
     (let (alist-headers)
       (maphash (lambda (k v)
@@ -121,13 +120,12 @@
   (logit "Client ~S disconnected." client)
   (continuable (remove-client res client)))
 
-(defmethod ws:resource-received-frame ((res chat-server) ws-client message
-                                       &aux (client (find-client res ws-client)))
-  (logit "Received resource frame.")
+(defmethod ws:resource-received-text ((res chat-server) ws-client message
+                                      &aux (client (find-client res ws-client)))
   (continuable
-   (if (client-session client)
-       (process-client-message res client message)
-       (process-client-validation res client message))))
+    (if (client-session client)
+        (process-client-message res client message)
+        (process-client-validation res client message))))
 
 (defun actor-client (actor-id)
   (maphash-values (lambda (client)
