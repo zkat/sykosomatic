@@ -1,5 +1,8 @@
 WEB_SOCKET_SWF_LOCATION = 'res/js/WebSocketMain.swf';
 WEB_SOCKET_DEBUG = true;
+if ('MozWebSocket' in window) {
+    WebSocket = MozWebSocket;
+}
 
 var sykosomatic =
 (function () {
@@ -259,7 +262,7 @@ var sykosomatic =
     /// From server
     ///
     var dispatch_table = {
-        'pong' : function(msg) { console.log('got a pong'); },
+        // 'pong' : function(msg) { console.log('got a pong'); },
         'char-desc' : function(msg) { popup_dialog('Description', msg[1], false,
                                                    {Ok:function(){$(this).dialog("close");}}); },
         'parse-error' : function(msg) { popup_dialog('Parser error', msg[1], true,
