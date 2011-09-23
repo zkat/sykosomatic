@@ -86,7 +86,7 @@
    (ws:origin-prefix "http://zushakon.sykosomatic.org")))
 
 (defmethod add-client ((srv chat-server) client)
-  (logit "Adding Pending Client ~S." client)
+  (logit "Adding pending client ~S." client)
   (setf (gethash (client-ws-client client) (slot-value srv 'clients))
         client))
 
@@ -105,7 +105,6 @@
       client)))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (logit "Got client connection.")
   (continuable
     (let (alist-headers)
       (maphash (lambda (k v)
@@ -123,7 +122,6 @@
 
 (defmethod ws:resource-received-text ((res chat-server) ws-client message
                                       &aux (client (find-client res ws-client)))
-  (logit "Received resource frame.")
   (continuable
     (if (client-session client)
         (process-client-message res client message)
