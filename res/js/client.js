@@ -18,6 +18,7 @@ var sykosomatic =
 
     function enable_input () {
         $("#game-input > div :input").attr('disabled',false);
+        $("#dialogue-input > div :input").attr('disabled',false);
     }
 
     function hide_loading_spinner() {
@@ -26,6 +27,7 @@ var sykosomatic =
 
     function disable_input () {
         $("#game-input > div :input").attr('disabled',true);
+        $("#dialogue-input > div :input").attr('disabled',true);
     }
 
     function get_url_parameter(name) {
@@ -356,6 +358,12 @@ var sykosomatic =
                 return false;
             }
             return e;
+        });
+        $("#dialogue-input").keypress(function(e) {
+            if (e.keyCode == $.ui.keyCode.ENTER) {
+                $("#dialogue-input").submit();
+                e.preventDefault();
+            };
         });
         $("#game-input > div :input").get(0).focus();
 
