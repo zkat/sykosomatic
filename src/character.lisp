@@ -233,4 +233,5 @@
 
 (defun import-test-form-options ()
   (loop for (category . data) in *test-data*
-     do (import-from-data category data)))
+     do (import-from-data category data))
+  (import-adjectives))
