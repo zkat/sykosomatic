@@ -13,7 +13,8 @@
 (defun find-character (name)
   (with-db ()
     (query (:order-by (:select 'entity-id :from 'modifier
-                               :where (:and (:= 'type "character:nickname")
+                               :where (:and (:= 'ns "character")
+                                            (:= 'name "nickname")
                                             (:ilike 'text-value name)))
                       (:desc 'precedence))
            :single)))
@@ -21,7 +22,8 @@
 (defun account-characters (account-id)
   (with-db ()
     (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'type "character:account")
+                    :where (:and (:= 'ns "character")
+                                 (:= 'name "account")
                                  (:= 'numeric-value account-id)))
            :column)))
 
@@ -82,8 +84,8 @@
         (if validp
             (with-transaction ()
               (let ((entity (create-entity)))
-                (add-modifier entity "character:nickname" :text-value nickname)
-                (add-modifier entity "character:account" :numeric-value account-id)
+                (add-modifier entity "character" "nickname" nickname)
+                (add-modifier entity "character" "account" account-id)
                 (let ((cc-values-id (id (make-dao 'cc-values
                                                   :entity-id entity
                                                   :pronoun  pronoun
@@ -109,11 +111,11 @@
             (values nil errors))))))
 
 (defun character-name (character-id)
-  (text-modifier-value character-id "character:nickname"))
+  (modifier-value character-id "character" "nickname" :text))
 (defun character-description (character-id)
-  (text-modifier-value character-id "character-description"))
+  (modifier-value character-id "character" "description" :text))
 (defun character-account (character-id)
-  (numeric-modifier-value character-id "character:account"))
+  (modifier-value character-id "character" "account" :num))
 (defun character-account-email (character-id)
   (with-db ()
     (with-transaction ()
