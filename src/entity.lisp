@@ -53,10 +53,12 @@
   ;; Just numbers for now.
   entity)
 
-(defun list-modifiers (entity)
-  ;; TODO - make this accept an 'ns' argument to filter by namespace.
+(defun list-modifiers (entity &optional ns name)
   (with-db ()
-    (query (:select :* :from 'modifier :where (:= 'entity-id (entity-id entity)))
+    (query (sql-compile `(:select :* :from 'modifier
+                                  :where (:and (:= 'entity-id ,(entity-id entity))
+                                               ,@(when ns `((:= 'ns ,ns)))
+                                               ,@(when name `((:= 'name ,name))))))
            :alists)))
 
 (defun add-modifier (entity ns name value &key
@@ -108,8 +110,8 @@
              (error "~S must be a globally unique identifier, but it already identifies entity ~A."
                     new-value (find-entity-by-uid new-value)))
             (t
-             (add-modifier entity "entity" "uid" new-value :description
-                           "Unique human-usable identifier for entity."))))))
+             (add-modifier entity "entity" "uid" new-value
+                           :description "Unique human-usable identifier for entity."))))))
 
 (defun find-entity-by-uid (uid)
   (with-db ()
