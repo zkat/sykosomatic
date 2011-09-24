@@ -84,8 +84,8 @@
         (if validp
             (with-transaction ()
               (let ((entity (create-entity)))
-                (add-modifier entity "character" "nickname" nickname)
-                (add-modifier entity "character" "account" account-id)
+                (add-modifier entity 'nickname nickname)
+                (add-modifier entity 'account account-id)
                 (let ((cc-values-id (id (make-dao 'cc-values
                                                   :entity-id entity
                                                   :pronoun  pronoun
@@ -111,11 +111,11 @@
             (values nil errors))))))
 
 (defun character-name (character-id)
-  (modifier-value character-id "character" "nickname"))
+  (modifier-value character-id 'nickname))
 (defun character-description (character-id)
-  (modifier-value character-id "character" "description"))
+  (modifier-value character-id 'description))
 (defun character-account (character-id)
-  (modifier-value character-id "character" "account"))
+  (modifier-value character-id 'account))
 (defun character-account-email (character-id)
   (with-db ()
     (with-transaction ()

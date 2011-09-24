@@ -3,21 +3,17 @@
 (cl:in-package #:sykosomatic.game-objects.describable)
 
 (defun short-name (entity)
-  (modifier-value entity "desc" "short-name"))
+  (modifier-value entity 'short-name))
 
 (defun full-name (entity)
   (with-db ()
     (when-let (short-name (short-name entity))
-      (let ((article (modifier-value entity "desc" "article"))
-            (adjectives (query (:select 'text-value :from 'modifier
-                                        :where (:and (:= 'entity-id entity)
-                                                     (:= 'ns "desc")
-                                                     (:= 'name "adjective")))
-                               :column)))
+      (let ((article (modifier-value entity 'article))
+            (adjectives (multiple-modifier-values entity 'adjective)))
         (format nil "~@[~A ~]~{~A ~^~}~A" article adjectives short-name)))))
 
 (defun short-description (entity)
-  (modifier-value entity "desc" "short-description"))
+  (modifier-value entity 'short-description))
 
 (defun long-description (entity)
-  (modifier-value entity "desc" "long-description"))
+  (modifier-value entity 'long-description))
