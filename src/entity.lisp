@@ -3,7 +3,7 @@
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
-           :modifier-value :entity-uid :find-entity-by-uid
+           :modifier-value :multiple-modifier-values :entity-uid :find-entity-by-uid
            :event-execution :expire-modifier
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
@@ -42,7 +42,7 @@
   ((id :col-type serial :reader id)
    (entity-id :col-type bigint :initarg :entity-id)
    (precedence :col-type bigint :initarg :precedence :col-default 0)
-   (ns :col-type text :initarg :ns)
+   (package :col-type text :initarg :package)
    (name :col-type text :initarg :name)
    (description :col-type (or db-null text) :initarg :description)
    ;; NOTE: If another value type is added here, ADD-MODIFIER and MODIFIER-VALUE must be amended.
@@ -54,22 +54,23 @@
   ;; Just numbers for now.
   entity)
 
-(defun list-modifiers (entity &optional ns name)
+(defun list-modifiers (entity &optional package-name)
   (with-db ()
     (query (sql-compile `(:select :* :from 'modifier
                                   :where (:and (:= 'entity-id ,(entity-id entity))
-                                               ,@(when ns `((:= 'ns ,ns)))
-                                               ,@(when name `((:= 'name ,name))))))
+                                               ,@(when package-name `((:= 'package ,(string package-name)))))))
            :alists)))
 
-(defun add-modifier (entity ns name value &key
-                     precedence description)
+(defun add-modifier (entity name value &key
+                     (precedence 0) (description :null))
+  (assert (symbolp name) (name) "Modifier names must be symbols. Got ~S instead." name)
   (with-db ()
     (apply #'make-dao 'modifier
            :entity-id (entity-id entity)
-           :ns ns :name name
-           :description (or description :null)
-           :precedence (or precedence 0)
+           :package (package-name (symbol-package name))
+           :name (symbol-name name)
+           :description description
+           :precedence precedence
            (typecase value
              (number (list :numeric-value value))
              (otherwise (list :text-value (princ-to-string value)))))))
@@ -78,47 +79,62 @@
   (with-db ()
     (query (:delete-from 'modifier :where (:= 'id modifier-id)))))
 
-(defun modifier-value (entity ns name)
+(defun modifier-value (entity name)
   (with-db ()
     (find-if-not (curry #'eq :null)
-                 (query (:limit
-                         (:order-by (:select 'text-value 'numeric-value
-                                             :from 'modifier
-                                             :where (:and (:= 'entity-id (entity-id entity))
-                                                          (:= 'ns ns)
-                                                          (:= 'name name)))
-                                    (:desc 'precedence)
-                                    (:desc 'id))
-                         1)
+                 (query (:order-by (:select 'text-value 'numeric-value
+                                            :from 'modifier
+                                            :where (:and (:= 'entity-id (entity-id entity))
+                                                         (:= 'package (package-name (symbol-package name)))
+                                                         (:= 'name (symbol-name name))))
+                                   (:desc 'precedence)
+                                   (:desc 'id))
                         :row))))
+
+(defun multiple-modifier-values (entity name)
+  (with-db ()
+    (mapcar (lambda (row)
+              (find-if-not (curry #'eq :null) row))
+            (query (:order-by (:select 'text-value 'numeric-value
+                                       :from 'modifier
+                                       :where (:and (:= 'entity-id (entity-id entity))
+                                                    (:= 'package (package-name (symbol-package name)))
+                                                    (:= 'name (symbol-name name))))
+                              (:desc 'precedence)
+                              (:desc 'id))
+                   :rows))))
+
+(defun (setf modifier-value) (new-value entity name column)
+  (with-db ()
+    (query (:update 'modifier
+                    :set column new-value
+                    :where (:and (:= 'entity-id (entity-id entity))
+                                 (:= 'package (package-name (symbol-package name)))
+                                 (:= 'name (symbol-name name)))))))
 
 (defun create-entity (&key comment)
   (id (with-db () (make-dao 'entity :comment (or comment :null)))))
 
 (defun entity-uid (entity)
-  (with-db () (modifier-value entity "entity" "uid")))
+  (with-db () (modifier-value entity 'uid)))
 
 (defun (setf entity-uid) (new-value entity)
   (with-db ()
     (with-transaction ()
       (cond ((entity-uid entity)
-             (query (:update 'modifier
-                          :set 'text-value new-value
-                          :where (:and (:= 'entity-id (entity-id entity))
-                                       (:= 'ns "entity")
-                                       (:= 'name "uid")))))
+             (setf (modifier-value entity 'uid 'text-value) new-value))
             ((find-entity-by-uid new-value)
              (error "~S must be a globally unique identifier, but it already identifies entity ~A."
                     new-value (find-entity-by-uid new-value)))
             (t
-             (add-modifier entity "entity" "uid" new-value
+             (add-modifier entity 'uid new-value
                            :description "Unique external identifier for entity."))))))
 
 (defun find-entity-by-uid (uid)
   (with-db ()
     (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'ns "entity")
-                                 (:= 'name "uid")
+                    :where (:and (:= 'package (package-name (symbol-package 'uid)))
+                                 (:= 'name (symbol-name 'uid))
                                  (:= 'text-value uid)))
            :single)))
 
