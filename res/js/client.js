@@ -19,18 +19,16 @@ var sykosomatic =
         $(d).dialog({title:title,modal:modalp,buttons:buttons});
     }
 
-    function enable_input () {
-        $("#game-input > div :input").attr('disabled',false);
-        $("#dialogue-input > div :input").attr('disabled',false);
-    }
-
     function hide_loading_spinner() {
         $('#loading-spinner').hide('fast');
     }
 
+    function enable_input () {
+        $("#game-input > div :input, #dialogue-input > div :input").attr('disabled',false);
+    }
+
     function disable_input () {
-        $("#game-input > div :input").attr('disabled',true);
-        $("#dialogue-input > div :input").attr('disabled',true);
+        $("#game-input > div :input, #dialogue-input > div :input").attr('disabled',true);
     }
 
     function get_url_parameter(name) {
