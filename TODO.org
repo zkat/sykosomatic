@@ -307,3 +307,11 @@
 **** TODO Make the 'get' verb tell you 'Ye cannot get <name of target>'
 **** TODO Give player an inventory
 **** TODO Make the 'get' verb transfer the target from its current location to player inventory
+** DONE modifiers
+*** DONE use symbols for modifier identifiers
+    Make it so all the modifier adders/removers use lisp symbols for naming. The symbols can then be
+    divided into package name (currently ns) and symbol-name.
+
+*** TODO Instead of multiple-modifier-values, add array support
+    For example, all adjectives should live in a single row. Multiple modifier entries should be
+    reserved for shadowing/temporaries.
