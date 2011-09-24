@@ -46,7 +46,8 @@
    (package :col-type text :initarg :package)
    (name :col-type text :initarg :name)
    (description :col-type (or db-null text) :initarg :description)
-   ;; NOTE: If another value type is added here, ADD-MODIFIER and MODIFIER-VALUE must be amended.
+   ;; NOTE: If another value type is added here, update:
+   ;; ADD-MODIFIER, MODIFIER-VALUE, FIND-BY-MODIFIER-VALUE.
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
    (text-value :col-type (or db-null text) :initarg :text-value)
    (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
