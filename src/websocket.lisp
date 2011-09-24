@@ -55,6 +55,11 @@
         (progn
           (logit "Client validated: ~S. It's now playing as ~A."
                  client (character-name character-id))
+          (when-let (existing-client (find character-id
+                                           (session-websocket-clients (client-session client))
+                                           :key #'client-character-id))
+            (deletef existing-client (session-websocket-clients (client-session client)))
+            (disconnect-client res existing-client))
           (setf (client-character-id client) character-id)
           (push (session-websocket-clients (client-session client)) client))
         (progn
