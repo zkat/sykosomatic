@@ -91,10 +91,8 @@
     (result `(:ooc . ,text))))
 
 (defcommand error ()
-  (=or
-   (=let* ((text (text)))
-     (fail :error text))
-   (fail :error "Kaboom")))
+  (=let* ((text (maybe (text))))
+    (fail :error (or text "Kaboom"))))
 
 ;; ws = one or more whitespace
 (defun ws ()
