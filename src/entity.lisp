@@ -50,7 +50,8 @@
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
    (text-value :col-type (or db-null text) :initarg :text-value)
    (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
-  (:keys id))
+  (:keys id)
+  (:index package name id entity-id))
 
 (defun entity-id (entity)
   ;; Just numbers for now.
