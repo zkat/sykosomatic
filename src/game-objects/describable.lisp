@@ -9,8 +9,8 @@
   (with-db ()
     (when-let (short-name (short-name entity))
       (let ((article (modifier-value entity 'article))
-            (adjectives (multiple-modifier-values entity 'adjective)))
-        (format nil "~@[~A ~]~{~A ~^~}~A" article adjectives short-name)))))
+            (adjectives (modifier-value entity 'adjectives)))
+        (format nil "~@[~A ~]~{~A ~^~}~A" article (coerce adjectives 'list) short-name)))))
 
 (defun short-description (entity)
   (modifier-value entity 'short-description))
