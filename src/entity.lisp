@@ -77,25 +77,25 @@
   (with-db ()
     (query (:delete-from 'modifier :where (:= 'id modifier-id)))))
 
-(defun modifier-value (entity ns name value-column)
+(defun modifier-value (entity ns name)
   (with-db ()
-    (query (:order-by (:select (ecase value-column
-                                 (:text 'text-value)
-                                 (:num 'numeric-value)
-                                 (:time 'timestamp-value))
-                               :from 'modifier
-                               :where (:and (:= 'entity-id (entity-id entity))
-                                            (:= 'ns ns)
-                                            (:= 'name name)))
-                      (:desc 'precedence)
-                      (:desc 'id))
-           :single)))
+    (find-if-not (curry #'eq :null)
+                 (query (:limit
+                         (:order-by (:select 'text-value 'numeric-value
+                                             :from 'modifier
+                                             :where (:and (:= 'entity-id (entity-id entity))
+                                                          (:= 'ns ns)
+                                                          (:= 'name name)))
+                                    (:desc 'precedence)
+                                    (:desc 'id))
+                         1)
+                        :row))))
 
 (defun create-entity (&key comment)
   (id (with-db () (make-dao 'entity :comment (or comment :null)))))
 
 (defun entity-uid (entity)
-  (with-db () (modifier-value entity "entity" "uid" :text)))
+  (with-db () (modifier-value entity "entity" "uid")))
 
 (defun (setf entity-uid) (new-value entity)
   (with-db ()
