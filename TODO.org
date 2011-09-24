@@ -11,7 +11,7 @@
     Define a vocabulary module for defining and maintaining the game's dictionary.
 *** TODO Persistent messaging events
     Messages being passed around to/from the client should be data-driven -- a 'dialogue' message is
-    sint to the client, for example, by a loop that looks for messages to send. That means all the
+    sent to the client, for example, by a loop that looks for messages to send. That means all the
     parser has to do is insert some rows into a table.
 *** TODO Persistent scenes
     NOTE: This'll need to be done *after* characters are implemented.
@@ -118,27 +118,25 @@
     Should validate what comes down the pipe: when a description request is received, there should
     be validation that the character can, in fact, see the object.
 ** JS client
-*** DONE OOC pane
+*** TODO OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
-*** TODO Instead of using web session, make web clients identify with a CSRF token.
-*** TODO Put descriptions somewhere more sane than an alert()
+*** TODO Disconnect existing clients for same character
+    If a different session tries to connect to a character already being played, disconnect the
+    existing client.
+*** TODO Instead of using web session, make web clients identify with a single-use token.
 *** TODO Back-button-friendliness
     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
     javascripty way to reconnect the websocket on back-button?
 **** TODO disabled=true by default for chat input fields
-*** TODO Better disconnect-client
-    It shouldn't be using ws::client-disconnect. Until a better force-boot alternative pops up,
-    though, _3b recommends that I just send a custom CLOSE message to the client, and close up the
-    socket client-side.
-*** TODO Fix clws to work on CCL.
 *** TODO Optional Flash loading
     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
+*** DONE Update clws/web-socket-js
 *** DONE Loading screen
     Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
     show the whole chat box.
-*** TODO Use WAI-ARIA in the client
+*** TODO FUTURE Use WAI-ARIA in the client
     http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
     start supporting this fairly early on, if possible.
     This should make it possible for screen readers to use the web client.
@@ -185,8 +183,8 @@
 *** TODO Style the input fields.
     Something more subtle than the deep abyss of standard input fields.
 ** Security
-*** DONE Sessions
-    Use cl+ssl to generate session strings.
+*** TODO Sessions
+**** DONE Use cl+ssl to generate session strings.
 *** TODO HTTPS
     Need to set up SSL for both hunchentoot and the websocket server.
 *** TODO XSS
@@ -295,3 +293,17 @@
    repeatedly pass around all the values. It should also automagically take care of validation and
    validation error reporting, and reloading values into the form. (should reload all values by
    default, unless a :noreload flag or something is provided)
+** TODO Interacting with the world
+*** TODO Add a location
+*** TODO Associate a character with that location
+*** TODO Limit dialogue interactions to current location
+    Only objects in the current location should receive local messages.
+*** TODO Add ye flask to location
+*** TODO Add method for inspecting the current location
+*** TODO Make location description list the things in it
+*** TODO Objects in location should be clickable
+*** TODO "get ye flask"
+**** TODO Add a 'get' verb that outputs something basic
+**** TODO Make the 'get' verb tell you 'Ye cannot get <name of target>'
+**** TODO Give player an inventory
+**** TODO Make the 'get' verb transfer the target from its current location to player inventory
