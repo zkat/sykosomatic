@@ -3,7 +3,8 @@
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
-           :modifier-value :multiple-modifier-values :entity-uid :find-entity-by-uid
+           :modifier-value :multiple-modifier-values :entity-uid
+           :find-by-modifier-value :find-entity-by-uid
            :event-execution :expire-modifier
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
@@ -47,7 +48,8 @@
    (description :col-type (or db-null text) :initarg :description)
    ;; NOTE: If another value type is added here, ADD-MODIFIER and MODIFIER-VALUE must be amended.
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
-   (text-value :col-type (or db-null text) :initarg :text-value))
+   (text-value :col-type (or db-null text) :initarg :text-value)
+   (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
   (:keys id))
 
 (defun entity-id (entity)
@@ -71,9 +73,11 @@
            :name (symbol-name name)
            :description description
            :precedence precedence
-           (typecase value
+           (etypecase value
              (number (list :numeric-value value))
-             (otherwise (list :text-value (princ-to-string value)))))))
+             (string (list :text-value value))
+             (vector (list :text-array-value value))
+             (symbol (list :text-value (princ-to-string value)))))))
 
 (defun delete-modifier (modifier-id)
   (with-db ()
@@ -82,7 +86,7 @@
 (defun modifier-value (entity name)
   (with-db ()
     (find-if-not (curry #'eq :null)
-                 (query (:order-by (:select 'text-value 'numeric-value
+                 (query (:order-by (:select 'text-value 'numeric-value 'text-array-value
                                             :from 'modifier
                                             :where (:and (:= 'entity-id (entity-id entity))
                                                          (:= 'package (package-name (symbol-package name)))
@@ -90,19 +94,6 @@
                                    (:desc 'precedence)
                                    (:desc 'id))
                         :row))))
-
-(defun multiple-modifier-values (entity name)
-  (with-db ()
-    (mapcar (lambda (row)
-              (find-if-not (curry #'eq :null) row))
-            (query (:order-by (:select 'text-value 'numeric-value
-                                       :from 'modifier
-                                       :where (:and (:= 'entity-id (entity-id entity))
-                                                    (:= 'package (package-name (symbol-package name)))
-                                                    (:= 'name (symbol-name name))))
-                              (:desc 'precedence)
-                              (:desc 'id))
-                   :rows))))
 
 (defun (setf modifier-value) (new-value entity name column)
   (with-db ()
@@ -130,13 +121,25 @@
              (add-modifier entity 'uid new-value
                            :description "Unique external identifier for entity."))))))
 
-(defun find-entity-by-uid (uid)
+(defun find-by-modifier-value (modifier-name value &key (test :=) (allp nil))
   (with-db ()
-    (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'package (package-name (symbol-package 'uid)))
-                                 (:= 'name (symbol-name 'uid))
-                                 (:= 'text-value uid)))
-           :single)))
+    (query (sql-compile
+            `(:order-by
+              (:select 'entity-id :from 'modifier
+                       :where (:and (:= 'package ,(package-name (symbol-package modifier-name)))
+                                    (:= 'name ,(symbol-name modifier-name))
+                                    (,test value ,(etypecase value
+                                                             (number 'numeric-value)
+                                                             (string 'text-value)
+                                                             (vector 'text-array-value)
+                                                             (symbol 'text-value)))))
+              (:desc 'precedence)))
+           (if allp
+               :single
+               :column))))
+
+(defun find-entity-by-uid (uid)
+  (find-by-modifier-value 'uid uid))
 
 ;;; Events
 (defdao event-execution ()

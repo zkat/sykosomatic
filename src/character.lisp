@@ -11,21 +11,10 @@
 (cl:in-package #:sykosomatic.character)
 
 (defun find-character (name)
-  (with-db ()
-    (query (:order-by (:select 'entity-id :from 'modifier
-                               :where (:and (:= 'ns "character")
-                                            (:= 'name "nickname")
-                                            (:ilike 'text-value name)))
-                      (:desc 'precedence))
-           :single)))
+  (find-by-modifier-value 'nickname name :test :ilike))
 
 (defun account-characters (account-id)
-  (with-db ()
-    (query (:select 'entity-id :from 'modifier
-                    :where (:and (:= 'ns "character")
-                                 (:= 'name "account")
-                                 (:= 'numeric-value account-id)))
-           :column)))
+  (find-by-modifier-value 'account account-id :allp t))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
