@@ -19,9 +19,9 @@
     (maphash-values #'funcall callbacks)))
 
 (defparameter *ticks-per-second* 5)
-(defvar *es-thread* nil)
+(defvar *entity-system-thread* nil)
 (defun init-entity-system ()
-  (setf *es-thread*
+  (setf *entity-system-thread*
         (bt:make-thread (lambda ()
                           (loop with timer = (make-timer *ticks-per-second*)
                              do (timer-tick timer)
@@ -29,9 +29,9 @@
                         :name "entity-system-processing")))
 
 (defun teardown-entity-system ()
-  (when (and *es-thread* (bt:thread-alive-p *es-thread*))
-    (bt:destroy-thread *es-thread*))
-  (setf *es-thread* nil))
+  (when (and *entity-system-thread* (bt:thread-alive-p *entity-system-thread*))
+    (bt:destroy-thread *entity-system-thread*))
+  (setf *entity-system-thread* nil))
 
 (defdao entity ()
   ((id :col-type serial :reader id)
@@ -45,6 +45,7 @@
    (ns :col-type text :initarg :ns)
    (name :col-type text :initarg :name)
    (description :col-type (or db-null text) :initarg :description)
+   ;; NOTE: If another value type is added here, ADD-MODIFIER and MODIFIER-VALUE must be amended.
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
    (text-value :col-type (or db-null text) :initarg :text-value))
   (:keys id))
@@ -111,7 +112,7 @@
                     new-value (find-entity-by-uid new-value)))
             (t
              (add-modifier entity "entity" "uid" new-value
-                           :description "Unique human-usable identifier for entity."))))))
+                           :description "Unique external identifier for entity."))))))
 
 (defun find-entity-by-uid (uid)
   (with-db ()
@@ -159,7 +160,6 @@
     (flet ((process-penalty (p)
              (destructuring-bind (event-execution-id modifier-id)
                  p
-               (dblog "Removing modifier ~A" modifier-id)
                (query (:delete-from 'modifier :where (:= 'id modifier-id)))
                (query (:update 'event-execution :set 'completedp t
                                :where (:= 'id event-execution-id))))))
