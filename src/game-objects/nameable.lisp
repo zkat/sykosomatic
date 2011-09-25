@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.game-objects.nameable
   (:use :cl :alexandria :postmodern :sykosomatic.entity :sykosomatic.db :sykosomatic.util)
-  (:export :base-name :full-name))
+  (:export :add-name :base-name :full-name))
 (cl:in-package #:sykosomatic.game-objects.nameable)
 
 (defdao nameable ()
@@ -13,6 +13,24 @@
    (first-name :col-type (or db-null text) :initarg :first-name)
    (suffix :col-type (or db-null text) :initarg :suffix)
    (suffix-titles :col-type (or db-null text[]) :initarg :suffix-titles)))
+
+(defun add-name (entity base-name &key
+                 use-article-p adjectives titles
+                 first-name suffix suffix-titles)
+  (flet ((ensure-vector (maybe-vec)
+           (if (vectorp maybe-vec)
+               maybe-vec
+               (coerce maybe-vec 'vector))))
+    (with-db ()
+      (id (make-dao 'nameable
+                    :entity-id entity
+                    :base-name base-name
+                    :use-article-p use-article-p
+                    :adjectives (if adjectives (ensure-vector adjectives) :null)
+                    :titles (if titles (ensure-vector titles) :null)
+                    :first-name (or first-name :null)
+                    :suffix (or suffix :null)
+                    :suffix-titles (if suffix-titles (ensure-vector suffix-titles) :null))))))
 
 (defun base-name (entity)
   (with-db ()
