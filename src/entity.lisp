@@ -58,11 +58,15 @@
   ;; Just numbers for now.
   entity)
 
-(defun list-modifiers (entity &optional package-name)
+(defun list-modifiers (entity &optional (package *package*))
   (with-db ()
     (query (sql-compile `(:select :* :from 'modifier
                                   :where (:and (:= 'entity-id ,(entity-id entity))
-                                               ,@(when package-name `((:= 'package ,(string package-name)))))))
+                                               ,@(when package
+                                                   `((:= 'package ,(etypecase package
+                                                                    (package (package-name package))
+                                                                    (string package)
+                                                                    (symbol (string package)))))))))
            :alists)))
 
 (defun add-modifier (entity name value &key
