@@ -99,6 +99,13 @@
 ** Misc Webapp work
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
+*** TODO Form builder
+    Need a form builder that supports validation, error reporting, rendering, and CSRF tokens. This
+    can be an independent library. freiksenet says he'll do it.
+*** TODO Use 'real' templates
+    Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
+    most templates should be in their own files, organized by webpage names. Give tal a shot for
+    this. Whatever ends up being used, it may need to be extended in order to support the form builder.
 *** TODO Generic form component/handler interface
     I want to be able to define forms and their fields once, and have those easily hook up to a
     template for layout, and easily hook up to a handler and its parameters, so I don't have to
@@ -106,9 +113,6 @@
     validation error reporting, and reloading values into the form. (should reload all values by
     default, unless a :noreload flag or something is provided)
 *** TODO Put locks on session value and finalizer hash tables
-*** TODO Improve form error reporting.
-    The GET version should accept an optional 'errors' argument that it can be called with to handle
-    error messages. This may involve not using define-easy-handler anymore.
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 ** Game
@@ -212,3 +216,6 @@
     The websocket client should not leak anything the player would not already be able to do through
     the interface. Object identities should be hidden somehow.
     
+
+** Misc
+*** TODO Move persistent sessions out into a separate lisp project
