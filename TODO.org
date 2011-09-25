@@ -118,6 +118,13 @@
     Should validate what comes down the pipe: when a description request is received, there should
     be validation that the character can, in fact, see the object.
 ** JS client
+*** TODO Fancy JS 'parser'
+    See sketch on whiteboard.
+    Basically, the parser is less text-based and more text-guided. An interactive completion system
+    will ensure that all items are uniquely chosen before the final message is even sent.
+    This will probably involve caching of at least part of the game's vocabulary client-side, but
+    we'll take that step when it's necessary.
+    The parser should use something chosen-like as an interface, but more typing-oriented.
 *** TODO OOC pane
     There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
     chatting can happen without interrupting the flow of the scene.
@@ -294,6 +301,8 @@
    validation error reporting, and reloading values into the form. (should reload all values by
    default, unless a :noreload flag or something is provided)
 ** TODO Interacting with the world
+*** TODO Figure out how to name things
+    See notes in describable.lisp
 *** TODO Add a location
 *** TODO Associate a character with that location
 *** TODO Limit dialogue interactions to current location
@@ -307,11 +316,3 @@
 **** TODO Make the 'get' verb tell you 'Ye cannot get <name of target>'
 **** TODO Give player an inventory
 **** TODO Make the 'get' verb transfer the target from its current location to player inventory
-** DONE modifiers
-*** DONE use symbols for modifier identifiers
-    Make it so all the modifier adders/removers use lisp symbols for naming. The symbols can then be
-    divided into package name (currently ns) and symbol-name.
-
-*** DONE Instead of multiple-modifier-values, add array support
-    For example, all adjectives should live in a single row. Multiple modifier entries should be
-    reserved for shadowing/temporaries.
