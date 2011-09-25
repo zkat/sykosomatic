@@ -301,8 +301,10 @@
    validation error reporting, and reloading values into the form. (should reload all values by
    default, unless a :noreload flag or something is provided)
 ** TODO Interacting with the world
-*** TODO Figure out how to name things
+*** DONE Figure out how to name things
     See notes in describable.lisp
+*** DONE Move name stuff to nameable.lisp
+*** DONE Make nameables use its own db table.
 *** TODO Add a location
 *** TODO Associate a character with that location
 *** TODO Limit dialogue interactions to current location
