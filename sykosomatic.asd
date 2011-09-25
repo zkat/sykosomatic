@@ -26,7 +26,8 @@
              (:file "account")
              (:module game-objects
                       :components
-                      ((:file "describable")))
+                      ((:file "nameable")
+                       (:file "describable")))
              (:file "character")
              (:file "scene")
              (:file "session")
