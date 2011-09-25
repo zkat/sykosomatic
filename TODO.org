@@ -1,18 +1,117 @@
-* Features
-** DB
-*** TODO Remove s-sql patch
-    When/if marijn accepts my pull request.
-** Misc
-** Accounts
-*** TODO Allow changing passwords.
-*** TODO Password recovery.
+* Hack challenge
+** TODO Get Ye Flask
+   Through the web interface, have character look at and pick up a flask in its current room.
+* Tasks
+** Pages
+*** /newchar
+**** TODO Configuration UI
+     Set up a nice web interface that waifu can use to do basic CRUD on all the different character
+     creation options.
+**** TODO Create appropriate entities and modifiers
+**** TODO (Maybe) Previews
+    Each section should have an informative preview that shows how the player's selections are
+    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
+***** TODO Identity
+     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
+     Something like "You are creating a new character. His name is Thomas Janus, also known as
+     'Wolf'."
+***** TODO Early Life
+     A sentence that gives a basic blurb about the character's family and childhood information,
+     which also includes the identity:
+     "Thomas grew up in a middle class family of three children by his two parents."
+***** TODO Later Life
+     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
+     really very close. He is also currently seeing someone. He has spent 10 years in Business."
+***** TODO Here and Now
+     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
+     about what the Twin Cities are, and maybe even some outside links to more information. There
+     should be various places marked on the map, each corresponding to a possible starting location
+     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
+     on a location or choosing it from the dropdown makes it the current selection, and also
+     displays a short paragraph with more information about what the place is like -- something to
+     give the player an idea of why it sets it apart from the other locations.
+***** TODO Confirm
+     Summarize all the other stuff that was accumulated during character creation, and have the
+     player confirm their decision. The actual submit button will be in here.
+
+**** TODO Proper inputs
+    Replace the mass of text input fields with appropriate stuff like dropdowns.
+***** TODO Careers
+****** TODO Use jQuery UI 1.9's spinner widget for number input
+       meh. Maybe wait for 1.9 to get released.
+***** TODO Location
+****** TODO Draw up a map of the area
+****** TODO Highlight places in the map according to selection
+****** TODO Expand description of place according to selection
+***** TODO Headings
+      I think headings are supposed to be helpful for folks using screen readers and the like. Look
+      into this, and add them where appropriat
+**** TODO Disable 'add' buttons when appropriate
+*** /stage
+**** TODO Instead of using web session, make web clients identify with a single-use token.
+**** TODO Make sure a user is chatting as a character only once.
+**** TODO Back-button-friendliness
+     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
+     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
+     javascripty way to reconnect the websocket on back-button?
+     Maybe this could be achieved with disabled=true by default for chat inputs?
+**** TODO Fancy JS 'parser'
+     See sketch on whiteboard.
+
+     Basically, the parser is less text-based and more text-guided. An interactive completion system
+     will ensure that all items are uniquely chosen before the final message is even sent.  This
+     will probably involve caching of at least part of the game's vocabulary client-side, but we'll
+     take that step when it's necessary.
+
+     The parser should use something chosen-like as an interface, but more typing-oriented.
+**** TODO No Flash on native-websocket browsers
+     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
+**** TODO Sticky scene headers
+     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
+     a particular scene -- always leaving clue of where the player currently is.  As new scene
+     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
+     reach the top of the screen, sticking there until the next header rolls by.
+**** TODO Character conversion
+     Convert -- to —.
+**** TODO Do something about the awful OOC area.
+**** TODO FUTURE WAI-ARIA support
+     The web client should play nice with screen readers.
+**** TODO Scene recording
+***** TODO Select area to record
+***** TODO Scene naming
+     Add ability to change the name of the recorded session.
+     NOTE: Perhaps more important than this -- descriptions? I'll do this later.
+*** /my-account
+    Need to have this page to manage account information.
+**** TODO Allow changing of display name.
+**** TODO Allow changing passwords.
+**** TODO More involved user bio?
+*** /recover-password
+**** TODO Set up an email-based password recovery system
+*** /view-scene
+**** TODO Scene editing
+     I like the idea of rendering each 'sentence'/unit as a targetable DOM element (such as SPANs
+     for sentences in a paragraph), and using jQuery UI to make those units individually
+     draggable. I don't think I want to allow full editing of scenes (might feel like it defeats the
+     purpose of -playing- the scenes if you can just -write- them), but this might be a really neat
+     feature that allows cleaning up garbage without giving too much freedom (or requiring too much
+     effort to handle formatting, and the like).
+** Misc Webapp work
+*** TODO Email system
+    Need a way to send emails out to people. Various things in the site will need this.
+*** TODO Generic form component/handler interface
+    I want to be able to define forms and their fields once, and have those easily hook up to a
+    template for layout, and easily hook up to a handler and its parameters, so I don't have to
+    repeatedly pass around all the values. It should also automagically take care of validation and
+    validation error reporting, and reloading values into the form. (should reload all values by
+    default, unless a :noreload flag or something is provided)
+*** TODO Put locks on session value and finalizer hash tables
+*** TODO Improve form error reporting.
+    The GET version should accept an optional 'errors' argument that it can be called with to handle
+    error messages. This may involve not using define-easy-handler anymore.
+*** TODO Smaller timeout for ajax ping.
+    Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 ** Game
-*** DONE Vocabulary module
-    Define a vocabulary module for defining and maintaining the game's dictionary.
-*** TODO Persistent messaging events
-    Messages being passed around to/from the client should be data-driven -- a 'dialogue' message is
-    sent to the client, for example, by a loop that looks for messages to send. That means all the
-    parser has to do is insert some rows into a table.
 *** TODO Persistent scenes
     NOTE: This'll need to be done *after* characters are implemented.
     Players should be able to 'record' scenes, which will be saved as they see them. These scenes
@@ -21,29 +120,8 @@
     Not all user messages must (or should) be saved. Instead, create a 'recorded session' document,
     and then record each line of input that the character is witness to into 'entry' documents,
     which can then be collated with the recorded session as outlined in the CouchDB Joins article.
-**** DONE Add 'record' and 'stop recording' buttons to chat page.
-     Link them up with a javascript function that alerts when recording starts/stops.
-**** DONE Recorded session
-     'Record' button should create a 'recorded-session' document, associated with the user. This
-     document can be pretty blank, but will eventually be used to store more metadata. For now, use
-     some default auto-generated name. The session should also be associated with the recording
-     account.
-**** DONE Recorded entries
-     Create new 'recorded-entry' documents associated with the recorded for each line of input since
-     the button was pressed. Linking entries with the 'scene' is done through document collation.
-**** DONE View scenes page
-     Add a 'recorded scenes' page where viewer can read through all the scenes they've recorded. The
-     scenes should be formatted just like they were in the chat.
-**** DONE Scene linking
-     Users should have the ability to link to their entire recorded-scenes page, and/or link to
-     individual scenes that other users (no login required for now) can view.
-**** DONE Scene ratings
-    Allow others to view and rate existing recorded scenes.
-**** DONE Revive scene recording
-     There were some changes to the whole action/dialogue model. Scenes need to be updated.
-**** TODO Scene naming
-     Add ability to change the name of the recorded session.
-     NOTE: Perhaps more important than this -- descriptions? I'll do this later.
+**** TODO Revive persistent scenes
+     Haven't been tested since pomo switch
 **** TODO Automatically add slug lines.
      Even if the user starts recording a while after entering an area, the recorded scene should
      include the slug line for that area. Will probably have to wait until we have locations. :)
@@ -51,40 +129,15 @@
      May need to wait until locations are implemented (although no harm in having some default text
      for now). Under the slug line for persisted scenes, the description of the location, as seen by
      the character at that point in time, should be included at the top of the scene.
-**** TODO Select area to record
-     No idea how insane this is at this phase: If you've already started a scene, and you realize
-     you forgot to start recording it, or a scene finished, or whatever. Can you select a section of
-     the log and save -that-? (would be nice. Leave for later if too hard)
-     I think this may end up being easier if I first implement that websocket JSON-based protocol,
-     and stop rendering HTML server-side. Instead, I can have the websocket server send JSON-encoded
-     messages to the client.
-     Once that bit is working, a per-client log (that cycles after X number of entries) can be kept,
-     with indexes to associate each server-side entry with what was sent to the client. The client
-     can then request entries X, Y, and Z to be saved/'recorded' as a scene log.
 **** TODO Scene collection
-    Users should be able to 'collect' others' stories, much like in DA.
-**** TODO Scene editing
-     I like the idea of rendering each 'sentence'/unit as a targetable DOM element (such as SPANs
-     for sentences in a paragraph), and using jQuery UI to make those units individually
-     draggable. I don't think I want to allow full editing of scenes (might feel like it defeats the
-     purpose of -playing- the scenes if you can just -write- them), but this might be a really neat
-     feature that allows cleaning up garbage without giving too much freedom (or requiring too much
-     effort to handle formatting, and the like).
+     Users should be able to 'collect' others' stories, much like in DA.
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
-*** TODO OOC messaging
-    Once we have locations, you won't be able to chat with everyone and anyone anymore -- including
-    OOCly. Still, it would be nice to be able to send messages to other players. For that purpose,
-    an OOC messaging system should be implemented.
-*** TODO Make sure a user is chatting as a character only once.
-*** TODO Game objects - basic entities
+*** TODO Entities
     Time to start coding up some game objects!
     http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
-**** TODO Convert characters to use entity system (start with Describable?)
 **** TODO Get the old code to work again with new entity system
-**** DONE Clamp rate of execute-all-callbacks.
-     Can probably yank the old UID code with some modifications.
 **** TODO Fix timer
      It's not quite working right now, although there's a reasonable rate limit. that might be okay
      for now.
@@ -114,207 +167,48 @@
      transitions, but an arrival message is good enough for now.
 *** TODO Location building.
     Write an interface that can be used to easily build and connect locations.
-*** TODO Location/visibility-restricted description getting
-    Should validate what comes down the pipe: when a description request is received, there should
-    be validation that the character can, in fact, see the object.
-** JS client
-*** TODO Fancy JS 'parser'
-    See sketch on whiteboard.
-    Basically, the parser is less text-based and more text-guided. An interactive completion system
-    will ensure that all items are uniquely chosen before the final message is even sent.
-    This will probably involve caching of at least part of the game's vocabulary client-side, but
-    we'll take that step when it's necessary.
-    The parser should use something chosen-like as an interface, but more typing-oriented.
-*** TODO OOC pane
-    There should be an OOC pane on the side (or somewhere) where miscellaneous messages and player
-    chatting can happen without interrupting the flow of the scene.
-*** TODO Disconnect existing clients for same character
-    If a different session tries to connect to a character already being played, disconnect the
-    existing client.
-*** TODO Instead of using web session, make web clients identify with a single-use token.
-*** TODO Back-button-friendliness
-    When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
-    input fields are enabled, as if the websocket connection were still up. Perhaps there's a
-    javascripty way to reconnect the websocket on back-button?
-**** TODO disabled=true by default for chat input fields
-*** TODO Optional Flash loading
-    Things got messed up when I tried to have optional loading of Flash. Give it another shot.
-*** DONE Update clws/web-socket-js
-*** DONE Loading screen
-    Instead of alerts, replace the chat box with 'loading...' until the websocket is connected, then
-    show the whole chat box.
-*** TODO FUTURE Use WAI-ARIA in the client
-    http://en.wikipedia.org/wiki/WAI-ARIA A standard for making web applications accessible. Should
-    start supporting this fairly early on, if possible.
-    This should make it possible for screen readers to use the web client.
-*** TODO FUTURE make clws support socket.io protocol.
-    socket.io has a client that automagically detects the right tools to use for different
-    browsers. If clws supports socket.io's protocol, then rainbows will be shat, and even IE 5.5 and
-    all the mobile browsers will be supported! This would probably take a bit of effort, and so is
-    probably better left to near-launch. Websockets + Flash sockets is good enough for now.
-*** TODO FUTURE separate websockets client from hunchentoot.
-    This'll make it possible to switch the frontend.
-** Webapp
-*** DONE Persistent sessions
-*** DONE More generic template generation.
-    So templates can be invoked symbolically, and easily swapped out for 'normal' templates.
-*** TODO Put locks on session value and finalizer hash tables
-*** TODO Improve form error reporting.
-    The GET version should accept an optional 'errors' argument that it can be called with to handle
-    error messages. This may involve not using define-easy-handler anymore.
-*** TODO Smaller timeout for ajax ping.
-    Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
-** Style
-*** TODO Expanding input fields
-    Check out Facebook's CSS/JS to figure out how they get their textboxes to expand. It's probably
-    pretty simple...
-*** TODO Fancy scene headers
-    Scene headers should all be images created specifically for the current area.
-*** TODO Nicer scrolling
-**** TODO Scrollbar
-     The default browser scrollbar is cool and all, but it would be nice to have a different one --
-     perhaps even one that can disappear.
-**** TODO Fade effect
-     Is it possible to have text "fade" near the top of the game area, instead of simply
-     disappearing? That would be -great-.
-**** TODO Scene headers
-     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
-     a particular scene -- always leaving clue of where the player currently is.  As new scene
-     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
-     reach the top of the screen, sticking there until the next header rolls by.
-*** TODO Combo boxes
-    http://harvesthq.github.com/chosen/ Sexy as hell.
-*** TODO Character conversion
-    Convert -- to —.
-*** TODO Do something about the awful OOC area.
-*** TODO Style the input fields.
-    Something more subtle than the deep abyss of standard input fields.
+** Database
+*** TODO Remove s-sql patch
+    When/if marijn accepts my pull request.
+*** TODO new defdao macro
+    Simplify common-case definition based on the currently-established usage pattern.
+
+    Something like:
+
+    (defdao tablename ()
+      ((entity-id bigint)
+       (my-value (or db-null text))
+       (is-it-true-p boolean :col-default nil)
+       (last-column boolean t :reader last-column :documentation "Last chance."))
+      (:keys id))
+
+    This should generate :initarg and :col-type using the available info, and accept
+    other slot arguments after that.
+*** TODO don't use postmodern directly
+    Wrap any postmodern-specific calls so only :sykosomatic.db needs to be included. This includes
+    stuff like automatic transaction 
 ** Security
-*** TODO Sessions
-**** DONE Use cl+ssl to generate session strings.
 *** TODO HTTPS
-    Need to set up SSL for both hunchentoot and the websocket server.
+    May not need/want hunchentoot managing this. Check out http://haproxy.1wt.eu/, which supposedly
+    supports both https and wss.
 *** TODO XSS
     There should be a specific method of handling all user input, and all redisplaying of
     server-side data such that XSS is not possible. This should be handled within the
     infrastructure.
-**** DONE De-XSS-ify client.js
 **** TODO De-XSS-ify server-side generated HTML.
      This involves using yaclml's <:ah
 *** TODO CSRF
-    Pretty much nothing to defend against this right now.
-**** TODO Track down all URLs with side effects and attach CSRF tokens to them.
-**** TODO Figure out what sort of similar attacks can be mounted on websockets.
+    Nothing to defend against this right now. Most likely, the form builder should have something
+    built-in that manages and checks tokens.
 *** TODO Injection
-    This is mostly taken care of by using s-sql. Keep an eye out, though.
+    This is mostly taken care of by using s-sql. Keep an eye out, though. Looks like (:raw) is
+    mostly protected as well, thanks to the whole (wrapping) thing. :D
 *** TODO DoS
 **** TODO Throttle user input.
      Length and regularity of user input should be somewhat limited, so players can't just spam a
      ton of garbage onto the screen.
 
-** TODO Character creation
-*** DONE Cleanup
-**** DONE Separate file(s?)
-     Move character creation out into a separate file from all the other templates. Perhaps also
-     move out the character creation handlers.
-*** TODO Data-driven
-    Move all the character-creation options into the database. Have the -handlers- provide the data
-    to display to the template generators. There's too much logic/data in templates.lisp.
-**** DONE Out of templates.lisp
-**** DONE Load from database
-     Can easily do this later. They're just in defparameters now.
-**** TODO Configuration UI
-     Set up a nice web interface that waifu can use to do basic CRUD on all the different character
-     creation options.
-*** TODO Handle POST
-    Capture the POST parameters, validate them, insert them.
-**** DONE Drop them into a database table.
-**** TODO Create appropriate entities and modifiers
-*** TODO Previews
-    Each section should have an informative preview that shows how the player's selections are
-    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
-**** TODO Identity
-     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
-     Something like "You are creating a new character. His name is Thomas Janus, also known as
-     'Wolf'."
-**** TODO Early Life
-     A sentence that gives a basic blurb about the character's family and childhood information,
-     which also includes the identity:
-     "Thomas grew up in a middle class family of three children by his two parents."
-**** TODO Later Life
-     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
-     really very close. He is also currently seeing someone. He has spent 10 years in Business."
-**** TODO Here and Now
-     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
-     about what the Twin Cities are, and maybe even some outside links to more information. There
-     should be various places marked on the map, each corresponding to a possible starting location
-     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
-     on a location or choosing it from the dropdown makes it the current selection, and also
-     displays a short paragraph with more information about what the place is like -- something to
-     give the player an idea of why it sets it apart from the other locations.
-**** TODO Confirm
-     Summarize all the other stuff that was accumulated during character creation, and have the
-     player confirm their decision. The actual submit button will be in here.
-
-*** TODO Proper inputs
-    Replace the mass of text input fields with appropriate stuff like dropdowns.
-**** TODO Careers
-***** TODO Use jQuery UI 1.9's spinner widget for number input
-      ...meh. Maybe wait for 1.9 to get released.
-**** TODO Location
-***** TODO Draw up a map of the area
-***** TODO Highlight places in the map according to selection
-***** TODO Expand description of place according to selection
-****** DONE Load a description through AJAX
-****** TODO Pull up waifu's descriptions
-*** TODO Prettify
-**** DONE Chosen
-     Use Chosen for the dropdowns. Looks like this'll need to wait until issues with width are
-     fixed.
-**** TODO Design brainstorm
-***** TODO What goes where?
-      UX that shit.
-***** TODO Make it pretty
-      Seriously, do something. It's pretty hideous. Make it something appealing. Fun. Pleasing to
-      the eye.
-*** TODO Validation
-    All of this should be automagically taken care of by the form builder, once it's ready.
-**** TODO Basic validation and error reporting.
-     Hook up the Big Fat Form to the error reporting system.
-**** TODO Repopulate
-     They shouldn't have to redo the ENTIRE CHARACTER just because they made one mistake in one of
-     the fields. Have the form properly re-populate on error.
-**** TODO (nice-to-have) Javascript validation
-     Once the important bits are done, consider doing another round of validation JS-side, to
-     report any problems as they fill out the form, instead of forcing them to submit over and over.
-     Hooking into the preview mechanism may end up making this easier than it might seem.
-*** TODO Usability
-**** TODO Make sure any live areas use the appropriate WAI-ARIA attributes.
-**** TODO Headings
-     I think headings are supposed to be helpful for folks using screen readers and the like. Look
-     into this, and add them where appropriate.
-**** TODO Disable 'add' buttons when appropriate
-** TODO Generic form component/handler interface
-   I want to be able to define forms and their fields once, and have those easily hook up to a
-   template for layout, and easily hook up to a handler and its parameters, so I don't have to
-   repeatedly pass around all the values. It should also automagically take care of validation and
-   validation error reporting, and reloading values into the form. (should reload all values by
-   default, unless a :noreload flag or something is provided)
-** TODO Interacting with the world
-*** DONE Figure out how to name things
-    See notes in describable.lisp
-*** DONE Move name stuff to nameable.lisp
-*** DONE Make nameables use its own db table.
-*** TODO Add a location
-*** TODO Associate a character with that location
-*** TODO Limit dialogue interactions to current location
-    Only objects in the current location should receive local messages.
-*** TODO Add ye flask to location
-*** TODO Add method for inspecting the current location
-*** TODO Make location description list the things in it
-*** TODO Objects in location should be clickable
-*** TODO "get ye flask"
-**** TODO Add a 'get' verb that outputs something basic
-**** TODO Make the 'get' verb tell you 'Ye cannot get <name of target>'
-**** TODO Give player an inventory
-**** TODO Make the 'get' verb transfer the target from its current location to player inventory
+*** TODO Malicious websocket clients
+    The websocket client should not leak anything the player would not already be able to do through
+    the interface. Object identities should be hidden somehow.
+    
