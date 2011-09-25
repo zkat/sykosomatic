@@ -49,6 +49,7 @@
    ;; NOTE: If another value type is added here, update:
    ;; ADD-MODIFIER, MODIFIER-VALUE, FIND-BY-MODIFIER-VALUE.
    (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
+   (boolean-value :col-type (or db-null boolean) :initarg :boolean-value)
    (text-value :col-type (or db-null text) :initarg :text-value)
    (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
   (:keys id)
@@ -83,6 +84,7 @@
              (number (list :numeric-value value))
              (string (list :text-value value))
              (vector (list :text-array-value value))
+             (boolean (list :boolean-value value))
              (symbol (list :text-value (princ-to-string value)))))))
 
 (defun delete-modifier (modifier-id)
@@ -92,7 +94,8 @@
 (defun modifier-value (entity name)
   (with-db ()
     (find-if-not (curry #'eq :null)
-                 (query (:order-by (:select 'text-value 'numeric-value 'text-array-value
+                 (query (:order-by (:select 'text-value 'numeric-value
+                                            'boolean-value 'text-array-value
                                             :from 'modifier
                                             :where (:and (:= 'entity-id (entity-id entity))
                                                          (:= 'package (package-name (symbol-package name)))
@@ -138,6 +141,7 @@
                                                              (number 'numeric-value)
                                                              (string 'text-value)
                                                              (vector 'text-array-value)
+                                                             (boolean 'boolean-value)
                                                              (symbol 'text-value)))))
               (:desc 'precedence)))
            (if allp
