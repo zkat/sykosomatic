@@ -9,6 +9,9 @@
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
 
+;;;
+;;; Entity System management
+;;;
 (let ((callbacks (make-hash-table)))
   (defun list-systems ()
     (hash-table-keys callbacks))
@@ -34,11 +37,24 @@
     (bt:destroy-thread *entity-system-thread*))
   (setf *entity-system-thread* nil))
 
+;;;
+;;; Entity
+;;;
 (defdao entity ()
   ((id :col-type serial :reader id)
    (comment :col-type (or db-null text)))
   (:keys id))
 
+(defun entity-id (entity)
+  ;; Just numbers for now.
+  entity)
+
+(defun create-entity (&key comment)
+  (id (with-db () (make-dao 'entity :comment (or comment :null)))))
+
+;;;
+;;; Modifiers
+;;;
 (defdao modifier ()
   ((id :col-type serial :reader id)
    (entity-id :col-type bigint :initarg :entity-id)
@@ -54,10 +70,6 @@
    (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
   (:keys id)
   (:index package name id entity-id))
-
-(defun entity-id (entity)
-  ;; Just numbers for now.
-  entity)
 
 (defun list-modifiers (entity &optional (package *package*))
   (with-db ()
@@ -112,24 +124,6 @@
                                  (:= 'package (package-name (symbol-package name)))
                                  (:= 'name (symbol-name name)))))))
 
-(defun create-entity (&key comment)
-  (id (with-db () (make-dao 'entity :comment (or comment :null)))))
-
-(defun entity-oid (entity)
-  (with-db () (modifier-value entity 'oid)))
-
-(defun (setf entity-oid) (new-value entity)
-  (with-db ()
-    (with-transaction ()
-      (cond ((entity-oid entity)
-             (setf (modifier-value entity 'oid 'text-value) new-value))
-            ((find-entity-by-oid new-value)
-             (error "~S must be a globally unique identifier, but it already identifies entity ~A."
-                    new-value (find-entity-by-oid new-value)))
-            (t
-             (add-modifier entity 'oid new-value
-                           :description "Unique external identifier for entity."))))))
-
 (defun find-by-modifier-value (modifier-name value &key (test :=) (allp nil))
   (with-db ()
     (let ((q (sql-compile
@@ -151,10 +145,33 @@
           (query q :column)
           (query q :single)))))
 
+;;;
+;;; Entity OIDs
+;;;
+;;; - These are meant to be unique, human-readable identifiers. Sort of like global variables.
+;;;   Example: (setf (entity-oid e) "example-objects:chair")
+;;;
+(defun entity-oid (entity)
+  (with-db () (modifier-value entity 'oid)))
+
+(defun (setf entity-oid) (new-value entity)
+  (with-db ()
+    (with-transaction ()
+      (cond ((entity-oid entity)
+             (setf (modifier-value entity 'oid 'text-value) new-value))
+            ((find-entity-by-oid new-value)
+             (error "~S must be a globally unique identifier, but it already identifies entity ~A."
+                    new-value (find-entity-by-oid new-value)))
+            (t
+             (add-modifier entity 'oid new-value
+                           :description "Unique external identifier for entity."))))))
+
 (defun find-entity-by-oid (oid)
   (find-by-modifier-value 'oid oid))
 
+;;;
 ;;; Events
+;;;
 (defdao event-execution ()
   ((id :col-type serial :reader id)
    (event-id :col-type bigint :initarg :event-id)
@@ -163,6 +180,9 @@
    (completedp :col-type boolean :col-default nil))
   (:keys id))
 
+;;;
+;;; Modifier removal events
+;;;
 (defdao ev-remove-modifier ()
   ((id :col-type serial :reader id)
    (modifier-id :col-type bigint :initarg :modifier-id))
