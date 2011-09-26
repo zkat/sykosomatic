@@ -46,7 +46,7 @@ var sykosomatic =
     }
 
     function current_char () {
-        return get_url_parameter('char');
+        return parseInt(get_url_parameter('char'));
     }
 
     function mk_dialogue(text) {

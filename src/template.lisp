@@ -199,12 +199,13 @@
 
 (defun character-list (characters)
   (<:ul
-   (mapc (lambda (char) (<:li (character-link char)))
-         characters)))
+   (loop
+      for i from 0
+      for name in characters
+      do (<:li (character-link name i)))))
 
-(defun character-link (char)
-  ;; TODO - This ~A smells really bad.
-  (<:href (format nil "/stage?char=~A" (string-downcase char))
+(defun character-link (char idx)
+  (<:href (format nil "/stage?char=~A" idx)
           (<:ah char)))
 
 ;;; /scenes

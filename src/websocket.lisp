@@ -48,23 +48,23 @@
                                   (message (jsown:parse json-message)))
   (push (cons :user-agent (jsown:val message "useragent"))
         (client-headers client))
-  (let ((character-id (find-character (jsown:val message "char"))))
-    (if (and (validate-client res client)
-             character-id
-             (eql (character-account character-id) (client-account-id client)))
-        (progn
-          (logit "Client validated: ~S. It's now playing as ~A."
-                 client (character-name character-id))
-          (when-let (existing-client (find character-id
-                                           (session-websocket-clients (client-session client))
-                                           :key #'client-character-id))
-            (deletef existing-client (session-websocket-clients (client-session client)))
-            (disconnect-client res existing-client))
-          (setf (client-character-id client) character-id)
-          (push (session-websocket-clients (client-session client)) client))
-        (progn
-          (logit "No session. Disconnecting client. (~S)" client)
-          (disconnect-client res client)))))
+  (let* ((client-valid-p (validate-client res client))
+         (char-index (jsown:val message "char"))
+         (character-id (nth char-index (account-characters (client-account-id client)))))
+    (cond ((and client-valid-p character-id)
+           (logit "Client validated: ~S. It's now playing as ~A."
+                  client (character-name character-id))
+           (when-let (existing-client (find character-id
+                                            (session-websocket-clients (client-session client))
+                                            :key #'client-character-id))
+             (deletef existing-client (session-websocket-clients (client-session client)))
+             (logit "Something funky is cooking.")
+             (disconnect-client res existing-client))
+           (setf (client-character-id client) character-id)
+           (push (session-websocket-clients (client-session client)) client))
+          (t
+           (logit "No session. Disconnecting client. (~S)" client)
+           (disconnect-client res client)))))
 
 (defun client-character-name (client)
   (when-let ((character-id (client-character-id client)))
