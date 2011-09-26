@@ -141,15 +141,11 @@
 *** TODO Entities
     Time to start coding up some game objects!
     http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
-**** TODO Get the old code to work again with new entity system
 **** TODO Fix timer
      It's not quite working right now, although there's a reasonable rate limit. that might be okay
      for now.
 **** TODO Cleaner es-thread shutdown
      Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
-**** TODO Hook up the parser to the entity system.
-***** TODO Allow parser to target characters by name.
-***** TODO Allow parser to target locations by name.
 *** TODO Add concept of a 'location'
     Once characters exist, we can start adding the concept of a 'location' to the game. Locations
     should have a description, and should be able to 'contain' other characters. Characters can only
@@ -191,6 +187,9 @@
 *** TODO don't use postmodern directly
     Wrap any postmodern-specific calls so only :sykosomatic.db needs to be included. This includes
     stuff like automatic transaction 
+*** TODO 'init db' system of some sort
+    Needs to both create all tables, insert any initial data stored elsewhere, and remind admin to
+    execute whatever external command needs to be executed post-boot (such as installing unaccent).
 ** Security
 *** TODO HTTPS
     May not need/want hunchentoot managing this. Check out http://haproxy.1wt.eu/, which supposedly
