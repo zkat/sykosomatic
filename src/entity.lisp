@@ -3,8 +3,8 @@
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
-           :modifier-value :multiple-modifier-values :entity-uid
-           :find-by-modifier-value :find-entity-by-uid
+           :modifier-value :multiple-modifier-values :entity-oid
+           :find-by-modifier-value :find-entity-by-oid
            :event-execution :expire-modifier
            :clear-expired-modifiers))
 (cl:in-package #:sykosomatic.entity)
@@ -115,19 +115,19 @@
 (defun create-entity (&key comment)
   (id (with-db () (make-dao 'entity :comment (or comment :null)))))
 
-(defun entity-uid (entity)
-  (with-db () (modifier-value entity 'uid)))
+(defun entity-oid (entity)
+  (with-db () (modifier-value entity 'oid)))
 
-(defun (setf entity-uid) (new-value entity)
+(defun (setf entity-oid) (new-value entity)
   (with-db ()
     (with-transaction ()
-      (cond ((entity-uid entity)
-             (setf (modifier-value entity 'uid 'text-value) new-value))
-            ((find-entity-by-uid new-value)
+      (cond ((entity-oid entity)
+             (setf (modifier-value entity 'oid 'text-value) new-value))
+            ((find-entity-by-oid new-value)
              (error "~S must be a globally unique identifier, but it already identifies entity ~A."
-                    new-value (find-entity-by-uid new-value)))
+                    new-value (find-entity-by-oid new-value)))
             (t
-             (add-modifier entity 'uid new-value
+             (add-modifier entity 'oid new-value
                            :description "Unique external identifier for entity."))))))
 
 (defun find-by-modifier-value (modifier-name value &key (test :=) (allp nil))
@@ -151,8 +151,8 @@
           (query q :column)
           (query q :single)))))
 
-(defun find-entity-by-uid (uid)
-  (find-by-modifier-value 'uid uid))
+(defun find-entity-by-oid (oid)
+  (find-by-modifier-value 'oid oid))
 
 ;;; Events
 (defdao event-execution ()
