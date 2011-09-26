@@ -17,14 +17,14 @@
   (find-by-modifier-value 'account account-id :allp t))
 
 ;; Validation
-(defparameter *character-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
+(defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
                                                      :case-insensitive-mode t))
 
 (defun valid-character-name-p (name)
-  ;; TODO - First character in name should be uppercase, all others downcase. (maybe?)
   (when (and (>= (length name) 4)
              (<= (length name) 24)
-             (scan *character-name-regex* name))
+             (scan *character-name-regex*
+                   (with-db () (query (:select (:unaccent name)) :single))))
     t))
 
 (defun validate-new-character (name)

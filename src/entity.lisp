@@ -132,21 +132,24 @@
 
 (defun find-by-modifier-value (modifier-name value &key (test :=) (allp nil))
   (with-db ()
-    (query (sql-compile
-            `(:order-by
-              (:select 'entity-id :from 'modifier
-                       :where (:and (:= 'package ,(package-name (symbol-package modifier-name)))
-                                    (:= 'name ,(symbol-name modifier-name))
-                                    (,test value ,(etypecase value
-                                                             (number 'numeric-value)
-                                                             (string 'text-value)
-                                                             (vector 'text-array-value)
-                                                             (boolean 'boolean-value)
-                                                             (symbol 'text-value)))))
-              (:desc 'precedence)))
-           (if allp
-               :single
-               :column))))
+    (let ((q (sql-compile
+              `(:order-by
+                (:select 'entity-id :from 'modifier
+                         :where (:and (:= 'package ,(package-name (symbol-package modifier-name)))
+                                      (:= 'name ,(symbol-name modifier-name))
+                                      (,test ,(if (stringp value)
+                                                  `(:unaccent ,value)
+                                                  value)
+                                             ,(etypecase value
+                                                         (number 'numeric-value)
+                                                         (string '(:unaccent text-value))
+                                                         (vector 'text-array-value)
+                                                         (boolean 'boolean-value)
+                                                         (symbol 'text-value)))))
+                (:desc 'precedence)))))
+      (if allp
+          (query q :column)
+          (query q :single)))))
 
 (defun find-entity-by-uid (uid)
   (find-by-modifier-value 'uid uid))
