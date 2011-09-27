@@ -1,5 +1,8 @@
 (cl:defpackage #:sykosomatic.parser
-  (:use :cl :alexandria :smug :sykosomatic.util)
+  (:use :cl :alexandria :smug
+        :sykosomatic.util
+        :sykosomatic.db
+        :sykosomatic.vocabulary)
   (:export :parse-dialogue))
 (cl:in-package #:sykosomatic.parser)
 
@@ -251,22 +254,17 @@
 
 (defun dashed-word ()
   (text (=or (alpha-char) (=char #\-))))
+
 ;;;
 ;;; Word identifiers
 ;;;
 (defun nounp (maybe-noun)
-  (find maybe-noun '("flask") :test #'string-equal))
+  maybe-noun)
 
 (defun adverbp (maybe-adverb)
-  (find maybe-adverb
-  '("despondently" "curiously" "victoriously" "amusedly"
-    "sunnily" "brightly" "happily" "honestly" "nicely"
-    "handsomely" "cleverly" "fascetiously" "excitedly"
-    "smugly" "smilingly" "angrily")
-  :test #'string-equal))
+  (with-db ()
+    (pomo:query (:select t :from 'adverb :where (:= 'text maybe-adverb)))))
 
 (defun verbp (maybe-verb)
-  (find maybe-verb
-  '("grins" "chuckles" "fluffs" "squees" "pouts" "cackles" "fixes"
-    "preens" "smiles" "frowns" "cheers" "laughs" "cries" "waves")
-  :test #'string-equal))
+  (with-db ()
+    (pomo:query (:select t :from 'verb :where (:= 'third-person maybe-verb)))))
