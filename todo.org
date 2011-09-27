@@ -48,13 +48,6 @@
       into this, and add them where appropriat
 **** TODO Disable 'add' buttons when appropriate
 *** /stage
-**** TODO Instead of using web session, make web clients identify with a single-use token.
-**** TODO Make sure a user is chatting as a character only once.
-**** TODO Back-button-friendliness
-     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
-     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
-     javascripty way to reconnect the websocket on back-button?
-     Maybe this could be achieved with disabled=true by default for chat inputs?
 **** TODO Fancy JS 'parser'
      See sketch on whiteboard.
 
@@ -64,6 +57,23 @@
      take that step when it's necessary.
 
      The parser should use something chosen-like as an interface, but more typing-oriented.
+***** DONE New defhandler macro
+***** DONE Split up 'user-input'
+      Instead of having a single 'user-input' message that gets parsed in order to process what
+      users enter, split it up into various kinds of user input and have dedicated processors for
+      those.
+****** DONE ooc
+****** DONE dialogue
+****** DONE action
+****** DONE emit (admin-only)
+****** DONE parenthetical
+**** TODO Instead of using web session, make web clients identify with a single-use token.
+**** TODO Make sure a user is chatting as a character only once.
+**** TODO Back-button-friendliness
+     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
+     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
+     javascripty way to reconnect the websocket on back-button?
+     Maybe this could be achieved with disabled=true by default for chat inputs?
 **** TODO No Flash on native-websocket browsers
      Things got messed up when I tried to have optional loading of Flash. Give it another shot.
 **** TODO Sticky scene headers
@@ -115,29 +125,8 @@
 *** TODO Put locks on session value and finalizer hash tables
 *** TODO Smaller timeout for ajax ping.
     Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
+*** TODO Figure out how to configure two lisp processes running behind HAProxy
 ** Game
-*** TODO Persistent scenes
-    NOTE: This'll need to be done *after* characters are implemented.
-    Players should be able to 'record' scenes, which will be saved as they see them. These scenes
-    should be viewable in a separate page (for phase 1). Would be nice to also have them formatted
-    as screenplays.
-    Not all user messages must (or should) be saved. Instead, create a 'recorded session' document,
-    and then record each line of input that the character is witness to into 'entry' documents,
-    which can then be collated with the recorded session as outlined in the CouchDB Joins article.
-**** TODO Revive persistent scenes
-     Haven't been tested since pomo switch
-**** TODO Automatically add slug lines.
-     Even if the user starts recording a while after entering an area, the recorded scene should
-     include the slug line for that area. Will probably have to wait until we have locations. :)
-**** TODO Automatically add location description under slug line.
-     May need to wait until locations are implemented (although no harm in having some default text
-     for now). Under the slug line for persisted scenes, the description of the location, as seen by
-     the character at that point in time, should be included at the top of the scene.
-**** TODO Scene collection
-     Users should be able to 'collect' others' stories, much like in DA.
-**** TODO FUTURE "Canon" system.
-    While people can tell any story they want, how about giving extra weight to stories that fit the
-    game's canon, and/or are staff approved?
 *** TODO Entities
     Time to start coding up some game objects!
     http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
@@ -167,6 +156,28 @@
      transitions, but an arrival message is good enough for now.
 *** TODO Location building.
     Write an interface that can be used to easily build and connect locations.
+*** TODO Persistent scenes
+    NOTE: This'll need to be done *after* characters are implemented.
+    Players should be able to 'record' scenes, which will be saved as they see them. These scenes
+    should be viewable in a separate page (for phase 1). Would be nice to also have them formatted
+    as screenplays.
+    Not all user messages must (or should) be saved. Instead, create a 'recorded session' document,
+    and then record each line of input that the character is witness to into 'entry' documents,
+    which can then be collated with the recorded session as outlined in the CouchDB Joins article.
+**** TODO Revive persistent scenes
+     Haven't been tested since pomo switch
+**** TODO Automatically add slug lines.
+     Even if the user starts recording a while after entering an area, the recorded scene should
+     include the slug line for that area. Will probably have to wait until we have locations. :)
+**** TODO Automatically add location description under slug line.
+     May need to wait until locations are implemented (although no harm in having some default text
+     for now). Under the slug line for persisted scenes, the description of the location, as seen by
+     the character at that point in time, should be included at the top of the scene.
+**** TODO Scene collection
+     Users should be able to 'collect' others' stories, much like in DA.
+**** TODO FUTURE "Canon" system.
+    While people can tell any story they want, how about giving extra weight to stories that fit the
+    game's canon, and/or are staff approved?
 ** Database
 *** TODO Remove s-sql patch
     When/if marijn accepts my pull request.
@@ -215,6 +226,5 @@
     The websocket client should not leak anything the player would not already be able to do through
     the interface. Object identities should be hidden somehow.
     
-
 ** Misc
 *** TODO Move persistent sessions out into a separate lisp project
