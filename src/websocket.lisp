@@ -178,42 +178,59 @@
 ;;;
 ;;; Client messages
 ;;;
-(defparameter *dispatch*
-  '(("user-input" . process-user-input)
-    ("ping" . process-ping)
-    ("start-recording"  . start-recording)
-    ("stop-recording" . stop-recording)
-    ("char-desc" . get-character-description)))
+(defvar *commands* (make-hash-table :test #'equal))
+(defvar *client*)
+(defvar *resource*)
+(defvar *raw-message*)
 
-(defun process-client-message (res client raw-message &aux (message (jsown:parse raw-message)))
-  (when-let ((action (cdr (assoc (car message) *dispatch* :test #'string=))))
-    (apply action res client (cdr message))))
+(defun find-command (name)
+  (values (gethash name *commands*)))
+(defun (setf find-command) (command name)
+  (setf (gethash name *commands*) command))
 
-(defun get-character-description (res client charname)
-  (declare (ignore res))
-  (logit "Got a character description request: ~S." charname)
-  (client-write client (jsown:to-json (list "char-desc" (character-description (find-character charname))))))
+(defmacro defhandler (name lambda-list &body body)
+  (let ((name (string-downcase (string name))))
+    `(setf (find-command ,name)
+           (lambda ,lambda-list
+             ,@body))))
 
-(defun process-user-input (res client input)
-  (funcall (slot-value res 'client-main) (client-character-id client) input))
+(defun process-client-message (res client raw-message)
+  (when-let (message (handler-case (jsown:parse raw-message)
+                       (error (e) (logit "Error while parsing client message '~A': ~A" raw-message e))))
+    (if-let (command (find-command (car message)))
+      (let ((*client* client)
+            (*resource* res)
+            (*raw-message* raw-message))
+        (handler-case
+            (apply command (cdr message))
+          (error (e)
+            (logit "Got an error while the handler for '~A': ~A" raw-message e))))
+      (logit "Unknown command '~A'. Ignoring." (car message)))))
 
-(defun process-ping (res client)
-  (declare (ignore res))
-  (client-write client (jsown:to-json (list "pong"))))
+(defhandler char-desc (charname)
+  (logit "Got a character description request: ~S" charname)
+  (client-write *client* (jsown:to-json (list "char-desc"
+                                              (character-description (find-character charname))))))
 
-(defun start-recording (res client)
-  (declare (ignore res))
+(defhandler user-input (input)
+  (funcall (slot-value *resource* 'client-main)
+           (client-character-id *client*)
+           input))
+
+(defhandler ping ()
+  (client-write *client* (jsown:to-json (list "pong"))))
+
+(defhandler start-recording ()
   (logit "Request to start recording received.")
-  (if (session-value 'scene-id (client-session client))
+  (if (session-value 'scene-id (client-session *client*))
       (logit "Scene already being recorded. Ignoring request.")
       (let ((*acceptor* *server*))
-        (setf (session-value 'scene-id (client-session client))
-              (create-scene (client-account-id client))))))
+        (setf (session-value 'scene-id (client-session *client*))
+              (create-scene (client-account-id *client*))))))
 
-(defun stop-recording (res client)
-  (declare (ignore res))
+(defhandler stop-recording ()
   (logit "Request to stop recording received.")
-  (delete-session-value 'scene-id (client-session client)))
+  (delete-session-value 'scene-id (client-session *client*)))
 
 ;;;
 ;;; Init/teardown
