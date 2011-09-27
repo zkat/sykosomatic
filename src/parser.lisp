@@ -124,22 +124,17 @@
               (:parenthetical . ,(cdr parenthetical))
               (:dialogue . ,dialogue-text)))))
 
-;; parenthetical = "(" adverb ")"
-;; parenthetical =/ "@" name
+;; parenthetical = "(" ("@"|"to"|"at") name | adverb ")"
 (defun parenthetical ()
-  (=or (=let* ((_ (=and (=char #\@) (zero-or-more (whitespace))))
-               (name (dashed-word)))
-         (result `(:parenthetical . ,(concatenate 'string "to " name))))
-       (=let* ((_ (=char #\())
-               ;; TODO - Temporary while testing.
-               (content (text (=and (=not (=char #\))) (item))) #+nil(=or (to/at-someone) (adverb)))
-               (_ (=char #\))))
-         ;; TODO - This'll need to return ,(cdr content) when the above is uncommented.
-         (result `(:parenthetical . ,content)))))
+  (=let* ((_ (=char #\())
+          (content (=or (to/at-someone) (adverb)))
+          (_ (=char #\))))
+    (result `(:parenthetical . ,(cdr content)))))
 
 (defun to/at-someone ()
   (=let* ((at/to (=or (=string "at")
-                      (=string "to")))
+                      (=string "to")
+                      (=string "@")))
           (_ (ws))
           (target-name (dashed-word)))
     (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
