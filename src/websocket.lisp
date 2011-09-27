@@ -155,8 +155,8 @@
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
   (let ((char-name (character-name actor)))
     #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
-      (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
-      (add-dialogue scene-id char-name dialogue parenthetical))
+           (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
+           (add-dialogue scene-id char-name dialogue parenthetical))
     (send-msg recipient `("dialogue" (:obj
                                       ("actor" . ,char-name)
                                       ("parenthetical" . ,parenthetical)
@@ -165,11 +165,10 @@
 (defun send-transition (recipient text)
   (send-msg recipient (list "transition" text)))
 
-(defun send-ooc (recipient actor text)
-  (let ((display-name (account-display-name (client-account-id (actor-client actor)))))
-    (send-msg recipient `("ooc" (:obj
-                                 ("display-name" . ,display-name)
-                                 ("text" . ,text))))))
+(defun send-ooc (recipient display-name text)
+  (send-msg recipient `("ooc" (:obj
+                               ("display-name" . ,display-name)
+                               ("text" . ,text)))))
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
@@ -195,6 +194,7 @@
              ,@body))))
 
 (defun process-client-message (res client raw-message)
+  (logit "Client message: ~A" raw-message)
   (when-let (message (handler-case (jsown:parse raw-message)
                        (error (e) (logit "Error while parsing client message '~A': ~A" raw-message e))))
     (if-let (command (find-command (car message)))
@@ -207,15 +207,27 @@
             (logit "Got an error while the handler for '~A': ~A" raw-message e))))
       (logit "Unknown command '~A'. Ignoring." (car message)))))
 
+(defhandler ooc (message)
+  (map nil (rcurry #'send-ooc (account-display-name (client-account-id *client*)) message)
+       (local-actors *client*)))
+
+(defhandler dialogue (message)
+  (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
+    (map nil (rcurry #'send-dialogue (client-character-id *client*) dialogue parenthetical)
+         (local-actors *client*))))
+
+(defhandler action (action-txt)
+  (map nil (rcurry #'send-action (client-character-id *client*) action-txt)
+       (local-actors *client*)))
+
+(defhandler emit (text)
+  (map nil (rcurry #'send-action nil text)
+       (local-actors *client*)))
+
 (defhandler char-desc (charname)
   (logit "Got a character description request: ~S" charname)
   (client-write *client* (jsown:to-json (list "char-desc"
                                               (character-description (find-character charname))))))
-
-(defhandler user-input (input)
-  (funcall (slot-value *resource* 'client-main)
-           (client-character-id *client*)
-           input))
 
 (defhandler ping ()
   (client-write *client* (jsown:to-json (list "pong"))))

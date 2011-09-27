@@ -159,7 +159,7 @@
                  (<:li (<:href "#dialogue-tab" "Dialogue"))
                  (<:li (<:href "#action-tab" "Action"))
                  (<:li (<:href "#ooc-tab" "OOC"))
-                 (<:li (<:href "#parser-tab" "Parser")))
+                 (<:li (<:href "#emit-tab" "Emit")))
                 (<:div :id "dialogue-tab"
                        (<:form :id "dialogue-input"
                                (<:div
@@ -172,8 +172,8 @@
                 (<:div :id "ooc-tab"
                        (<:form :id "ooc-input"
                                "OOC - " (<:input)))
-                (<:div :id "parser-tab"
-                       (<:form :id "parser-input"
+                (<:div :id "emit-tab"
+                       (<:form :id "emit-input"
                                (<:input))))))
 
 (defun ooc-panel ()

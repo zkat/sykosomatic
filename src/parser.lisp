@@ -1,7 +1,22 @@
 (cl:defpackage #:sykosomatic.parser
   (:use :cl :alexandria :smug :sykosomatic.util)
-  (:export :parse-input))
+  (:export :parse-dialogue))
 (cl:in-package #:sykosomatic.parser)
+
+(defun parse-dialogue (message)
+  (let ((results (invoke-parser (either (dialogue) 'error) message)))
+    (cond ((cdr results)
+           (error "Parse was ambiguous."))
+          ((typep (car results) 'error)
+           (signal (car results)))
+          (t (values (cdr (assoc :dialogue (cdar results)))
+                     (cdr (assoc :parenthetical (cdar results))))))))
+
+(defun run-parser (parser input)
+  (let ((results (invoke-parser (either parser 'error) input)))
+    (if (cdr results)
+        (error "Parse was ambiguous.")
+        (car results))))
 
 (defun parse-input (actor input)
   (let ((result (car (invoke-parser (either (input) 'error) input))))

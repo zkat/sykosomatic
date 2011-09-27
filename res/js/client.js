@@ -124,7 +124,7 @@ var sykosomatic =
     function add_dialogue(actor,dialogue,paren) {
         if ((last_actor == actor) && (last_unit == 'dialogue')) {
             if (paren && paren.length > 0) {
-                $('#scene-displa > .unit:last').append(mk_paren(paren));
+                $('#scene-display > .unit:last').append(mk_paren(paren));
             }
             $('#scene-display > .unit:last').append(mk_dialogue(dialogue));
             // else {
@@ -213,21 +213,21 @@ var sykosomatic =
     }
     pub.stop_recording = stop_recording;
 
-    function send_input() {
-        var msg = $('#parser-input :input').val();
+    function send_emit() {
+        var msg = $('#emit-input :input').val();
         if (msg) {
-            $('#parser-input :input').val('');
-            ws_send(['user-input',msg]);
+            $('#emit-input :input').val('');
+            ws_send(['emit',msg]);
         }
         return false;
     }
-    pub.send_input = send_input;
+    pub.send_emit = send_emit;
 
     function send_dialogue() {
         var msg = $('#dialogue-input :input').val();
         if (msg) {
             $('#dialogue-input :input').val('');
-            ws_send(['user-input',msg]);
+            ws_send(['dialogue',msg]);
         }
         return false;
     }
@@ -236,7 +236,7 @@ var sykosomatic =
         var msg = $('#action-input :input').val();
         if (msg) {
             $('#action-input :input').val('');
-            ws_send(['user-input','/me '+msg]);
+            ws_send(['action',msg]);
         }
         return false;
     }
@@ -245,7 +245,7 @@ var sykosomatic =
         var msg = $('#ooc-input :input').val();
         if (msg) {
             $('#ooc-input :input').val('');
-            ws_send(['user-input',"/ooc "+msg]);
+            ws_send(['ooc',msg]);
         }
         return false;
     }
@@ -310,7 +310,7 @@ var sykosomatic =
         $("#ooc-input").submit(send_ooc_input);
         $("#action-input").submit(send_action);
         $("#dialogue-input").submit(send_dialogue);
-        $("#parser-input").submit(send_input);
+        $("#emit-input").submit(send_emit);
     }
 
     function init() {
@@ -336,7 +336,7 @@ var sykosomatic =
         install_onsubmits();
 
         var current_tab = 0;
-        var inputs = ['dialogue-input','action-input','ooc-input','parser-input'];
+        var inputs = ['dialogue-input','action-input','ooc-input','emit-input'];
         $(document).keypress(function(e) {
             if (e.keyCode == $.ui.keyCode.TAB) {
                 if (e.shiftKey) {
