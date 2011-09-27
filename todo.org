@@ -47,50 +47,6 @@
       I think headings are supposed to be helpful for folks using screen readers and the like. Look
       into this, and add them where appropriat
 **** TODO Disable 'add' buttons when appropriate
-*** /stage
-**** TODO Fancy JS 'parser'
-     See sketch on whiteboard.
-
-     Basically, the parser is less text-based and more text-guided. An interactive completion system
-     will ensure that all items are uniquely chosen before the final message is even sent.  This
-     will probably involve caching of at least part of the game's vocabulary client-side, but we'll
-     take that step when it's necessary.
-
-     The parser should use something chosen-like as an interface, but more typing-oriented.
-***** DONE New defhandler macro
-***** DONE Split up 'user-input'
-      Instead of having a single 'user-input' message that gets parsed in order to process what
-      users enter, split it up into various kinds of user input and have dedicated processors for
-      those.
-****** DONE ooc
-****** DONE dialogue
-****** DONE action
-****** DONE emit (admin-only)
-****** DONE parenthetical
-**** TODO Instead of using web session, make web clients identify with a single-use token.
-**** TODO Make sure a user is chatting as a character only once.
-**** TODO Back-button-friendliness
-     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
-     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
-     javascripty way to reconnect the websocket on back-button?
-     Maybe this could be achieved with disabled=true by default for chat inputs?
-**** TODO No Flash on native-websocket browsers
-     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
-**** TODO Sticky scene headers
-     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
-     a particular scene -- always leaving clue of where the player currently is.  As new scene
-     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
-     reach the top of the screen, sticking there until the next header rolls by.
-**** TODO Character conversion
-     Convert -- to —.
-**** TODO Do something about the awful OOC area.
-**** TODO FUTURE WAI-ARIA support
-     The web client should play nice with screen readers.
-**** TODO Scene recording
-***** TODO Select area to record
-***** TODO Scene naming
-     Add ability to change the name of the recorded session.
-     NOTE: Perhaps more important than this -- descriptions? I'll do this later.
 *** /my-account
     Need to have this page to manage account information.
 **** TODO Allow changing of display name.
@@ -106,6 +62,50 @@
      purpose of -playing- the scenes if you can just -write- them), but this might be a really neat
      feature that allows cleaning up garbage without giving too much freedom (or requiring too much
      effort to handle formatting, and the like).
+** Websocket client
+*** TODO Fancy JS 'parser'
+     See sketch on whiteboard.
+
+     Basically, the parser is less text-based and more text-guided. An interactive completion system
+     will ensure that all items are uniquely chosen before the final message is even sent.  This
+     will probably involve caching of at least part of the game's vocabulary client-side, but we'll
+     take that step when it's necessary.
+
+     The parser should use something chosen-like as an interface, but more typing-oriented.
+**** DONE New defhandler macro
+**** DONE Split up 'user-input'
+      Instead of having a single 'user-input' message that gets parsed in order to process what
+      users enter, split it up into various kinds of user input and have dedicated processors for
+      those.
+***** DONE ooc
+***** DONE dialogue
+***** DONE action
+***** DONE emit (admin-only)
+***** DONE parenthetical
+*** TODO Instead of using web session, make web clients identify with a single-use token.
+*** TODO Make sure a user is chatting as a character only once.
+*** TODO Back-button-friendliness
+     When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
+     input fields are enabled, as if the websocket connection were still up. Perhaps there's a
+     javascripty way to reconnect the websocket on back-button?
+     Maybe this could be achieved with disabled=true by default for chat inputs?
+*** TODO No Flash on native-websocket browsers
+     Things got messed up when I tried to have optional loading of Flash. Give it another shot.
+*** TODO Sticky scene headers
+     Ideally, scene headers will 'stick' to the top of the screen when the entire screen belongs to
+     a particular scene -- always leaving clue of where the player currently is.  As new scene
+     headers appear, they should scroll up regularly, and 'bump' off the older sceneheader as they
+     reach the top of the screen, sticking there until the next header rolls by.
+*** TODO Character conversion
+     Convert -- to —.
+*** TODO Do something about the awful OOC area.
+*** TODO FUTURE WAI-ARIA support
+     The web client should play nice with screen readers.
+*** TODO Scene recording
+**** TODO Select area to record
+**** TODO Scene naming
+     Add ability to change the name of the recorded session.
+     NOTE: Perhaps more important than this -- descriptions? I'll do this later.
 ** Misc Webapp work
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
