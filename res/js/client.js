@@ -107,6 +107,7 @@ var sykosomatic =
     var last_actor;
     var last_unit;
     function add_action(actor,action) {
+        action = action+'.';
         if ((last_actor == actor) && (last_unit == 'action')) {
             $('#scene-display > .unit:last > p.action').append(mk_append_action(actor,action));
         } else {
