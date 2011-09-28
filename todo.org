@@ -70,8 +70,6 @@
      will ensure that all items are uniquely chosen before the final message is even sent.  This
      will probably involve caching of at least part of the game's vocabulary client-side, but we'll
      take that step when it's necessary.
-
-     The parser should use something chosen-like as an interface, but more typing-oriented.
 **** DONE New defhandler macro
 **** DONE Split up 'user-input'
       Instead of having a single 'user-input' message that gets parsed in order to process what
@@ -82,6 +80,16 @@
 ***** DONE action
 ***** DONE emit (admin-only)
 ***** DONE parenthetical
+**** DONE Interactively accept a verb in the action field
+     Verb should be auto-completable based on the existing list of verbs.
+**** TODO Interactively select both a verb, then an adverb
+     Adverb should also be from the existing adverb database
+**** TODO Interactively select either verb-adverb or adverb-verb or just verb
+*** TODO Performance: one SQL connection per websocket client?
+*** TODO Scene headers
+**** TODO Add a scene-header server->client message
+     Should include the url for an image to load and the name of the location.
+**** TODO Get client to render the scene header.
 *** TODO Instead of using web session, make web clients identify with a single-use token.
 *** TODO Make sure a user is chatting as a character only once.
 *** TODO Back-button-friendliness
@@ -107,6 +115,15 @@
      Add ability to change the name of the recorded session.
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
 ** Misc Webapp work
+*** TODO Sessions
+**** DONE Forever Sessions
+     Google and Facebook don't bother letting your session time out, or restricting logins to one
+     session per account. Re-authorization should be required for money-related parts of the site,
+     of course, but sessions should just last a very long time (30 days?).
+**** TODO Concurrent session/session history information
+     Since sessions last a long time, have a screen where a user can log out all other active
+     sessions.
+**** TODO Log out all sessions on username or password change
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
 *** TODO Form builder
@@ -123,8 +140,6 @@
     validation error reporting, and reloading values into the form. (should reload all values by
     default, unless a :noreload flag or something is provided)
 *** TODO Put locks on session value and finalizer hash tables
-*** TODO Smaller timeout for ajax ping.
-    Those AJAX pings will stay alive for freakin' ever. Make them time out quicker.
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
 ** Game
 *** TODO Entities
