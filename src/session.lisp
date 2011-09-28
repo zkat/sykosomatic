@@ -36,10 +36,9 @@
 
 (defun current-account (&optional (session *session*))
   (when session
-    (with-db ()
-      (query (:select 'account-id :from 'persistent-session
-                      :where (:= 'id session))
-             :single))))
+    (db-query (:select 'account-id :from 'persistent-session
+                       :where (:= 'id session))
+              :single)))
 
 (defun ensure-logged-in ()
   (unless *session*
@@ -50,11 +49,11 @@
   "sykosomatic-session")
 
 (defun persistent-session-gc ()
-  (with-db ()
-    (let ((old-session-ids (query (:select 'id :from 'persistent-session
-                                           :where (:< (:+ 'last-seen 'max-time)
-                                                      (:now)))
-                                  :column)))
+  (let ((old-session-ids (db-query (:select 'id :from 'persistent-session
+                                            :where (:< (:+ 'last-seen 'max-time)
+                                                       (:now)))
+                                   :column)))
+    (with-transaction ()
       (map nil #'session-cleanup old-session-ids))))
 
 (defun start-persistent-session (account-id)
@@ -71,10 +70,9 @@
         (setf *session* (id session)))))
 
 (defmethod session-cookie-value ((session-id integer))
-  (with-db ()
-    (query (:select 'cookie-value :from 'persistent-session
-                    :where (:= 'id session-id))
-           :single)))
+  (db-query (:select 'cookie-value :from 'persistent-session
+                     :where (:= 'id session-id))
+            :single))
 
 (defmethod session-verify ((request persistent-session-request))
   (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
@@ -82,33 +80,32 @@
     (when (and session-identifier
                (stringp session-identifier)
                (not (emptyp session-identifier)))
-      (with-db ()
-        (with-transaction ()
-          (when-let (session-id (query (:for-update
-                                        (:select 'id :from 'persistent-session
-                                                 :where (:and (:= 'cookie-value session-identifier)
-                                                              (:= 'user-agent (user-agent request)))))
-                                       :single))
-            (if (query (:for-update
-                        (:select t :from 'persistent-session
-                                 :where (:and (:= 'id session-id)
-                                              (:< (:+ 'last-seen 'max-time)
-                                                  (:now)))))
-                       :single)
-                (session-cleanup session-id)
-                (prog1 session-id
-                  (query (:update 'persistent-session
-                                  :set 'last-seen (:now)
-                                       'last-remote-addr (remote-addr request)
-                                  :where (:= 'id session-id)))))))))))
+      (with-transaction ()
+        (when-let (session-id (db-query (:for-update
+                                         (:select 'id :from 'persistent-session
+                                                  :where (:and (:= 'cookie-value session-identifier)
+                                                               (:= 'user-agent (user-agent request)))))
+                                        :single))
+          (if (db-query (:for-update
+                         (:select t :from 'persistent-session
+                                  :where (:and (:= 'id session-id)
+                                               (:< (:+ 'last-seen 'max-time)
+                                                   (:now)))))
+                        :single)
+              (session-cleanup session-id)
+              (prog1 session-id
+                (db-query (:update 'persistent-session
+                                   :set 'last-seen (:now)
+                                   'last-remote-addr (remote-addr request)
+                                   :where (:= 'id session-id))))))))))
 
 (defun end-session (session-id)
-  (let ((account-id (current-account session-id)))
-    (when account-id
-      (logit "~A logged out." (account-email account-id)))
-    (map nil (rcurry #'funcall session-id) (all-finalizers))
-    (with-db ()
-      (query (:delete-from 'persistent-session :where (:= 'id session-id))))))
+  (with-transaction ()
+    (let ((account-id (current-account session-id)))
+      (when account-id
+        (logit "~A logged out." (account-email account-id)))
+      (map nil (rcurry #'funcall session-id) (all-finalizers))
+      (db-query (:delete-from 'persistent-session :where (:= 'id session-id))))))
 
 (defun session-cleanup (session-id)
   (logit "Session timed out. Logging it out.")

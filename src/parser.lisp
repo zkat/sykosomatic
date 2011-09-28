@@ -28,16 +28,15 @@
            (fail)))))
 
 (defun action-completions (action-text)
-  (with-db ()
-    (when-let (results (funcall (either (parse-action-completions) 'error) action-text))
-      (unless
-          (<= *max-completion-results*
-              (reduce #'* results :key (compose #'length #'car))))
-      (loop for (completions . leftovers) in results
-         when (typep completions 'error)
-         do (signal completions)
-         when (emptyp leftovers)
-         append completions))))
+  (when-let (results (funcall (either (parse-action-completions) 'error) action-text))
+    (unless
+        (<= *max-completion-results*
+            (reduce #'* results :key (compose #'length #'car))))
+    (loop for (completions . leftovers) in results
+       when (typep completions 'error)
+       do (signal completions)
+       when (emptyp leftovers)
+       append completions)))
 
 (defun partial-vocabulary-word (search-fun)
   (=let* ((partial-word (dashed-word)))
@@ -295,9 +294,7 @@
   maybe-noun)
 
 (defun adverbp (maybe-adverb)
-  (with-db ()
-    (pomo:query (:select t :from 'adverb :where (:ilike 'text maybe-adverb)) :single)))
+  (db-query (:select t :from 'adverb :where (:ilike 'text maybe-adverb)) :single))
 
 (defun verbp (maybe-verb)
-  (with-db ()
-    (pomo:query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single)))
+  (db-query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single))

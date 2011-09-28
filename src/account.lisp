@@ -36,13 +36,11 @@
 (defgeneric account-password-salt (account))
 
 (defmethod account-email ((acc-id integer))
-  (with-db ()
-    (query (:select 'email :from 'account :where (:= 'id acc-id))
-           :single)))
+  (db-query (:select 'email :from 'account :where (:= 'id acc-id))
+            :single))
 (defmethod account-display-name ((acc-id integer))
-  (with-db ()
-    (query (:select 'display-name :from 'account :where (:= 'id acc-id))
-           :single)))
+  (db-query (:select 'display-name :from 'account :where (:= 'id acc-id))
+            :single))
 
 (defdao account ()
   ((display-name text :reader account-display-name)
@@ -65,16 +63,14 @@
     (car (select-dao 'account (:= 'email (string-downcase email))))))
 
 (defun validate-account (email password)
-  (with-db ()
-    (when-let (account (find-account-by-email email))
-      (let ((hashed-pass (hash-password password (account-password-salt account))))
-        (when (equalp hashed-pass (account-password account))
-          account)))))
+  (when-let (account (find-account-by-email email))
+    (let ((hashed-pass (hash-password password (account-password-salt account))))
+      (when (equalp hashed-pass (account-password account))
+        account))))
 
 (defun display-name-exists-p (display-name)
-  (with-db ()
-    (query (:select t :from 'account :where (:= 'display-name display-name))
-           :single)))
+  (db-query (:select t :from 'account :where (:= 'display-name display-name))
+            :single))
 
 ;;;
 ;;; Creation and validation
@@ -113,15 +109,14 @@
     (assert-validation (string= password confirmation) "Password confirmation does not match.")))
 
 (defun create-account (email display-name password confirmation)
-  (with-db ()
-    (with-transaction ()
-      (multiple-value-bind (validp errors)
-          (validate-new-account email display-name password confirmation)
-        (if validp
-            (let ((salt (gensalt)))
-              (make-dao 'account
-                        :email email
-                        :display-name display-name
-                        :password (hash-password password salt)
-                        :salt salt))
-            (values nil errors))))))
+  (with-transaction ()
+    (multiple-value-bind (validp errors)
+        (validate-new-account email display-name password confirmation)
+      (if validp
+          (let ((salt (gensalt)))
+            (make-dao 'account
+                      :email email
+                      :display-name display-name
+                      :password (hash-password password salt)
+                      :salt salt))
+          (values nil errors)))))
