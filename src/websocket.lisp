@@ -217,12 +217,20 @@
          (local-actors *client*))))
 
 (defhandler action (action-txt)
-  (map nil (rcurry #'send-action (client-character-id *client*) action-txt)
-       (local-actors *client*)))
+  (handler-case
+      (let ((predicate (print (sykosomatic.parser:parse-action action-txt))))
+        (map nil (rcurry #'send-action (client-character-id *client*) predicate)
+             (local-actors *client*)))
+    (error (e)
+      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
 
 (defhandler emit (text)
   (map nil (rcurry #'send-action nil text)
        (local-actors *client*)))
+
+(defhandler complete-verb (verb-text)
+  (client-write *client* (jsown:to-json (list "completion"
+                                              (sykosomatic.vocabulary:verb-completions verb-text)))))
 
 (defhandler char-desc (charname)
   (logit "Got a character description request: ~S" charname)
