@@ -33,8 +33,7 @@
 (defvar *connection-pool* (make-queue *max-pooled-connections*))
 
 (defun get-connection ()
-  (or *database*
-      (bt:with-lock-held (*connection-pool-lock*)
+  (or (bt:with-lock-held (*connection-pool-lock*)
         (unless (queue-empty-p *connection-pool*)
           (dequeue *connection-pool*)))
       (apply #'connect (list *db-name* *db-user* *db-password* *db-host*))))
