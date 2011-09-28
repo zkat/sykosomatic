@@ -6,7 +6,7 @@
         :sykosomatic.util)
   (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
            :current-account :ensure-logged-in :start-persistent-session
-           :persistent-session-gc :end-session :session-cleanup
+           :verify-persistent-session :persistent-session-gc :end-session :session-cleanup
            :register-session-finalizer :unregister-session-finalizer
            :transient-session-value
            :push-error :session-errors :session-websocket-clients))
@@ -73,30 +73,33 @@
                      :where (:= 'id session-id))
             :single))
 
+(defun verify-persistent-session (session-identifier user-agent remote-addr)
+  (with-transaction ()
+    (destructuring-bind (session-id expiredp)
+        (db-query (:for-update
+                   (:select 'id (:< (:+ 'last-seen 'max-time)
+                                    (:now))
+                            :from 'persistent-session
+                            :where (:and (:= 'cookie-value session-identifier)
+                                         (:= 'user-agent user-agent))))
+                  :row)
+      (when session-id
+        (if expiredp
+            (session-cleanup session-id)
+            (db-query (:update 'persistent-session
+                               :set 'last-seen (:now)
+                               'last-remote-addr remote-addr
+                               :where (:= 'id session-id)
+                               :returning 'id)
+                      :single))))))
+
 (defmethod session-verify ((request persistent-session-request))
   (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
                                 (get-parameter (session-cookie-name *acceptor*) request))))
     (when (and session-identifier
                (stringp session-identifier)
                (not (emptyp session-identifier)))
-      (with-transaction ()
-        (destructuring-bind (session-id expiredp)
-            (db-query (:for-update
-                       (:select 'id (:< (:+ 'last-seen 'max-time)
-                                        (:now))
-                                :from 'persistent-session
-                                :where (:and (:= 'cookie-value session-identifier)
-                                             (:= 'user-agent (user-agent request)))))
-                      :row)
-          (when session-id
-            (if expiredp
-                (session-cleanup session-id)
-                (db-query (:update 'persistent-session
-                                   :set 'last-seen (:now)
-                                   'last-remote-addr (remote-addr request)
-                                   :where (:= 'id session-id)
-                                   :returning 'id)
-                          :single))))))))
+      (verify-persistent-session session-identifier (user-agent request) (remote-addr request)))))
 
 (defun end-session (session-id)
   (with-transaction ()
