@@ -1,7 +1,17 @@
 (cl:defpackage #:sykosomatic.util
   (:use :cl :alexandria)
   (:export :logit :dbg :continuable :random-string
-           :make-timer :timer-tick))
+           ;; Timer
+           :make-timer :timer-tick
+           ;; Queue
+           :make-queue
+           :queue-count
+           :queue-length
+           :queue-peek
+           :queue-full-p
+           :queue-empty-p
+           :enqueue
+           :dequeue))
 (cl:in-package :sykosomatic.util)
 
 ;; Because SAFETY settings persist from libraries in CCL >:|
