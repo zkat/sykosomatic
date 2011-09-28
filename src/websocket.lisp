@@ -15,20 +15,6 @@
 (defun (setf session-websocket-clients) (new-value session)
   (setf (transient-session-value 'websocket-clients session) new-value))
 
-(defstruct (user-action (:constructor make-user-action (user action dialogue
-                                                        &optional (timestamp (get-universal-time)))))
-  user timestamp action dialogue)
-
-(defun render-user-action-to-json (user-action)
-  (let ((action (user-action-action user-action))
-        (dialogue (user-action-dialogue user-action))
-        (user (user-action-user user-action)))
-    (jsown:to-json
-     `("user-action"
-       (:obj ("action" . ,action)
-             ("character" . ,user)
-             ("dialogue" . ,dialogue))))))
-
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
 (defgeneric validate-client (chat-server client))
@@ -283,6 +269,23 @@
     (bt:destroy-thread *chat-resource-thread*))
   (setf *websocket-thread* nil
         *chat-resource-thread* nil))
+
+
+;;; User actions
+;; (defstruct (user-action (:constructor make-user-action (user action dialogue
+;;                                                         &optional (timestamp (get-universal-time)))))
+;;   user timestamp action dialogue)
+
+;; (defun render-user-action-to-json (user-action)
+;;   (let ((action (user-action-action user-action))
+;;         (dialogue (user-action-dialogue user-action))
+;;         (user (user-action-user user-action)))
+;;     (jsown:to-json
+;;      `("user-action"
+;;        (:obj ("action" . ,action)
+;;              ("character" . ,user)
+;;              ("dialogue" . ,dialogue))))))
+
 
 ;; (defun send-user-action (client user-action)
 ;;   (when-let ((scene-id (session-value 'scene-id (client-session client))))
