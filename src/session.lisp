@@ -49,12 +49,11 @@
   "sykosomatic-session")
 
 (defun persistent-session-gc ()
-  (let ((old-session-ids (db-query (:select 'id :from 'persistent-session
-                                            :where (:< (:+ 'last-seen 'max-time)
-                                                       (:now)))
-                                   :column)))
-    (with-transaction ()
-      (map nil #'session-cleanup old-session-ids))))
+  (with-transaction ()
+    (doquery (:select 'id :from 'persistent-session
+                      :where (:< (:+ 'last-seen 'max-time)
+                                 (:now))) (old-id)
+      (with-db (:reusep nil) (session-cleanup old-id)))))
 
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
