@@ -82,9 +82,14 @@
 ***** DONE parenthetical
 **** DONE Interactively accept a verb in the action field
      Verb should be auto-completable based on the existing list of verbs.
-**** TODO Interactively select both a verb, then an adverb
+**** DONE Interactively select both a verb, then an adverb
      Adverb should also be from the existing adverb database
-**** TODO Interactively select either verb-adverb or adverb-verb or just verb
+**** DONE Interactively select either verb-adverb or adverb-verb or just verb
+**** TODO Improve error reporting
+     Perhaps PLUS can be used here. The ENOPARSE error is sub-optimal.
+**** TODO In the completion popup, group matches by verb and by adverb
+     Kinda like an <optgroup>. jquery-ui's autocomplete supports this.
+     NOTE: Maybe in the future. Whole-sentence is easier for now. :\
 *** TODO Performance: one SQL connection per websocket client?
 *** TODO Scene headers
 **** TODO Add a scene-header server->client message
@@ -124,11 +129,16 @@
      Since sessions last a long time, have a screen where a user can log out all other active
      sessions.
 **** TODO Log out all sessions on username or password change
+**** DONE Put locks around finalizers and transient values
+**** TODO Make sure session-verify really is thread-safe.
+     I'm nublar at with-transaction :(
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
 *** TODO Form builder
     Need a form builder that supports validation, error reporting, rendering, and CSRF tokens. This
     can be an independent library. freiksenet says he'll do it.
+*** TODO Logging system
+    Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
 *** TODO Use 'real' templates
     Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
     most templates should be in their own files, organized by webpage names. Give tal a shot for
@@ -195,8 +205,8 @@
     game's canon, and/or are staff approved?
 ** Database
 *** TODO Remove s-sql patch
-    When/if marijn accepts my pull request.
-*** TODO new defdao macro
+    Waiting until the new pomo makes it into a quicklisp release.
+*** DONE new defdao macro
     Simplify common-case definition based on the currently-established usage pattern.
 
     Something like:
@@ -210,12 +220,21 @@
 
     This should generate :initarg and :col-type using the available info, and accept
     other slot arguments after that.
-*** TODO don't use postmodern directly
+*** DONE don't use postmodern directly
     Wrap any postmodern-specific calls so only :sykosomatic.db needs to be included. This includes
     stuff like automatic transaction 
+*** DONE Reduce with-db wrapping
+*** DONE with-transaction implies with-db
 *** TODO 'init db' system of some sort
     Needs to both create all tables, insert any initial data stored elsewhere, and remind admin to
     execute whatever external command needs to be executed post-boot (such as installing unaccent).
+*** DONE Connection pool
+*** DONE Optionally turn off connection sharing
+*** DONE Fix connection sharing
+*** TODO Look into offering my pooling improvements to postmodern
+    Postmodern already has a pooled connection system. Look at it a little closer and figure out how
+    it might benefit from my own pooling system (and/or if it's worth using instead of my own
+    pooling system).
 ** Security
 *** TODO HTTPS
     May not need/want hunchentoot managing this. Check out http://haproxy.1wt.eu/, which supposedly
@@ -243,3 +262,6 @@
     
 ** Misc
 *** TODO Move persistent sessions out into a separate lisp project
+*** DONE Move queue.lisp into an external project
+*** TODO Move timer.lisp into an external project
+*** TODO Merge smug.lisp changes into mainline smug and use that version instead
