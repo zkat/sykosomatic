@@ -63,6 +63,10 @@
   `(with-db () (query ,query ,@args/format)))
 
 ;;; SQL utils
+(defclass base-table ()
+  ((id :reader id :col-type serial))
+  (:metaclass dao-class))
+
 (defmacro defdao (name superclasses slots &body dao-options)
   (flet ((parsed-opts (keyword deftable-func-name)
            (mapcar (lambda (statement)
@@ -70,8 +74,11 @@
                    (remove-if-not (lambda (opt) (eq keyword (car opt)))
                                   dao-options))))
     `(progn
-       (defclass ,name ,superclasses
-         ,slots
+       (defclass ,name ,(append '(base-table) superclasses)
+         ,(loop for (slotname col-type . other-args) in slots
+             collect `(,slotname :initarg ,(intern (string slotname) :keyword)
+                                 :col-type ,col-type
+                                 ,@other-args))
          (:metaclass dao-class)
          ,@(when-let (keys (assoc :keys dao-options)) `(,keys)))
        (deftable ,name

@@ -43,8 +43,7 @@
 ;;; Entity
 ;;;
 (defdao entity ()
-  ((id :col-type serial :reader id)
-   (comment :col-type (or db-null text)))
+  ((comment (or db-null text)))
   (:keys id))
 
 (defun entity-id (entity)
@@ -58,18 +57,17 @@
 ;;; Modifiers
 ;;;
 (defdao modifier ()
-  ((id :col-type serial :reader id)
-   (entity-id :col-type bigint :initarg :entity-id)
-   (precedence :col-type bigint :initarg :precedence :col-default 0)
-   (package :col-type text :initarg :package)
-   (name :col-type text :initarg :name)
-   (description :col-type (or db-null text) :initarg :description)
+  ((entity-id bigint)
+   (precedence bigint :col-default 0)
+   (package text)
+   (name text)
+   (description (or db-null text))
    ;; NOTE: If another value type is added here, update:
    ;; ADD-MODIFIER, MODIFIER-VALUE, FIND-BY-MODIFIER-VALUE.
-   (numeric-value :col-type (or db-null numeric) :initarg :numeric-value)
-   (boolean-value :col-type (or db-null boolean) :initarg :boolean-value)
-   (text-value :col-type (or db-null text) :initarg :text-value)
-   (text-array-value :col-type (or db-null text[]) :initarg :text-array-value))
+   (numeric-value (or db-null numeric))
+   (boolean-value (or db-null boolean))
+   (text-value (or db-null text))
+   (text-array-value (or db-null text[])))
   (:keys id)
   (:index package name id entity-id))
 
@@ -175,19 +173,17 @@
 ;;; Events
 ;;;
 (defdao event-execution ()
-  ((id :col-type serial :reader id)
-   (event-id :col-type bigint :initarg :event-id)
-   (type :col-type text :initarg :type)
-   (execution-time :col-type timestamp :col-default (:now) :initarg :execution-time)
-   (completedp :col-type boolean :col-default nil))
+  ((event-id bigint)
+   (type text)
+   (execution-time timestamp :col-default (:now))
+   (completedp boolean :col-default nil))
   (:keys id))
 
 ;;;
 ;;; Modifier removal events
 ;;;
 (defdao ev-remove-modifier ()
-  ((id :col-type serial :reader id)
-   (modifier-id :col-type bigint :initarg :modifier-id))
+  ((modifier-id bigint))
   (:keys id))
 
 (defprepared expired-modifiers

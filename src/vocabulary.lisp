@@ -7,14 +7,13 @@
 
 ;;; Pronouns
 (defdao pronoun ()
-  ((id :col-type serial :reader id)
-   (pluralp :col-type boolean :col-default nil :initarg :pluralp)
+  ((pluralp boolean :col-default nil)
    ;; "She"/"He"
-   (subjective :col-type text :initarg :subjective)
+   (subjective text)
    ;; "Her"/"Him"
-   (objective :col-type text :initarg :objective)
+   (objective text)
    ;; "Her"/"His"
-   (possessive :col-type text :initarg :possessive))
+   (possessive text))
   (:keys subjective)
   (:unique-index subjective)
   (:unique subjective))
@@ -34,8 +33,7 @@
 
 ;;; Adverbs
 (defdao adverb ()
-  ((id :col-type serial :reader id)
-   (text :col-type text :initarg :text))
+  ((text text))
   (:keys text)
   (:unique-index text)
   (:unique text))
@@ -59,10 +57,9 @@
 ;;; Using terminology from the wikipedia article on English Conjugation:
 ;;; https://secure.wikimedia.org/wikipedia/en/wiki/English_conjugation
 (defdao verb ()
-  ((id :col-type serial :reader id)
-   (bare :col-type text :initarg :bare)
-   (third-person :col-type text :initarg :third-person)
-   (preterite :col-type text :initarg :preterite))
+  ((bare text)
+   (third-person text)
+   (preterite text))
   (:keys bare)
   (:unique-index bare)
   (:unique bare))
