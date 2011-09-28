@@ -6,6 +6,7 @@
    #:parse
    #:item
    #:fail
+   #:plus
 
    #:=let*
    #:*case-sensitive-p*
