@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.vocabulary
-  (:use :cl :alexandria :postmodern :sykosomatic.db)
+  (:use :cl :alexandria :sykosomatic.db)
   (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb
            :add-verb :remove-verb :verb-completions :adverb-completions
            :third-person-singular :preterite))
