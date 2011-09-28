@@ -252,7 +252,6 @@ var sykosomatic =
     pub.send_ooc_input = send_ooc_input;
 
     function ping() {
-        $.get('pingme',on_ajax_success);
         ws_send(['ping']);
     }
 
@@ -294,18 +293,6 @@ var sykosomatic =
     /// Init
     ///
     var interval_id;
-    var num_ajax_failures = 0;
-    function on_ajax_error() {
-        num_ajax_failures = num_ajax_failures + 1;
-        if (num_ajax_failures >= 5) {
-            clearTimeout(interval_id);
-        };
-    };
-
-    function on_ajax_success() {
-        num_ajax_failures = 0;
-    };
-
     function install_onsubmits() {
         $("#ooc-input").submit(send_ooc_input);
         $("#action-input").submit(send_action);
@@ -370,9 +357,8 @@ var sykosomatic =
 
         $("select").chosen();
 
-        // ping the server to keep the session and websocket alive.
-        interval_id = setInterval(ping,1000*60*5);
-        $(document).ajaxError(on_ajax_error);
+        // ping the server to keep the websocket alive.
+        interval_id = setInterval(ping,1000*60*15);
         //$(document).unload(disable_input);
     }
     pub.init = init;

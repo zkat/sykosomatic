@@ -30,8 +30,7 @@
    (session-start :col-type timestamp :col-default (:now))
    (last-seen :col-type timestamp :col-default (:now))
    (max-time :col-type interval :initarg :max-time
-             :initform (format nil "~A seconds"
-                               *session-max-time*)))
+             :initform (format nil "~A seconds" *session-max-time*)))
   (:keys cookie-value)
   (:unique cookie-value))
 
