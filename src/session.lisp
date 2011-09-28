@@ -114,42 +114,50 @@
   (logit "Session timed out. Logging it out.")
   (end-session session-id))
 
-;; TODO - put a lock on these.
-
 ;;; Session finalizers
 ;;; - When end-session is called, it will execute all registered finalizers, in no particular order,
 ;;;   by calling them on the session-id. These finalizers will all be called before the persistent
 ;;;   session is deleted.
 
+(defvar *finalizer-lock* (bt:make-lock))
 (defvar *session-finalizers* (make-hash-table))
 
 (defun register-session-finalizer (name function)
-  (setf (gethash name *session-finalizers*) function))
+  (bt:with-lock-held (*finalizer-lock*)
+    (setf (gethash name *session-finalizers*) function)))
 (defun unregister-session-finalizer (name)
-  (remhash name *session-finalizers*))
+  (bt:with-lock-held (*finalizer-lock*)
+    (remhash name *session-finalizers*)))
 (defun find-finalizer (name)
-  (gethash name *session-finalizers*))
+  (bt:with-lock-held (*finalizer-lock*)
+    (gethash name *session-finalizers*)))
 (defun all-finalizers ()
-  (hash-table-values *session-finalizers*))
+  (bt:with-lock-held (*finalizer-lock*)
+    (hash-table-values *session-finalizers*)))
 
 ;;; Transient session values
+(defvar *transient-value-lock* (bt:make-lock))
 (defvar *transient-session-values* (make-hash-table))
 
 (defun remove-transient-session-values (&optional (session *session*))
-  (remhash session *transient-session-values*))
+  (bt:with-lock-held (*transient-value-lock*)
+    (remhash session *transient-session-values*)))
 
 (defun transient-session-value (key &optional (session *session*))
-  (when-let (session-table (gethash session *transient-session-values*))
-    (gethash key session-table)))
+  (bt:with-lock-held (*transient-value-lock*)
+    (when-let (session-table (gethash session *transient-session-values*))
+      (gethash key session-table))))
 (defun (setf transient-session-value) (new-value key &optional (session *session*))
-  (let ((session-table (or (gethash session *transient-session-values*)
-                           (setf (gethash session *transient-session-values*)
-                                 (make-hash-table)))))
-    (setf (gethash key session-table) new-value)))
+  (bt:with-lock-held (*transient-value-lock*)
+    (let ((session-table (or (gethash session *transient-session-values*)
+                             (setf (gethash session *transient-session-values*)
+                                   (make-hash-table)))))
+      (setf (gethash key session-table) new-value))))
 
 (defun push-error (format-string &rest format-args)
-  (push (apply #'format nil format-string format-args)
-        (transient-session-value 'errors)))
+  (bt:with-lock-held (*transient-value-lock*)
+    (push (apply #'format nil format-string format-args)
+          (transient-session-value 'errors))))
 
 (defun session-errors (&optional (session hunchentoot:*session*))
   (transient-session-value 'errors session))
