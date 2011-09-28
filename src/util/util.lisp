@@ -4,6 +4,9 @@
            :make-timer :timer-tick))
 (cl:in-package :sykosomatic.util)
 
+;; Because SAFETY settings persist from libraries in CCL >:|
+(declaim (optimize (safety 1)))
+
 (defmacro continuable (&body body)
   "helper macro since we use continue restarts a lot
  (remember to hit C in slime or pick the restart so errors don't kill the app)"
