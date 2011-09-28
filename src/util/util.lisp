@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.util
-  (:use :cl :alexandria)
+  (:use :cl :alexandria :cl-speedy-queue)
   (:export :logit :dbg :continuable :random-string
            ;; Timer
            :make-timer :timer-tick
