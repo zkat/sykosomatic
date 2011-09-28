@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.db
   (:use :cl :alexandria :postmodern
         :sykosomatic.util)
+  (:shadow :with-transaction)
   (:export
    ;; DAO
    :id :defdao :get-dao :select-dao
@@ -94,6 +95,11 @@
                            (otherwise (error "Unknown defdao option: ~S" opt)))
               when form
               collect form)))))
+
+(defmacro with-transaction ((&optional name) &body body)
+  `(with-db ()
+     (pomo:with-transaction (,@(when name `(,name)))
+       ,@body)))
 
 (defun drop-table (symbol)
   (with-db ()
