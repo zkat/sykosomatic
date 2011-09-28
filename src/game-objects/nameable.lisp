@@ -7,15 +7,14 @@
 (cl:in-package #:sykosomatic.game-objects.nameable)
 
 (defdao nameable ()
-  ((id :col-type serial :reader id)
-   (entity-id :col-type bigint :initarg :entity-id)
-   (base-name :col-type text :initarg :base-name)
-   (use-article-p :col-type boolean :col-default nil :initarg :use-article-p)
-   (adjectives :col-type (or db-null text[]) :initarg :adjectives)
-   (titles :col-type (or db-null text[]) :initarg :titles)
-   (first-name :col-type (or db-null text) :initarg :first-name)
-   (suffix :col-type (or db-null text) :initarg :suffix)
-   (suffix-titles :col-type (or db-null text[]) :initarg :suffix-titles)))
+  ((entity-id bigint)
+   (base-name text)
+   (use-article-p boolean :col-default nil)
+   (adjectives (or db-null text[]))
+   (titles (or db-null text[]))
+   (first-name (or db-null text))
+   (suffix (or db-null text))
+   (suffix-titles (or db-null text[]))))
 
 (defun add-name (entity base-name &key
                  use-article-p adjectives titles

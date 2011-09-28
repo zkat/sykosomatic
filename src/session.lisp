@@ -22,15 +22,13 @@
   (ironclad:byte-array-to-hex-string (cl+ssl:random-bytes byte-count)))
 
 (defdao persistent-session ()
-  ((id :col-type serial :reader id)
-   (cookie-value :col-type text :initform (generate-session-string 128) :reader session-cookie-value)
-   (account-id :col-type bigint :initarg :account-id)
-   (user-agent :col-type text :initform (user-agent *request*))
-   (last-remote-addr :col-type text :initform (real-remote-addr *request*))
-   (session-start :col-type timestamp :col-default (:now))
-   (last-seen :col-type timestamp :col-default (:now))
-   (max-time :col-type interval :initarg :max-time
-             :initform (format nil "~A seconds" *session-max-time*)))
+  ((cookie-value text :initform (generate-session-string 128) :reader session-cookie-value)
+   (account-id bigint)
+   (user-agent text :initform (user-agent *request*))
+   (last-remote-addr text :initform (real-remote-addr *request*))
+   (session-start timestamp :col-default (:now))
+   (last-seen timestamp :col-default (:now))
+   (max-time interval :initform (format nil "~A seconds" *session-max-time*)))
   (:keys cookie-value)
   (:unique cookie-value))
 
