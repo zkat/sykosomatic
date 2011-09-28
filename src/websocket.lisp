@@ -71,8 +71,7 @@
     (character-name character-id)))
 
 (defclass chat-server (ws:ws-resource)
-  ((clients :initform (make-hash-table :test #'eq))
-   (client-main :initarg :client-main)))
+  ((clients :initform (make-hash-table :test #'eq))))
 
 (defmethod disconnect-client ((server chat-server) client)
   (let ((ws-client (client-ws-client client))
@@ -84,10 +83,10 @@
 
 (defvar *websocket-server*)
 
-(defun register-chat-server (client-main)
+(defun register-chat-server ()
   (ws:register-global-resource
    "/chat"
-   (setf *websocket-server* (make-instance 'chat-server :client-main client-main))
+   (setf *websocket-server* (make-instance 'chat-server))
    (ws:origin-prefix "http://zushakon.sykosomatic.org")))
 
 (defmethod add-client ((srv chat-server) client)
@@ -261,8 +260,8 @@
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
-(defun init-websockets (client-main &optional (port *chat-server-port*))
-  (register-chat-server client-main)
+(defun init-websockets (&optional (port *chat-server-port*))
+  (register-chat-server)
   (register-session-finalizer 'websocket-clients
                               (lambda (session-id)
                                 (when-let (clients (session-websocket-clients session-id))
