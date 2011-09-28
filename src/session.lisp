@@ -50,9 +50,11 @@
 
 (defun persistent-session-gc ()
   (with-transaction ()
-    (doquery (:select 'id :from 'persistent-session
-                      :where (:< (:+ 'last-seen 'max-time)
-                                 (:now))) (old-id)
+    (doquery (:for-update
+              (:select 'id :from 'persistent-session
+                       :where (:< (:+ 'last-seen 'max-time)
+                                  (:now))))
+        (old-id)
       (with-db (:reusep nil) (session-cleanup old-id)))))
 
 (defun start-persistent-session (account-id)
