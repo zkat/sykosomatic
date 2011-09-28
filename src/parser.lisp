@@ -8,31 +8,36 @@
 
 (defparameter *max-completion-results* 25)
 (defun parse-action-completions ()
-  (=let* ((verbs (partial-verb))
-          (adverbs (maybe (=and (ws) (partial-adverb)))))
+  (plus (parse-word-pair (partial-verb) (partial-adverb))
+        (parse-word-pair (partial-adverb) (partial-verb))))
+
+(defun parse-word-pair (parser1 parser2)
+  (=let* ((words1 parser1)
+          (words2 (maybe (=and (ws) parser2))))
     (cond ((<= *max-completion-results*
-               (reduce #'* (list verbs adverbs) :key #'length))
+               (reduce #'* (list words1 words2) :key #'length))
            (fail))
-          ((and verbs adverbs)
+          ((and words1 words2)
            (result
-            (loop for verb in verbs
-               appending (loop for adverb in adverbs
-                            collect (concatenate 'string verb " " adverb)))))
-          (verbs
-           (result verbs))
+            (loop for word1 in words1
+               appending (loop for word2 in words2
+                            collect (concatenate 'string word1 " " word2)))))
+          (words1
+           (result words1))
           (t
            (fail)))))
 
 (defun action-completions (action-text)
   (with-db ()
     (when-let (results (funcall (either (parse-action-completions) 'error) action-text))
-      (destructuring-bind ((completions . rest) . more)
-          results
-        (cond ((or more (not (emptyp rest)))
-               nil)
-              ((typep completions 'error)
-               (signal completions))
-              (t completions))))))
+      (unless
+          (<= *max-completion-results*
+              (reduce #'* results :key (compose #'length #'car))))
+      (loop for (completions . leftovers) in results
+         when (typep completions 'error)
+         do (signal completions)
+         when (emptyp leftovers)
+         append completions))))
 
 (defun partial-vocabulary-word (search-fun)
   (=let* ((partial-word (dashed-word)))
