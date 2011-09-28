@@ -297,7 +297,7 @@ var sykosomatic =
     function init_autocomplete() {
         $("#action-input :input").autocomplete({
             source:function (request,response){
-                ws_send(["complete-verb",request.term]);
+                ws_send(["complete-action",request.term]);
                 ac_response_handler = response;
             }
         });

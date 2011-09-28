@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic.vocabulary
   (:use :cl :alexandria :postmodern :sykosomatic.db)
   (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb
-           :add-verb :remove-verb :verb-completions
+           :add-verb :remove-verb :verb-completions :adverb-completions
            :third-person-singular :preterite))
 (cl:in-package #:sykosomatic.vocabulary)
 
@@ -47,6 +47,13 @@
   (with-db () (query (:delete-from 'adverb :where (:= 'text adverb))))
   t)
 
+(defun adverb-completions (incomplete-adverb &optional (limit 50))
+  (with-db ()
+    (query (:limit (:select 'text :from 'adverb :where
+                            (:ilike 'text (format nil "%~A%" incomplete-adverb)))
+                   limit)
+           :column)))
+
 ;;; Verbs
 ;;;
 ;;; Using terminology from the wikipedia article on English Conjugation:
@@ -78,10 +85,11 @@
   (with-db () (query (:delete-from 'verb :where (:= 'bare bare))))
   t)
 
-(defun verb-completions (incomplete-verb)
+(defun verb-completions (incomplete-verb &optional (limit 50))
   (with-db ()
-    (query (:select 'third-person :from 'verb :where
-                    (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
+    (query (:limit (:select 'third-person :from 'verb :where
+                            (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
+                   limit)
            :column)))
 
 ;;; Testing

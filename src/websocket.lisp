@@ -230,9 +230,9 @@
   (map nil (rcurry #'send-action nil text)
        (local-actors *client*)))
 
-(defhandler complete-verb (verb-text)
+(defhandler complete-action (action-text)
   (client-write *client* (jsown:to-json (list "completion"
-                                              (sykosomatic.vocabulary:verb-completions verb-text)))))
+                                              (sykosomatic.parser:action-completions action-text)))))
 
 (defhandler char-desc (charname)
   (logit "Got a character description request: ~S" charname)

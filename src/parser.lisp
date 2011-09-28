@@ -3,8 +3,47 @@
         :sykosomatic.util
         :sykosomatic.db
         :sykosomatic.vocabulary)
-  (:export :parse-dialogue :parse-action))
+  (:export :action-completions :parse-dialogue :parse-action))
 (cl:in-package #:sykosomatic.parser)
+
+(defparameter *max-completion-results* 25)
+(defun parse-action-completions ()
+  (=let* ((verbs (partial-verb))
+          (adverbs (maybe (=and (ws) (partial-adverb)))))
+    (cond ((<= *max-completion-results*
+               (reduce #'* (list verbs adverbs) :key #'length))
+           (fail))
+          ((and verbs adverbs)
+           (result
+            (loop for verb in verbs
+               appending (loop for adverb in adverbs
+                            collect (concatenate 'string verb " " adverb)))))
+          (verbs
+           (result verbs))
+          (t
+           (fail)))))
+
+(defun action-completions (action-text)
+  (with-db ()
+    (when-let (results (funcall (either (parse-action-completions) 'error) action-text))
+      (destructuring-bind ((completions . rest) . more)
+          results
+        (cond ((or more (not (emptyp rest)))
+               nil)
+              ((typep completions 'error)
+               (signal completions))
+              (t completions))))))
+
+(defun partial-vocabulary-word (search-fun)
+  (=let* ((partial-word (dashed-word)))
+    (if-let (completed (funcall search-fun partial-word))
+      (result completed)
+      (fail))))
+
+(defun partial-verb ()
+  (partial-vocabulary-word #'verb-completions))
+(defun partial-adverb ()
+  (partial-vocabulary-word #'adverb-completions))
 
 (defun parse-dialogue (message)
   (let ((results (invoke-parser (either (dialogue) 'error) message)))
