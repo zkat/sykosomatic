@@ -10,7 +10,6 @@
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
-  (with-db ()
-    (with-form-errors
-      (templ:render-template "role" (mapcar #'character-name
-                                            (account-characters (current-account)))))))
+  (with-form-errors
+    (templ:render-template "role" (mapcar #'character-name
+                                          (account-characters (current-account))))))

@@ -49,53 +49,48 @@
   (:keys id))
 
 (defun scene-upvote (scene-id account-id)
-  (with-db ()
-    (with-transaction ()
-      (unless (account-voted-p scene-id account-id)
-        (make-dao 'scene-upvote))
-      t)))
+  (with-transaction ()
+    (unless (account-voted-p scene-id account-id)
+      (make-dao 'scene-upvote))
+    t))
 
 (defun scene-id (scene)
   (id scene))
 
 (defun scene-exists-p (scene-id)
-  (with-db ()
-    (query (:select t :from 'scene :where (:= 'id scene-id))
-           :single)))
+  (db-query (:select t :from 'scene :where (:= 'id scene-id))
+            :single))
 
 (defun account-voted-p (scene-id account-id)
-  (with-db ()
-    (query (:select t :from 'scene-upvote
-                    :where (:and (:= 'scene-id scene-id)
-                                 (:= 'account-id account-id)))
-           :single)))
+  (db-query (:select t :from 'scene-upvote
+                     :where (:and (:= 'scene-id scene-id)
+                                  (:= 'account-id account-id)))
+            :single))
 
 (defun scene-rating (scene-id)
-  (with-db ()
-    (query (:select (:count :*) :from 'scene-upvote
-                    :where (:= 'scene-id scene-id)))))
+  (db-query (:select (:count :*) :from 'scene-upvote
+                     :where (:= 'scene-id scene-id))
+            :single))
 
 (defun find-scenes-by-account-id (account-id)
   (with-db ()
     (select-dao 'scene (:= 'account-id account-id))))
 
 (defun find-scenes-by-account-email (account-email)
-  (with-db ()
-    (with-transaction ()
-      (when-let (account-id (query (:select 'id :from 'account
-                                            :where (:= 'email (string-downcase account-email)))
-                                   :single))
-        (find-scenes-by-account-id account-id)))))
+  (with-transaction ()
+    (when-let (account-id (query (:select 'id :from 'account
+                                          :where (:= 'email (string-downcase account-email)))
+                                 :single))
+      (find-scenes-by-account-id account-id))))
 
 (defun find-scene-with-entries (scene-id)
-  (with-db ()
-    (query (:select :* :from (:as 'scene 's)
-                    :left-join (:as 'dialogue 'd)
-                    :on (:= 'd.scene-id 's.id)
-                    :left-join (:as 'action 'a)
-                    :on (:= 'a.scene-id 's.id)
-                    :where (:= 's.id scene-id))
-           :alists)))
+  (db-query (:select :* :from (:as 'scene 's)
+                     :left-join (:as 'dialogue 'd)
+                     :on (:= 'd.scene-id 's.id)
+                     :left-join (:as 'action 'a)
+                     :on (:= 'a.scene-id 's.id)
+                     :where (:= 's.id scene-id))
+            :alists))
 
 (defun find-scene-entries (scene-id)
   (find-scene-with-entries scene-id))

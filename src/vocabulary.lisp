@@ -27,8 +27,7 @@
   t)
 
 (defun remove-pronoun (text-id)
-  (with-db ()
-    (query (:delete-from 'pronoun :where (:= 'text-id text-id))))
+  (db-query (:delete-from 'pronoun :where (:= 'text-id text-id)))
   t)
 
 ;;; Adverbs
@@ -42,15 +41,14 @@
   (with-db () (make-dao 'adverb :text adverb))
   t)
 (defun remove-adverb (adverb)
-  (with-db () (query (:delete-from 'adverb :where (:= 'text adverb))))
+  (db-query (:delete-from 'adverb :where (:= 'text adverb)))
   t)
 
 (defun adverb-completions (incomplete-adverb &optional (limit 50))
-  (with-db ()
-    (query (:limit (:select 'text :from 'adverb :where
-                            (:ilike 'text (format nil "%~A%" incomplete-adverb)))
-                   limit)
-           :column)))
+  (db-query (:limit (:select 'text :from 'adverb :where
+                             (:ilike 'text (format nil "%~A%" incomplete-adverb)))
+                    limit)
+            :column))
 
 ;;; Verbs
 ;;;
@@ -79,15 +77,14 @@
                                (t (concatenate 'string bare "ed")))))
   t)
 (defun remove-verb (bare)
-  (with-db () (query (:delete-from 'verb :where (:= 'bare bare))))
+  (db-query (:delete-from 'verb :where (:= 'bare bare)))
   t)
 
 (defun verb-completions (incomplete-verb &optional (limit 50))
-  (with-db ()
-    (query (:limit (:select 'third-person :from 'verb :where
-                            (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
-                   limit)
-           :column)))
+  (db-query (:limit (:select 'third-person :from 'verb :where
+                             (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
+                    limit)
+            :column))
 
 ;;; Testing
 (defparameter *test-data*
@@ -108,7 +105,6 @@
   (map nil #'rebuild-table '(verb adverb pronoun)))
 
 (defun import-test-data ()
-  (with-db ()
-    (loop for (adder . args-list) in *test-data*
-       do (loop for args in args-list
-             do (apply adder args)))))
+  (loop for (adder . args-list) in *test-data*
+     do (loop for args in args-list
+           do (apply adder args))))

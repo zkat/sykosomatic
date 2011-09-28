@@ -72,15 +72,14 @@
   (:index package name id entity-id))
 
 (defun list-modifiers (entity &optional (package *package*))
-  (with-db ()
-    (query (sql-compile `(:select :* :from 'modifier
-                                  :where (:and (:= 'entity-id ,(entity-id entity))
-                                               ,@(when package
-                                                   `((:= 'package ,(etypecase package
-                                                                    (package (package-name package))
-                                                                    (string package)
-                                                                    (symbol (string package)))))))))
-           :alists)))
+  (db-query (sql-compile `(:select :* :from 'modifier
+                                   :where (:and (:= 'entity-id ,(entity-id entity))
+                                                ,@(when package
+                                                        `((:= 'package ,(etypecase package
+                                                                                   (package (package-name package))
+                                                                                   (string package)
+                                                                                   (symbol (string package)))))))))
+            :alists))
 
 (defun add-modifier (entity name value &key
                      (precedence 0) (description :null))
@@ -100,50 +99,46 @@
              (symbol (list :text-value (princ-to-string value)))))))
 
 (defun delete-modifier (modifier-id)
-  (with-db ()
-    (query (:delete-from 'modifier :where (:= 'id modifier-id)))))
+  (db-query (:delete-from 'modifier :where (:= 'id modifier-id))))
 
 (defun modifier-value (entity name)
-  (with-db ()
-    (find-if-not (curry #'eq :null)
-                 (query (:order-by (:select 'text-value 'numeric-value
-                                            'boolean-value 'text-array-value
-                                            :from 'modifier
-                                            :where (:and (:= 'entity-id (entity-id entity))
-                                                         (:= 'package (package-name (symbol-package name)))
-                                                         (:= 'name (symbol-name name))))
-                                   (:desc 'precedence)
-                                   (:desc 'id))
-                        :row))))
+  (find-if-not (curry #'eq :null)
+               (db-query (:order-by (:select 'text-value 'numeric-value
+                                             'boolean-value 'text-array-value
+                                             :from 'modifier
+                                             :where (:and (:= 'entity-id (entity-id entity))
+                                                          (:= 'package (package-name (symbol-package name)))
+                                                          (:= 'name (symbol-name name))))
+                                    (:desc 'precedence)
+                                    (:desc 'id))
+                         :row)))
 
 (defun (setf modifier-value) (new-value entity name column)
-  (with-db ()
-    (query (:update 'modifier
-                    :set column new-value
-                    :where (:and (:= 'entity-id (entity-id entity))
-                                 (:= 'package (package-name (symbol-package name)))
-                                 (:= 'name (symbol-name name)))))))
+  (db-query (:update 'modifier
+                     :set column new-value
+                     :where (:and (:= 'entity-id (entity-id entity))
+                                  (:= 'package (package-name (symbol-package name)))
+                                  (:= 'name (symbol-name name))))))
 
 (defun find-by-modifier-value (modifier-name value &key (test :=) (allp nil))
-  (with-db ()
-    (let ((q (sql-compile
-              `(:order-by
-                (:select 'entity-id :from 'modifier
-                         :where (:and (:= 'package ,(package-name (symbol-package modifier-name)))
-                                      (:= 'name ,(symbol-name modifier-name))
-                                      (,test ,(if (stringp value)
-                                                  `(:unaccent ,value)
-                                                  value)
-                                             ,(etypecase value
-                                                         (number 'numeric-value)
-                                                         (string '(:unaccent text-value))
-                                                         (vector 'text-array-value)
-                                                         (boolean 'boolean-value)
-                                                         (symbol 'text-value)))))
-                (:desc 'precedence)))))
-      (if allp
-          (query q :column)
-          (query q :single)))))
+  (let ((q (sql-compile
+            `(:order-by
+              (:select 'entity-id :from 'modifier
+                       :where (:and (:= 'package ,(package-name (symbol-package modifier-name)))
+                                    (:= 'name ,(symbol-name modifier-name))
+                                    (,test ,(if (stringp value)
+                                                `(:unaccent ,value)
+                                                value)
+                                           ,(etypecase value
+                                                       (number 'numeric-value)
+                                                       (string '(:unaccent text-value))
+                                                       (vector 'text-array-value)
+                                                       (boolean 'boolean-value)
+                                                       (symbol 'text-value)))))
+              (:desc 'precedence)))))
+    (if allp
+        (db-query q :column)
+        (db-query q :single))))
 
 ;;;
 ;;; Entity OIDs
@@ -152,19 +147,18 @@
 ;;;   Example: (setf (entity-oid e) "example-objects:chair")
 ;;;
 (defun entity-oid (entity)
-  (with-db () (modifier-value entity 'oid)))
+  (modifier-value entity 'oid))
 
 (defun (setf entity-oid) (new-value entity)
-  (with-db ()
-    (with-transaction ()
-      (cond ((entity-oid entity)
-             (setf (modifier-value entity 'oid 'text-value) new-value))
-            ((find-entity-by-oid new-value)
-             (error "~S must be a globally unique identifier, but it already identifies entity ~A."
-                    new-value (find-entity-by-oid new-value)))
-            (t
-             (add-modifier entity 'oid new-value
-                           :description "Unique external identifier for entity."))))))
+  (with-transaction ()
+    (cond ((entity-oid entity)
+           (setf (modifier-value entity 'oid 'text-value) new-value))
+          ((find-entity-by-oid new-value)
+           (error "~S must be a globally unique identifier, but it already identifies entity ~A."
+                  new-value (find-entity-by-oid new-value)))
+          (t
+           (add-modifier entity 'oid new-value
+                         :description "Unique external identifier for entity.")))))
 
 (defun find-entity-by-oid (oid)
   (find-by-modifier-value 'oid oid))
@@ -197,23 +191,21 @@
                           (:not 'ex.completedp))))
 
 (defun expire-modifier (modifier-id &key (expiration (get-universal-time)))
-  (with-db ()
-    (with-transaction ()
-      (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
-        (make-dao 'event-execution :type "remove-modifier"
-                  :event-id (id removal)
-                  :execution-time (local-time:to-rfc3339-timestring
-                                   (local-time:universal-to-timestamp expiration)))))))
+  (with-transaction ()
+    (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
+      (make-dao 'event-execution :type "remove-modifier"
+                :event-id (id removal)
+                :execution-time (local-time:to-rfc3339-timestring
+                                 (local-time:universal-to-timestamp expiration))))))
 
 (defun clear-expired-modifiers ()
-  (with-db ()
-    (flet ((process-penalty (p)
-             (destructuring-bind (event-execution-id modifier-id)
-                 p
-               (query (:delete-from 'modifier :where (:= 'id modifier-id)))
-               (query (:update 'event-execution :set 'completedp t
-                               :where (:= 'id event-execution-id))))))
-      (with-transaction ()
-        (map nil #'process-penalty (expired-modifiers))))))
+  (flet ((process-penalty (p)
+           (destructuring-bind (event-execution-id modifier-id)
+               p
+             (db-query (:delete-from 'modifier :where (:= 'id modifier-id)))
+             (db-query (:update 'event-execution :set 'completedp t
+                                :where (:= 'id event-execution-id))))))
+    (with-transaction ()
+      (map nil #'process-penalty (expired-modifiers)))))
 
 (register-system 'modifier-expiration 'clear-expired-modifiers)

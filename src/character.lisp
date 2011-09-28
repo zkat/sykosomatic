@@ -26,7 +26,7 @@
   (when (and (>= (length name) 4)
              (<= (length name) 24)
              (scan *character-name-regex*
-                   (with-db () (query (:select (:unaccent name)) :single))))
+                   (db-query (:select (:unaccent name)) :single)))
     t))
 
 (defun validate-new-character (name)
@@ -65,38 +65,36 @@
                          pronoun first-name nickname last-name
                          origin parents siblings situation friends
                          so career-info feature-info where)
-  (with-db ()
-    (with-transaction ()
-      (multiple-value-bind (validp errors)
-          (validate-new-character nickname)
-        (if validp
-            (with-transaction ()
-              (let ((entity (create-entity)))
-                (add-modifier entity 'nickname nickname)
-                (add-modifier entity 'account account-id)
-                (let ((cc-values-id (id (make-dao 'cc-values
-                                                  :entity-id entity
-                                                  :pronoun  pronoun
-                                                  :first-name first-name
-                                                  :nickname nickname
-                                                  :last-name last-name
-                                                  :origin origin
-                                                  :parents parents
-                                                  :siblings siblings
-                                                  :situation situation
-                                                  :friends friends
-                                                  :so so
-                                                  :where where))))
-                  (loop for (career . years-spent) in career-info
-                     when years-spent
-                     do (make-dao 'cc-career-info :cc-values-id cc-values-id
-                                  :career career :years-spent years-spent))
-                  (loop for (feature . adjective) in feature-info
-                     when adjective
-                     do (make-dao 'cc-feature-info :cc-values-id cc-values-id
-                                  :feature feature :adjective adjective)))
-                entity))
-            (values nil errors))))))
+  (with-transaction ()
+    (multiple-value-bind (validp errors)
+        (validate-new-character nickname)
+      (if validp
+          (let ((entity (create-entity)))
+            (add-modifier entity 'nickname nickname)
+            (add-modifier entity 'account account-id)
+            (let ((cc-values-id (id (make-dao 'cc-values
+                                              :entity-id entity
+                                              :pronoun  pronoun
+                                              :first-name first-name
+                                              :nickname nickname
+                                              :last-name last-name
+                                              :origin origin
+                                              :parents parents
+                                              :siblings siblings
+                                              :situation situation
+                                              :friends friends
+                                              :so so
+                                              :where where))))
+              (loop for (career . years-spent) in career-info
+                 when years-spent
+                 do (make-dao 'cc-career-info :cc-values-id cc-values-id
+                              :career career :years-spent years-spent))
+              (loop for (feature . adjective) in feature-info
+                 when adjective
+                 do (make-dao 'cc-feature-info :cc-values-id cc-values-id
+                              :feature feature :adjective adjective)))
+            entity)
+          (values nil errors)))))
 
 (defun character-name (character-id)
   (modifier-value character-id 'nickname))
@@ -105,10 +103,9 @@
 (defun character-account (character-id)
   (modifier-value character-id 'account))
 (defun character-account-email (character-id)
-  (with-db ()
-    (with-transaction ()
-      (let ((account-id (character-account character-id)))
-        (query (:select 'email :from 'account :where (:= 'id account-id)))))))
+  (with-transaction ()
+    (let ((account-id (character-account character-id)))
+      (query (:select 'email :from 'account :where (:= 'id account-id))))))
 
 ;; Character creation
 (defdao cc-option ()
@@ -127,28 +124,24 @@
   (:unique feature category adjective))
 
 (defun cc-features ()
-  (with-db ()
-    (query (:select 'feature :distinct :from 'cc-adjective)
-           :column)))
+  (db-query (:select 'feature :distinct :from 'cc-adjective)
+            :column))
 
 (defun cc-adjectives (feature-name)
-  (with-db ()
-    (query (:select 'category (:as (:array-agg 'adjective) 'adjectives)
-                    :from 'cc-adjective
-                    :where (:= 'feature feature-name)
-                    :group-by 'category))))
+  (db-query (:select 'category (:as (:array-agg 'adjective) 'adjectives)
+                     :from 'cc-adjective
+                     :where (:= 'feature feature-name)
+                     :group-by 'category)))
 
 (defun cc-location-description (location-name)
-  (with-db ()
-    (query (:select 'displayed :from 'cc-option
-                    :where (:= 'short location-name))
-           :single)))
+  (db-query (:select 'displayed :from 'cc-option
+                     :where (:= 'short location-name))
+            :single))
 
 (defun cc-select-options (category)
-  (with-db ()
-    (query (:select 'short 'displayed 'details
-                    :from 'cc-option
-                    :where (:= 'category category)))))
+  (db-query (:select 'short 'displayed 'details
+                     :from 'cc-option
+                     :where (:= 'category category))))
 
 ;;; Importing seed/test data.
 (defun import-adjectives ()
