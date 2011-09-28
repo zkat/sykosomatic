@@ -85,10 +85,10 @@
          (!dao-def)
          ,@(loop for (opt . args) in dao-options
               for form = (case opt
-                           (:index `(!index ,@(mapcar (curry #'list 'quote) args )))
-                           (:unique-index `(!unique-index ,@(mapcar (curry #'list 'quote) args )))
+                           (:index `(!index ,@(mapcar (curry #'list 'quote) args)))
+                           (:unique-index `(!unique-index ,@(mapcar (curry #'list 'quote) args)))
                            (:foreign-key `(!foreign ,@args))
-                           (:unique `(!unique ,@(mapcar (curry #'list 'quote) args )))
+                           (:unique `(!unique ,@(mapcar (curry #'list 'quote) args)))
                            (:query `(query ,@args))
                            (:keys nil)
                            (otherwise (error "Unknown defdao option: ~S" opt)))
