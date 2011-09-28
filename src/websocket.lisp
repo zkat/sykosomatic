@@ -212,9 +212,12 @@
        (local-actors *client*)))
 
 (defhandler dialogue (message)
-  (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
-    (map nil (rcurry #'send-dialogue (client-character-id *client*) dialogue parenthetical)
-         (local-actors *client*))))
+  (handler-case
+      (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
+        (map nil (rcurry #'send-dialogue (client-character-id *client*) dialogue parenthetical)
+             (local-actors *client*)))
+    (error (e)
+      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
 
 (defhandler action (action-txt)
   (handler-case
