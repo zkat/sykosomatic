@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.session
-  (:use :cl :hunchentoot :alexandria :postmodern
+  (:use :cl :alexandria :hunchentoot
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.account

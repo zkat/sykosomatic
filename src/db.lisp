@@ -1,19 +1,66 @@
 (cl:defpackage #:sykosomatic.db
   (:use :cl :alexandria :postmodern
         :sykosomatic.util)
-  (:export :id :defdao :init-db
-           :with-db
-           :get-connection
-           :done-with-connection
-           :dblog :rebuild-table
-           :rebuild :drop-table :drop-all-tables
-           :assert-validation :with-validation :assert-required))
+  (:export
+   ;; DAO
+   :id :defdao :get-dao :select-dao
+   ;; Misc sql
+   :sql-compile :defprepared
+   ;; Querying
+   :query :make-dao :db-query :doquery
+   ;; Connections
+   :with-db :with-transaction
+   :get-connection
+   :done-with-connection
+   ;; Development utilities
+   :dblog :rebuild-table :init-db
+   :rebuild :drop-table :drop-all-tables
+   ;; Validation
+   :assert-validation :with-validation :assert-required))
 (cl:in-package #:sykosomatic.db)
 
 (defparameter *db-name* "sykosomatic")
 (defparameter *db-user* "postgres")
 (defparameter *db-password* "")
 (defparameter *db-host* "localhost")
+
+;;;
+;;; Connection pooling
+;;;
+(defparameter *connection-pool-lock* (bt:make-lock))
+(defparameter *max-pooled-connections* 50)
+(defvar *connection-pool* (make-queue *max-pooled-connections*))
+
+(defun get-connection ()
+  (or *database*
+      (bt:with-lock-held (*connection-pool-lock*)
+        (unless (queue-empty-p *connection-pool*)
+          (dequeue *connection-pool*)))
+      (apply #'connect (list *db-name* *db-user* *db-password* *db-host*))))
+
+(defun done-with-connection (connection)
+  (bt:with-lock-held (*connection-pool-lock*)
+    (if (queue-full-p *connection-pool*)
+        (disconnect connection)
+        (enqueue connection *connection-pool*))))
+
+(defun clear-pooled-connections ()
+  (bt:with-lock-held (*connection-pool-lock*)
+    (loop until (queue-empty-p *connection-pool*)
+       for connection = (dequeue *connection-pool*)
+       when (connected-p connection)
+       do (disconnect connection))))
+
+(defmacro with-db ((&key (reusep t)) &body body)
+  `(let* ((reusing-connection-p (and *database* ,reusep))
+          (*database* (or (when reusing-connection-p *database*)
+                          (get-connection))))
+     (unwind-protect (progn ,@body)
+       (unless reusing-connection-p
+         (done-with-connection *database*)))))
+
+(defmacro db-query (query &rest args/format)
+  `(with-db () (query ,query ,@args/format)))
 
 ;;; SQL utils
 (defmacro defdao (name superclasses slots &body dao-options)
@@ -66,41 +113,6 @@
   (rebuild))
 
 (defgeneric id (dao))
-
-;;;
-;;; Connection pooling
-;;;
-(defparameter *connection-pool-lock* (bt:make-lock))
-(defparameter *max-pooled-connections* 50)
-(defvar *connection-pool* (make-queue *max-pooled-connections*))
-
-(defun get-connection ()
-  (or *database*
-      (bt:with-lock-held (*connection-pool-lock*)
-        (unless (queue-empty-p *connection-pool*)
-          (dequeue *connection-pool*)))
-      (apply #'connect (list *db-name* *db-user* *db-password* *db-host*))))
-
-(defun done-with-connection (connection)
-  (bt:with-lock-held (*connection-pool-lock*)
-    (if (queue-full-p *connection-pool*)
-        (disconnect connection)
-        (enqueue connection *connection-pool*))))
-
-(defun clear-pooled-connections ()
-  (bt:with-lock-held (*connection-pool-lock*)
-    (loop until (queue-empty-p *connection-pool*)
-       for connection = (dequeue *connection-pool*)
-       when (connected-p connection)
-       do (disconnect connection))))
-
-(defmacro with-db ((&key (reusep t)) &body body)
-  `(let* ((reusing-connection-p (and *database* ,reusep))
-          (*database* (or (when reusing-connection-p *database*)
-                          (get-connection))))
-     (unwind-protect (progn ,@body)
-       (unless reusing-connection-p
-         (done-with-connection *database*)))))
 
 ;; Forms
 (defvar *validation-errors*)

@@ -1,5 +1,8 @@
 (cl:defpackage #:sykosomatic.game-objects.nameable
-  (:use :cl :alexandria :postmodern :sykosomatic.entity :sykosomatic.db :sykosomatic.util)
+  (:use :cl :alexandria
+        :sykosomatic.util
+        :sykosomatic.db
+        :sykosomatic.entity)
   (:export :add-name :base-name :full-name))
 (cl:in-package #:sykosomatic.game-objects.nameable)
 

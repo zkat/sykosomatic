@@ -1,5 +1,8 @@
 (cl:defpackage #:sykosomatic.game-objects.describable
-  (:use :cl :alexandria :sykosomatic.entity :sykosomatic.db :sykosomatic.util :postmodern))
+  (:use :cl :alexandria
+         :sykosomatic.util
+         :sykosomatic.db
+         :sykosomatic.entity))
 (cl:in-package #:sykosomatic.game-objects.describable)
 
 (defun short-description (entity)

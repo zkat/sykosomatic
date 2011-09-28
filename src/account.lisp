@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.account
-  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.util :postmodern)
+  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.util)
   (:export :create-account :find-account :find-account-by-email :validate-account
            :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
