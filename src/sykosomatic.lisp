@@ -12,7 +12,7 @@
 (defun begin-shared-hallucination ()
   (when *runningp* (end-shared-hallucination) (warn "Restarting server."))
   (init-entity-system)
-  (init-websockets 'sykosomatic.parser:parse-input)
+  (init-websockets)
   (init-hunchentoot)
   (setf *runningp* t))
 
