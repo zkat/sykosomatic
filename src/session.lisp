@@ -80,23 +80,23 @@
                (stringp session-identifier)
                (not (emptyp session-identifier)))
       (with-transaction ()
-        (when-let (session-id (db-query (:for-update
-                                         (:select 'id :from 'persistent-session
-                                                  :where (:and (:= 'cookie-value session-identifier)
-                                                               (:= 'user-agent (user-agent request)))))
-                                        :single))
-          (if (db-query (:for-update
-                         (:select t :from 'persistent-session
-                                  :where (:and (:= 'id session-id)
-                                               (:< (:+ 'last-seen 'max-time)
-                                                   (:now)))))
-                        :single)
-              (session-cleanup session-id)
-              (prog1 session-id
+        (destructuring-bind (session-id expiredp)
+            (db-query (:for-update
+                       (:select 'id (:< (:+ 'last-seen 'max-time)
+                                        (:now))
+                                :from 'persistent-session
+                                :where (:and (:= 'cookie-value session-identifier)
+                                             (:= 'user-agent (user-agent request)))))
+                      :row)
+          (when session-id
+            (if expiredp
+                (session-cleanup session-id)
                 (db-query (:update 'persistent-session
                                    :set 'last-seen (:now)
                                    'last-remote-addr (remote-addr request)
-                                   :where (:= 'id session-id))))))))))
+                                   :where (:= 'id session-id)
+                                   :returning 'id)
+                          :single))))))))
 
 (defun end-session (session-id)
   (with-transaction ()
