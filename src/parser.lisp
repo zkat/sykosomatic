@@ -60,13 +60,20 @@
                      (cdr (assoc :parenthetical (cdar results))))))))
 
 (defun parse-action (message)
-  (let ((results (invoke-parser (either (verb) 'error) message)))
-    (cond ((cdr results)
+  (let ((results (invoke-parser (either (=prog1 (sentence) (no-more-input)) 'error) message)))
+    (cond ((null results)
+           (error "ENOPARSE"))
+          ((cdr results)
            (error "Parse was ambiguous."))
           ((typep (car results) 'error)
            (signal (car results)))
-          (t (print results)
-             (car results)))))
+          (t (let* ((sentence (cdar results))
+                    (verb (cdr (assoc :verb sentence)))
+                    (adverbs (cdr (assoc :adverbs sentence))))
+               (concatenate 'string
+                            (car adverbs) (when (car adverbs) " ")
+                            verb
+                            (when (cadr adverbs) " ") (cadr adverbs)))))))
 
 (defun run-parser (parser input)
   (let ((results (invoke-parser (either parser 'error) input)))
@@ -187,9 +194,11 @@
 
 ;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
 (defun sentence ()
-  (=let* ((verb (verb))
-          (_ (maybe (=char #\.))))
+  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
+          (verb (verb))
+          (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
+              (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
               (:verb . ,verb)))))
 
 #+nil(defun sentence ()

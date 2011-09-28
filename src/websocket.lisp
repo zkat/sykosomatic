@@ -220,7 +220,7 @@
 
 (defhandler action (action-txt)
   (handler-case
-      (let ((predicate (print (sykosomatic.parser:parse-action action-txt))))
+      (let ((predicate (sykosomatic.parser:parse-action action-txt)))
         (map nil (rcurry #'send-action (client-character-id *client*) predicate)
              (local-actors *client*)))
     (error (e)
