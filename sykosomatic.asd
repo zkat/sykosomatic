@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:sykosomatic
   :serial t
-  :depends-on (#:alexandria
+  :depends-on (#:alexandria #:cl-speedy-queue
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad #:postmodern
@@ -17,7 +17,6 @@
                       :components
                       ((:file "util")
                        (:file "smug")
-                       (:file "queue")
                        (:file "timer")))
              (:file "config")
              (:file "db")
