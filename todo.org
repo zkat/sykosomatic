@@ -70,21 +70,6 @@
      will ensure that all items are uniquely chosen before the final message is even sent.  This
      will probably involve caching of at least part of the game's vocabulary client-side, but we'll
      take that step when it's necessary.
-**** DONE New defhandler macro
-**** DONE Split up 'user-input'
-      Instead of having a single 'user-input' message that gets parsed in order to process what
-      users enter, split it up into various kinds of user input and have dedicated processors for
-      those.
-***** DONE ooc
-***** DONE dialogue
-***** DONE action
-***** DONE emit (admin-only)
-***** DONE parenthetical
-**** DONE Interactively accept a verb in the action field
-     Verb should be auto-completable based on the existing list of verbs.
-**** DONE Interactively select both a verb, then an adverb
-     Adverb should also be from the existing adverb database
-**** DONE Interactively select either verb-adverb or adverb-verb or just verb
 **** TODO Improve error reporting
      Perhaps PLUS can be used here. The ENOPARSE error is sub-optimal.
 **** TODO In the completion popup, group matches by verb and by adverb
@@ -121,15 +106,10 @@
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
 ** Misc Webapp work
 *** TODO Sessions
-**** DONE Forever Sessions
-     Google and Facebook don't bother letting your session time out, or restricting logins to one
-     session per account. Re-authorization should be required for money-related parts of the site,
-     of course, but sessions should just last a very long time (30 days?).
 **** TODO Concurrent session/session history information
      Since sessions last a long time, have a screen where a user can log out all other active
      sessions.
 **** TODO Log out all sessions on username or password change
-**** DONE Put locks around finalizers and transient values
 **** TODO Make sure session-verify really is thread-safe.
      I'm nublar at with-transaction :(
 *** TODO Email system
@@ -206,31 +186,9 @@
 ** Database
 *** TODO Remove s-sql patch
     Waiting until the new pomo makes it into a quicklisp release.
-*** DONE new defdao macro
-    Simplify common-case definition based on the currently-established usage pattern.
-
-    Something like:
-
-    (defdao tablename ()
-      ((entity-id bigint)
-       (my-value (or db-null text))
-       (is-it-true-p boolean :col-default nil)
-       (last-column boolean t :reader last-column :documentation "Last chance."))
-      (:keys id))
-
-    This should generate :initarg and :col-type using the available info, and accept
-    other slot arguments after that.
-*** DONE don't use postmodern directly
-    Wrap any postmodern-specific calls so only :sykosomatic.db needs to be included. This includes
-    stuff like automatic transaction 
-*** DONE Reduce with-db wrapping
-*** DONE with-transaction implies with-db
 *** TODO 'init db' system of some sort
     Needs to both create all tables, insert any initial data stored elsewhere, and remind admin to
     execute whatever external command needs to be executed post-boot (such as installing unaccent).
-*** DONE Connection pool
-*** DONE Optionally turn off connection sharing
-*** DONE Fix connection sharing
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
@@ -262,6 +220,5 @@
     
 ** Misc
 *** TODO Move persistent sessions out into a separate lisp project
-*** DONE Move queue.lisp into an external project
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
