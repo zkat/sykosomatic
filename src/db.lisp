@@ -6,7 +6,7 @@
    ;; DAO
    :id :defdao :get-dao :select-dao
    ;; Misc sql
-   :sql-compile :defprepared
+   :defprepared
    ;; Querying
    :query :make-dao :db-query :doquery
    ;; Connections
@@ -17,7 +17,13 @@
    :dblog :rebuild-table :init-db
    :rebuild :drop-table :drop-all-tables
    ;; Validation
-   :assert-validation :with-validation :assert-required))
+   :assert-validation :with-validation :assert-required
+   ;; misc stuff from s-sql
+   :smallint :bigint :numeric :real :double-precision :bytea
+   :text :varchar :db-null :sql-type-name :*standard-sql-strings*
+   :sql-escape-string :sql-escape :from-sql-name :to-sql-name
+   :*escape-sql-names-p* :sql :sql-compile :sql-template :$$
+   :register-sql-operators :enable-s-sql-syntax :sql-error))
 (cl:in-package #:sykosomatic.db)
 
 (defparameter *db-name* "sykosomatic")

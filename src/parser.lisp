@@ -3,7 +3,8 @@
         :sykosomatic.util
         :sykosomatic.db
         :sykosomatic.vocabulary)
-  (:export :action-completions :parse-dialogue :parse-action))
+  (:export :action-completions :parse-dialogue :parse-action)
+  (:shadowing-import-from :smug :text))
 (cl:in-package #:sykosomatic.parser)
 
 (defparameter *max-completion-results* 25)
