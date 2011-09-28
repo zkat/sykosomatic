@@ -1,7 +1,8 @@
 (cl:defpackage #:sykosomatic.vocabulary
   (:use :cl :alexandria :postmodern :sykosomatic.db)
   (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb
-           :add-verb :remove-verb :third-person-singular :preterite))
+           :add-verb :remove-verb :verb-completions
+           :third-person-singular :preterite))
 (cl:in-package #:sykosomatic.vocabulary)
 
 ;;; Pronouns
@@ -76,6 +77,12 @@
 (defun remove-verb (bare)
   (with-db () (query (:delete-from 'verb :where (:= 'bare bare))))
   t)
+
+(defun verb-completions (incomplete-verb)
+  (with-db ()
+    (query (:select 'third-person :from 'verb :where
+                    (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
+           :column)))
 
 ;;; Testing
 (defparameter *test-data*

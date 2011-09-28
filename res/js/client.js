@@ -290,6 +290,26 @@ var sykosomatic =
     };
 
     ///
+    /// Action autocompletion
+    ///
+    var ac_response_handler = false;
+    function init_autocomplete() {
+        $("#action-input :input").autocomplete({
+            source:function (request,response){
+                ws_send(["complete-verb",request.term]);
+                ac_response_handler = response;
+            }
+        });
+    }
+
+    dispatch_table['completion'] = function(msg) {
+        if (ac_response_handler) {
+            ac_response_handler(msg[1]);
+            ac_response_handler = false;
+        }
+    };
+
+    ///
     /// Init
     ///
     var interval_id;
@@ -321,6 +341,8 @@ var sykosomatic =
             .removeClass("ui-corner-all ui-corner-top")
             .addClass("ui-corner-bottom");
         install_onsubmits();
+
+        init_autocomplete();
 
         var current_tab = 0;
         var inputs = ['dialogue-input','action-input','ooc-input','emit-input'];

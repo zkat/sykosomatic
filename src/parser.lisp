@@ -3,7 +3,7 @@
         :sykosomatic.util
         :sykosomatic.db
         :sykosomatic.vocabulary)
-  (:export :parse-dialogue))
+  (:export :parse-dialogue :parse-action))
 (cl:in-package #:sykosomatic.parser)
 
 (defun parse-dialogue (message)
@@ -15,43 +15,23 @@
           (t (values (cdr (assoc :dialogue (cdar results)))
                      (cdr (assoc :parenthetical (cdar results))))))))
 
+(defun parse-action (message)
+  (let ((results (invoke-parser (either (verb) 'error) message)))
+    (cond ((cdr results)
+           (error "Parse was ambiguous."))
+          ((typep (car results) 'error)
+           (signal (car results)))
+          (t (print results)
+             (car results)))))
+
 (defun run-parser (parser input)
   (let ((results (invoke-parser (either parser 'error) input)))
     (if (cdr results)
         (error "Parse was ambiguous.")
         (car results))))
 
-(defun parse-input (actor input)
-  (let ((result (car (invoke-parser (either (input) 'error) input))))
-    (cond ((typep result 'error)
-           (sykosomatic.websocket::send-msg actor (list "parse-error" (princ-to-string result))))
-          ((null result)
-           (sykosomatic.websocket::send-msg actor (list "parse-error" "Sorry, I couldn't understand what you said.")))
-          (t
-           (case (car result)
-             (:dialogue
-              (map nil (rcurry #'sykosomatic.websocket::send-dialogue actor
-                               (cdr (assoc :dialogue (cdr result)))
-                               (cdr (assoc :parenthetical (cdr result))))
-                   (sykosomatic.websocket::local-actors actor)))
-             (:sentence
-              (map nil (rcurry #'sykosomatic.websocket::send-action actor
-                               (sentence->text (cdr result)))
-                   (sykosomatic.websocket::local-actors actor)))
-             (:action
-              (map nil (rcurry #'sykosomatic.websocket::send-action actor
-                               (cdr result))
-                   (sykosomatic.websocket::local-actors actor)))
-             (:actorless-action
-              (map nil (rcurry #'sykosomatic.websocket::send-action nil
-                               (cdr result))
-                   (sykosomatic.websocket::local-actors actor)))
-             (:transition
-              (map nil (rcurry #'sykosomatic.websocket::send-transition (cdr result))
-                   (sykosomatic.websocket::local-actors actor)))
-             (:ooc
-              (map nil (rcurry #'sykosomatic.websocket::send-ooc actor (cdr result))
-                   (sykosomatic.websocket::local-actors actor))))))))
+#+nil
+(sykosomatic.websocket::send-msg actor (list "parse-error" (princ-to-string result)))
 
 (defun sentence->text (sentence)
   (format nil "~A." (cdr (assoc :verb sentence))))
@@ -263,8 +243,8 @@
 
 (defun adverbp (maybe-adverb)
   (with-db ()
-    (pomo:query (:select t :from 'adverb :where (:= 'text maybe-adverb)))))
+    (pomo:query (:select t :from 'adverb :where (:ilike 'text maybe-adverb)) :single)))
 
 (defun verbp (maybe-verb)
   (with-db ()
-    (pomo:query (:select t :from 'verb :where (:= 'third-person maybe-verb)))))
+    (pomo:query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single)))
