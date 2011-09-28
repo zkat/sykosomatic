@@ -96,7 +96,7 @@
                    ("smugly") ("smilingly") ("angrily")))
     (add-verb . (("grin" "grins" "grinned") ("chuckle") ("fluff") ("squee")
                  ("pout") ("cackle") ("fix") ("preen") ("smile") ("frown")
-                 ("cheer") ("laugh") ("wave")
+                 ("cheer") ("laugh") ("wave") ("get" "gets" "got")
                  ("cry" "cries" "cried")))))
 
 (defun reset ()
