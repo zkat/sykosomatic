@@ -82,23 +82,24 @@
 
 (defun verify-persistent-session (session-identifier user-agent remote-addr)
   (with-transaction ()
-    (destructuring-bind (session-id expiredp)
-        (db-query (:for-update
-                   (:select 'id (:< (:+ 'last-seen 'max-time)
-                                    (:now))
-                            :from 'persistent-session
-                            :where (:and (:= 'cookie-value session-identifier)
-                                         (:= 'user-agent user-agent))))
-                  :row)
-      (when session-id
-        (if expiredp
-            (session-cleanup session-id)
-            (db-query (:update 'persistent-session
-                               :set 'last-seen (:now)
-                               'last-remote-addr remote-addr
-                               :where (:= 'id session-id)
-                               :returning 'id)
-                      :single))))))
+    (when-let (session-info (db-query (:for-update
+                                       (:select 'id (:< (:+ 'last-seen 'max-time)
+                                                        (:now))
+                                                :from 'persistent-session
+                                                :where (:and (:= 'cookie-value session-identifier)
+                                                             (:= 'user-agent user-agent))))
+                                      :row))
+      (destructuring-bind (session-id expiredp)
+          session-info
+        (when session-id
+          (if expiredp
+              (session-cleanup session-id)
+              (db-query (:update 'persistent-session
+                                 :set 'last-seen (:now)
+                                 'last-remote-addr remote-addr
+                                 :where (:= 'id session-id)
+                                 :returning 'id)
+                        :single)))))))
 
 (defmethod session-verify ((request persistent-session-request))
   (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)

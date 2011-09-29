@@ -70,26 +70,28 @@
 
 (defun find-session-string-by-token (token)
   (with-transaction ()
-    (destructuring-bind (row-id session-string expiredp)
-        (db-query (:for-update
-                   (:select 'id 'session-string (:< (:+ 'time-created
-                                                        (:raw
-                                                         (format nil "interval '~A seconds'"
-                                                                 *validation-token-timeout*)))
-                                                    (:now))
-                            :from 'websocket-validation-token
-                            :where (:= 'token token)))
-                  :row)
-      (when row-id
-        (db-query (:delete-from 'websocket-validation-token
-                                :where (:or
-                                        (:< (:+ 'time-created
-                                                (:raw
-                                                 (format nil "interval '~A seconds'"
-                                                         *validation-token-timeout*)))
-                                            (:now))
-                                        (:= 'id row-id))))
-        (and (not expiredp) session-string)))))
+    (when-let (session-info
+               (db-query (:for-update
+                          (:select 'id 'session-string (:< (:+ 'time-created
+                                                               (:raw
+                                                                (format nil "interval '~A seconds'"
+                                                                        *validation-token-timeout*)))
+                                                           (:now))
+                                   :from 'websocket-validation-token
+                                   :where (:= 'token token)))
+                         :row))
+      (destructuring-bind (row-id session-string expiredp)
+          session-info
+        (when row-id
+          (db-query (:delete-from 'websocket-validation-token
+                                  :where (:or
+                                          (:< (:+ 'time-created
+                                                  (:raw
+                                                   (format nil "interval '~A seconds'"
+                                                           *validation-token-timeout*)))
+                                              (:now))
+                                          (:= 'id row-id))))
+          (and (not expiredp) session-string))))))
 
 (defun handle-new-client (res ws-client json-message
                           &aux (message (jsown:parse json-message)))
