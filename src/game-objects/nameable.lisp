@@ -3,7 +3,7 @@
         :sykosomatic.util
         :sykosomatic.db
         :sykosomatic.entity)
-  (:export :add-name :base-name :full-name
+  (:export :add-name :base-name :full-name :find-by-full-name
            :recalculate-full-name :refresh-all-full-names))
 (cl:in-package #:sykosomatic.game-objects.nameable)
 
@@ -59,6 +59,15 @@
 
 (defun full-name (entity)
   (db-query (:select 'full-name :from 'nameable :where (:= 'entity-id entity))
+            :single))
+
+(defun find-by-full-name (name &key fuzzyp)
+  (db-query (sql-compile `(:select 'entity-id :from 'nameable :where
+                                   (,(if fuzzyp :ilike :=)
+                                     'full-name
+                                     ,(if fuzzyp
+                                          (format nil "%~A%" name)
+                                          name))))
             :single))
 
 (defun recalculate-full-name (entity)
