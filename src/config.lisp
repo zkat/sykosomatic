@@ -1,16 +1,21 @@
 (cl:defpackage #:sykosomatic.config
   (:use #:cl)
   (:export :*server*
+           :*server-base-url*
            :*web-server-port*
-           :*chat-server-port*
+           :*websocket-server-port*
+           :*websocket-resource-name*
            :*sykosomatic-path*))
 (cl:in-package #:sykosomatic.config)
 
 (defvar *server* nil)
+(defparameter *server-base-url* "http://zushakon.sykosomatic.org")
 (defparameter *web-server-port* 8888)
-(defparameter *chat-server-port*
+(defparameter *websocket-server-port*
   ;; 843 ; makes flash load faster, but can only do this as root.
   8889)
+(defparameter *websocket-resource-name* "/chat")
+
 (defparameter *sykosomatic-path* (asdf:system-relative-pathname 'sykosomatic "res/"))
 
 ;; Sessions last for 30 days.

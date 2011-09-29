@@ -281,12 +281,9 @@
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
-(defparameter *websocket-origin-prefix* "http://zushakon.sykosomatic.org")
-(defparameter *websocket-resource-name* "/chat")
-
 (defun init-websockets (&key (port *chat-server-port*)
                         (resource-name *websocket-resource-name*)
-                        (origin-prefix *websocket-origin-prefix*))
+                        (origin-prefix *server-base-url*))
   (register-chat-server (make-instance 'chat-server
                                        :origin-prefix origin-prefix
                                        :resource-name resource-name))
