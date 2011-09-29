@@ -1,6 +1,7 @@
 (cl:defpackage #:sykosomatic.account
   (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.util)
   (:export :create-account :find-account :find-account-by-email :validate-account
+           :add-body :remove-body :deactivate-body :activate-body :account-bodies
            :account-email :account-display-name))
 (cl:in-package #:sykosomatic.account)
 
@@ -71,6 +72,46 @@
 (defun display-name-exists-p (display-name)
   (db-query (:select t :from 'account :where (:= 'display-name display-name))
             :single))
+
+;;;
+;;; Bodies
+;;;
+(defdao account-body ()
+  ((entity-id bigint)
+   (account-id bigint)
+   (activep boolean :col-default t))
+  (:keys entity-id account-id)
+  (:unique entity-id account-id)
+  (:unique-index entity-id account-id))
+
+(defun add-body (entity-id account-id)
+  (with-db ()
+    (id (make-dao 'account-body
+                  :entity-id entity-id
+                  :account-id account-id))))
+
+(defun remove-body (entity-id account-id)
+  (db-query (:delete-from 'account-body
+                          :where (:and (:= 'entity-id entity-id)
+                                       (:= 'account-id account-id)))))
+
+(defun deactivate-body (entity-id account-id)
+  (db-query (:update 'account-body
+                     :set 'activep nil
+                     :where (:and (:= 'entity-id entity-id)
+                                  (:= 'account-id account-id)))))
+
+(defun activate-body (entity-id account-id)
+  (db-query (:update 'account-body
+                     :set 'activep t
+                     :where (:and (:= 'entity-id entity-id)
+                                  (:= 'account-id account-id)))))
+
+(defun account-bodies (account-id)
+  (db-query (:select 'entity-id :from 'account-body
+                     :where (:and 'activep
+                                  (:= 'account-id account-id)))
+            :column))
 
 ;;;
 ;;; Creation and validation
