@@ -29,24 +29,17 @@
 (defun (setf session-websocket-clients) (new-value session)
   (setf (transient-session-value 'websocket-clients session) new-value))
 
-(defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (declare (ignore resource-name headers))      ; Is this wise?
-  (continuable
-    (add-client res (make-client :ws-client ws-client)))
-  t)
-
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
   (logit "Client ~S disconnected." client)
   (continuable (remove-client res client)))
 
-(defmethod ws:resource-received-text ((res chat-server) ws-client message
-                                      &aux (client (find-client res ws-client)))
+(defmethod ws:resource-received-text ((res chat-server) ws-client message)
   (continuable
-    (if (client-session client)
-        (process-client-message res client message)
-        (process-client-validation res client message))))
-
+    (let ((client (find-client res ws-client)))
+      (if (and client (client-session client))
+          (process-client-message res client message)
+          (handle-new-client res ws-client message)))))
 
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
@@ -131,12 +124,12 @@
     (logit "Client successfully validated: ~S" client)
     client))
 
-(defun process-client-validation (res client json-message
-                                  &aux (*acceptor* *server*)
-                                  (message (jsown:parse json-message)))
-  (setf (client-user-agent client) (jsown:val message "useragent")
-        (client-validation-token client) (jsown:val message "token"))
-  (let* ((client-valid-p (validate-client res client))
+(defun handle-new-client (res ws-client json-message
+                          &aux (message (jsown:parse json-message)))
+  (let* ((client (make-client :ws-client ws-client
+                              :user-agent (jsown:val message "useragent")
+                              :validation-token (jsown:val message "token")))
+         (client-valid-p (validate-client res client))
          (char-index (jsown:val message "char"))
          (character-id (nth char-index (account-characters (client-account-id client)))))
     (cond ((and client-valid-p character-id)
@@ -151,6 +144,7 @@
              (logit "Something funky is cooking.")
              (disconnect-client res existing-client))
            (setf (client-entity-id client) character-id)
+           (add-client res client)
            (push (session-websocket-clients (client-session client)) client))
           (t
            (logit "No session. Disconnecting client. (~S)" client)
