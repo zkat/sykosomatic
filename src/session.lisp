@@ -70,8 +70,7 @@
                     :value (session-cookie-value session)
                     :path "/"
                     :secure (ssl-p)
-                    ;; Unfortunately, this is required for websockets right now.
-                    :http-only nil)
+                    :http-only t)
         (setf (session *request*) session)
         #+nil(persistent-session-gc)
         (setf *session* (id session)))))
