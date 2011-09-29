@@ -98,7 +98,7 @@
                               :validation-token (jsown:val message "token")))
          (client-valid-p (validate-client res client))
          (char-index (jsown:val message "char"))
-         (entity-id (nth char-index (sykosomatic.character:account-characters
+         (entity-id (nth char-index (account-bodies
                                      (client-account-id client)))))
     (cond ((and client-valid-p entity-id)
            (logit "Client validated: ~S.~%It's now playing as ~A."

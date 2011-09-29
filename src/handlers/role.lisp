@@ -4,7 +4,6 @@
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.game-objects.nameable
-        :sykosomatic.character
         :sykosomatic.account)
   (:export :role))
 (cl:in-package #:sykosomatic.handler.role)
@@ -13,4 +12,4 @@
   (ensure-logged-in)
   (with-form-errors
     (templ:render-template "role" (mapcar #'full-name
-                                          (account-characters (current-account))))))
+                                          (account-bodies (current-account))))))

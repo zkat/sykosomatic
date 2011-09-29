@@ -2,21 +2,13 @@
   (:use :cl :alexandria :cl-ppcre
         :sykosomatic.util
         :sykosomatic.db
-        :sykosomatic.entity)
-  (:export :find-character :account-characters
-           :create-character :character-account
-           :character-account-email
-           :character-name :character-description
-           :cc-features :cc-adjectives
+        :sykosomatic.entity
+        :sykosomatic.account
+        :sykosomatic.game-objects.nameable)
+  (:export :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
 (cl:in-package #:sykosomatic.character)
-
-(defun find-character (name)
-  (find-by-modifier-value 'nickname name :test :ilike))
-
-(defun account-characters (account-id)
-  (find-by-modifier-value 'account account-id :allp t))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
@@ -32,9 +24,44 @@
 (defun validate-new-character (name)
   (with-validation
     (assert-required "Nickname" name)
-    (assert-validation (valid-character-name-p name) "Invalid nickname.")
-    (assert-validation (not (find-character name)) "Character with that name already exists.")))
+    (assert-validation (valid-character-name-p name) "Invalid nickname.")))
 
+(defun create-character (account-id &key
+                         pronoun first-name nickname last-name
+                         origin parents siblings situation friends
+                         so career-info feature-info where)
+  (with-transaction ()
+    (multiple-value-bind (validp errors)
+        (validate-new-character nickname)
+      (if validp
+          (let ((entity (create-entity)))
+            (add-name entity last-name :first-name first-name)
+            (add-body entity account-id)
+            (let ((cc-values-id (id (make-dao 'cc-values
+                                              :entity-id entity
+                                              :pronoun  pronoun
+                                              :first-name first-name
+                                              :nickname nickname
+                                              :last-name last-name
+                                              :origin origin
+                                              :parents parents
+                                              :siblings siblings
+                                              :situation situation
+                                              :friends friends
+                                              :so so
+                                              :where where))))
+              (loop for (career . years-spent) in career-info
+                 when years-spent
+                 do (make-dao 'cc-career-info :cc-values-id cc-values-id
+                              :career career :years-spent years-spent))
+              (loop for (feature . adjective) in feature-info
+                 when adjective
+                 do (make-dao 'cc-feature-info :cc-values-id cc-values-id
+                              :feature feature :adjective adjective)))
+            entity)
+          (values nil errors)))))
+
+;; newchar parameter storage
 (defdao cc-values ()
   ((entity-id bigint)
    (pronoun text)
@@ -61,53 +88,6 @@
    (adjective text))
   (:keys id))
 
-(defun create-character (account-id &key
-                         pronoun first-name nickname last-name
-                         origin parents siblings situation friends
-                         so career-info feature-info where)
-  (with-transaction ()
-    (multiple-value-bind (validp errors)
-        (validate-new-character nickname)
-      (if validp
-          (let ((entity (create-entity)))
-            (add-modifier entity 'nickname nickname)
-            (add-modifier entity 'account account-id)
-            (let ((cc-values-id (id (make-dao 'cc-values
-                                              :entity-id entity
-                                              :pronoun  pronoun
-                                              :first-name first-name
-                                              :nickname nickname
-                                              :last-name last-name
-                                              :origin origin
-                                              :parents parents
-                                              :siblings siblings
-                                              :situation situation
-                                              :friends friends
-                                              :so so
-                                              :where where))))
-              (loop for (career . years-spent) in career-info
-                 when years-spent
-                 do (make-dao 'cc-career-info :cc-values-id cc-values-id
-                              :career career :years-spent years-spent))
-              (loop for (feature . adjective) in feature-info
-                 when adjective
-                 do (make-dao 'cc-feature-info :cc-values-id cc-values-id
-                              :feature feature :adjective adjective)))
-            entity)
-          (values nil errors)))))
-
-(defun character-name (character-id)
-  (modifier-value character-id 'nickname))
-(defun character-description (character-id)
-  (modifier-value character-id 'description))
-(defun character-account (character-id)
-  (modifier-value character-id 'account))
-(defun character-account-email (character-id)
-  (with-transaction ()
-    (let ((account-id (character-account character-id)))
-      (query (:select 'email :from 'account :where (:= 'id account-id))))))
-
-;; Character creation
 (defdao cc-option ()
   ((category text)
    (short text)
