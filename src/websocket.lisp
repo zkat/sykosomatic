@@ -1,79 +1,132 @@
 (cl:defpackage #:sykosomatic.websocket
   (:use :cl :alexandria :hunchentoot
         :sykosomatic.util
+        :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
-        :sykosomatic.character
+        :sykosomatic.game-objects.nameable
         :sykosomatic.account
         :sykosomatic.scene)
-  (:export :init-websockets
-           :teardown-websockets))
+  (:export
+   :generate-websocket-token
+   :init-websockets
+   :teardown-websockets))
 (cl:in-package #:sykosomatic.websocket)
 
-(defun session-websocket-clients (session)
-  (transient-session-value 'websocket-clients session))
-(defun (setf session-websocket-clients) (new-value session)
-  (setf (transient-session-value 'websocket-clients session) new-value))
-
-(defgeneric add-client (chat-server client))
-(defgeneric remove-client (chat-server client))
-(defgeneric validate-client (chat-server client))
-(defgeneric disconnect-client (chat-server client))
-
-(defstruct client server uri host headers user-agent ws-client session account-id character-id)
-
-(defun client-write (client string)
-  (continuable
-    (ws:write-to-client-text (client-ws-client client) string)))
-
-(defun find-client (chat-server ws-client)
-  (gethash ws-client (slot-value chat-server 'clients)))
-
-(defun process-client-validation (res client json-message
-                                  &aux (*acceptor* *server*)
-                                  (message (jsown:parse json-message)))
-  (push (cons :user-agent (jsown:val message "useragent"))
-        (client-headers client))
-  (let* ((client-valid-p (validate-client res client))
-         (char-index (jsown:val message "char"))
-         (character-id (nth char-index (account-characters (client-account-id client)))))
-    (cond ((and client-valid-p character-id)
-           (logit "Client validated: ~S. It's now playing as ~A."
-                  client (character-name character-id))
-           (when-let (existing-client (find character-id
-                                            (session-websocket-clients (client-session client))
-                                            :key #'client-character-id))
-             (deletef existing-client (session-websocket-clients (client-session client)))
-             (logit "Something funky is cooking.")
-             (disconnect-client res existing-client))
-           (setf (client-character-id client) character-id)
-           (push (session-websocket-clients (client-session client)) client))
-          (t
-           (logit "No session. Disconnecting client. (~S)" client)
-           (disconnect-client res client)))))
-
-(defun client-character-name (client)
-  (when-let ((character-id (client-character-id client)))
-    (character-name character-id)))
+(defvar *websocket-server*)
 
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test #'eq))))
-
-(defmethod disconnect-client ((server chat-server) client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
-    (ws:write-to-client-close ws-client)
-    (when session
-      (deletef (session-websocket-clients session)
-               client))))
-
-(defvar *websocket-server*)
 
 (defun register-chat-server ()
   (ws:register-global-resource
    "/chat"
    (setf *websocket-server* (make-instance 'chat-server))
    (ws:origin-prefix "http://zushakon.sykosomatic.org")))
+
+(defgeneric add-client (chat-server client))
+(defgeneric remove-client (chat-server client))
+(defgeneric validate-client (chat-server client))
+(defgeneric disconnect-client (chat-server client))
+
+(defstruct client
+  ;; Websocket metadata
+  server ws-client
+  ;; Metadata/validation
+  host user-agent validation-token
+  ;; Associated session and entity.
+  session entity-id)
+
+;;;
+;;; Client utils
+;;;
+(defun client-write (client string)
+  (continuable
+    (ws:write-to-client-text (client-ws-client client) string)))
+
+(defun client-write-json (client obj)
+  (client-write client (jsown:to-json obj)))
+
+(defun find-client (chat-server ws-client)
+  (gethash ws-client (slot-value chat-server 'clients)))
+
+(defun client-account-id (client)
+  (when-let (sess (client-session client))
+    (current-account sess)))
+
+;;;
+;;; Client validation
+;;;
+(defparameter *validation-token-timeout* 30
+  "How long before validation tokens are considered expired, in seconds.")
+(defdao websocket-validation-token ()
+  ((token text)
+   (session-string text)
+   (time-created timestamp :col-default (:now)))
+  (:keys token))
+
+(defun generate-websocket-token (session-string)
+  (let ((token (generate-session-string)))
+    (with-db ()
+      (make-dao 'websocket-validation-token :token token :session-string session-string))
+    token))
+
+(defun find-session-string-by-token (token)
+  (with-transaction ()
+    (destructuring-bind (row-id session-string expiredp)
+        (db-query (:for-update
+                   (:select 'id 'session-string (:< (:+ 'time-created
+                                                        (:raw
+                                                         (format nil "interval '~A seconds'"
+                                                                 *validation-token-timeout*)))
+                                                    (:now))
+                            :from 'websocket-validation-token
+                            :where (:= 'token token)))
+                  :row)
+      (when row-id
+        (db-query (:delete-from 'websocket-validation-token
+                                :where (:or
+                                        (:< (:+ 'time-created
+                                                (:raw
+                                                 (format nil "interval '~A seconds'"
+                                                         *validation-token-timeout*)))
+                                            (:now))
+                                        (:= 'id row-id))))
+        (and (not expiredp) session-string)))))
+
+(defun handle-new-client (res ws-client json-message
+                          &aux (message (jsown:parse json-message)))
+  (let* ((client (make-client :ws-client ws-client
+                              :user-agent (jsown:val message "useragent")
+                              :validation-token (jsown:val message "token")))
+         (client-valid-p (validate-client res client))
+         (char-index (jsown:val message "char"))
+         (entity-id (nth char-index (sykosomatic.character:account-characters
+                                     (client-account-id client)))))
+    (cond ((and client-valid-p entity-id)
+           (logit "Client validated: ~S.~%It's now playing as ~A."
+                  client (full-name entity-id))
+           ;; TODO - Need to do something about clients connecting to the same entity.
+           (setf (client-entity-id client) entity-id)
+           (add-client res client))
+          (t
+           (logit "No session. Disconnecting client. (~S)" client)
+           (disconnect-client res client)))))
+
+;;;
+;;; Protocol implementations
+;;;
+(defmethod ws:resource-client-disconnected ((res chat-server) ws-client
+                                            &aux (client (find-client res ws-client)))
+  (logit "Client ~S disconnected." client)
+  (continuable (remove-client res client)))
+
+(defmethod ws:resource-received-text ((res chat-server) ws-client message)
+  (continuable
+    (let ((client (find-client res ws-client)))
+      (if (and client (client-session client))
+          (handle-client-message res client message)
+          (handle-new-client res ws-client message)))))
 
 (defmethod add-client ((srv chat-server) client)
   (logit "Adding pending client ~S." client)
@@ -83,81 +136,18 @@
 (defmethod remove-client ((srv chat-server) client)
   (remhash (client-ws-client client) (slot-value srv 'clients)))
 
+(defmethod disconnect-client ((server chat-server) client)
+  (ws:write-to-client-close (client-ws-client client)))
+
 (defmethod validate-client ((srv chat-server) client &aux (*acceptor* *server*))
-  (let ((session (session-verify (make-instance 'persistent-session-request
-                                                :uri (client-uri client)
-                                                :remote-addr (client-host client)
-                                                :headers-in (client-headers client)
-                                                :acceptor *server*))))
-    (when session
-      (setf (client-session client) session
-            (client-account-id client) (current-account session))
-      client)))
-
-(defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (continuable
-    (let (alist-headers)
-      (maphash (lambda (k v)
-                 (push (cons (intern (string-upcase k) :keyword)
-                             v)
-                       alist-headers))
-               headers)
-      (add-client res (make-client :uri resource-name :headers alist-headers :ws-client ws-client))))
-  t)
-
-(defmethod ws:resource-client-disconnected ((res chat-server) ws-client
-                                            &aux (client (find-client res ws-client)))
-  (logit "Client ~S disconnected." client)
-  (continuable (remove-client res client)))
-
-(defmethod ws:resource-received-text ((res chat-server) ws-client message
-                                      &aux (client (find-client res ws-client)))
-  (continuable
-    (if (client-session client)
-        (process-client-message res client message)
-        (process-client-validation res client message))))
-
-(defun actor-client (actor-id)
-  (maphash-values (lambda (client)
-                    (when (eql actor-id (client-character-id client))
-                      (return-from actor-client client)))
-                  (slot-value *websocket-server* 'clients))
-  nil)
-
-(defun send-msg (actor msg)
-  (client-write (actor-client actor)
-                (jsown:to-json msg)))
-
-(defun send-action (recipient actor action-txt)
-  #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
-    (logit "Saving action under scene ~A: ~A" scene-id action-txt)
-    (add-action scene-id actor action-txt))
-  (send-msg recipient `("action" (:obj
-                                  ,@(when actor
-                                          `(("actor" . ,(character-name actor))))
-                                  ("action" . ,action-txt)))))
-
-(defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (let ((char-name (character-name actor)))
-    #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
-           (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
-           (add-dialogue scene-id char-name dialogue parenthetical))
-    (send-msg recipient `("dialogue" (:obj
-                                      ("actor" . ,char-name)
-                                      ("parenthetical" . ,parenthetical)
-                                      ("dialogue" . ,dialogue))))))
-
-(defun send-transition (recipient text)
-  (send-msg recipient (list "transition" text)))
-
-(defun send-ooc (recipient display-name text)
-  (send-msg recipient `("ooc" (:obj
-                               ("display-name" . ,display-name)
-                               ("text" . ,text)))))
-
-(defun local-actors (actor-id)
-  (declare (ignore actor-id))
-  (mapcar #'client-character-id (hash-table-values (slot-value *websocket-server* 'clients))))
+  (logit "Attempting to validate client: ~S" client)
+  (when-let* ((session-string (find-session-string-by-token (client-validation-token client)))
+              (session (verify-persistent-session session-string
+                                                  (client-user-agent client)
+                                                  (client-host client))))
+    (setf (client-session client) session)
+    (logit "Client successfully validated: ~S" client)
+    client))
 
 ;;;
 ;;; Client messages
@@ -178,7 +168,7 @@
            (lambda ,lambda-list
              ,@body))))
 
-(defun process-client-message (res client raw-message)
+(defun handle-client-message (res client raw-message)
   (logit "Client message: ~A" raw-message)
   (when-let (message (handler-case (jsown:parse raw-message)
                        (error (e) (logit "Error while parsing client message '~A': ~A" raw-message e))))
@@ -192,41 +182,81 @@
             (logit "Got an error while the handler for '~A': ~A" raw-message e))))
       (logit "Unknown command '~A'. Ignoring." (car message)))))
 
+;;;
+;;; Messaging utilities
+;;;
+(defun entity-client (entity-id)
+  (maphash-values (lambda (client)
+                    (when (eql entity-id (client-entity-id client))
+                      (return-from entity-client client)))
+                  (slot-value *websocket-server* 'clients))
+  nil)
+
+(defun all-clients ()
+  (hash-table-values (slot-value *websocket-server* 'clients)))
+
+;;;
+;;; Handlers
+;;;
+(defun send-ooc (recipient display-name text)
+  (send-json recipient `("ooc" (:obj
+                               ("display-name" . ,display-name)
+                               ("text" . ,text)))))
+
 (defhandler ooc (message)
   (map nil (rcurry #'send-ooc (account-display-name (client-account-id *client*)) message)
-       (local-actors *client*)))
+       (all-clients)))
+
+(defun send-dialogue (recipient actor dialogue &optional parenthetical)
+  (let ((char-name (full-name actor)))
+    #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
+           (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
+           (add-dialogue scene-id char-name dialogue parenthetical))
+    (client-write-json recipient `("dialogue" (:obj
+                                               ("actor" . ,char-name)
+                                               ("parenthetical" . ,parenthetical)
+                                               ("dialogue" . ,dialogue))))))
 
 (defhandler dialogue (message)
   (handler-case
       (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
-        (map nil (rcurry #'send-dialogue (client-character-id *client*) dialogue parenthetical)
-             (local-actors *client*)))
+        (map nil (rcurry #'send-dialogue (client-entity-id *client*) dialogue parenthetical)
+             (all-clients)))
     (error (e)
-      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
+      (client-write-json *client* (list "parse-error" (princ-to-string e))))))
+
+(defun send-action (recipient actor action-txt)
+  #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
+         (logit "Saving action under scene ~A: ~A" scene-id action-txt)
+         (add-action scene-id actor action-txt))
+  (client-write-json recipient `("action" (:obj
+                                           ,@(when actor
+                                                   `(("actor" . ,(full-name actor))))
+                                           ("action" . ,action-txt)))))
 
 (defhandler action (action-txt)
   (handler-case
       (let ((predicate (sykosomatic.parser:parse-action action-txt)))
-        (map nil (rcurry #'send-action (client-character-id *client*) predicate)
-             (local-actors *client*)))
+        (map nil (rcurry #'send-action (client-entity-id *client*) predicate)
+             (all-clients)))
     (error (e)
-      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
+      (client-write-json *client* (list "parse-error" (princ-to-string e))))))
 
 (defhandler emit (text)
   (map nil (rcurry #'send-action nil text)
-       (local-actors *client*)))
+       (all-clients)))
 
 (defhandler complete-action (action-text)
-  (client-write *client* (jsown:to-json (list "completion"
-                                              (sykosomatic.parser:action-completions action-text)))))
+  (client-write-json *client* (list "completion"
+                                    (sykosomatic.parser:action-completions action-text))))
 
-(defhandler char-desc (charname)
-  (logit "Got a character description request: ~S" charname)
-  (client-write *client* (jsown:to-json (list "char-desc"
-                                              (character-description (find-character charname))))))
+(defhandler obj-desc (objname)
+  (logit "Got an object description request: ~S" objname)
+  (when-let (entity (find-by-full-name objname :fuzzyp t))
+    (client-write-json *client* (list "obj-desc" (full-name entity)))))
 
 (defhandler ping ()
-  (client-write *client* (jsown:to-json (list "pong"))))
+  (client-write-json *client* (list "pong")))
 
 (defhandler start-recording ()
   (logit "Request to start recording received.")
@@ -248,10 +278,6 @@
 
 (defun init-websockets (&optional (port *chat-server-port*))
   (register-chat-server)
-  (register-session-finalizer 'websocket-clients
-                              (lambda (session-id)
-                                (when-let (clients (session-websocket-clients session-id))
-                                  (map nil #'disconnect-client clients))))
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
          (lambda ()
@@ -269,29 +295,3 @@
     (bt:destroy-thread *chat-resource-thread*))
   (setf *websocket-thread* nil
         *chat-resource-thread* nil))
-
-
-;;; User actions
-;; (defstruct (user-action (:constructor make-user-action (user action dialogue
-;;                                                         &optional (timestamp (get-universal-time)))))
-;;   user timestamp action dialogue)
-
-;; (defun render-user-action-to-json (user-action)
-;;   (let ((action (user-action-action user-action))
-;;         (dialogue (user-action-dialogue user-action))
-;;         (user (user-action-user user-action)))
-;;     (jsown:to-json
-;;      `("user-action"
-;;        (:obj ("action" . ,action)
-;;              ("character" . ,user)
-;;              ("dialogue" . ,dialogue))))))
-
-
-;; (defun send-user-action (client user-action)
-;;   (when-let ((scene-id (session-value 'scene-id (client-session client))))
-;;     (save-user-action scene-id user-action))
-;;   (client-write client (render-user-action-to-json user-action)))
-
-;; (defun broadcast-user-action (res action)
-;;   (maphash-values (rcurry #'send-user-action action)
-;;                   (slot-value res 'clients)))

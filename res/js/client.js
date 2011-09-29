@@ -179,6 +179,7 @@ var sykosomatic =
         // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
         ws.onopen = function() {
             var obj = { useragent : navigator.userAgent,
+                        token : $('#wstoken').text(),
                         'char' : current_char() };
             ws.send(JSON.stringify(obj));
             enable_input();
@@ -200,7 +201,7 @@ var sykosomatic =
     /// From client
     ///
     function request_char_description(charname) {
-        ws_send(['char-desc',charname]);
+        ws_send(['obj-desc',charname]);
     }
     pub.request_char_description = request_char_description;
 
@@ -261,8 +262,8 @@ var sykosomatic =
     ///
     var dispatch_table = {
         // 'pong' : function(msg) { console.log('got a pong'); },
-        'char-desc' : function(msg) { popup_dialog('Description', msg[1], false,
-                                                   {Ok:function(){$(this).dialog("close");}}); },
+        'obj-desc' : function(msg) { popup_dialog('Description', msg[1], false,
+                                                  {Ok:function(){$(this).dialog("close");}}); },
         'parse-error' : function(msg) { popup_dialog('Parser error', msg[1], true,
                                                      {Ok:function(){$(this).dialog("close");}}); }
     };

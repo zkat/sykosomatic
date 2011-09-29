@@ -127,9 +127,10 @@
           (<:submit :value "Log in")))
 
 ;;; /stage
-(defpage stage (char-name) ((gameplay-js-libs))
+(defpage stage (session-token char-name) ((gameplay-js-libs))
     "All the World's a Stage"
   (chat-area char-name)
+  (<:p :style "visibility: hidden;" :id "wstoken" (<:ah session-token))
   #+nil
   (scene-recording)
   #+nil
