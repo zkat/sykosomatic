@@ -204,9 +204,9 @@
 ;;; Handlers
 ;;;
 (defun send-ooc (recipient display-name text)
-  (send-json recipient `("ooc" (:obj
-                               ("display-name" . ,display-name)
-                               ("text" . ,text)))))
+  (client-write-json recipient `("ooc" (:obj
+                                        ("display-name" . ,display-name)
+                                        ("text" . ,text)))))
 
 (defhandler ooc (message)
   (map nil (rcurry #'send-ooc (account-display-name (client-account-id *client*)) message)
@@ -281,7 +281,7 @@
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
-(defun init-websockets (&key (port *chat-server-port*)
+(defun init-websockets (&key (port *websocket-server-port*)
                         (resource-name *websocket-resource-name*)
                         (origin-prefix *server-base-url*))
   (register-chat-server (make-instance 'chat-server
