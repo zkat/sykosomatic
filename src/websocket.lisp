@@ -30,7 +30,7 @@
   (setf (transient-session-value 'websocket-clients session) new-value))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
-  (declare (ignore resource-name))      ; Is this wise?
+  (declare (ignore resource-name headers))      ; Is this wise?
   (continuable
     (add-client res (make-client :ws-client ws-client)))
   t)
@@ -140,12 +140,13 @@
          (char-index (jsown:val message "char"))
          (character-id (nth char-index (account-characters (client-account-id client)))))
     (cond ((and client-valid-p character-id)
-           (logit "Client validated: ~S. It's now playing as ~A."
+           (logit "Client validated: ~S.~%It's now playing as ~A."
                   client (character-name character-id))
            ;; TODO - Need to do something about clients connecting to the same entity.
+           #+nil
            (when-let (existing-client (find character-id
                                             (session-websocket-clients (client-session client))
-                                            :key #'client-character-id))
+                                            :key #'client-entity-id))
              (deletef existing-client (session-websocket-clients (client-session client)))
              (logit "Something funky is cooking.")
              (disconnect-client res existing-client))
@@ -163,12 +164,12 @@
   (gethash ws-client (slot-value chat-server 'clients)))
 
 (defun client-character-name (client)
-  (when-let ((character-id (client-character-id client)))
+  (when-let ((character-id (client-entity-id client)))
     (character-name character-id)))
 
 (defun actor-client (actor-id)
   (maphash-values (lambda (client)
-                    (when (eql actor-id (client-character-id client))
+                    (when (eql actor-id (client-entity-id client))
                       (return-from actor-client client)))
                   (slot-value *websocket-server* 'clients))
   nil)
@@ -206,7 +207,7 @@
 
 (defun local-actors (actor-id)
   (declare (ignore actor-id))
-  (mapcar #'client-character-id (hash-table-values (slot-value *websocket-server* 'clients))))
+  (mapcar #'client-entity-id (hash-table-values (slot-value *websocket-server* 'clients))))
 
 ;;;
 ;;; Client messages
@@ -248,18 +249,18 @@
 (defhandler dialogue (message)
   (handler-case
       (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
-        (map nil (rcurry #'send-dialogue (client-character-id *client*) dialogue parenthetical)
+        (map nil (rcurry #'send-dialogue (client-entity-id *client*) dialogue parenthetical)
              (local-actors *client*)))
     (error (e)
-      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
+      (send-msg (client-entity-id *client*) (list "parse-error" (princ-to-string e))))))
 
 (defhandler action (action-txt)
   (handler-case
       (let ((predicate (sykosomatic.parser:parse-action action-txt)))
-        (map nil (rcurry #'send-action (client-character-id *client*) predicate)
+        (map nil (rcurry #'send-action (client-entity-id *client*) predicate)
              (local-actors *client*)))
     (error (e)
-      (send-msg (client-character-id *client*) (list "parse-error" (princ-to-string e))))))
+      (send-msg (client-entity-id *client*) (list "parse-error" (princ-to-string e))))))
 
 (defhandler emit (text)
   (map nil (rcurry #'send-action nil text)
