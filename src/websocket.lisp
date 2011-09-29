@@ -1,71 +1,17 @@
 (cl:defpackage #:sykosomatic.websocket
   (:use :cl :alexandria :hunchentoot
         :sykosomatic.util
+        :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
         :sykosomatic.character
         :sykosomatic.account
         :sykosomatic.scene)
-  (:export :init-websockets
-           :teardown-websockets))
+  (:export
+   :generate-websocket-token
+   :init-websockets
+   :teardown-websockets))
 (cl:in-package #:sykosomatic.websocket)
-
-(defun session-websocket-clients (session)
-  (transient-session-value 'websocket-clients session))
-(defun (setf session-websocket-clients) (new-value session)
-  (setf (transient-session-value 'websocket-clients session) new-value))
-
-(defgeneric add-client (chat-server client))
-(defgeneric remove-client (chat-server client))
-(defgeneric validate-client (chat-server client))
-(defgeneric disconnect-client (chat-server client))
-
-(defstruct client server uri host headers user-agent ws-client session account-id character-id)
-
-(defun client-write (client string)
-  (continuable
-    (ws:write-to-client-text (client-ws-client client) string)))
-
-(defun find-client (chat-server ws-client)
-  (gethash ws-client (slot-value chat-server 'clients)))
-
-(defun process-client-validation (res client json-message
-                                  &aux (*acceptor* *server*)
-                                  (message (jsown:parse json-message)))
-  (push (cons :user-agent (jsown:val message "useragent"))
-        (client-headers client))
-  (let* ((client-valid-p (validate-client res client))
-         (char-index (jsown:val message "char"))
-         (character-id (nth char-index (account-characters (client-account-id client)))))
-    (cond ((and client-valid-p character-id)
-           (logit "Client validated: ~S. It's now playing as ~A."
-                  client (character-name character-id))
-           (when-let (existing-client (find character-id
-                                            (session-websocket-clients (client-session client))
-                                            :key #'client-character-id))
-             (deletef existing-client (session-websocket-clients (client-session client)))
-             (logit "Something funky is cooking.")
-             (disconnect-client res existing-client))
-           (setf (client-character-id client) character-id)
-           (push (session-websocket-clients (client-session client)) client))
-          (t
-           (logit "No session. Disconnecting client. (~S)" client)
-           (disconnect-client res client)))))
-
-(defun client-character-name (client)
-  (when-let ((character-id (client-character-id client)))
-    (character-name character-id)))
-
-(defclass chat-server (ws:ws-resource)
-  ((clients :initform (make-hash-table :test #'eq))))
-
-(defmethod disconnect-client ((server chat-server) client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
-    (ws:write-to-client-close ws-client)
-    (when session
-      (deletef (session-websocket-clients session)
-               client))))
 
 (defvar *websocket-server*)
 
@@ -75,34 +21,18 @@
    (setf *websocket-server* (make-instance 'chat-server))
    (ws:origin-prefix "http://zushakon.sykosomatic.org")))
 
-(defmethod add-client ((srv chat-server) client)
-  (logit "Adding pending client ~S." client)
-  (setf (gethash (client-ws-client client) (slot-value srv 'clients))
-        client))
+(defclass chat-server (ws:ws-resource)
+  ((clients :initform (make-hash-table :test #'eq))))
 
-(defmethod remove-client ((srv chat-server) client)
-  (remhash (client-ws-client client) (slot-value srv 'clients)))
-
-(defmethod validate-client ((srv chat-server) client &aux (*acceptor* *server*))
-  (let ((session (session-verify (make-instance 'persistent-session-request
-                                                :uri (client-uri client)
-                                                :remote-addr (client-host client)
-                                                :headers-in (client-headers client)
-                                                :acceptor *server*))))
-    (when session
-      (setf (client-session client) session
-            (client-account-id client) (current-account session))
-      client)))
+(defun session-websocket-clients (session)
+  (transient-session-value 'websocket-clients session))
+(defun (setf session-websocket-clients) (new-value session)
+  (setf (transient-session-value 'websocket-clients session) new-value))
 
 (defmethod ws:resource-accept-connection ((res chat-server) resource-name headers ws-client)
+  (declare (ignore resource-name))      ; Is this wise?
   (continuable
-    (let (alist-headers)
-      (maphash (lambda (k v)
-                 (push (cons (intern (string-upcase k) :keyword)
-                             v)
-                       alist-headers))
-               headers)
-      (add-client res (make-client :uri resource-name :headers alist-headers :ws-client ws-client))))
+    (add-client res (make-client :ws-client ws-client)))
   t)
 
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
@@ -116,6 +46,125 @@
     (if (client-session client)
         (process-client-message res client message)
         (process-client-validation res client message))))
+
+
+(defgeneric add-client (chat-server client))
+(defgeneric remove-client (chat-server client))
+(defgeneric validate-client (chat-server client))
+(defgeneric disconnect-client (chat-server client))
+
+(defstruct client
+  ;; Websocket metadata
+  server ws-client
+  ;; Metadata/validation
+  host user-agent validation-token
+  ;; Associated session and entity.
+  session entity-id)
+
+(defmethod add-client ((srv chat-server) client)
+  (logit "Adding pending client ~S." client)
+  (setf (gethash (client-ws-client client) (slot-value srv 'clients))
+        client))
+
+(defmethod remove-client ((srv chat-server) client)
+  (remhash (client-ws-client client) (slot-value srv 'clients)))
+
+(defmethod disconnect-client ((server chat-server) client)
+  (let ((ws-client (client-ws-client client))
+        (session (client-session client)))
+    (ws:write-to-client-close ws-client)
+    (when session
+      (deletef (session-websocket-clients session)
+               client))))
+
+(defun client-account-id (client)
+  (when-let (sess (client-session client))
+    (current-account sess)))
+
+;;;
+;;; Client validation
+;;;
+(defparameter *validation-token-timeout* 30
+  "How long before validation tokens are considered expired, in seconds.")
+(defdao websocket-validation-token ()
+  ((token text)
+   (session-string text)
+   (time-created timestamp :col-default (:now)))
+  (:keys token))
+
+(defun generate-websocket-token (session-string)
+  (let ((token (generate-session-string)))
+    (with-db ()
+      (make-dao 'websocket-validation-token :token token :session-string session-string))
+    token))
+
+(defun find-session-string-by-token (token)
+  (with-transaction ()
+    (destructuring-bind (row-id session-string expiredp)
+        (db-query (:for-update
+                   (:select 'id 'session-string (:< (:+ 'time-created
+                                                        (:raw
+                                                         (format nil "interval '~A seconds'"
+                                                                 *validation-token-timeout*)))
+                                                    (:now))
+                            :from 'websocket-validation-token
+                            :where (:= 'token token)))
+                  :row)
+      (when row-id
+        (db-query (:delete-from 'websocket-validation-token
+                                :where (:or
+                                        (:< (:+ 'time-created
+                                                (:raw
+                                                 (format nil "interval '~A seconds'"
+                                                         *validation-token-timeout*)))
+                                            (:now))
+                                        (:= 'id row-id))))
+        (and (not expiredp) session-string)))))
+
+(defmethod validate-client ((srv chat-server) client &aux (*acceptor* *server*))
+  (logit "Attempting to validate client: ~S" client)
+  (when-let* ((session-string (find-session-string-by-token (client-validation-token client)))
+              (session (verify-persistent-session session-string
+                                                  (client-user-agent client)
+                                                  (client-host client))))
+    (setf (client-session client) session)
+    (logit "Client successfully validated: ~S" client)
+    client))
+
+(defun process-client-validation (res client json-message
+                                  &aux (*acceptor* *server*)
+                                  (message (jsown:parse json-message)))
+  (setf (client-user-agent client) (jsown:val message "useragent")
+        (client-validation-token client) (jsown:val message "token"))
+  (let* ((client-valid-p (validate-client res client))
+         (char-index (jsown:val message "char"))
+         (character-id (nth char-index (account-characters (client-account-id client)))))
+    (cond ((and client-valid-p character-id)
+           (logit "Client validated: ~S. It's now playing as ~A."
+                  client (character-name character-id))
+           ;; TODO - Need to do something about clients connecting to the same entity.
+           (when-let (existing-client (find character-id
+                                            (session-websocket-clients (client-session client))
+                                            :key #'client-character-id))
+             (deletef existing-client (session-websocket-clients (client-session client)))
+             (logit "Something funky is cooking.")
+             (disconnect-client res existing-client))
+           (setf (client-entity-id client) character-id)
+           (push (session-websocket-clients (client-session client)) client))
+          (t
+           (logit "No session. Disconnecting client. (~S)" client)
+           (disconnect-client res client)))))
+
+(defun client-write (client string)
+  (continuable
+    (ws:write-to-client-text (client-ws-client client) string)))
+
+(defun find-client (chat-server ws-client)
+  (gethash ws-client (slot-value chat-server 'clients)))
+
+(defun client-character-name (client)
+  (when-let ((character-id (client-character-id client)))
+    (character-name character-id)))
 
 (defun actor-client (actor-id)
   (maphash-values (lambda (client)
