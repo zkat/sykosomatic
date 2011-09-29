@@ -77,8 +77,8 @@
      NOTE: Maybe in the future. Whole-sentence is easier for now. :\
 **** TODO Name completion for currently-playing entities.
 *** TODO Use character/named library
-*** TODO Clean that shit up
-    It's a bloody mess in websocket.lisp
+*** DONE Clean up websocket.lisp
+    It's a bloody mess in there
 **** DONE Only the session and the actor-id need to be kept
 **** DONE Instead of using web session, make web clients identify with a single-use token
 **** DONE Get rid of resource-client-connected
@@ -86,13 +86,10 @@
      quick check to see if the session is already being tracked, and if it's valid. If it's not,
      treat it as the validation step, etc.
 **** DONE Reorganize the file so it's more readable
-**** TODO Clean up that protocol mess
-     I got carried away, eh? It's too confusing and there's no direction from it. Just make them
-     functions.
-**** TODO Give client.js a once-over.
-     Probably worth revisiting the way things are being 'exported' and the like. Some of the stuff
-     in that file might be useful in other pages, as well. Perhaps it should actually be used as a
-     shared library of sorts. Maybe also rename it to sykosomatic.js?
+*** TODO Give client.js a once-over.
+    Probably worth revisiting the way things are being 'exported' and the like. Some of the stuff in
+    that file might be useful in other pages, as well. Perhaps it should actually be used as a
+    shared library of sorts. Maybe also rename it to sykosomatic.js?
 *** TODO If the current entity's name changes in the database, tell the client
     A nice message through the websocket to update the client's display.
 *** TODO Scene headers
@@ -156,12 +153,13 @@
     Entity: a game object, which a client may be using as its "Body"
     Body: a game object a client is directly controlling. AKA its entity-id.
     Actor: For the sake of dialogue/actions, the entity who is understood to be performing the action.
-*** TODO Implement body/actor/entity clarification
+*** DONE Implement body/actor/entity clarification
 **** DONE Make websocket.lisp use plain old entity IDs for the current actor.
 **** DONE Think about how to represent entity<->connected-client relationship
 **** DONE Update websocket.lisp to use nameable instead of character to render names and find things.
-**** TODO update character.lisp to only handle character creation.
-     perhaps rename it to character-creation.lisp? Get rid of the character-blah stuff.
+**** DONE Make character.lisp create a nameable instead of slapping modifiers on an entity.
+**** DONE update character.lisp to only handle character creation.
+**** DONE rename character module to character-creation.
 *** TODO Fix timer
     It's not quite working right now, although there's a reasonable rate limit. that might be okay
     for now.
@@ -172,8 +170,7 @@
     should have a description, and should be able to 'contain' other characters. Characters can only
     interact with other characters provided they are in the same location.
 *** TODO Put characters in a location
-    Add several locations. Allow characters to interact only with other characters present in the
-    current location.
+*** TODO Limit dialogue/action interactions to same location
 *** TODO Location transitions
     Changing locations should have a couple of effects:
 **** TODO Scene transition.
@@ -250,12 +247,15 @@
     The websocket client should not leak anything the player would not already be able to do through
     the interface. Object identities should be hidden somehow.
     
+*** DONE sykosomatic.account:gensalt uses cl:random
+     Might be a good idea to put the openssl-based random numgen in util.lisp or something.
 ** Misc
 *** TODO Move persistent sessions out into a separate lisp project
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
+*** TODO Actual config file system for local configs
 * Right now
 ** DONE Do the websocket refactor (Websocket client/clean that shit up)
    This may also include doing the auth-through-single-use-token thing.
-** TODO Do the character/actor/entity clarification (Game/Implement character/actor/entity...)
+** DONE Do the character/actor/entity clarification (Game/Implement character/actor/entity...)
 ** TODO Implement name completion (Websocket client/Fancy js 'parser')
