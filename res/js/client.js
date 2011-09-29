@@ -179,6 +179,7 @@ var sykosomatic =
         // ws = new WebSocket('ws://dagon.ath.cx:843/chat');
         ws.onopen = function() {
             var obj = { useragent : navigator.userAgent,
+                        token : $('#wstoken').text(),
                         'char' : current_char() };
             ws.send(JSON.stringify(obj));
             enable_input();
