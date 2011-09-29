@@ -24,11 +24,6 @@
 (defclass chat-server (ws:ws-resource)
   ((clients :initform (make-hash-table :test #'eq))))
 
-(defun session-websocket-clients (session)
-  (transient-session-value 'websocket-clients session))
-(defun (setf session-websocket-clients) (new-value session)
-  (setf (transient-session-value 'websocket-clients session) new-value))
-
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
   (logit "Client ~S disconnected." client)
@@ -63,12 +58,7 @@
   (remhash (client-ws-client client) (slot-value srv 'clients)))
 
 (defmethod disconnect-client ((server chat-server) client)
-  (let ((ws-client (client-ws-client client))
-        (session (client-session client)))
-    (ws:write-to-client-close ws-client)
-    (when session
-      (deletef (session-websocket-clients session)
-               client))))
+  (ws:write-to-client-close (client-ws-client client)))
 
 (defun client-account-id (client)
   (when-let (sess (client-session client))
@@ -136,16 +126,8 @@
            (logit "Client validated: ~S.~%It's now playing as ~A."
                   client (character-name character-id))
            ;; TODO - Need to do something about clients connecting to the same entity.
-           #+nil
-           (when-let (existing-client (find character-id
-                                            (session-websocket-clients (client-session client))
-                                            :key #'client-entity-id))
-             (deletef existing-client (session-websocket-clients (client-session client)))
-             (logit "Something funky is cooking.")
-             (disconnect-client res existing-client))
            (setf (client-entity-id client) character-id)
-           (add-client res client)
-           (push (session-websocket-clients (client-session client)) client))
+           (add-client res client))
           (t
            (logit "No session. Disconnecting client. (~S)" client)
            (disconnect-client res client)))))
@@ -292,10 +274,6 @@
 
 (defun init-websockets (&optional (port *chat-server-port*))
   (register-chat-server)
-  (register-session-finalizer 'websocket-clients
-                              (lambda (session-id)
-                                (when-let (clients (session-websocket-clients session-id))
-                                  (map nil #'disconnect-client clients))))
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
          (lambda ()
