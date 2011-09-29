@@ -1,6 +1,6 @@
 (cl:defpackage #:sykosomatic.util
   (:use :cl :alexandria :cl-speedy-queue)
-  (:export :logit :dbg :continuable :random-string
+  (:export :logit :dbg :continuable :random-string :random-byte-array
            ;; Timer
            :make-timer :timer-tick
            ;; Queue
@@ -36,9 +36,16 @@
           target-fields))
 (export 'pomo::\!unique (find-package :postmodern))
 
-(defun random-string (length &optional (dictionary "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+(defun insecure-random-string (length &optional (dictionary "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
   (map-into (make-array length :element-type 'character)
             (curry #'random-elt dictionary)))
+
+(defun random-string (length)
+  "LENGTH will be rounded down to the nearest multiple of two."
+  (ironclad:byte-array-to-hex-string (cl+ssl:random-bytes (truncate length 2))))
+
+(defun random-byte-array (length)
+  (cl+ssl:random-bytes length))
 
 (cl:in-package :s-sql)
 

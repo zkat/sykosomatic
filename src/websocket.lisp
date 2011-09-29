@@ -62,8 +62,9 @@
    (time-created timestamp :col-default (:now)))
   (:keys token))
 
+(defparameter *websocket-token-length* 256)
 (defun generate-websocket-token (session-string)
-  (let ((token (generate-session-string)))
+  (let ((token (random-string *websocket-token-length*)))
     (with-db ()
       (make-dao 'websocket-validation-token :token token :session-string session-string))
     token))

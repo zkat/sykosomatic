@@ -24,10 +24,7 @@
    *key-derivation-iterations*
    *key-length*))
 
-;; TODO - don't use cl:random for security-related things, ffs
-(defun gensalt (&key (length 32) (size 256))
-  (map-into (make-array length :element-type '(unsigned-byte 8))
-            (curry #'random size)))
+(defun gensalt () (random-byte-array *key-length*))
 
 ;;;
 ;;; DB

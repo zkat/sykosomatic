@@ -19,10 +19,10 @@
 (defclass persistent-session-request (request)
   ())
 
-(defparameter *session-string-byte-count* 128)
+(defparameter *session-string-length* 256)
 
-(defun generate-session-string (&optional (byte-count *session-string-byte-count*))
-  (ironclad:byte-array-to-hex-string (cl+ssl:random-bytes byte-count)))
+(defun generate-session-string (&optional (length *session-string-length*))
+  (random-string length))
 
 (defdao persistent-session ()
   ((cookie-value text :initform (generate-session-string) :reader session-cookie-value)
