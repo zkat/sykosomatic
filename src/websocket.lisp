@@ -15,17 +15,17 @@
 
 (defvar *websocket-server*)
 
-(defclass chat-server (ws:ws-resource)
-  ((clients :initform (make-hash-table :test #'eq))))
-
-(defun register-chat-server ()
+(defun register-chat-server (server)
   (ws:register-global-resource
-   "/chat"
-   (setf *websocket-server* (make-instance 'chat-server))
-   (ws:origin-prefix "http://zushakon.sykosomatic.org")))
+   (resource-name server)
+   (setf *websocket-server* server)
+   (ws:origin-prefix (origin-prefix server))))
 
+(defgeneric origin-prefix (server))
+(defgeneric resource-name (server))
 (defgeneric add-client (chat-server client))
 (defgeneric remove-client (chat-server client))
+(defgeneric find-client (chat-server client))
 (defgeneric validate-client (chat-server client))
 (defgeneric disconnect-client (chat-server client))
 
@@ -46,9 +46,6 @@
 
 (defun client-write-json (client obj)
   (client-write client (jsown:to-json obj)))
-
-(defun find-client (chat-server ws-client)
-  (gethash ws-client (slot-value chat-server 'clients)))
 
 (defun client-account-id (client)
   (when-let (sess (client-session client))
@@ -116,6 +113,11 @@
 ;;;
 ;;; Protocol implementations
 ;;;
+(defclass chat-server (ws:ws-resource)
+  ((clients :initform (make-hash-table :test #'eq))
+   (origin-prefix :initarg :origin-prefix :reader origin-prefix)
+   (resource-name :initarg :resource-name :reader resource-name)))
+
 (defmethod ws:resource-client-disconnected ((res chat-server) ws-client
                                             &aux (client (find-client res ws-client)))
   (logit "Client ~S disconnected." client)
@@ -135,6 +137,9 @@
 
 (defmethod remove-client ((srv chat-server) client)
   (remhash (client-ws-client client) (slot-value srv 'clients)))
+
+(defmethod find-client ((res chat-server) ws-client)
+  (gethash ws-client (slot-value res 'clients)))
 
 (defmethod disconnect-client ((server chat-server) client)
   (ws:write-to-client-close (client-ws-client client)))
@@ -276,8 +281,15 @@
 (defvar *websocket-thread* nil)
 (defvar *chat-resource-thread* nil)
 
-(defun init-websockets (&optional (port *chat-server-port*))
-  (register-chat-server)
+(defparameter *websocket-origin-prefix* "http://zushakon.sykosomatic.org")
+(defparameter *websocket-resource-name* "/chat")
+
+(defun init-websockets (&key (port *chat-server-port*)
+                        (resource-name *websocket-resource-name*)
+                        (origin-prefix *websocket-origin-prefix*))
+  (register-chat-server (make-instance 'chat-server
+                                       :origin-prefix origin-prefix
+                                       :resource-name resource-name))
   (setf *websocket-thread*
         (bordeaux-threads:make-thread
          (lambda ()
@@ -285,7 +297,7 @@
          :name "websockets server"))
   (setf *chat-resource-thread*
         (bt:make-thread
-         (lambda () (ws:run-resource-listener (ws:find-global-resource "/chat")))
+         (lambda () (ws:run-resource-listener (ws:find-global-resource resource-name)))
          :name "chat resource listener")))
 
 (defun teardown-websockets ()
