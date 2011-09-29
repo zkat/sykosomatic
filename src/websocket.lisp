@@ -44,6 +44,9 @@
   (continuable
     (ws:write-to-client-text (client-ws-client client) string)))
 
+(defun client-write-json (client obj)
+  (client-write client (jsown:to-json obj)))
+
 (defun find-client (chat-server ws-client)
   (gethash ws-client (slot-value chat-server 'clients)))
 
@@ -181,20 +184,15 @@
 ;;;
 ;;; Messaging utilities
 ;;;
-(defun actor-client (actor-id)
+(defun entity-client (entity-id)
   (maphash-values (lambda (client)
-                    (when (eql actor-id (client-entity-id client))
-                      (return-from actor-client client)))
+                    (when (eql entity-id (client-entity-id client))
+                      (return-from entity-client client)))
                   (slot-value *websocket-server* 'clients))
   nil)
 
-(defun send-json (actor msg)
-  (client-write (actor-client actor)
-                (jsown:to-json msg)))
-
-(defun local-actors (actor-id)
-  (declare (ignore actor-id))
-  (mapcar #'client-entity-id (hash-table-values (slot-value *websocket-server* 'clients))))
+(defun all-clients ()
+  (hash-table-values (slot-value *websocket-server* 'clients)))
 
 ;;;
 ;;; Handlers
@@ -206,58 +204,58 @@
 
 (defhandler ooc (message)
   (map nil (rcurry #'send-ooc (account-display-name (client-account-id *client*)) message)
-       (local-actors *client*)))
+       (all-clients)))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
   (let ((char-name (character-name actor)))
-    #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
+    #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
            (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
            (add-dialogue scene-id char-name dialogue parenthetical))
-    (send-json recipient `("dialogue" (:obj
-                                      ("actor" . ,char-name)
-                                      ("parenthetical" . ,parenthetical)
-                                      ("dialogue" . ,dialogue))))))
+    (client-write-json recipient `("dialogue" (:obj
+                                               ("actor" . ,char-name)
+                                               ("parenthetical" . ,parenthetical)
+                                               ("dialogue" . ,dialogue))))))
 
 (defhandler dialogue (message)
   (handler-case
       (multiple-value-bind (dialogue parenthetical) (sykosomatic.parser:parse-dialogue message)
         (map nil (rcurry #'send-dialogue (client-entity-id *client*) dialogue parenthetical)
-             (local-actors *client*)))
+             (all-clients)))
     (error (e)
-      (send-json (client-entity-id *client*) (list "parse-error" (princ-to-string e))))))
+      (client-write-json *client* (list "parse-error" (princ-to-string e))))))
 
 (defun send-action (recipient actor action-txt)
-  #+nil(when-let ((scene-id (session-value 'scene-id (client-session (actor-client recipient)))))
-    (logit "Saving action under scene ~A: ~A" scene-id action-txt)
-    (add-action scene-id actor action-txt))
-  (send-json recipient `("action" (:obj
-                                  ,@(when actor
-                                          `(("actor" . ,(character-name actor))))
-                                  ("action" . ,action-txt)))))
+  #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
+         (logit "Saving action under scene ~A: ~A" scene-id action-txt)
+         (add-action scene-id actor action-txt))
+  (client-write-json recipient `("action" (:obj
+                                           ,@(when actor
+                                                   `(("actor" . ,(character-name actor))))
+                                           ("action" . ,action-txt)))))
 
 (defhandler action (action-txt)
   (handler-case
       (let ((predicate (sykosomatic.parser:parse-action action-txt)))
         (map nil (rcurry #'send-action (client-entity-id *client*) predicate)
-             (local-actors *client*)))
+             (all-clients)))
     (error (e)
-      (send-json (client-entity-id *client*) (list "parse-error" (princ-to-string e))))))
+      (client-write-json *client* (list "parse-error" (princ-to-string e))))))
 
 (defhandler emit (text)
   (map nil (rcurry #'send-action nil text)
-       (local-actors *client*)))
+       (all-clients)))
 
 (defhandler complete-action (action-text)
-  (client-write *client* (jsown:to-json (list "completion"
-                                              (sykosomatic.parser:action-completions action-text)))))
+  (client-write-json *client* (list "completion"
+                                    (sykosomatic.parser:action-completions action-text))))
 
 (defhandler char-desc (charname)
   (logit "Got a character description request: ~S" charname)
-  (client-write *client* (jsown:to-json (list "char-desc"
-                                              (character-description (find-character charname))))))
+  (client-write-json *client* (list "char-desc"
+                                    (character-description (find-character charname)))))
 
 (defhandler ping ()
-  (client-write *client* (jsown:to-json (list "pong"))))
+  (client-write-json *client* (list "pong")))
 
 (defhandler start-recording ()
   (logit "Request to start recording received.")
