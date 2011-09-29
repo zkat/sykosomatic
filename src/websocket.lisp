@@ -4,7 +4,7 @@
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
-        :sykosomatic.character
+        :sykosomatic.game-objects.nameable
         :sykosomatic.account
         :sykosomatic.scene)
   (:export
@@ -101,10 +101,11 @@
                               :validation-token (jsown:val message "token")))
          (client-valid-p (validate-client res client))
          (char-index (jsown:val message "char"))
-         (entity-id (nth char-index (account-characters (client-account-id client)))))
+         (entity-id (nth char-index (sykosomatic.character:account-characters
+                                     (client-account-id client)))))
     (cond ((and client-valid-p entity-id)
            (logit "Client validated: ~S.~%It's now playing as ~A."
-                  client (character-name entity-id))
+                  client (full-name entity-id))
            ;; TODO - Need to do something about clients connecting to the same entity.
            (setf (client-entity-id client) entity-id)
            (add-client res client))
@@ -207,7 +208,7 @@
        (all-clients)))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (let ((char-name (character-name actor)))
+  (let ((char-name (full-name actor)))
     #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
            (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
            (add-dialogue scene-id char-name dialogue parenthetical))
@@ -230,7 +231,7 @@
          (add-action scene-id actor action-txt))
   (client-write-json recipient `("action" (:obj
                                            ,@(when actor
-                                                   `(("actor" . ,(character-name actor))))
+                                                   `(("actor" . ,(full-name actor))))
                                            ("action" . ,action-txt)))))
 
 (defhandler action (action-txt)
@@ -249,10 +250,10 @@
   (client-write-json *client* (list "completion"
                                     (sykosomatic.parser:action-completions action-text))))
 
-(defhandler char-desc (charname)
-  (logit "Got a character description request: ~S" charname)
-  (client-write-json *client* (list "char-desc"
-                                    (character-description (find-character charname)))))
+(defhandler obj-desc (objname)
+  (logit "Got an object description request: ~S" objname)
+  (when-let (entity (find-by-full-name objname :fuzzyp t))
+    (client-write-json *client* (list "obj-desc" (full-name entity)))))
 
 (defhandler ping ()
   (client-write-json *client* (list "pong")))
