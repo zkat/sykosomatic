@@ -27,7 +27,7 @@
                       :components
                       ((:file "nameable")
                        (:file "describable")))
-             (:file "character")
+             (:file "character-creation")
              (:file "scene")
              (:file "session")
              (:file "parser")
