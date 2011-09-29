@@ -75,12 +75,30 @@
 **** TODO In the completion popup, group matches by verb and by adverb
      Kinda like an <optgroup>. jquery-ui's autocomplete supports this.
      NOTE: Maybe in the future. Whole-sentence is easier for now. :\
-*** TODO Performance: one SQL connection per websocket client?
+**** TODO Name completion for currently-playing entities.
+*** TODO Use character/named library
+*** TODO Clean that shit up
+    It's a bloody mess in websocket.lisp
+**** DONE Only the session and the actor-id need to be kept
+**** DONE Instead of using web session, make web clients identify with a single-use token
+**** DONE Get rid of resource-client-connected
+     Validation no longer needs to be split up into two steps. Have resource-received-text do a
+     quick check to see if the session is already being tracked, and if it's valid. If it's not,
+     treat it as the validation step, etc.
+**** DONE Reorganize the file so it's more readable
+**** TODO Clean up that protocol mess
+     I got carried away, eh? It's too confusing and there's no direction from it. Just make them
+     functions.
+**** TODO Give client.js a once-over.
+     Probably worth revisiting the way things are being 'exported' and the like. Some of the stuff
+     in that file might be useful in other pages, as well. Perhaps it should actually be used as a
+     shared library of sorts. Maybe also rename it to sykosomatic.js?
+*** TODO If the current entity's name changes in the database, tell the client
+    A nice message through the websocket to update the client's display.
 *** TODO Scene headers
 **** TODO Add a scene-header server->client message
      Should include the url for an image to load and the name of the location.
 **** TODO Get client to render the scene header.
-*** TODO Instead of using web session, make web clients identify with a single-use token.
 *** TODO Make sure a user is chatting as a character only once.
 *** TODO Back-button-friendliness
      When you leave the chat page, the websocket is disconnected. If you press 'back', though, the
@@ -104,14 +122,14 @@
 **** TODO Scene naming
      Add ability to change the name of the recorded session.
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
+*** TODO FUTURE Client customization by users
 ** Misc Webapp work
 *** TODO Sessions
 **** TODO Concurrent session/session history information
      Since sessions last a long time, have a screen where a user can log out all other active
      sessions.
 **** TODO Log out all sessions on username or password change
-**** TODO Make sure session-verify really is thread-safe.
-     I'm nublar at with-transaction :(
+**** DONE Make sure session-verify really is thread-safe.
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
 *** TODO Form builder
@@ -131,15 +149,24 @@
     default, unless a :noreload flag or something is provided)
 *** TODO Put locks on session value and finalizer hash tables
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
+*** TODO Use a couple of lisps with single-threaded-taskmaster instances
+    The multithreaded thing will probably not scale too nicely. Can punt on this for the time being.
 ** Game
-*** TODO Entities
-    Time to start coding up some game objects!
-    http://t-machine.org/index.php/2010/05/09/entity-system-1-javaandroid/ might be good to read.
-**** TODO Fix timer
-     It's not quite working right now, although there's a reasonable rate limit. that might be okay
-     for now.
-**** TODO Cleaner es-thread shutdown
-     Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
+*** DONE Clarify relationship between account characters, actors, and entities
+    Entity: a game object, which a client may be using as its "Body"
+    Body: a game object a client is directly controlling. AKA its entity-id.
+    Actor: For the sake of dialogue/actions, the entity who is understood to be performing the action.
+*** TODO Implement body/actor/entity clarification
+**** DONE Make websocket.lisp use plain old entity IDs for the current actor.
+**** DONE Think about how to represent entity<->connected-client relationship
+**** DONE Update websocket.lisp to use nameable instead of character to render names and find things.
+**** TODO update character.lisp to only handle character creation.
+     perhaps rename it to character-creation.lisp? Get rid of the character-blah stuff.
+*** TODO Fix timer
+    It's not quite working right now, although there's a reasonable rate limit. that might be okay
+    for now.
+*** TODO Cleaner es-thread shutdown
+    Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
 *** TODO Add concept of a 'location'
     Once characters exist, we can start adding the concept of a 'location' to the game. Locations
     should have a description, and should be able to 'contain' other characters. Characters can only
@@ -193,6 +220,11 @@
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
     pooling system).
+*** DONE Fix package issues with type names in defdao
+*** TODO Figure out a cleaner way of 'passing through' s-sql stuff
+*** TODO Nameable must-refresh-full-name constraint?
+    Is it possible to put in a constraint that prevents updates of nameable if a new full-name is
+    not provided? Most likely, I'll need to write a trigger that does this.
 ** Security
 *** TODO HTTPS
     May not need/want hunchentoot managing this. Check out http://haproxy.1wt.eu/, which supposedly
@@ -222,3 +254,8 @@
 *** TODO Move persistent sessions out into a separate lisp project
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
+* Right now
+** DONE Do the websocket refactor (Websocket client/clean that shit up)
+   This may also include doing the auth-through-single-use-token thing.
+** TODO Do the character/actor/entity clarification (Game/Implement character/actor/entity...)
+** TODO Implement name completion (Websocket client/Fancy js 'parser')
