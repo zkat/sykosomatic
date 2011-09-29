@@ -6,6 +6,7 @@
         :sykosomatic.util)
   (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
            :current-account :ensure-logged-in :start-persistent-session
+           :generate-session-string :session-string
            :verify-persistent-session :persistent-session-gc :end-session :session-cleanup
            :register-session-finalizer :unregister-session-finalizer
            :transient-session-value
@@ -40,6 +41,11 @@
                        :where (:= 'id session))
               :single)))
 
+(defun session-string (&optional (session *session*))
+  (db-query (:select 'cookie-value :from 'persistent-session
+                     :where (:= 'id session))
+            :single))
+
 (defun ensure-logged-in ()
   (unless *session*
     (push-error "You must be logged in to access that page.")
@@ -64,8 +70,7 @@
                     :value (session-cookie-value session)
                     :path "/"
                     :secure (ssl-p)
-                    ;; Unfortunately, this is required for websockets right now.
-                    :http-only nil)
+                    :http-only t)
         (setf (session *request*) session)
         #+nil(persistent-session-gc)
         (setf *session* (id session)))))

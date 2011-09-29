@@ -2,6 +2,7 @@
   (:use :cl :hunchentoot :alexandria
         :sykosomatic.account
         :sykosomatic.character
+        :sykosomatic.websocket
         :sykosomatic.session
         :sykosomatic.handler)
   (:export :stage))
@@ -15,4 +16,6 @@
     (cond ((null character-id)
            (push-error "You must select a character before playing.")
            (redirect "/role"))
-          (t (with-form-errors (templ:render-template "stage" (character-name character-id)))))))
+          (t (with-form-errors (templ:render-template "stage"
+                                                      (generate-websocket-token (session-string))
+                                                      (character-name character-id)))))))
