@@ -130,7 +130,7 @@
 (defpage stage (session-token char-name) ((gameplay-js-libs))
     "All the World's a Stage"
   (chat-area char-name)
-  (<:p :style "visibility: hidden;" :id "wstoken" (<:ah session-token))
+  (<:p :style "visibility:hidden;overflow:hidden;" :id "wstoken" (<:ah session-token))
   #+nil
   (scene-recording)
   #+nil
