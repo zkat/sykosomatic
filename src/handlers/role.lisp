@@ -3,6 +3,7 @@
         :sykosomatic.db
         :sykosomatic.handler
         :sykosomatic.session
+        :sykosomatic.game-objects.nameable
         :sykosomatic.character
         :sykosomatic.account)
   (:export :role))
@@ -11,5 +12,5 @@
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
   (with-form-errors
-    (templ:render-template "role" (mapcar #'character-name
+    (templ:render-template "role" (mapcar #'full-name
                                           (account-characters (current-account))))))
