@@ -3,7 +3,7 @@
         :alexandria
         :yaclml
         :sykosomatic.handler
-        :sykosomatic.character
+        :sykosomatic.character-creation
         :sykosomatic.session
         :sykosomatic.account)
   (:export :newchar))

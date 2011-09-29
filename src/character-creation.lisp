@@ -1,14 +1,15 @@
-(cl:defpackage #:sykosomatic.character
+(cl:defpackage #:sykosomatic.character-creation
   (:use :cl :alexandria :cl-ppcre
         :sykosomatic.util
         :sykosomatic.db
         :sykosomatic.entity
         :sykosomatic.account
         :sykosomatic.game-objects.nameable)
-  (:export :cc-features :cc-adjectives
+  (:export :create-character
+           :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
-(cl:in-package #:sykosomatic.character)
+(cl:in-package #:sykosomatic.character-creation)
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
