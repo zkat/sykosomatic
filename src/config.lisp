@@ -1,12 +1,10 @@
-(cl:defpackage #:sykosomatic.config
-  (:use #:cl)
+(util:def-file-package #:sykosomatic.config
   (:export :*server*
            :*server-base-url*
            :*web-server-port*
            :*websocket-server-port*
            :*websocket-resource-name*
            :*sykosomatic-path*))
-(cl:in-package #:sykosomatic.config)
 
 (defvar *server* nil)
 (defparameter *server-base-url* "http://zushakon.sykosomatic.org")

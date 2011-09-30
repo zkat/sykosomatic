@@ -1,7 +1,8 @@
-(cl:defpackage #:sykosomatic.handler
-  (:use :cl :sykosomatic.config :hunchentoot :sykosomatic.util :sykosomatic.session)
+(util:def-file-package #:sykosomatic.handler
+  (:use :hunchentoot
+        :sykosomatic.config
+        :sykosomatic.session)
   (:export :init-hunchentoot :teardown-hunchentoot :with-form-errors))
-(cl:in-package #:sykosomatic.handler)
 
 ;;;
 ;;; HT

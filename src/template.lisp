@@ -1,5 +1,5 @@
-(cl:defpackage :sykosomatic.template
-  (:use :cl :yaclml :alexandria :string-case)
+(util:def-file-package :sykosomatic.template
+  (:use :yaclml :string-case)
   (:nicknames :templ)
   (:export :not-found :index :login :stage :role
            :scenes :view-scene :signup :newchar
@@ -15,7 +15,6 @@
            :option-value
            :option-text
            :option-detail))
-(cl:in-package :templ)
 
 (defgeneric optgroup-label (optgroup))
 (defgeneric optgroup-options (optgroup))

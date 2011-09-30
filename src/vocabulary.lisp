@@ -1,9 +1,8 @@
-(cl:defpackage #:sykosomatic.vocabulary
-  (:use :cl :alexandria :sykosomatic.db)
+(util:def-file-package #:sykosomatic.vocabulary
+  (:use :sykosomatic.db)
   (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb :adverbp
            :add-verb :remove-verb :verbp :verb-completions :adverb-completions
            :third-person-singular :preterite))
-(cl:in-package #:sykosomatic.vocabulary)
 
 ;;; Pronouns
 (defdao pronoun ()

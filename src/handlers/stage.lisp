@@ -1,12 +1,11 @@
-(cl:defpackage #:sykosomatic.handler.stage
-  (:use :cl :hunchentoot :alexandria
+(util:def-file-package #:sykosomatic.handler.stage
+  (:use :hunchentoot
         :sykosomatic.account
         :sykosomatic.game-objects.nameable
         :sykosomatic.websocket
         :sykosomatic.session
         :sykosomatic.handler)
   (:export :stage))
-(cl:in-package #:sykosomatic.handler.stage)
 
 (define-easy-handler (play :uri "/stage") ((char :parameter-type 'integer))
   (ensure-logged-in)

@@ -1,9 +1,9 @@
-(cl:defpackage #:sykosomatic.account
-  (:use :cl :alexandria :cl-ppcre :sykosomatic.db :sykosomatic.util)
+(util:def-file-package #:sykosomatic.account
+  (:use :cl-ppcre
+        :sykosomatic.db)
   (:export :create-account :find-account :find-account-by-email :validate-account
            :add-body :remove-body :deactivate-body :activate-body :account-bodies
            :account-email :account-display-name))
-(cl:in-package #:sykosomatic.account)
 
 ;;;
 ;;; Utils

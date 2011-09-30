@@ -1,7 +1,6 @@
-(cl:defpackage #:sykosomatic.handler.index
+(util:def-file-package #:sykosomatic.handler.index
   (:use :hunchentoot)
   (:export :index))
-(cl:in-package #:sykosomatic.handler.index)
 
 (define-easy-handler (index :uri "/") ()
   (templ:render-template "index"))

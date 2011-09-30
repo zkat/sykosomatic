@@ -1,11 +1,10 @@
-(cl:defpackage #:sykosomatic.handler.scenes
-  (:use :cl :hunchentoot
+(util:def-file-package #:sykosomatic.handler.scenes
+  (:use :hunchentoot
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.scene
         :sykosomatic.account)
   (:export :scenes))
-(cl:in-package #:sykosomatic.handler.scenes)
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)

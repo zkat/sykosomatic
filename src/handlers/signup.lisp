@@ -1,12 +1,9 @@
-(cl:defpackage #:sykosomatic.handler.signup
-  (:use :cl :hunchentoot
-        :alexandria
-        :sykosomatic.util
+(util:def-file-package #:sykosomatic.handler.signup
+  (:use :hunchentoot
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.account)
   (:export :signup))
-(cl:in-package #:sykosomatic.handler.signup)
 
 (define-easy-handler (signup :uri "/signup") (email display-name password confirmation)
   (case (request-method*)

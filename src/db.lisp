@@ -1,6 +1,5 @@
-(cl:defpackage #:sykosomatic.db
-  (:use :cl :alexandria :postmodern
-        :sykosomatic.util)
+(util:def-file-package #:sykosomatic.db
+  (:use :postmodern)
   (:shadow :with-transaction)
   (:export
    ;; DAO
@@ -24,7 +23,6 @@
    :sql-escape-string :sql-escape :from-sql-name :to-sql-name
    :*escape-sql-names-p* :sql :sql-compile :sql-template :$$
    :register-sql-operators :enable-s-sql-syntax :sql-error))
-(cl:in-package #:sykosomatic.db)
 
 (defparameter *db-name* "sykosomatic")
 (defparameter *db-user* "postgres")

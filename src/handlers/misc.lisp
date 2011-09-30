@@ -1,9 +1,8 @@
-(cl:defpackage #:sykosomatic.handler.misc
-  (:use :cl :hunchentoot
+(util:def-file-package #:sykosomatic.handler.misc
+  (:use :hunchentoot
         :sykosomatic.handler
         :sykosomatic.session)
   (:export :ajax-ping))
-(cl:in-package #:sykosomatic.handler.misc)
 
 (define-easy-handler (ajax-ping :uri "/pingme") ()
   (ensure-logged-in)

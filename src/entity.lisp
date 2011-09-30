@@ -1,7 +1,5 @@
-(cl:defpackage #:sykosomatic.entity
-  (:use :cl :alexandria
-        :sykosomatic.util
-        :sykosomatic.db)
+(util:def-file-package #:sykosomatic.entity
+  (:use :sykosomatic.db)
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
            :list-modifiers :add-modifier :create-entity
@@ -9,7 +7,6 @@
            :find-by-modifier-value :find-entity-by-oid
            :event-execution :expire-modifier
            :clear-expired-modifiers))
-(cl:in-package #:sykosomatic.entity)
 
 ;;;
 ;;; Entity System management

@@ -1,12 +1,9 @@
-(cl:defpackage #:sykosomatic.scene
-  (:use :cl :alexandria
-        :sykosomatic.util
-        :sykosomatic.db)
+(util:def-file-package #:sykosomatic.scene
+  (:use :sykosomatic.db)
   (:export :create-scene :add-action :add-dialogue :find-scenes-by-account-id
            :scene-exists-p :account-voted-p
            :find-scenes-by-account-email :find-scene-with-entries :find-scene-entries
            :scene-id :scene-upvote :scene-rating))
-(cl:in-package #:sykosomatic.scene)
 
 (defdao scene ()
   ((account-id bigint))

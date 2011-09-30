@@ -1,11 +1,9 @@
-(cl:defpackage #:sykosomatic.parser
-  (:use :cl :alexandria :smug
-        :sykosomatic.util
+(util:def-file-package #:sykosomatic.parser
+  (:use :smug
         :sykosomatic.vocabulary
         :sykosomatic.command
         :sykosomatic.game-objects.nameable)
   (:export :parse-action-completions :parse-dialogue :parse-action))
-(cl:in-package #:sykosomatic.parser)
 
 ;;;
 ;;; Util

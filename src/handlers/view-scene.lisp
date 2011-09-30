@@ -1,10 +1,9 @@
-(cl:defpackage #:sykosomatic.handler.view-scene
-  (:use :cl :hunchentoot
+(util:def-file-package #:sykosomatic.handler.view-scene
+  (:use :hunchentoot
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.scene)
   (:export :view-scene))
-(cl:in-package #:sykosomatic.handler.view-scene)
 
 (define-easy-handler (view-scene :uri "/view-scene") ((id :parameter-type 'integer))
   (case (request-method*)
