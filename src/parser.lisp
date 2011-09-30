@@ -145,14 +145,14 @@
       (fail))))
 
 ;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
-;; (currently: [adverb ws] verb [ws adverb])
+;; (currently: [adverb ws] verb [ws local-object] [ws adverb])
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
           (object (maybe (=and (ws) (local-object))))
           (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
-              ,object
+              (:direct-object . ,(cdr object))
               (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
               (:verb . ,verb)))))
 
