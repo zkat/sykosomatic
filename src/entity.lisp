@@ -206,3 +206,9 @@
       (map nil #'process-penalty (expired-modifiers)))))
 
 (register-system 'modifier-expiration 'clear-expired-modifiers)
+(register-db-init-hook 'ensure-unaccent (lambda ()
+                                          (unless (db-query (:select t :from 'pg-extension
+                                                                     :where (:= 'extname "unaccent"))
+                                                            :single)
+                                            (dblog "Installing unaccent extension.")
+                                            (db-query "create extension unaccent"))))
