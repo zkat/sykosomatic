@@ -1,6 +1,12 @@
 (cl:defpackage #:sykosomatic.util
   (:use :cl :alexandria :cl-speedy-queue)
-  (:export :logit :dbg :continuable :random-string :random-byte-array
+  (:nicknames :util)
+  (:export :def-file-package
+           :logit
+           :dbg
+           :continuable
+           :random-string
+           :random-byte-array
            ;; Timer
            :make-timer :timer-tick
            ;; Queue
@@ -16,6 +22,13 @@
 
 ;; Because SAFETY settings persist from libraries in CCL >:|
 (declaim (optimize (safety 1)))
+
+(defmacro def-file-package (name &body defpackage-args)
+  `(progn
+     (defpackage ,name
+       (:use :cl :alexandria :sykosomatic.util)
+       ,@defpackage-args)
+     (in-package ,name)))
 
 (defmacro continuable (&body body)
   "helper macro since we use continue restarts a lot
