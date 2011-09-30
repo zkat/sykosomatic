@@ -2,6 +2,7 @@
   (:use :cl :alexandria :smug
         :sykosomatic.util
         :sykosomatic.vocabulary
+        :sykosomatic.command
         :sykosomatic.game-objects.nameable)
   (:export :parse-action-completions :parse-dialogue :parse-action))
 (cl:in-package #:sykosomatic.parser)
