@@ -30,6 +30,7 @@
              (:file "character-creation")
              (:file "scene")
              (:file "session")
+             (:file "command")
              (:file "parser")
              (:file "websocket")
              (:file "template")
