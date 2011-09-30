@@ -8,4 +8,7 @@
             :serial t
             :components
             ((:file "test")
+             (:module game-objects
+                      :components
+                      ((:file "nameable")))
              (:file "command")))))
