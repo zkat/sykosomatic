@@ -13,8 +13,10 @@
    :get-connection
    :done-with-connection
    ;; Development utilities
-   :dblog :rebuild-table :init-db
-   :rebuild :drop-table :drop-all-tables
+   :dblog :init-db :rebuild-db :rebuild-table
+   :drop-table :drop-all-tables
+   ;; Init hooks
+   :register-db-init-hook :remove-db-init-hook :run-db-init-hook
    ;; Validation
    :assert-validation :with-validation :assert-required
    ;; misc stuff from s-sql
@@ -66,7 +68,9 @@
 (defmacro db-query (query &rest args/format)
   `(with-db () (query ,query ,@args/format)))
 
+;;;
 ;;; SQL utils
+;;;
 (defclass base-table ()
   ((id :reader id :col-type serial))
   (:metaclass dao-class))
@@ -104,6 +108,9 @@
      (pomo:with-transaction (,@(when name `(,name)))
        ,@body)))
 
+;;;
+;;; DB booting
+;;;
 (defun drop-table (symbol)
   (db-query (format nil "drop table if exists ~A" (sql-compile symbol))))
 (defun drop-all-tables ()
@@ -114,16 +121,31 @@
     (drop-table table-name)
     (create-table table-name)))
 
-(defun rebuild ()
-  (with-transaction ()
-    (drop-all-tables)
-    (create-all-tables)))
-
 (defun dblog (format-string &rest format-args)
   (format t "~&LOG - ~A~%" (apply #'format nil format-string format-args)))
 
+(defvar *init-hooks* (make-hash-table))
+(defun register-db-init-hook (hook-name function)
+  (setf (gethash hook-name *init-hooks*) function))
+(defun remove-db-init-hook (name)
+  (remhash name *init-hooks*))
+(defun run-db-init-hook (name)
+  (if-let (func (gethash name *init-hooks*))
+    (funcall func)
+    (error "No hook named ~A." name)))
+
+(defun rebuild-db ()
+  (with-db ()
+    (drop-all-tables))
+  (init-db))
+
 (defun init-db ()
-  (rebuild))
+  (with-db ()
+    (create-all-tables))
+  (maphash (lambda (hook-name function)
+             (dblog "Executing db-boot hook: ~A" hook-name)
+             (funcall function))
+           *init-hooks*))
 
 (defgeneric id (dao))
 
