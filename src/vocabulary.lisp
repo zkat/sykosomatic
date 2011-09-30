@@ -113,3 +113,5 @@
   (loop for (adder . args-list) in *test-data*
      do (loop for args in args-list
            do (apply adder args))))
+
+(register-db-init-hook 'vocabulary-init 'import-test-data)

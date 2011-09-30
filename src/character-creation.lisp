@@ -193,3 +193,5 @@
   (loop for (category . data) in *test-data*
      do (import-from-data category data))
   (import-adjectives))
+
+(register-db-init-hook 'character-creation 'import-test-form-options)
