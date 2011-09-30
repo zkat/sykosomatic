@@ -1,9 +1,9 @@
 (cl:defpackage #:sykosomatic.parser
   (:use :cl :alexandria :smug
         :sykosomatic.util
-        :sykosomatic.vocabulary)
-  (:export :parse-action-completions :parse-dialogue :parse-action)
-  (:shadowing-import-from :smug :text))
+        :sykosomatic.vocabulary
+        :sykosomatic.game-objects.nameable)
+  (:export :parse-action-completions :parse-dialogue :parse-action))
 (cl:in-package #:sykosomatic.parser)
 
 ;;;
@@ -133,13 +133,26 @@
         (result text)
         (fail :error (format nil "'~A' is not a verb." text)))))
 
+(defun phrase-with-spaces ()
+  (=let* ((word (dashed-word))
+          (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
+    (result (format nil "~A~{ ~A~}" word other-words))))
+
+(defun local-object ()
+  (=let* ((full-name (phrase-with-spaces)))
+    (if-let (entity (find-by-full-name full-name))
+      (result `(:entity . ,entity))
+      (fail))))
+
 ;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
 ;; (currently: [adverb ws] verb [ws adverb])
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
+          (object (maybe (=and (ws) (local-object))))
           (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
+              ,object
               (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
               (:verb . ,verb)))))
 
@@ -150,14 +163,19 @@
           ((cdr results)
            (error "Parse was ambiguous."))
           ((typep (car results) 'error)
-           (signal (car results)))
+           (error (car results)))
           (t (let* ((sentence (cdar results))
                     (verb (cdr (assoc :verb sentence)))
+                    (entity-id (cdr (assoc :entity sentence)))
                     (adverbs (cdr (assoc :adverbs sentence))))
-               (concatenate 'string
-                            (car adverbs) (when (car adverbs) " ")
-                            verb
-                            (when (cadr adverbs) " ") (cadr adverbs)))))))
+               (with-output-to-string (s)
+                 (when-let (adv (car adverbs))
+                   (format s "~A " adv))
+                 (princ verb s)
+                 (when entity-id
+                   (format s " ~A" (full-name entity-id)))
+                 (when-let (adv (cadr adverbs))
+                   (format s " ~A" adv))))))))
 
 ;; #+nil(defun sentence ()
 ;;   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))

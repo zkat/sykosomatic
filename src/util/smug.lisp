@@ -277,9 +277,9 @@
              (result (cons x y)))
            (result nil)))
 
-(defun one-or-more (parser)
+(defun one-or-more (parser &optional (combinator #'=or))
   (=let* ((x parser)
-          (y (zero-or-more parser)))
+          (y (zero-or-more parser combinator)))
     (result (cons x y))))
 
 (defun at-least (n parser)
