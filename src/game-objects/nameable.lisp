@@ -1,11 +1,8 @@
-(cl:defpackage #:sykosomatic.game-objects.nameable
-  (:use :cl :alexandria
-        :sykosomatic.util
-        :sykosomatic.db
+(util:def-file-package #:sykosomatic.game-objects.nameable
+  (:use :sykosomatic.db
         :sykosomatic.entity)
   (:export :add-name :base-name :full-name :find-by-full-name
            :recalculate-full-name :refresh-all-full-names))
-(cl:in-package #:sykosomatic.game-objects.nameable)
 
 ;; Thank you, PCL
 (defparameter *english-list*

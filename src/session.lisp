@@ -1,9 +1,8 @@
-(cl:defpackage #:sykosomatic.session
-  (:use :cl :alexandria :hunchentoot
+(util:def-file-package #:sykosomatic.session
+  (:use :hunchentoot
         :sykosomatic.db
         :sykosomatic.config
-        :sykosomatic.account
-        :sykosomatic.util)
+        :sykosomatic.account)
   (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
            :current-account :ensure-logged-in :start-persistent-session
            :generate-session-string :session-string
@@ -11,7 +10,6 @@
            :register-session-finalizer :unregister-session-finalizer
            :transient-session-value
            :push-error :session-errors :session-websocket-clients))
-(cl:in-package :sykosomatic.session)
 
 (defclass sykosomatic-acceptor (acceptor)
   ())

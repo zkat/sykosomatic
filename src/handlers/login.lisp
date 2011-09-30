@@ -1,12 +1,10 @@
-(cl:defpackage #:sykosomatic.handler.login
-  (:use :cl :hunchentoot :alexandria
-        :sykosomatic.util
+(util:def-file-package #:sykosomatic.handler.login
+  (:use :hunchentoot
         :sykosomatic.db
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.account)
   (:export :login))
-(cl:in-package #:sykosomatic.handler.login)
 
 (define-easy-handler (login :uri "/login") (email password)
   (case (request-method*)

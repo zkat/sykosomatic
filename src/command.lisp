@@ -1,8 +1,6 @@
-(cl:defpackage #:sykosomatic.command
-  (:use :cl :alexandria
-        :sykosomatic.util
-        :sykosomatic.vocabulary
-        :sykosomatic.db)
+(util:def-file-package #:sykosomatic.command
+  (:use :sykosomatic.db
+        :sykosomatic.vocabulary)
   (:export :*actor*
            :*verb*
            :*adverbs*
@@ -15,7 +13,6 @@
            :verb-command
            :remove-verb-command
            :remove-command))
-(cl:in-package #:sykosomatic.command)
 
 ;;; Command vars
 (defvar *actor*)

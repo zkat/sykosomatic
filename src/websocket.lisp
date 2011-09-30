@@ -1,6 +1,5 @@
-(cl:defpackage #:sykosomatic.websocket
-  (:use :cl :alexandria :hunchentoot
-        :sykosomatic.util
+(util:def-file-package #:sykosomatic.websocket
+  (:use :hunchentoot
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
@@ -11,7 +10,6 @@
    :generate-websocket-token
    :init-websockets
    :teardown-websockets))
-(cl:in-package #:sykosomatic.websocket)
 
 (defvar *websocket-server*)
 

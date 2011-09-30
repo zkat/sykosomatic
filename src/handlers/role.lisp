@@ -1,12 +1,11 @@
-(cl:defpackage #:sykosomatic.handler.role
-  (:use :cl :hunchentoot
+(util:def-file-package #:sykosomatic.handler.role
+  (:use :hunchentoot
         :sykosomatic.db
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.game-objects.nameable
         :sykosomatic.account)
   (:export :role))
-(cl:in-package #:sykosomatic.handler.role)
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)

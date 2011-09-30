@@ -1,9 +1,6 @@
-(cl:defpackage #:sykosomatic.game-objects.describable
-  (:use :cl :alexandria
-         :sykosomatic.util
-         :sykosomatic.db
-         :sykosomatic.entity))
-(cl:in-package #:sykosomatic.game-objects.describable)
+(util:def-file-package #:sykosomatic.game-objects.describable
+  (:use :sykosomatic.db
+   :sykosomatic.entity))
 
 (defun short-description (entity)
   (modifier-value entity 'short-description))

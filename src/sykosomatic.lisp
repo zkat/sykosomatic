@@ -1,12 +1,9 @@
-(cl:defpackage #:sykosomatic
-  (:use :cl
-        :sykosomatic.util
-        :sykosomatic.entity
+(util:def-file-package #:sykosomatic
+  (:use :sykosomatic.entity
         :sykosomatic.websocket
         :sykosomatic.handler)
   (:export :begin-shared-hallucination
            :end-shared-hallucination))
-(cl:in-package :sykosomatic)
 
 (defvar *runningp* nil)
 (defun begin-shared-hallucination ()

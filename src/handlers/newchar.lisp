@@ -1,13 +1,11 @@
-(cl:defpackage #:sykosomatic.handler.newchar
-  (:use :cl :hunchentoot
-        :alexandria
+(util:def-file-package #:sykosomatic.handler.newchar
+  (:use :hunchentoot
         :yaclml
         :sykosomatic.handler
         :sykosomatic.character-creation
         :sykosomatic.session
         :sykosomatic.account)
   (:export :newchar))
-(cl:in-package #:sykosomatic.handler.newchar)
 
 (define-easy-handler (newchar :uri "/newchar") (pronoun
                                                 first-name
