@@ -9,7 +9,12 @@
            :*direct-object*
            :*indirect-object*
            :*direct-preposition*
-           :*indirect-preposition*))
+           :*indirect-preposition*
+           :defcommand
+           :add-verb-command
+           :verb-command
+           :remove-verb-command
+           :remove-command))
 (cl:in-package #:sykosomatic.command)
 
 ;;; Command vars
