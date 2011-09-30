@@ -256,7 +256,7 @@
 
 (defhandler complete-action (action-text)
   (client-write-json *client* (list "completion"
-                                    (sykosomatic.parser:action-completions action-text))))
+                                    (sykosomatic.parser:parse-action-completions action-text))))
 
 (defhandler obj-desc (objname)
   (logit "Got an object description request: ~S" objname)

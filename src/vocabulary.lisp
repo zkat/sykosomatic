@@ -1,7 +1,7 @@
 (cl:defpackage #:sykosomatic.vocabulary
   (:use :cl :alexandria :sykosomatic.db)
-  (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb
-           :add-verb :remove-verb :verb-completions :adverb-completions
+  (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb :adverbp
+           :add-verb :remove-verb :verbp :verb-completions :adverb-completions
            :third-person-singular :preterite))
 (cl:in-package #:sykosomatic.vocabulary)
 
@@ -50,6 +50,9 @@
                     limit)
             :column))
 
+(defun adverbp (maybe-adverb)
+  (db-query (:select t :from 'adverb :where (:ilike 'text maybe-adverb)) :single))
+
 ;;; Verbs
 ;;;
 ;;; Using terminology from the wikipedia article on English Conjugation:
@@ -85,6 +88,9 @@
                              (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
                     limit)
             :column))
+
+(defun verbp (maybe-verb)
+  (db-query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single))
 
 ;;; Testing
 (defparameter *test-data*
