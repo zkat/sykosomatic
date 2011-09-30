@@ -1,12 +1,5 @@
-(cl:defpackage #:sykosomatic.test.command
-  (:use :cl :alexandria :eos
-        :sykosomatic.test
-        :sykosomatic.command))
-(cl:in-package #:sykosomatic.test.command)
-
-(def-suite command :in sykosomatic)
-
-(in-suite command)
+(test:def-test-package command
+  (:use :sykosomatic.command))
 
 (test basic
   (unwind-protect

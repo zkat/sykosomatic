@@ -1,13 +1,7 @@
-(cl:defpackage #:sykosomatic.test.game-objects.nameable
-  (:use :cl :alexandria :eos
-        :sykosomatic.test
-        :sykosomatic.entity
+(test:def-test-package game-objects.nameable
+  (:use :sykosomatic.entity
         :sykosomatic.db
         :sykosomatic.game-objects.nameable))
-(cl:in-package #:sykosomatic.test.game-objects.nameable)
-
-(def-suite game-objects.nameable :in sykosomatic)
-(in-suite game-objects.nameable)
 
 (defun gen-full-name (full-name-arg-alist)
   (let ((e (create-entity)))
