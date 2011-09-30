@@ -67,14 +67,3 @@
                                :single))
       (db-query (:delete-from 'verb-command :where (:= 'verb-id verb-id)))
       (error "Unknown verb: ~S" verb))))
-
-;;; test
-(defun test-commands ()
-  (unwind-protect
-       (progn
-         (defcommand test
-           (print "Success!"))
-         (add-verb-command "smiles" 'test)
-         (funcall (verb-command "smiles")))
-    (remove-verb-command "smiles")
-    (remove-command 'test)))
