@@ -4,7 +4,7 @@
 (test basic
   (unwind-protect
        (let ((success (gensym)))
-         (defcommand test
+         (defcommand test ()
            success)
          (add-verb-command "smiles" 'test)
          (is (eq success (invoke-verb-command :verb "smiles"))))
