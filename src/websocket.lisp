@@ -251,8 +251,10 @@
        (all-clients)))
 
 (defhandler complete-action (action-text)
-  (client-write-json *client* (list "completion"
-                                    (sykosomatic.parser:parse-action-completions action-text))))
+  (declare (ignore action-text))
+  ;; Disabling completion system for now.
+  #+nil(client-write-json *client* (list "completion"
+                                         (sykosomatic.parser:parse-action-completions action-text))))
 
 (defhandler obj-desc (objname)
   (logit "Got an object description request: ~S" objname)
