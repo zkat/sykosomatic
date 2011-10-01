@@ -137,25 +137,27 @@
           (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
     (result (format nil "~A~{ ~A~}" word other-words))))
 
-(defun local-object ()
+(defun noun-clause ()
+  ;; This is only for testing/development.
   (=let* ((full-name (phrase-with-spaces)))
     (if-let (entity (find-by-full-name full-name))
-      (result `(:entity . ,entity))
+      (result `(:entities ,entity))
       (fail))))
 
 ;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
-;; (currently: [adverb ws] verb [ws local-object] [ws adverb])
+;; (currently: [adverb ws] verb [ws noun-clause] [ws adverb])
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
-          (object (maybe (=and (ws) (local-object))))
+          (object (maybe (=and (ws) (noun-clause))))
           (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
-              (:direct-object . ,(cdr object))
+              (:direct-objects . ,(cdr object))
               (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
               (:verb . ,verb)))))
 
-(defun parse-action (message)
+;;; Commands
+(defun parse-action (actor message)
   (let ((results (invoke-parser (either (=prog1 (sentence) (no-more-input)) 'error) message)))
     (cond ((null results)
            (error "ENOPARSE"))
@@ -163,18 +165,8 @@
            (error "Parse was ambiguous."))
           ((typep (car results) 'error)
            (error (car results)))
-          (t (let* ((sentence (cdar results))
-                    (verb (cdr (assoc :verb sentence)))
-                    (entity-id (cdr (assoc :entity sentence)))
-                    (adverbs (cdr (assoc :adverbs sentence))))
-               (with-output-to-string (s)
-                 (when-let (adv (car adverbs))
-                   (format s "~A " adv))
-                 (princ verb s)
-                 (when entity-id
-                   (format s " ~A" (full-name entity-id)))
-                 (when-let (adv (cadr adverbs))
-                   (format s " ~A" adv))))))))
+          (t (let ((sentence (cdar results)))
+               (apply #'invoke-verb-command :actor actor (alist-plist sentence)))))))
 
 ;; #+nil(defun sentence ()
 ;;   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
