@@ -24,7 +24,7 @@
 (declaim (optimize (safety 1)))
 
 (defmacro def-file-package (name &body defpackage-args)
-  `(progn
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      (defpackage ,name
        (:use :cl :alexandria :sykosomatic.util)
        ,@defpackage-args)
