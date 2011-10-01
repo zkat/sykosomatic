@@ -13,6 +13,7 @@
            :invoke-verb-command
            :remove-verb-command
            :remove-command
+           :get-all-messages
            :tell
            :tell-local))
 
@@ -77,11 +78,24 @@
   (funcall (verb-command *verb*)))
 
 ;;; Command-writing utilities
-(defun tell (entity format-string &rest format-args)
+(defvar *tell-lock* (bt:make-lock))
+(defvar *messages* nil)
+(defun send-to-entity (entity message)
+  (bt:with-lock-held (*tell-lock*)
+    (push (cons entity message) *messages*)))
+(defun get-all-messages ()
+  (bt:with-lock-held (*tell-lock*)
+    (prog1 (nreverse *messages*)
+      (setf *messages* nil))))
+
+(defun tell (entity format-string &rest format-args
+             &aux (message (apply #'format nil format-string format-args)))
   "Sends a message to a specific entity."
-  (logit "Telling entity #~A: ~S"
-         entity (apply #'format nil format-string format-args)))
-(defun tell-local (entity format-string &rest format-args)
+  (send-to-entity entity message))
+(defun tell-local (entity format-string &rest format-args
+                   &aux (message (apply #'format nil format-string format-args)))
   "Sends a message to all local entities."
-  (logit "Telling all entities local to entity #~A: ~S"
-         entity (apply #'format nil format-string format-args)))
+  ;; Right now, just sends it to all existing entities.
+  (declare (ignore entity))
+  (map nil (rcurry #'send-to-entity message)
+       (db-query (:select 'id :from 'entity) :column)))
