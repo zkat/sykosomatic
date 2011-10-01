@@ -1,6 +1,3 @@
-* Hack challenge
-** TODO Get Ye Flask
-   Through the web interface, have character look at and pick up a flask in its current room.
 * Tasks
 ** Pages
 *** /newchar
@@ -71,21 +68,11 @@
      will probably involve caching of at least part of the game's vocabulary client-side, but we'll
      take that step when it's necessary.
 
-**** TODO Disable completion system for now
+**** DONE Disable completion system for now
      Having a halfassed completion system and updating it while figuring out what the optimal use
      case is will only cause problems.
 **** DONE Extend parser to support objects
      Target grammar: [adverb ws] verb [ws object] [ws adverb]
-**** TODO Extend parser to support full grammar
-     sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
-
-     Where noun-clause is a clause representing one or more objects visible to the associated
-     actor. It may be a prepositional phrase, in which case that preposition is kept. More detailed
-     grammar notes (and initial parsers) are spread around parser.lisp.
-
-     The full parser should return enough objects to bind all of the command variables, which
-     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and prepositions
-     associated with the direct and indirect objects.
 **** DONE command-definition system
      Have a system for defining commands, which can then be associated with verbs. These commands
      must accept and handle all parts of the sentence. One command could be shared by any number of
@@ -102,7 +89,7 @@
       defcommand or whatever. Make it convenient to define/redefine these things.
 ***** DONE Associate with vocabulary verbs
       Add a system of doing CRUD on verb->command associations. These live in the database.
-**** TODO Command execution
+**** DONE Command execution
 ***** DONE Figure out how parse-action (and parser.lisp in general) should relate to websocket.lisp
       It seems like parser.lisp is full of stuff that should just be commands in websocket.lisp (and
       the commands in -that- file should probably be moved out.
@@ -111,7 +98,7 @@
       the variables from parsing.
 ***** DONE Hook command up to game
       So it actually gets used.
-***** TODO Write utility functions for from-command output queueing
+***** DONE Write utility functions for from-command output queueing
       Commands themselves should be the ones sending messages out to object/players. At the same
       time, they're supposed to be blind to websockets. Therefore, there needs to be a way to either
       directly send, or enqueue message sends to *entities*, which, at the websocket.lisp level,
@@ -120,13 +107,30 @@
       I like the idea of having a (memory-stored) queue of messages that a thread goes through. This
       will need to support sending all the various client messages, like dialogue, transitions, etc,
       in case commands want to handle them.
-***** TODO Command overrides
-      Instead of putting command associations into verbs, make a command-association table that maps
-      verbs to command names. This table should also include columns for most (if not all) of the
-      action parameters. These can then be used to create 'multimethods' of sorts: By querying for
-      specific parameters, default commands can be shadowed. For example, one could write a 'method'
-      where a certain combination of actor/direct-object will yield a specific result. In general,
-      this should not be used, but it may become handy when very-special-code is needed.
+**** TODO Extend parser to support full grammar
+     sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
+
+     Where noun-clause is a clause representing one or more objects visible to the associated
+     actor. It may be a prepositional phrase, in which case that preposition is kept. More detailed
+     grammar notes (and initial parsers) are spread around parser.lisp.
+
+     The full parser should return enough objects to bind all of the command variables, which
+     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and prepositions
+     associated with the direct and indirect objects.
+**** TODO The Test
+     Target parsed sentence: 'kindly smiles with X at Y and Z.'
+     Target output: 'John Doe kindly smiles with X at Y and Z.'
+
+     Where X, Y, and Z are *toplevel* entities. They could be the same object.
+
+     Output should go to all connected clients.
+**** TODO FUTURE Command overrides
+     Instead of putting command associations into verbs, make a command-association table that maps
+     verbs to command names. This table should also include columns for most (if not all) of the
+     action parameters. These can then be used to create 'multimethods' of sorts: By querying for
+     specific parameters, default commands can be shadowed. For example, one could write a 'method'
+     where a certain combination of actor/direct-object will yield a specific result. In general,
+     this should not be used, but it may become handy when very-special-code is needed.
 **** TODO Add completion features to dialogue input area
 **** TODO (maybe) Improve error reporting
      For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
@@ -162,6 +166,12 @@
 
     Probably just do the former for now, since it's nicer to deal with, and handle the xml version
     later.
+*** TODO (re)design client
+    The UI is currently all sorts of awful. The currently-necessary components should be gathered,
+    and decent designs should be agreed upon for all of it. Waifu recommends brainstorming sessions
+    followed by user testing. Not sure how much user testing we can do, but even a little bit
+    helps. Maybe pick something not-too-awful and then start doing honest user testing once we have
+    a few early testers?
 *** TODO Give client.js a once-over.
     Probably worth revisiting the way things are being 'exported' and the like. Some of the stuff in
     that file might be useful in other pages, as well. Perhaps it should actually be used as a
@@ -188,13 +198,13 @@
 *** TODO Character conversion
      Convert -- to —.
 *** TODO Do something about the awful OOC area.
-*** TODO FUTURE WAI-ARIA support
-     The web client should play nice with screen readers.
 *** TODO Scene recording
 **** TODO Select area to record
 **** TODO Scene naming
      Add ability to change the name of the recorded session.
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
+*** TODO FUTURE WAI-ARIA support
+     The web client should play nice with screen readers.
 *** TODO FUTURE define a language-agnostic command definition protocol (a-la-couchdb)
 *** TODO FUTURE Client customization by users
 ** Misc Webapp work
@@ -215,16 +225,11 @@
     Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
     most templates should be in their own files, organized by webpage names. Give tal a shot for
     this. Whatever ends up being used, it may need to be extended in order to support the form builder.
-*** TODO Generic form component/handler interface
-    I want to be able to define forms and their fields once, and have those easily hook up to a
-    template for layout, and easily hook up to a handler and its parameters, so I don't have to
-    repeatedly pass around all the values. It should also automagically take care of validation and
-    validation error reporting, and reloading values into the form. (should reload all values by
-    default, unless a :noreload flag or something is provided)
 *** TODO Put locks on session value and finalizer hash tables
+*** TODO Figure out how to put the server behind stud
+    URL: https://github.com/bumptech/stud
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
 *** TODO Use a couple of lisps with single-threaded-taskmaster instances
-    The multithreaded thing will probably not scale too nicely. Can punt on this for the time being.
 ** Game
 *** DONE Clarify relationship between account characters, actors, and entities
     Entity: a game object, which a client may be using as its "Body"
@@ -284,6 +289,23 @@
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
+** Game Building
+*** TODO Component manager
+    Parts of the game should be split into components (things like nameable, describable,
+    weight/size, combat stats, contents, all being components).
+    Components can be arbitrarily added/removed through a web interface, and each component should
+    have a custom data editor for configuration.
+    Components can be represented by block areas in a single entity editor screen. Or something like
+    that. Should also have entity searching features.
+    Sounds like a generic component registration system is needed that includes a particular API,
+    built forms, etc.
+*** TODO Vocabulary manager
+    A manager for doing CRUD on vocabulary words, configuring what commands verbs are attached to
+    (and possibly viewing the source code for the commands, or at least the documentation for them).
+*** TODO Room builder
+    A dedicated entity editor meant for linking together various rooms, with a nicer view than just
+    using the raw component manager. You should be able to do all that this screen can do with the
+    component manager, though.
 ** Database
 *** TODO Remove s-sql patch
     Waiting until the new pomo makes it into a quicklisp release.
@@ -343,4 +365,4 @@
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
 *** TODO Actual config file system for local configs
 * Right now
-** TODO Wrap up command definition and execution tasks
+** TODO Complete enough command output stuff to C-c C-t The Test
