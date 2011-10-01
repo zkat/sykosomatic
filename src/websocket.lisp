@@ -242,9 +242,7 @@
 
 (defhandler action (action-txt)
   (handler-case
-      (let ((predicate (sykosomatic.parser:parse-action action-txt)))
-        (map nil (rcurry #'send-action (client-entity-id *client*) predicate)
-             (all-clients)))
+      (sykosomatic.parser:parse-action (client-entity-id *client*) action-txt)
     (error (e)
       (client-write-json *client* (list "parse-error" (princ-to-string e))))))
 
