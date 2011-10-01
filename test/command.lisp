@@ -7,6 +7,6 @@
          (defcommand test
            success)
          (add-verb-command "smiles" 'test)
-         (is (eq success (funcall (verb-command "smiles")))))
+         (is (eq success (invoke-verb-command :verb "smiles"))))
     (remove-verb-command "smiles")
     (remove-command 'test)))
