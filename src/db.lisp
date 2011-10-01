@@ -103,7 +103,7 @@
               when form
               collect form)))))
 
-(defmacro with-transaction ((&optional name) &body body)
+(defmacro with-transaction ((&key name) &body body)
   `(with-db ()
      (pomo:with-transaction (,@(when name `(,name)))
        ,@body)))
