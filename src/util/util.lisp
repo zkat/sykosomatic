@@ -30,8 +30,8 @@
        ,@defpackage-args)
      (in-package ,name)))
 (when (find-package :pxref)
-  (push 'def-file-package
-        (symbol-value (intern "*HANDLE-PACKAGE-FORMS*" :pxref))))
+  (pushnew 'def-file-package
+           (symbol-value (intern "*HANDLE-PACKAGE-FORMS*" :pxref))))
 
 (defmacro continuable (&body body)
   "helper macro since we use continue restarts a lot
