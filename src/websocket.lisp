@@ -191,15 +191,14 @@
 ;;;
 ;;; Messaging utilities
 ;;;
-(defun entity-client (entity-id)
-  (maphash-values (lambda (client)
-                    (when (eql entity-id (client-entity-id client))
-                      (return-from entity-client client)))
-                  (slot-value *websocket-server* 'clients))
-  nil)
-
 (defun all-clients ()
   (hash-table-values (slot-value *websocket-server* 'clients)))
+
+(defun entity-clients (entity-id)
+  (remove entity-id
+          (all-clients)
+          :test-not #'eql
+          :key #'client-entity-id))
 
 ;;;
 ;;; Handlers
@@ -231,6 +230,7 @@
     (error (e)
       (client-write-json *client* (list "parse-error" (princ-to-string e))))))
 
+#+nil
 (defun send-action (recipient actor action-txt)
   #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
          (logit "Saving action under scene ~A: ~A" scene-id action-txt)
@@ -275,6 +275,20 @@
 (defhandler stop-recording ()
   (logit "Request to stop recording received.")
   (delete-session-value 'scene-id (client-session *client*)))
+
+;;;
+;;; Grab and send all messages
+;;;
+(defun send-action (entity message)
+  (let ((json (jsown:to-json `("action" (:obj ("action" . ,message))))))
+    (map nil (rcurry #'client-write json)
+         (entity-clients entity))))
+
+(defun send-all-actions ()
+  (loop for (entity . message) in (sykosomatic.command:get-all-messages)
+     do (send-action entity message)))
+
+(sykosomatic.entity:register-system 'send-action-message 'send-all-actions)
 
 ;;;
 ;;; Init/teardown
