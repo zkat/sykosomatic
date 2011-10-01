@@ -70,13 +70,76 @@
      will ensure that all items are uniquely chosen before the final message is even sent.  This
      will probably involve caching of at least part of the game's vocabulary client-side, but we'll
      take that step when it's necessary.
-**** TODO Improve error reporting
-     Perhaps PLUS can be used here. The ENOPARSE error is sub-optimal.
-**** TODO In the completion popup, group matches by verb and by adverb
+
+**** TODO Disable completion system for now
+     Having a halfassed completion system and updating it while figuring out what the optimal use
+     case is will only cause problems.
+**** DONE Extend parser to support objects
+     Target grammar: [adverb ws] verb [ws object] [ws adverb]
+**** TODO Extend parser to support full grammar
+     sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
+
+     Where noun-clause is a clause representing one or more objects visible to the associated
+     actor. It may be a prepositional phrase, in which case that preposition is kept. More detailed
+     grammar notes (and initial parsers) are spread around parser.lisp.
+
+     The full parser should return enough objects to bind all of the command variables, which
+     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and prepositions
+     associated with the direct and indirect objects.
+**** DONE command-definition system
+     Have a system for defining commands, which can then be associated with verbs. These commands
+     must accept and handle all parts of the sentence. One command could be shared by any number of
+     verbs -- for example: 'smiles', 'laughs', 'grins' can all be associated with a single command
+     (let's call it base-social for argument's sake).
+***** DONE Figure out what commands need
+      actor, verb, adverbs, direct-object, indirect-object, do-preposition, io-preposition.
+      I believe anything that commands need to do their work can be extracted from these components
+      of the sentence, such as the actor's location, name, etc etc.
+***** DONE Command CRUD
+      The usual. Commands are lisp code, so they should just live in an in-memory hash table or
+      something, keyed by name.
+***** DONE Command-definition macro
+      defcommand or whatever. Make it convenient to define/redefine these things.
+***** DONE Associate with vocabulary verbs
+      Add a system of doing CRUD on verb->command associations. These live in the database.
+**** TODO Command execution
+***** DONE Figure out how parse-action (and parser.lisp in general) should relate to websocket.lisp
+      It seems like parser.lisp is full of stuff that should just be commands in websocket.lisp (and
+      the commands in -that- file should probably be moved out.
+***** DONE Write a sample command
+      A simple emote command that takes care of basic social verbs. Don't worry about handling all
+      the variables from parsing.
+***** DONE Hook command up to game
+      So it actually gets used.
+***** TODO Write utility functions for from-command output queueing
+      Commands themselves should be the ones sending messages out to object/players. At the same
+      time, they're supposed to be blind to websockets. Therefore, there needs to be a way to either
+      directly send, or enqueue message sends to *entities*, which, at the websocket.lisp level,
+      takes care of sending messages out to connected clients that control those entities.
+      
+      I like the idea of having a (memory-stored) queue of messages that a thread goes through. This
+      will need to support sending all the various client messages, like dialogue, transitions, etc,
+      in case commands want to handle them.
+***** TODO Command overrides
+      Instead of putting command associations into verbs, make a command-association table that maps
+      verbs to command names. This table should also include columns for most (if not all) of the
+      action parameters. These can then be used to create 'multimethods' of sorts: By querying for
+      specific parameters, default commands can be shadowed. For example, one could write a 'method'
+      where a certain combination of actor/direct-object will yield a specific result. In general,
+      this should not be used, but it may become handy when very-special-code is needed.
+**** TODO Add completion features to dialogue input area
+**** TODO (maybe) Improve error reporting
+     For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
+     once we have the full game frontend. If that's the case, we can just ignore erroneous input
+     because it means the player has bypassed the standard client.
+***** TODO Do something about that ENOPARSE garbage
+***** TODO When an adverb is wrong and a verb is write, report it as such
+      If someone enters 'merrly jumps', it should properly report the error as 'merrly is not an
+      adverb', instead of 'merrly is not a verb'.
+**** TODO (maybe) In the completion popup, group matches by verb and by adverb
      Kinda like an <optgroup>. jquery-ui's autocomplete supports this.
      NOTE: Maybe in the future. Whole-sentence is easier for now. :\
-**** TODO Name completion for currently-playing entities.
-*** TODO Use character/named library
+*** DONE Use character/named library
 *** DONE Clean up websocket.lisp
     It's a bloody mess in there
 **** DONE Only the session and the actor-id need to be kept
@@ -86,6 +149,19 @@
      quick check to see if the session is already being tracked, and if it's valid. If it's not,
      treat it as the validation step, etc.
 **** DONE Reorganize the file so it's more readable
+*** TODO Semantic markup for game area
+    This should probably include changes to the command output functions such that they're not
+    simple string concatenations. Actual objects/ids should be passed around, which a command
+    rendering engine will then take care of converting into tagged text.
+    Perhaps all that is needed is an sexp/xml tagging system that will 'mark up' zones of the output
+    text semantically.
+
+    Examples:
+      - '(:e 12345 John Doe) (:verb jumps) to (:e 4322 Jane).'
+      - '<e id='12345'>John Doe</e> <verb>jumps</verb> to <e id="4322">Jane</e>.'
+
+    Probably just do the former for now, since it's nicer to deal with, and handle the xml version
+    later.
 *** TODO Give client.js a once-over.
     Probably worth revisiting the way things are being 'exported' and the like. Some of the stuff in
     that file might be useful in other pages, as well. Perhaps it should actually be used as a
@@ -119,6 +195,7 @@
 **** TODO Scene naming
      Add ability to change the name of the recorded session.
      NOTE: Perhaps more important than this -- descriptions? I'll do this later.
+*** TODO FUTURE define a language-agnostic command definition protocol (a-la-couchdb)
 *** TODO FUTURE Client customization by users
 ** Misc Webapp work
 *** TODO Sessions
@@ -210,9 +287,12 @@
 ** Database
 *** TODO Remove s-sql patch
     Waiting until the new pomo makes it into a quicklisp release.
-*** TODO 'init db' system of some sort
+*** DONE 'init db' system of some sort
     Needs to both create all tables, insert any initial data stored elsewhere, and remind admin to
     execute whatever external command needs to be executed post-boot (such as installing unaccent).
+**** DONE init hooks for individual modules
+**** DONE Figure out a way to remind/enforce unaccent's existence
+     A plain old init hook that queries for the extension's existence is enough. :)
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
@@ -250,12 +330,17 @@
 *** DONE sykosomatic.account:gensalt uses cl:random
      Might be a good idea to put the openssl-based random numgen in util.lisp or something.
 ** Misc
+*** DONE Start writing unit tests
+*** TODO Write a macro to simplify one-package-per-file
+**** DONE Merge defpackage and in-package
+**** DONE Have it always :use :cl, :alexandria, and :sykosomatic.util
+**** TODO Ability to disable defaults
+**** TODO Is it possible to extract the package name from the -filename-?
+*** DONE Write a macro to simplify one-test-per-module
+    On top of the one-package-per-file thing, it should also define the relevant suite
 *** TODO Move persistent sessions out into a separate lisp project
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
 *** TODO Actual config file system for local configs
 * Right now
-** DONE Do the websocket refactor (Websocket client/clean that shit up)
-   This may also include doing the auth-through-single-use-token thing.
-** DONE Do the character/actor/entity clarification (Game/Implement character/actor/entity...)
-** TODO Implement name completion (Websocket client/Fancy js 'parser')
+** TODO Wrap up command definition and execution tasks
