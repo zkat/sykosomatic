@@ -175,3 +175,22 @@
     (is (find "testly" (getf results :adverbs) :test #'string-equal))
     (finishes (parse-action 1 "testly testsits one on two"))
     (is (find "testly" (getf results :adverbs) :test #'string-equal))))
+
+(test action-parse-multiple
+  (with-verb-and-nameables (results "testpokes" "one" "two"
+                                    :intransitivep t
+                                    :transitivep t
+                                    :prepositions '("in" "at"))
+    (finishes (parse-action 1 "testpokes at one, two"))
+    (is (equalp '("one" "two") (getf results :io)))
+    (finishes (parse-action 1 "testpokes one, two, one"))
+    (is (equalp '("one" "two" "one") (getf results :do)))
+    (finishes (parse-action 1 "testpokes at one and two"))
+    (is (equalp '("one" "two") (getf results :io)))
+    (finishes (parse-action 1 "testpokes at one, one and two"))
+    (is (equalp '("one" "one" "two") (getf results :io)))
+    (finishes (parse-action 1 "testpokes at one, one, and two"))
+    (is (equalp '("one" "one" "two") (getf results :io)))
+    (finishes (parse-action 1 "testpokes one, two in two, one"))
+    (is (equalp '("one" "two") (getf results :do)))
+    (is (equalp '("two" "one") (getf results :io)))))
