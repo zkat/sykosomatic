@@ -96,11 +96,14 @@
       (fail)
       (=let* ((_ (ws))
               (direct-objects (noun-clause))
+              ;; Transitive verbs can have an adverb right in here.
+              (adverb (maybe (=and (ws) (adverb)) 'error))
               (preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
                                     (noun-clause)
                                     (result nil))))
-        (result `((:direct-objects . ,direct-objects)
+        (result `((:adverb . ,(cdr adverb))
+                  (:direct-objects . ,direct-objects)
                   (:preposition . ,preposition)
                   (:indirect-objects . ,indirect-objects))))))
 
@@ -137,15 +140,19 @@
        (ditransitive-verb-args verb)
        (intransitive-verb-args verb)))
 
-;; sentence = [adverb ws] verb [ws verb-args] [ws adverb]
+;; sentence = [adverb ws] verb [ws adverb] [ws verb-args] [ws adverb]
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
+          (adverb2 (maybe (=and (ws) (adverb)) 'error))
           (verb-args (verb-args verb))
-          (adverb2 (maybe (=and (ws) (adverb)) 'error)))
+          (adverb3 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
-              ,@verb-args
-              (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
+              ,@(remove :adverb verb-args :key #'car)
+              (:adverbs . ,(list (cdr adverb1)
+                                 (cdr adverb2)
+                                 (cdr (assoc :adverb verb-args))
+                                 (cdr adverb3)))
               (:verb . ,(verb-third-person verb))))))
 
 ;;; Commands
