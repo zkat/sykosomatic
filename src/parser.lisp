@@ -59,7 +59,7 @@
     (cond ((cdr results)
            (error "Parse was ambiguous."))
           ((typep (car results) 'error)
-           (signal (car results)))
+           (error (car results)))
           (t (values (cdr (assoc :dialogue (cdar results)))
                      (cdr (assoc :parenthetical (cdar results))))))))
 
