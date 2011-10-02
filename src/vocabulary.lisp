@@ -67,12 +67,13 @@
    (preterite text)
    (transitivep boolean :col-default nil)
    (intransitivep boolean :col-default nil)
-   (ditransitivep boolean :col-default nil))
+   (ditransitivep boolean :col-default nil)
+   (prepositions text[]))
   (:keys id)
   (:unique-index third-person)
   (:unique third-person))
 
-(defun add-verb (bare &key third-person preterite
+(defun add-verb (bare &key third-person preterite prepositions
                  transitivep intransitivep ditransitivep)
   (with-db ()
     (make-dao 'verb
@@ -89,7 +90,10 @@
                                (t (concatenate 'string bare "ed")))
               :transitivep transitivep
               :ditransitivep ditransitivep
-              :intransitivep intransitivep))
+              :intransitivep intransitivep
+              :prepositions (if prepositions
+                                (coerce prepositions 'array)
+                                '(:raw "ARRAY[]::text[]"))))
   t)
 
 (defun remove-verb (third-person)
@@ -119,16 +123,29 @@
                    ("sunnily") ("brightly") ("happily") ("honestly") ("nicely")
                    ("handsomely") ("cleverly") ("fascetiously") ("excitedly")
                    ("smugly") ("smilingly") ("angrily")))
-    (add-verb . (("grin" :third-person "grins" :preterite "grinned" :intransitivep t)
-                 ("chuckle" :intransitivep t) ("fluff" :intransitivep t :transitivep t)
-                 ("squee" :intransitivep t) ("pout" :transitivep t :intransitivep t)
-                 ("cackle" :intransitivep t) ("fix" :transitivep t) ("preen" :intransitivep t)
-                 ("smile" :intransitivep t) ("frown" :intransitivep t)
-                 ("cheer" :transitivep t :intransitivep t) ("laugh" :intransitivep t)
-                 ("wave" :transitivep t :intransitivep t) ("get" :preterite "got" :transitivep t)
-                 ("cry" :third-person "cries" :preterite "cried" :intransitivep t)
-                 ("punch" :transitivep t) ("give" :preterite "gave" :ditransitivep t)
-                 ("throw" :preterite "threw" :ditransitivep t :transitivep t)))))
+    (add-verb . (("grin" :third-person "grins" :preterite "grinned" :intransitivep t
+                         :prepositions ("at" "with"))
+                 ("chuckle" :intransitivep t :prepositions ("at" "with"))
+                 ("fluff" :intransitivep t :transitivep t
+                          :prepositions ("at" "with"))
+                 ("squee" :intransitivep t :prepositions ("at" "with"))
+                 ("pout" :transitivep t :intransitivep t
+                         :prepositions ("at" "with"))
+                 ("cackle" :intransitivep t :prepositions ("at" "with"))
+                 ("fix" :transitivep t :prepositions ("with"))
+                 ("preen" :intransitivep t :prepositions ("at" "with"))
+                 ("smile" :intransitivep t :prepositions ("at" "with"))
+                 ("frown" :intransitivep t :prepositions ("at" "with"))
+                 ("cheer" :transitivep t :intransitivep t :prepositions ("at" "with"))
+                 ("laugh" :intransitivep t :prepositions ("at" "with"))
+                 ("wave" :transitivep t :intransitivep t :prepositions ("at" "to" "with"))
+                 ("get" :preterite "got" :transitivep t :prepositions ("at" "to" "with"))
+                 ("cry" :third-person "cries" :preterite "cried" :intransitivep t
+                        :prepositions ("at" "to" "with" "over" "on"))
+                 ("punch" :transitivep t :prepositions ("at" "with"))
+                 ("give" :preterite "gave" :ditransitivep t :prepositions ("to" "with"))
+                 ("throw" :preterite "threw" :ditransitivep t :transitivep t
+                          :prepositions ("to" "at" "with"))))))
 
 (defun import-test-data ()
   (loop for (adder . args-list) in *test-data*
