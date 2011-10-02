@@ -7,7 +7,8 @@
         :sykosomatic.game-objects.nameable))
 
 (defmacro with-verb-and-nameables ((result-var verb-third-person name1 name2 &key
-                                    transitivep intransitivep ditransitivep)
+                                    transitivep intransitivep ditransitivep
+                                    prepositions)
                                    &body body)
   (let ((verb-var (gensym "VERB-")))
     `(let ((e1 (create-entity))
@@ -20,7 +21,8 @@
               (add-verb ,verb-var :third-person ,verb-var
                         :transitivep ,transitivep
                         :intransitivep ,intransitivep
-                        :ditransitivep ,ditransitivep)
+                        :ditransitivep ,ditransitivep
+                        :prepositions ,prepositions)
               (defcommand test ()
                 (setf results
                       (list :actor *actor*
@@ -41,7 +43,8 @@
                                                  (:= 'id e2))))))))
 
 (test action-parse-intransitive
-  (with-verb-and-nameables (results "testsmiles" "one" "two" :intransitivep t)
+  (with-verb-and-nameables (results "testsmiles" "one" "two" :intransitivep t
+                                    :prepositions '("at" "with"))
     (finishes (parse-action 1 "testsmiles"))
     (is (equalp '(:actor 1 :verb "testsmiles" :adverbs (nil nil)
                   :do nil :io nil :preposition nil)
@@ -56,7 +59,8 @@
 
 (test action-parse-transitive-intransitive
   (with-verb-and-nameables (results "testwaves" "one" "two"
-                                    :intransitivep t :transitivep t)
+                                    :intransitivep t :transitivep t
+                                    :prepositions '("at" "to" "with"))
     (finishes (parse-action 1 "testwaves"))
     (is (equalp '(:actor 1 :verb "testwaves" :adverbs (nil nil)
                   :do nil :io nil :preposition nil)
@@ -77,7 +81,8 @@
     (signals error (parse-action 1 "testwaves at one with two"))))
 
 (test action-parse-transitive
-  (with-verb-and-nameables (results "testpunches" "one" "two" :transitivep t)
+  (with-verb-and-nameables (results "testpunches" "one" "two" :transitivep t
+                                    :prepositions '("at" "with"))
     (signals error (parse-action 1 "testpunches"))
     (signals error (parse-action 1 "testpunches at one"))
     (finishes (parse-action 1 "testpunches one"))
@@ -92,7 +97,8 @@
     (signals error (parse-action 1 "testpunches at one with two"))))
 
 (test action-parse-ditransitive
-  (with-verb-and-nameables (results "testgives" "one" "two" :ditransitivep t)
+  (with-verb-and-nameables (results "testgives" "one" "two" :ditransitivep t
+                                    :prepositions '("at" "to" "with"))
     (signals error (parse-action 1 "testgives"))
     (signals error (parse-action 1 "testgives at one"))
     (signals error (parse-action 1 "testgives one"))

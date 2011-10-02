@@ -85,17 +85,17 @@
       (result (list entity))
       (fail))))
 
-;; TODO - this needs to work off of sykosomatic.vocabulary's own storage.
-(defun preposition ()
-  (=or (=string "to")
-       (=string "at")
-       (=string "with")))
+(defun preposition (verb)
+  (=let* ((prep (dashed-word)))
+    (if (find prep (getf verb :prepositions) :test #'string-equal)
+        (result prep)
+        (fail))))
 
 (defun transitive-verb-args (verb)
   (if (getf verb :transitivep)
       (=let* ((_ (ws))
               (direct-objects (noun-clause))
-              (preposition (maybe (=prog2 (ws) (preposition) (ws))))
+              (preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
                                     (noun-clause)
                                     (result nil))))
@@ -109,7 +109,7 @@
       (=or
        (=let* ((_ (ws))
                (direct-objects (noun-clause))
-               (preposition (=prog2 (ws) (preposition) (ws)))
+               (preposition (=prog2 (ws) (preposition verb) (ws)))
                (indirect-objects (noun-clause)))
          (result `((:direct-objects . ,direct-objects)
                    (:indirect-objects . ,indirect-objects)
@@ -124,7 +124,7 @@
 
 (defun intransitive-verb-args (verb)
   (if (getf verb :intransitivep)
-      (=let* ((preposition (maybe (=prog2 (ws) (preposition) (ws))))
+      (=let* ((preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
                                     (noun-clause)
                                     (result nil))))
