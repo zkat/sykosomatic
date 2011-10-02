@@ -173,7 +173,7 @@
             (reduce #'* results :key (compose #'length #'car))))
     (loop for (completions . leftovers) in results
        when (typep completions 'error)
-       do (signal completions)
+       do (error completions)
        when (emptyp leftovers)
        append completions)))
 
