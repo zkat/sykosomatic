@@ -26,6 +26,141 @@
         (fail :error (format nil "'~A' is not an adverb." adverb)))))
 
 ;;;
+;;; Dialogue
+;;;
+(defun to/at-someone ()
+  (=let* ((at/to (=or (=string "at")
+                      (=string "to")
+                      (=string "@")))
+          (_ (ws))
+          (target-name (dashed-word)))
+    (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
+
+;; parenthetical = "(" ("@"|"to"|"at") name | adverb ")"
+(defun parenthetical ()
+  (=let* ((_ (=char #\())
+          (content (=or (to/at-someone) (adverb)))
+          (_ (=char #\))))
+    (result `(:parenthetical . ,(cdr content)))))
+
+;; dialogue = [parenthetical ws] text
+(defun dialogue ()
+  (=let* ((parenthetical (maybe (=prog1 (parenthetical) (ws))))
+          (dialogue-text (if parenthetical
+                             (text)
+                             (=and (=not (=char #\())
+                                   (text)))))
+    (result `(:dialogue
+              (:parenthetical . ,(cdr parenthetical))
+              (:dialogue . ,dialogue-text)))))
+
+(defun parse-dialogue (message)
+  (let ((results (invoke-parser (either (dialogue) 'error) message)))
+    (cond ((cdr results)
+           (error "Parse was ambiguous."))
+          ((typep (car results) 'error)
+           (signal (car results)))
+          (t (values (cdr (assoc :dialogue (cdar results)))
+                     (cdr (assoc :parenthetical (cdar results))))))))
+
+;;;
+;;; Full-sentence action parser
+;;;
+;; verb = existing verb
+(defun verb ()
+  (=let* ((text (text (alpha-char))))
+    (if-let (verb (find-verb text))
+      (result verb)
+      (fail :error (format nil "'~A' is not a verb." text)))))
+
+(defun phrase-with-spaces ()
+  (=let* ((word (dashed-word))
+          (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
+    (result (format nil "~A~{ ~A~}" word other-words))))
+
+(defun noun-clause ()
+  ;; This is only for testing/development.
+  (=let* ((full-name (phrase-with-spaces)))
+    (if-let (entity (find-by-full-name full-name))
+      (result (list entity))
+      (fail))))
+
+;; TODO - this needs to work off of sykosomatic.vocabulary's own storage.
+(defun preposition ()
+  (=or (=string "to")
+       (=string "at")
+       (=string "with")))
+
+(defun transitive-verb-args (verb)
+  (if (getf verb :transitivep)
+      (=let* ((_ (ws))
+              (direct-objects (noun-clause))
+              (preposition (maybe (=prog2 (ws) (preposition) (ws))))
+              (indirect-objects (if preposition
+                                    (noun-clause)
+                                    (result nil))))
+        (result `((:direct-objects . ,direct-objects)
+                  (:preposition . ,preposition)
+                  (:indirect-objects . ,indirect-objects))))
+      (fail)))
+
+(defun ditransitive-verb-args (verb)
+  (if (getf verb :ditransitivep)
+      (=or
+       (=let* ((_ (ws))
+               (direct-objects (noun-clause))
+               (preposition (=prog2 (ws) (preposition) (ws)))
+               (indirect-objects (noun-clause)))
+         (result `((:direct-objects . ,direct-objects)
+                   (:indirect-objects . ,indirect-objects)
+                   (:preposition . ,preposition))))
+       (=let* ((_ (ws))
+               (indirect-objects (noun-clause))
+               (_ (ws))
+               (direct-objects (noun-clause)))
+         (result `((:direct-objects . ,direct-objects)
+                   (:indirect-objects . ,indirect-objects)))))
+      (fail)))
+
+(defun intransitive-verb-args (verb)
+  (if (getf verb :intransitivep)
+      (=let* ((preposition (maybe (=prog2 (ws) (preposition) (ws))))
+              (indirect-objects (if preposition
+                                    (noun-clause)
+                                    (result nil))))
+        (result `((:indirect-objects . ,indirect-objects)
+                  (:preposition . ,preposition))))
+      (fail)))
+
+(defun verb-args (verb)
+  (=or (transitive-verb-args verb)
+       (ditransitive-verb-args verb)
+       (intransitive-verb-args verb)))
+
+;; sentence = [adverb ws] verb [ws verb-args] [ws adverb]
+(defun sentence ()
+  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
+          (verb (verb))
+          (verb-args (verb-args verb))
+          (adverb2 (maybe (=and (ws) (adverb)) 'error)))
+    (result `(:sentence
+              ,@verb-args
+              (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
+              (:verb . ,(getf verb :third-person))))))
+
+;;; Commands
+(defun parse-action (actor message)
+  (let ((results (invoke-parser (either (=prog1 (sentence) (no-more-input)) 'error) message)))
+    (cond ((null results)
+           (error "ENOPARSE"))
+          ((cdr results)
+           (error "Parse was ambiguous."))
+          ((typep (car results) 'error)
+           (error (car results)))
+          (t (let ((sentence (cdar results)))
+               (apply #'invoke-verb-command :actor actor (alist-plist sentence)))))))
+
+;;;
 ;;; Partial-sentence completion
 ;;;
 (defparameter *max-completion-results* 25)
@@ -83,90 +218,6 @@
   (partial-vocabulary-word #'verb-completions))
 (defun partial-adverb ()
   (partial-vocabulary-word #'adverb-completions))
-
-;;;
-;;; Dialogue
-;;;
-(defun to/at-someone ()
-  (=let* ((at/to (=or (=string "at")
-                      (=string "to")
-                      (=string "@")))
-          (_ (ws))
-          (target-name (dashed-word)))
-    (result `(:at/to . ,(concatenate 'string at/to " " target-name)))))
-
-;; parenthetical = "(" ("@"|"to"|"at") name | adverb ")"
-(defun parenthetical ()
-  (=let* ((_ (=char #\())
-          (content (=or (to/at-someone) (adverb)))
-          (_ (=char #\))))
-    (result `(:parenthetical . ,(cdr content)))))
-
-;; dialogue = [parenthetical ws] text
-(defun dialogue ()
-  (=let* ((parenthetical (maybe (=prog1 (parenthetical) (ws))))
-          (dialogue-text (if parenthetical
-                             (text)
-                             (=and (=not (=char #\())
-                                   (text)))))
-    (result `(:dialogue
-              (:parenthetical . ,(cdr parenthetical))
-              (:dialogue . ,dialogue-text)))))
-
-(defun parse-dialogue (message)
-  (let ((results (invoke-parser (either (dialogue) 'error) message)))
-    (cond ((cdr results)
-           (error "Parse was ambiguous."))
-          ((typep (car results) 'error)
-           (signal (car results)))
-          (t (values (cdr (assoc :dialogue (cdar results)))
-                     (cdr (assoc :parenthetical (cdar results))))))))
-
-;;;
-;;; Full-sentence action parser
-;;;
-;; verb = existing verb
-(defun verb ()
-  (=let* ((text (text (alpha-char))))
-    (if (verbp text)
-        (result text)
-        (fail :error (format nil "'~A' is not a verb." text)))))
-
-(defun phrase-with-spaces ()
-  (=let* ((word (dashed-word))
-          (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
-    (result (format nil "~A~{ ~A~}" word other-words))))
-
-(defun noun-clause ()
-  ;; This is only for testing/development.
-  (=let* ((full-name (phrase-with-spaces)))
-    (if-let (entity (find-by-full-name full-name))
-      (result `(:entities ,entity))
-      (fail))))
-
-;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
-;; (currently: [adverb ws] verb [ws noun-clause] [ws adverb])
-(defun sentence ()
-  (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
-          (verb (verb))
-          (object (maybe (=and (ws) (noun-clause))))
-          (adverb2 (maybe (=and (ws) (adverb)) 'error)))
-    (result `(:sentence
-              (:direct-objects . ,(cdr object))
-              (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
-              (:verb . ,verb)))))
-
-;;; Commands
-(defun parse-action (actor message)
-  (let ((results (invoke-parser (either (=prog1 (sentence) (no-more-input)) 'error) message)))
-    (cond ((null results)
-           (error "ENOPARSE"))
-          ((cdr results)
-           (error "Parse was ambiguous."))
-          ((typep (car results) 'error)
-           (error (car results)))
-          (t (let ((sentence (cdar results)))
-               (apply #'invoke-verb-command :actor actor (alist-plist sentence)))))))
 
 ;; #+nil(defun sentence ()
 ;;   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))

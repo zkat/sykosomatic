@@ -4,10 +4,9 @@
   (:export :*actor*
            :*verb*
            :*adverbs*
-           :*direct-object*
-           :*indirect-object*
-           :*direct-preposition*
-           :*indirect-preposition*
+           :*direct-objects*
+           :*indirect-objects*
+           :*preposition*
            :defcommand
            :add-verb-command
            :invoke-verb-command
@@ -23,8 +22,7 @@
 (defvar *adverbs*)
 (defvar *direct-objects*)
 (defvar *indirect-objects*)
-(defvar *direct-preposition*)
-(defvar *indirect-preposition*)
+(defvar *preposition*)
 
 ;;; Command definition
 (defvar *commands* (make-hash-table :test #'equal))
@@ -73,8 +71,7 @@
                             ((:actor *actor*)) ((:verb *verb*)) ((:adverbs *adverbs*)) 
                             ((:direct-objects *direct-objects*))
                             ((:indirect-objects *indirect-objects*))
-                            ((:direct-preposition *direct-preposition*))
-                            ((:indirect-preposition *indirect-preposition*)))
+                            ((:preposition *preposition*)))
   (funcall (verb-command *verb*)))
 
 ;;; Command-writing utilities

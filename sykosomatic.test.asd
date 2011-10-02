@@ -11,4 +11,5 @@
              (:module game-objects
                       :components
                       ((:file "nameable")))
-             (:file "command")))))
+             (:file "command")
+             (:file "parser")))))
