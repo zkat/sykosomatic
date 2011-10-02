@@ -101,6 +101,8 @@
                                     :prepositions '("at" "to" "with"))
     (signals error (parse-action 1 "testgives"))
     (signals error (parse-action 1 "testgives at one"))
+    ;; ditransitive verbs only do 'to'
+    (signals error (parse-action 1 "testgives two at one"))
     (signals error (parse-action 1 "testgives one"))
     (finishes (parse-action 1 "testgives one to two"))
     (is (equalp '(:actor 1 :verb "testgives" :adverbs (nil nil)

@@ -110,7 +110,7 @@
       (=or
        (=let* ((_ (ws))
                (direct-objects (noun-clause))
-               (preposition (=prog2 (ws) (preposition verb) (ws)))
+               (preposition (=prog2 (ws) (=string "to") (ws)))
                (indirect-objects (noun-clause)))
          (result `((:direct-objects . ,direct-objects)
                    (:indirect-objects . ,indirect-objects)
