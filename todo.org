@@ -107,23 +107,66 @@
       I like the idea of having a (memory-stored) queue of messages that a thread goes through. This
       will need to support sending all the various client messages, like dialogue, transitions, etc,
       in case commands want to handle them.
-**** TODO Extend parser to support full grammar
-     sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
+**** TODO Extend parser to support more complete grammar
+     sentence = [adverb ws] verb [ws verb-args] [ws adverb]
 
-     Where noun-clause is a clause representing one or more objects visible to the associated
-     actor. It may be a prepositional phrase, in which case that preposition is kept. More detailed
-     grammar notes (and initial parsers) are spread around parser.lisp.
+     verb-args depends on whether the verb is transitive, intransitive, and/or ditransitive, and
+     will return an alist with direct-objects, indirect-objects, and a preposition, as appropriate.
+
+     Within verb-args, direct and indirect objects will be parsed, for now, as just any object with
+     a full-name match.
 
      The full parser should return enough objects to bind all of the command variables, which
-     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and prepositions
-     associated with the direct and indirect objects.
+     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and a
+     preposition.
+
+***** DONE Parse verb-args
+***** DONE Write some unit tests for the parser
+      Things might get a bit fragile. Make sure they're well-tested.
+***** TODO Define valid prepositions at the verb level
+      And have the parser use those for (preposition)
+
+      https://secure.wikimedia.org/wikipedia/en/wiki/English_prepositions As a nice reference to
+      what sort of thing should be supported.
+****** TODO One-word prepositions
+****** TODO Two- and three-word prepositions
+       Many of the two-word prepositions would be really nice to have, since they sound much more
+       natural than their single-word counterparts ('by' vs 'close to').
+
+       "on top of", "in front of", "as far as", "in lieu of", "on behalf of", "on account of", "by
+       means of", "in spite of", and "on account of" all seem like perfectly desirable things to
+       want to be able to type.
+
+       Are 'to the right of'/'to the left of' desirable enough to take the parser one extra level?
+       Are there any other 4-word prepositions? There's already 'right of' and 'left of'.
+***** TODO Extend verb-args parsers to pick up adverbs
+***** TODO conjunctions (multiple objects in a clause)
+***** TODO Only one adverb
+      This is nonsense. Pick up all adverbs, and error if there turns out to be more than one (after
+      everything else has been parsed).
+***** TODO Support phrasal verbs
+      "wave off", "give up", "give in"
+***** TODO Figure out exactly which characters will be allowed in vocabulary words and object names.
+      And put them in a shared place (sykosomatic.vocabulary?) that all other modules can use when
+      parsing/validating.
 **** TODO The Test
-     Target parsed sentence: 'kindly smiles with X at Y and Z.'
-     Target output: 'John Doe kindly smiles with X at Y and Z.'
+     Target parsed sentence: 'kindly smiles at Y and Z.'
+     Target output: 'John Doe kindly smiles at Y and Z.'
 
      Where X, Y, and Z are *toplevel* entities. They could be the same object.
 
      Output should go to all connected clients.
+**** TODO Memory-cache vocabulary
+     Start with closed classes: Keep all pronouns and adverbs in-memory.
+
+     Figure out how much memory having all verbs and adverbs in-memory would take. If it seems
+     reasonable, write them out to the database for storage, but work off the in-memory version.
+
+     That should help speed up the parser, hopefully.
+**** TODO Action completion
+     With the 'full' parser in place, revisit command completion and see if there's a way to
+     autocomplete large, complex sentences.
+**** TODO Add completion features to dialogue input area
 **** TODO FUTURE Command overrides
      Instead of putting command associations into verbs, make a command-association table that maps
      verbs to command names. This table should also include columns for most (if not all) of the
@@ -131,7 +174,6 @@
      specific parameters, default commands can be shadowed. For example, one could write a 'method'
      where a certain combination of actor/direct-object will yield a specific result. In general,
      this should not be used, but it may become handy when very-special-code is needed.
-**** TODO Add completion features to dialogue input area
 **** TODO (maybe) Improve error reporting
      For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
      once we have the full game frontend. If that's the case, we can just ignore erroneous input
@@ -225,7 +267,7 @@
     Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
     most templates should be in their own files, organized by webpage names. Give tal a shot for
     this. Whatever ends up being used, it may need to be extended in order to support the form builder.
-*** TODO Put locks on session value and finalizer hash tables
+*** DONE Put locks on session value and finalizer hash tables
 *** TODO Figure out how to put the server behind stud
     URL: https://github.com/bumptech/stud
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
@@ -325,6 +367,22 @@
     Is it possible to put in a constraint that prevents updates of nameable if a new full-name is
     not provided? Most likely, I'll need to write a trigger that does this.
 ** Security
+   https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines Has a nice overview of security
+   concerns and mitigations.
+*** TODO Password hashing
+    Confirm that the current password hashing algorithm is as secure/more secure than the 'standard'
+    bcrypt method.
+*** TODO nonce
+    The mozilla guidelines recommend storing the nonce elsewhere in the filesystem. Consider using
+    couchdb to store nonces for user passwords.
+*** TODO Clickjacking
+    x-frame-options to prevent malicious site framing. (see mozilla guidelines)
+*** TODO Content security policy
+    https://developer.mozilla.org/en/Introducing_Content_Security_Policy
+*** TODO Secure cookies
+    Since we'll probably not be doing hunchentoot-level SSL, the session mechanism should be
+    adjusted so that cookies are always secure (but this can't happen until there's a working TLS
+    system in place, for development)
 *** TODO HTTPS
     May not need/want hunchentoot managing this. Check out http://haproxy.1wt.eu/, which supposedly
     supports both https and wss.
@@ -349,6 +407,11 @@
     The websocket client should not leak anything the player would not already be able to do through
     the interface. Object identities should be hidden somehow.
     
+*** TODO Logout
+    Expire/delete the session cookie upon logout.
+*** TODO Security logging
+    https://wiki.mozilla.org/Security/Users_and_Logs (note that newlines should be escaped to
+    prevent log forging)
 *** DONE sykosomatic.account:gensalt uses cl:random
      Might be a good idea to put the openssl-based random numgen in util.lisp or something.
 ** Misc
