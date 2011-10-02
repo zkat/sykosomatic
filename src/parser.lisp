@@ -92,7 +92,8 @@
         (fail))))
 
 (defun transitive-verb-args (verb)
-  (if (verb-transitive-p verb)
+  (if (not (verb-transitive-p verb))
+      (fail)
       (=let* ((_ (ws))
               (direct-objects (noun-clause))
               (preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
@@ -101,11 +102,11 @@
                                     (result nil))))
         (result `((:direct-objects . ,direct-objects)
                   (:preposition . ,preposition)
-                  (:indirect-objects . ,indirect-objects))))
-      (fail)))
+                  (:indirect-objects . ,indirect-objects))))))
 
 (defun ditransitive-verb-args (verb)
-  (if (verb-ditransitive-p verb)
+  (if (not (verb-ditransitive-p verb))
+      (fail)
       (=or
        (=let* ((_ (ws))
                (direct-objects (noun-clause))
@@ -119,18 +120,17 @@
                (_ (ws))
                (direct-objects (noun-clause)))
          (result `((:direct-objects . ,direct-objects)
-                   (:indirect-objects . ,indirect-objects)))))
-      (fail)))
+                   (:indirect-objects . ,indirect-objects)))))))
 
 (defun intransitive-verb-args (verb)
-  (if (verb-intransitive-p verb)
+  (if (not (verb-intransitive-p verb))
+      (fail)
       (=let* ((preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
                                     (noun-clause)
                                     (result nil))))
         (result `((:indirect-objects . ,indirect-objects)
-                  (:preposition . ,preposition))))
-      (fail)))
+                  (:preposition . ,preposition))))))
 
 (defun verb-args (verb)
   (=or (transitive-verb-args verb)
