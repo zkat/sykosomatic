@@ -125,7 +125,7 @@
                        (:preposition . ,preposition))))
            (fail))))
 
-;; sentence = [adverb ws] verb [ws verd-args] [ws adverb]
+;; sentence = [adverb ws] verb [ws verb-args] [ws adverb]
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
