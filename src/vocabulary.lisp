@@ -79,20 +79,21 @@
               :bare bare
               :third-person (cond (third-person)
                                   ((or (ends-with #\x bare)
-                                       (ends-with #\s bare))
+                                       (ends-with #\s bare)
+                                       (ends-with-subseq "ch" bare))
                                    (concatenate 'string bare "es"))
                                   (t (concatenate 'string bare "s")))
               :preterite (cond (preterite)
                                ((ends-with #\e bare)
                                 (concatenate 'string bare "d"))
                                (t (concatenate 'string bare "ed")))
-              :intransitivep intransitivep
-              :transitive transitivep
-              :distransitivep ditransitivep))
+              :transitivep transitivep
+              :ditransitivep ditransitivep
+              :intransitivep intransitivep))
   t)
 
-(defun remove-verb (bare)
-  (db-query (:delete-from 'verb :where (:= 'bare bare)))
+(defun remove-verb (third-person)
+  (db-query (:delete-from 'verb :where (:= 'third-person third-person)))
   t)
 
 (defun verb-completions (incomplete-verb &optional (limit 50))
@@ -126,14 +127,16 @@
                  ("cheer" :transitivep t :intransitivep t) ("laugh" :intransitivep t)
                  ("wave" :transitivep t :intransitivep t) ("get" :preterite "got" :transitivep t)
                  ("cry" :third-person "cries" :preterite "cried" :intransitivep t)
-                 ("punch" :transitivep t) ("give" :preterite "gave" :ditransitivep t)))))
-
-(defun reset ()
-  (map nil #'rebuild-table '(verb adverb pronoun)))
+                 ("punch" :transitivep t) ("give" :preterite "gave" :ditransitivep t)
+                 ("throw" :preterite "threw" :ditransitivep t :transitivep t)))))
 
 (defun import-test-data ()
   (loop for (adder . args-list) in *test-data*
      do (loop for args in args-list
            do (apply adder args))))
+
+(defun reset ()
+  (map nil #'rebuild-table '(verb adverb pronoun))
+  (import-test-data))
 
 (register-db-init-hook 'vocabulary-init 'import-test-data)
