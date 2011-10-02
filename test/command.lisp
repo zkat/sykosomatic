@@ -1,10 +1,11 @@
 (test:def-test-package command
   (:use :sykosomatic.command))
 
-(test basic
+(test command-basic
   (unwind-protect
        (let ((success (gensym)))
          (defcommand test ()
+           (list *actor* *verb* *adverbs* *direct-objects* *indirect-objects* *preposition*)
            success)
          (add-verb-command "smiles" 'test)
          (is (eq success (invoke-verb-command :verb "smiles"))))
