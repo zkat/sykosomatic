@@ -1,8 +1,18 @@
 (util:def-file-package #:sykosomatic.vocabulary
   (:use :sykosomatic.db)
-  (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb :adverbp
-           :add-verb :remove-verb :find-verb :verbp :verb-completions :adverb-completions
-           :third-person-singular :preterite))
+  (:export
+   ;; Pronouns
+   :add-pronoun :remove-pronoun
+   ;; Adverbs
+   :add-adverb :remove-adverb :adverbp :adverb-completions
+   ;; Verbs
+   :add-verb :remove-verb :find-verb
+   :verb-third-person
+   :verb-transitive-p
+   :verb-intransitive-p
+   :verb-ditransitive-p
+   :verb-prepositions
+   :verb-completions))
 
 ;;; Pronouns
 (defdao pronoun ()
@@ -110,8 +120,16 @@
   (db-query (:select :* :from 'verb :where (:ilike 'third-person third-person))
             :plist))
 
-(defun verbp (maybe-verb)
-  (db-query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single))
+(defun verb-transitive-p (verb)
+  (getf verb :transitivep))
+(defun verb-intransitive-p (verb)
+  (getf verb :intransitivep))
+(defun verb-ditransitive-p (verb)
+  (getf verb :ditransitivep))
+(defun verb-prepositions (verb)
+  (getf verb :prepositions))
+(defun verb-third-person (verb)
+  (getf verb :third-person))
 
 ;;; Testing
 (defparameter *test-data*

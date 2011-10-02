@@ -87,12 +87,12 @@
 
 (defun preposition (verb)
   (=let* ((prep (phrase-with-spaces)))
-    (if (find prep (getf verb :prepositions) :test #'string-equal)
+    (if (find prep (verb-prepositions verb) :test #'string-equal)
         (result prep)
         (fail))))
 
 (defun transitive-verb-args (verb)
-  (if (getf verb :transitivep)
+  (if (verb-transitive-p verb)
       (=let* ((_ (ws))
               (direct-objects (noun-clause))
               (preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
@@ -105,7 +105,7 @@
       (fail)))
 
 (defun ditransitive-verb-args (verb)
-  (if (getf verb :ditransitivep)
+  (if (verb-ditransitive-p verb)
       (=or
        (=let* ((_ (ws))
                (direct-objects (noun-clause))
@@ -123,7 +123,7 @@
       (fail)))
 
 (defun intransitive-verb-args (verb)
-  (if (getf verb :intransitivep)
+  (if (verb-intransitive-p verb)
       (=let* ((preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
                                     (noun-clause)
@@ -146,7 +146,7 @@
     (result `(:sentence
               ,@verb-args
               (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
-              (:verb . ,(getf verb :third-person))))))
+              (:verb . ,(verb-third-person verb))))))
 
 ;;; Commands
 (defun parse-action (actor message)
