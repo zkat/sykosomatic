@@ -4,10 +4,9 @@
   (:export :*actor*
            :*verb*
            :*adverbs*
-           :*direct-object*
-           :*indirect-object*
-           :*direct-preposition*
-           :*indirect-preposition*
+           :*direct-objects*
+           :*indirect-objects*
+           :*preposition*
            :defcommand
            :add-verb-command
            :invoke-verb-command
@@ -72,7 +71,7 @@
                             ((:actor *actor*)) ((:verb *verb*)) ((:adverbs *adverbs*)) 
                             ((:direct-objects *direct-objects*))
                             ((:indirect-objects *indirect-objects*))
-                            ((:preposition *direct-preposition*)))
+                            ((:preposition *preposition*)))
   (funcall (verb-command *verb*)))
 
 ;;; Command-writing utilities
