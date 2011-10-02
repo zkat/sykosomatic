@@ -26,65 +26,6 @@
         (fail :error (format nil "'~A' is not an adverb." adverb)))))
 
 ;;;
-;;; Partial-sentence completion
-;;;
-(defparameter *max-completion-results* 25)
-
-(defun parse-action-completions (action-text)
-  (when-let (results (funcall (either (=prog1 (action-completions) (no-more-input))
-                                      'error) action-text))
-    (unless
-        (<= *max-completion-results*
-            (reduce #'* results :key (compose #'length #'car))))
-    (loop for (completions . leftovers) in results
-       when (typep completions 'error)
-       do (signal completions)
-       when (emptyp leftovers)
-       append completions)))
-
-(defun action-completions ()
-  (=let* ((completions1 (partial-verb-or-adverb))
-          (completions2 (maybe (=and (ws)
-                                     (if (eq :verbs (car completions1))
-                                         (partial-adverb)
-                                         (partial-verb))))))
-    (cond ((<= *max-completion-results*
-               (* (length (cdr completions1))
-                  (length (cdr completions2))))
-           (fail))
-          ((and completions1 completions2)
-           (result
-            (loop for c1 in (cdr completions1)
-               appending (loop for c2 in (cdr completions2)
-                            collect (concatenate 'string c1 " " c2)))))
-          (completions1
-           (result (cdr completions1)))
-          (t
-           (fail)))))
-
-(defun partial-verb-or-adverb ()
-  (plus
-   (=let* ((completions (partial-verb)))
-     (if completions
-         (result `(:verbs . ,(cdr completions)))
-         (fail)))
-   (=let* ((completions (partial-adverb)))
-     (if completions
-         (result `(:adverbs . ,(cdr completions)))
-         (fail)))))
-
-(defun partial-vocabulary-word (search-fun)
-  (=let* ((partial-word (dashed-word)))
-    (if-let (completed (funcall search-fun partial-word))
-      (result `(:completions . ,completed))
-      (fail))))
-
-(defun partial-verb ()
-  (partial-vocabulary-word #'verb-completions))
-(defun partial-adverb ()
-  (partial-vocabulary-word #'adverb-completions))
-
-;;;
 ;;; Dialogue
 ;;;
 (defun to/at-someone ()
@@ -167,6 +108,65 @@
            (error (car results)))
           (t (let ((sentence (cdar results)))
                (apply #'invoke-verb-command :actor actor (alist-plist sentence)))))))
+
+;;;
+;;; Partial-sentence completion
+;;;
+(defparameter *max-completion-results* 25)
+
+(defun parse-action-completions (action-text)
+  (when-let (results (funcall (either (=prog1 (action-completions) (no-more-input))
+                                      'error) action-text))
+    (unless
+        (<= *max-completion-results*
+            (reduce #'* results :key (compose #'length #'car))))
+    (loop for (completions . leftovers) in results
+       when (typep completions 'error)
+       do (signal completions)
+       when (emptyp leftovers)
+       append completions)))
+
+(defun action-completions ()
+  (=let* ((completions1 (partial-verb-or-adverb))
+          (completions2 (maybe (=and (ws)
+                                     (if (eq :verbs (car completions1))
+                                         (partial-adverb)
+                                         (partial-verb))))))
+    (cond ((<= *max-completion-results*
+               (* (length (cdr completions1))
+                  (length (cdr completions2))))
+           (fail))
+          ((and completions1 completions2)
+           (result
+            (loop for c1 in (cdr completions1)
+               appending (loop for c2 in (cdr completions2)
+                            collect (concatenate 'string c1 " " c2)))))
+          (completions1
+           (result (cdr completions1)))
+          (t
+           (fail)))))
+
+(defun partial-verb-or-adverb ()
+  (plus
+   (=let* ((completions (partial-verb)))
+     (if completions
+         (result `(:verbs . ,(cdr completions)))
+         (fail)))
+   (=let* ((completions (partial-adverb)))
+     (if completions
+         (result `(:adverbs . ,(cdr completions)))
+         (fail)))))
+
+(defun partial-vocabulary-word (search-fun)
+  (=let* ((partial-word (dashed-word)))
+    (if-let (completed (funcall search-fun partial-word))
+      (result `(:completions . ,completed))
+      (fail))))
+
+(defun partial-verb ()
+  (partial-vocabulary-word #'verb-completions))
+(defun partial-adverb ()
+  (partial-vocabulary-word #'adverb-completions))
 
 ;; #+nil(defun sentence ()
 ;;   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
