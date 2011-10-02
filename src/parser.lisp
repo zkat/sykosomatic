@@ -78,12 +78,33 @@
           (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
     (result (format nil "~A~{ ~A~}" word other-words))))
 
-(defun noun-clause ()
-  ;; This is only for testing/development.
+(defun local-object ()
   (=let* ((full-name (phrase-with-spaces)))
     (if-let (entity (find-by-full-name full-name))
-      (result (list entity))
+      (result entity)
       (fail))))
+
+(defun comma ()
+  (=and
+   (maybe (ws))
+   (=char #\,)
+   (maybe (ws))
+   (result t)))
+
+(defun conjunction ()
+  (=or
+   (=let* ((commap (maybe (comma)))
+           (_ (if commap (result nil) (ws)))
+           (_ (=string "and"))
+           (_ (ws)))
+     (result t))
+   (comma)))
+
+(defun noun-clause ()
+  (=let* ((obj (local-object))
+          (more-objects (zero-or-more (=and (conjunction)
+                                            (local-object)))))
+    (result (cons obj more-objects))))
 
 (defun preposition (verb)
   (=let* ((prep (phrase-with-spaces)))
