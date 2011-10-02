@@ -86,7 +86,7 @@
       (fail))))
 
 (defun preposition (verb)
-  (=let* ((prep (dashed-word)))
+  (=let* ((prep (phrase-with-spaces)))
     (if (find prep (getf verb :prepositions) :test #'string-equal)
         (result prep)
         (fail))))

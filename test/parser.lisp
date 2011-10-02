@@ -111,3 +111,36 @@
                   :do ("two") :io ("one") :preposition nil)
                 results))
     (signals error (parse-action 1 "testgives at one with two"))))
+
+(test action-parse-prepositions
+  (with-verb-and-nameables (results "testsmiles" "one" "two" :intransitivep t
+                                    :prepositions '("at" "with"))
+    (finishes (parse-action 1 "testsmiles at one"))
+    (is (string-equal "at" (getf results :preposition)))
+    (finishes (parse-action 1 "testsmiles with one"))
+    (is (string-equal "with" (getf results :preposition)))
+    (signals error (parse-action 1 "testsmiles to one")))
+  ;; Two-word
+  (with-verb-and-nameables (results "teststands" "one" "two" :intransitivep t
+                                    :prepositions '("right of" "next to"))
+    (finishes (parse-action 1 "teststands right of one"))
+    (is (string-equal "right of" (getf results :preposition)))
+    (finishes (parse-action 1 "teststands next to one"))
+    (is (string-equal "next to" (getf results :preposition)))
+    (signals error (parse-action 1 "teststands right one"))
+    (signals error (parse-action 1 "teststands to one")))
+  (with-verb-and-nameables (results "testsits" "one" "two" :intransitivep t
+                                    :prepositions '("on" "on top of" "right of"
+                                                    "to the right of" "next to"))
+    (finishes (parse-action 1 "testsits to the right of one"))
+    (is (string-equal "to the right of" (getf results :preposition)))
+    (finishes (parse-action 1 "testsits next to one"))
+    (is (string-equal "next to" (getf results :preposition)))
+    (finishes (parse-action 1 "testsits right of one"))
+    (is (string-equal "right of" (getf results :preposition)))
+    (finishes (parse-action 1 "testsits on one"))
+    (is (string-equal "on" (getf results :preposition)))
+    (finishes (parse-action 1 "testsits on top of one"))
+    (is (string-equal "on top of" (getf results :preposition)))
+    (signals error (parse-action 1 "testsits right one"))
+    (signals error (parse-action 1 "testsits to one"))))
