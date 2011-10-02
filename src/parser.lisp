@@ -69,9 +69,9 @@
 ;; verb = existing verb
 (defun verb ()
   (=let* ((text (text (alpha-char))))
-    (if (verbp text)
-        (result text)
-        (fail :error (format nil "'~A' is not a verb." text)))))
+    (if-let (verb (find-verb text))
+      (result verb)
+      (fail :error (format nil "'~A' is not a verb." text)))))
 
 (defun phrase-with-spaces ()
   (=let* ((word (dashed-word))
@@ -82,20 +82,59 @@
   ;; This is only for testing/development.
   (=let* ((full-name (phrase-with-spaces)))
     (if-let (entity (find-by-full-name full-name))
-      (result `(:entities ,entity))
+      (result (list entity))
       (fail))))
 
-;; sentence = [adverb ws] verb [ws noun-clause] [ws noun-clause] [ws adverb]
-;; (currently: [adverb ws] verb [ws noun-clause] [ws adverb])
+;; TODO - this needs to work off of sykosomatic.vocabulary's own storage.
+(defun preposition ()
+  (=or (=string "to")
+       (=string "at")
+       (=string "with")))
+
+(defun verb-args (verb)
+  (=or (if (getf verb :transitivep)
+           (=let* ((direct-objects (noun-clause))
+                   (preposition (maybe (=prog2 (ws) (preposition) (ws))))
+                   (indirect-objects (if preposition
+                                         (noun-clause)
+                                         (result nil))))
+             (result `((:direct-objects . ,direct-objects)
+                       (:preposition . ,preposition)
+                       (:indirect-objects . ,indirect-objects))))
+           (fail))
+       (if (getf verb :ditransitivep)
+           (=or
+            (=let* ((direct-objects (noun-clause))
+                    (preposition (=prog2 (ws) (preposition) (ws)))
+                    (indirect-objects (noun-clause)))
+              (result `((:direct-objects . ,direct-objects)
+                        (:indirect-objects . ,indirect-objects)
+                        (:preposition . ,preposition))))
+            (=let* ((indirect-objects (noun-clause))
+                    (_ (ws))
+                    (direct-objects (noun-clause)))
+              (result `((:direct-objects . ,direct-objects)
+                        (:indirect-objects . ,indirect-objects)))))
+           (fail))
+       (if (getf verb :intransitivep)
+           (=let* ((preposition (maybe (=prog1 (preposition) (ws))))
+                   (indirect-objects (if preposition
+                                         (noun-clause)
+                                         (result nil))))
+             (result `((:indirect-objects . ,indirect-objects)
+                       (:preposition . ,preposition))))
+           (fail))))
+
+;; sentence = [adverb ws] verb [ws verd-args] [ws adverb]
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
-          (object (maybe (=and (ws) (noun-clause))))
+          (verb-args (maybe (=and (ws) (verb-args verb))))
           (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
-              (:direct-objects . ,(cdr object))
+              ,@verb-args
               (:adverbs . ,(list (cdr adverb1) (cdr adverb2)))
-              (:verb . ,verb)))))
+              (:verb . ,(getf verb :third-person))))))
 
 ;;; Commands
 (defun parse-action (actor message)
