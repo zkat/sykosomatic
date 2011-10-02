@@ -1,7 +1,7 @@
 (util:def-file-package #:sykosomatic.vocabulary
   (:use :sykosomatic.db)
   (:export :add-pronoun :remove-pronoun :add-adverb :remove-adverb :adverbp
-           :add-verb :remove-verb :verbp :verb-completions :adverb-completions
+           :add-verb :remove-verb :find-verb :verbp :verb-completions :adverb-completions
            :third-person-singular :preterite))
 
 ;;; Pronouns
@@ -100,6 +100,10 @@
                              (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
                     limit)
             :column))
+
+(defun find-verb (third-person)
+  (db-query (:select :* :from 'verb :where (:ilike 'third-person third-person))
+            :plist))
 
 (defun verbp (maybe-verb)
   (db-query (:select t :from 'verb :where (:ilike 'third-person maybe-verb)) :single))
