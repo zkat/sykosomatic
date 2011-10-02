@@ -56,15 +56,24 @@
 ;;;
 ;;; Using terminology from the wikipedia article on English Conjugation:
 ;;; https://secure.wikimedia.org/wikipedia/en/wiki/English_conjugation
+;;;
+;;; Also see:
+;;; https://secure.wikimedia.org/wikipedia/en/wiki/Transitive_verb
+;;; https://secure.wikimedia.org/wikipedia/en/wiki/Intransitive_verb
+;;; https://secure.wikimedia.org/wikipedia/en/wiki/Ditransitive_verb
 (defdao verb ()
   ((bare text)
    (third-person text)
-   (preterite text))
-  (:keys bare)
-  (:unique-index bare)
-  (:unique bare))
+   (preterite text)
+   (transitivep boolean :col-default nil)
+   (intransitivep boolean :col-default nil)
+   (ditransitivep boolean :col-default nil))
+  (:keys id)
+  (:unique-index third-person)
+  (:unique third-person))
 
-(defun add-verb (bare &optional third-person preterite)
+(defun add-verb (bare &key third-person preterite
+                 transitivep intransitivep ditransitivep)
   (with-db ()
     (make-dao 'verb
               :bare bare
@@ -76,8 +85,12 @@
               :preterite (cond (preterite)
                                ((ends-with #\e bare)
                                 (concatenate 'string bare "d"))
-                               (t (concatenate 'string bare "ed")))))
+                               (t (concatenate 'string bare "ed")))
+              :intransitivep intransitivep
+              :transitive transitivep
+              :distransitivep ditransitivep))
   t)
+
 (defun remove-verb (bare)
   (db-query (:delete-from 'verb :where (:= 'bare bare)))
   t)
@@ -101,10 +114,15 @@
                    ("sunnily") ("brightly") ("happily") ("honestly") ("nicely")
                    ("handsomely") ("cleverly") ("fascetiously") ("excitedly")
                    ("smugly") ("smilingly") ("angrily")))
-    (add-verb . (("grin" "grins" "grinned") ("chuckle") ("fluff") ("squee")
-                 ("pout") ("cackle") ("fix") ("preen") ("smile") ("frown")
-                 ("cheer") ("laugh") ("wave") ("get" "gets" "got")
-                 ("cry" "cries" "cried")))))
+    (add-verb . (("grin" :third-person "grins" :preterite "grinned" :intransitivep t)
+                 ("chuckle" :intransitivep t) ("fluff" :intransitivep t :transitivep t)
+                 ("squee" :intransitivep t) ("pout" :transitivep t :intransitivep t)
+                 ("cackle" :intransitivep t) ("fix" :transitivep t) ("preen" :intransitivep t)
+                 ("smile" :intransitivep t) ("frown" :intransitivep t)
+                 ("cheer" :transitivep t :intransitivep t) ("laugh" :intransitivep t)
+                 ("wave" :transitivep t :intransitivep t) ("get" :preterite "got" :transitivep t)
+                 ("cry" :third-person "cries" :preterite "cried" :intransitivep t)
+                 ("punch" :transitivep t) ("give" :preterite "gave" :ditransitivep t)))))
 
 (defun reset ()
   (map nil #'rebuild-table '(verb adverb pronoun)))
