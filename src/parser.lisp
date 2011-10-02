@@ -92,8 +92,10 @@
        (=string "with")))
 
 (defun verb-args (verb)
+  ;; TODO - split into multiple parsers...
   (=or (if (getf verb :transitivep)
-           (=let* ((direct-objects (noun-clause))
+           (=let* ((_ (ws))
+                   (direct-objects (noun-clause))
                    (preposition (maybe (=prog2 (ws) (preposition) (ws))))
                    (indirect-objects (if preposition
                                          (noun-clause)
@@ -104,20 +106,22 @@
            (fail))
        (if (getf verb :ditransitivep)
            (=or
-            (=let* ((direct-objects (noun-clause))
+            (=let* ((_ (ws))
+                    (direct-objects (noun-clause))
                     (preposition (=prog2 (ws) (preposition) (ws)))
                     (indirect-objects (noun-clause)))
               (result `((:direct-objects . ,direct-objects)
                         (:indirect-objects . ,indirect-objects)
                         (:preposition . ,preposition))))
-            (=let* ((indirect-objects (noun-clause))
+            (=let* ((_ (ws))
+                    (indirect-objects (noun-clause))
                     (_ (ws))
                     (direct-objects (noun-clause)))
               (result `((:direct-objects . ,direct-objects)
                         (:indirect-objects . ,indirect-objects)))))
            (fail))
        (if (getf verb :intransitivep)
-           (=let* ((preposition (maybe (=prog1 (preposition) (ws))))
+           (=let* ((preposition (maybe (=prog2 (ws) (preposition) (ws))))
                    (indirect-objects (if preposition
                                          (noun-clause)
                                          (result nil))))
@@ -129,7 +133,7 @@
 (defun sentence ()
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
-          (verb-args (maybe (=and (ws) (verb-args verb))))
+          (verb-args (verb-args verb))
           (adverb2 (maybe (=and (ws) (adverb)) 'error)))
     (result `(:sentence
               ,@verb-args
