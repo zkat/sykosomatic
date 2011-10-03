@@ -52,7 +52,7 @@
   (or (find-command (db-query (:select 'c.command-name :from (:as 'verb-command 'c)
                                        :inner-join (:as 'verb 'v)
                                        :on (:= 'v.id 'c.verb-id)
-                                       :where (:= 'v.third-person verb))
+                                       :where (:= 'v.third-person (verb-third-person verb)))
                               :single))
       (error "No command associated with verb: ~S" verb)))
 
