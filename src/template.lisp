@@ -167,7 +167,7 @@
                                 (<:textarea :class "dialogue"))))
                 (<:div :id "action-tab"
                        (<:form :id "action-input"
-                               (<:ah (string-capitalize char-name))
+                               (<:ah "What do you do? ")
                                (<:input)))
                 (<:div :id "ooc-tab"
                        (<:form :id "ooc-input"
