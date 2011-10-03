@@ -143,7 +143,7 @@
                        ,@(remove :adverb verb-args :key #'car)
                        (:adverb . ,adverb)
                        (:adverb-position . ,adverb-position)
-                       (:verb . ,(verb-third-person verb)))))))))
+                       (:verb . ,verb))))))))
 
 ;;; Commands
 (defun parse-action (actor message)

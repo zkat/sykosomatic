@@ -51,13 +51,11 @@
   (with-verb-and-nameables (results "testsmiles" "one" "two" :intransitivep t
                                     :prepositions '("at" "with"))
     (finishes (parse-action 1 "testsmiles"))
-    (is (equalp '(:actor 1 :verb "testsmiles" :adverb nil :adverb-position nil
-                  :do nil :io nil :preposition nil)
-                results))
+    (is (string-equal "testsmiles" (verb-third-person (getf results :verb))))
     (finishes (parse-action 1 "testsmiles at one"))
-    (is (equalp '(:actor 1 :verb "testsmiles" :adverb nil :adverb-position nil
-                  :do nil :io ("one") :preposition "at")
-                results))
+    (is (string-equal "testsmiles" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :io)))
+    (is (string-equal "at" (getf results :preposition)))
     (signals error (parse-action 1 "testsmiles one two"))
     (signals error (parse-action 1 "testsmiles one"))
     (signals error (parse-action 1 "testsmiles at one with two"))))
@@ -67,21 +65,20 @@
                                     :intransitivep t :transitivep t
                                     :prepositions '("at" "to" "with"))
     (finishes (parse-action 1 "testwaves"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
-                  :do nil :io nil :preposition nil)
-                results))
+    (is (string-equal "testwaves" (verb-third-person (getf results :verb))))
     (finishes (parse-action 1 "testwaves at one"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
-                  :do nil :io ("one") :preposition "at")
-                results))
+    (is (string-equal "testwaves" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :io)))
+    (is (string-equal "at" (getf results :preposition)))
     (finishes (parse-action 1 "testwaves one"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
-                  :do ("one") :io nil :preposition nil)
-                results))
+    (is (string-equal "testwaves" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :do)))
+    (is (null (getf results :preposition)))
     (finishes (parse-action 1 "testwaves one to two"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
-                  :do ("one") :io ("two") :preposition "to")
-                results))
+    (is (string-equal "testwaves" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :do)))
+    (is (equalp '("two") (getf results :io)))
+    (is (string-equal "to" (getf results :preposition)))
     (signals error (parse-action 1 "testwaves one two"))
     (signals error (parse-action 1 "testwaves at one with two"))))
 
@@ -91,13 +88,13 @@
     (signals error (parse-action 1 "testpunches"))
     (signals error (parse-action 1 "testpunches at one"))
     (finishes (parse-action 1 "testpunches one"))
-    (is (equalp '(:actor 1 :verb "testpunches" :adverb nil :adverb-position nil
-                  :do ("one") :io nil :preposition nil)
-                results))
+    (is (string-equal "testpunches" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :do)))
     (finishes (parse-action 1 "testpunches one with two"))
-    (is (equalp '(:actor 1 :verb "testpunches" :adverb nil :adverb-position nil
-                  :do ("one") :io ("two") :preposition "with")
-                results))
+    (is (string-equal "testpunches" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :do)))
+    (is (equalp '("two") (getf results :io)))
+    (is (string-equal "with" (getf results :preposition)))
     (signals error (parse-action 1 "testpunches one two"))
     (signals error (parse-action 1 "testpunches at one with two"))))
 
@@ -110,13 +107,14 @@
     (signals error (parse-action 1 "testgives two at one"))
     (signals error (parse-action 1 "testgives one"))
     (finishes (parse-action 1 "testgives one to two"))
-    (is (equalp '(:actor 1 :verb "testgives" :adverb nil :adverb-position nil
-                  :do ("one") :io ("two") :preposition "to")
-                results))
+    (is (string-equal "testgives" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :do)))
+    (is (equalp '("two") (getf results :io)))
+    (is (string-equal "to" (getf results :preposition)))
     (finishes (parse-action 1 "testgives one two"))
-    (is (equalp '(:actor 1 :verb "testgives" :adverb nil :adverb-position nil
-                  :do ("two") :io ("one") :preposition nil)
-                results))
+    (is (string-equal "testgives" (verb-third-person (getf results :verb))))
+    (is (equalp '("one") (getf results :io)))
+    (is (equalp '("two") (getf results :do)))
     (signals error (parse-action 1 "testgives at one with two"))))
 
 (test action-parse-prepositions
