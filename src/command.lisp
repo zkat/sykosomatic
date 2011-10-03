@@ -3,7 +3,8 @@
         :sykosomatic.vocabulary)
   (:export :*actor*
            :*verb*
-           :*adverbs*
+           :*adverb*
+           :*adverb-position*
            :*direct-objects*
            :*indirect-objects*
            :*preposition*
@@ -19,7 +20,8 @@
 ;;; Command vars
 (defvar *actor*)
 (defvar *verb*)
-(defvar *adverbs*)
+(defvar *adverb*)
+(defvar *adverb-position*)
 (defvar *direct-objects*)
 (defvar *indirect-objects*)
 (defvar *preposition*)
@@ -68,7 +70,8 @@
       (error "Unknown verb: ~S" verb))))
 
 (defun invoke-verb-command (&key
-                            ((:actor *actor*)) ((:verb *verb*)) ((:adverbs *adverbs*)) 
+                            ((:actor *actor*)) ((:verb *verb*))
+                            ((:adverb *adverb*)) ((:adverb-position *adverb-position*))
                             ((:direct-objects *direct-objects*))
                             ((:indirect-objects *indirect-objects*))
                             ((:preposition *preposition*)))
