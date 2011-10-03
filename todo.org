@@ -60,141 +60,20 @@
      feature that allows cleaning up garbage without giving too much freedom (or requiring too much
      effort to handle formatting, and the like).
 ** Websocket client
-*** TODO Fancy JS 'parser'
+*** TODO Parser, JS-side
      See sketch on whiteboard.
 
      Basically, the parser is less text-based and more text-guided. An interactive completion system
      will ensure that all items are uniquely chosen before the final message is even sent.  This
      will probably involve caching of at least part of the game's vocabulary client-side, but we'll
      take that step when it's necessary.
-
-**** DONE Disable completion system for now
-     Having a halfassed completion system and updating it while figuring out what the optimal use
-     case is will only cause problems.
-**** DONE Extend parser to support objects
-     Target grammar: [adverb ws] verb [ws object] [ws adverb]
-**** DONE command-definition system
-     Have a system for defining commands, which can then be associated with verbs. These commands
-     must accept and handle all parts of the sentence. One command could be shared by any number of
-     verbs -- for example: 'smiles', 'laughs', 'grins' can all be associated with a single command
-     (let's call it base-social for argument's sake).
-***** DONE Figure out what commands need
-      actor, verb, adverbs, direct-object, indirect-object, do-preposition, io-preposition.
-      I believe anything that commands need to do their work can be extracted from these components
-      of the sentence, such as the actor's location, name, etc etc.
-***** DONE Command CRUD
-      The usual. Commands are lisp code, so they should just live in an in-memory hash table or
-      something, keyed by name.
-***** DONE Command-definition macro
-      defcommand or whatever. Make it convenient to define/redefine these things.
-***** DONE Associate with vocabulary verbs
-      Add a system of doing CRUD on verb->command associations. These live in the database.
-**** DONE Command execution
-***** DONE Figure out how parse-action (and parser.lisp in general) should relate to websocket.lisp
-      It seems like parser.lisp is full of stuff that should just be commands in websocket.lisp (and
-      the commands in -that- file should probably be moved out.
-***** DONE Write a sample command
-      A simple emote command that takes care of basic social verbs. Don't worry about handling all
-      the variables from parsing.
-***** DONE Hook command up to game
-      So it actually gets used.
-***** DONE Write utility functions for from-command output queueing
-      Commands themselves should be the ones sending messages out to object/players. At the same
-      time, they're supposed to be blind to websockets. Therefore, there needs to be a way to either
-      directly send, or enqueue message sends to *entities*, which, at the websocket.lisp level,
-      takes care of sending messages out to connected clients that control those entities.
-      
-      I like the idea of having a (memory-stored) queue of messages that a thread goes through. This
-      will need to support sending all the various client messages, like dialogue, transitions, etc,
-      in case commands want to handle them.
-**** TODO Extend parser to support more complete grammar
-     sentence = [adverb ws] verb [ws verb-args] [ws adverb]
-
-     verb-args depends on whether the verb is transitive, intransitive, and/or ditransitive, and
-     will return an alist with direct-objects, indirect-objects, and a preposition, as appropriate.
-
-     Within verb-args, direct and indirect objects will be parsed, for now, as just any object with
-     a full-name match.
-
-     The full parser should return enough objects to bind all of the command variables, which
-     includes up to 4 adverbs, a set of direct objects, a set of indirect objects, and a
-     preposition.
-
-***** DONE Parse verb-args
-***** DONE Write some unit tests for the parser
-      Things might get a bit fragile. Make sure they're well-tested.
-***** TODO Define valid prepositions at the verb level
-      And have the parser use those for (preposition)
-
-      https://secure.wikimedia.org/wikipedia/en/wiki/English_prepositions As a nice reference to
-      what sort of thing should be supported.
-****** TODO One-word prepositions
-****** TODO Two- and three-word prepositions
-       Many of the two-word prepositions would be really nice to have, since they sound much more
-       natural than their single-word counterparts ('by' vs 'close to').
-
-       "on top of", "in front of", "as far as", "in lieu of", "on behalf of", "on account of", "by
-       means of", "in spite of", and "on account of" all seem like perfectly desirable things to
-       want to be able to type.
-
-       Are 'to the right of'/'to the left of' desirable enough to take the parser one extra level?
-       Are there any other 4-word prepositions? There's already 'right of' and 'left of'.
-***** TODO Extend verb-args parsers to pick up adverbs
-***** TODO conjunctions (multiple objects in a clause)
-***** TODO Only one adverb
-      This is nonsense. Pick up all adverbs, and error if there turns out to be more than one (after
-      everything else has been parsed).
-***** TODO Support phrasal verbs
-      "wave off", "give up", "give in"
-***** TODO Figure out exactly which characters will be allowed in vocabulary words and object names.
-      And put them in a shared place (sykosomatic.vocabulary?) that all other modules can use when
-      parsing/validating.
-**** TODO The Test
-     Target parsed sentence: 'kindly smiles at Y and Z.'
-     Target output: 'John Doe kindly smiles at Y and Z.'
-
-     Where X, Y, and Z are *toplevel* entities. They could be the same object.
-
-     Output should go to all connected clients.
-**** TODO Memory-cache vocabulary
-     Start with closed classes: Keep all pronouns and adverbs in-memory.
-
-     Figure out how much memory having all verbs and adverbs in-memory would take. If it seems
-     reasonable, write them out to the database for storage, but work off the in-memory version.
-
-     That should help speed up the parser, hopefully.
 **** TODO Action completion
      With the 'full' parser in place, revisit command completion and see if there's a way to
      autocomplete large, complex sentences.
 **** TODO Add completion features to dialogue input area
-**** TODO FUTURE Command overrides
-     Instead of putting command associations into verbs, make a command-association table that maps
-     verbs to command names. This table should also include columns for most (if not all) of the
-     action parameters. These can then be used to create 'multimethods' of sorts: By querying for
-     specific parameters, default commands can be shadowed. For example, one could write a 'method'
-     where a certain combination of actor/direct-object will yield a specific result. In general,
-     this should not be used, but it may become handy when very-special-code is needed.
-**** TODO (maybe) Improve error reporting
-     For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
-     once we have the full game frontend. If that's the case, we can just ignore erroneous input
-     because it means the player has bypassed the standard client.
-***** TODO Do something about that ENOPARSE garbage
-***** TODO When an adverb is wrong and a verb is write, report it as such
-      If someone enters 'merrly jumps', it should properly report the error as 'merrly is not an
-      adverb', instead of 'merrly is not a verb'.
 **** TODO (maybe) In the completion popup, group matches by verb and by adverb
      Kinda like an <optgroup>. jquery-ui's autocomplete supports this.
      NOTE: Maybe in the future. Whole-sentence is easier for now. :\
-*** DONE Use character/named library
-*** DONE Clean up websocket.lisp
-    It's a bloody mess in there
-**** DONE Only the session and the actor-id need to be kept
-**** DONE Instead of using web session, make web clients identify with a single-use token
-**** DONE Get rid of resource-client-connected
-     Validation no longer needs to be split up into two steps. Have resource-received-text do a
-     quick check to see if the session is already being tracked, and if it's valid. If it's not,
-     treat it as the validation step, etc.
-**** DONE Reorganize the file so it's more readable
 *** TODO Semantic markup for game area
     This should probably include changes to the command output functions such that they're not
     simple string concatenations. Actual objects/ids should be passed around, which a command
@@ -255,7 +134,6 @@
      Since sessions last a long time, have a screen where a user can log out all other active
      sessions.
 **** TODO Log out all sessions on username or password change
-**** DONE Make sure session-verify really is thread-safe.
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
 *** TODO Form builder
@@ -267,23 +145,59 @@
     Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
     most templates should be in their own files, organized by webpage names. Give tal a shot for
     this. Whatever ends up being used, it may need to be extended in order to support the form builder.
-*** DONE Put locks on session value and finalizer hash tables
 *** TODO Figure out how to put the server behind stud
     URL: https://github.com/bumptech/stud
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
 *** TODO Use a couple of lisps with single-threaded-taskmaster instances
 ** Game
-*** DONE Clarify relationship between account characters, actors, and entities
-    Entity: a game object, which a client may be using as its "Body"
-    Body: a game object a client is directly controlling. AKA its entity-id.
-    Actor: For the sake of dialogue/actions, the entity who is understood to be performing the action.
-*** DONE Implement body/actor/entity clarification
-**** DONE Make websocket.lisp use plain old entity IDs for the current actor.
-**** DONE Think about how to represent entity<->connected-client relationship
-**** DONE Update websocket.lisp to use nameable instead of character to render names and find things.
-**** DONE Make character.lisp create a nameable instead of slapping modifiers on an entity.
-**** DONE update character.lisp to only handle character creation.
-**** DONE rename character module to character-creation.
+*** TODO Parser
+**** TODO Possessives
+     Allow chained possessives parsing.
+
+     NOTE: this needs game objects that can -have- possessives. Do it later.
+**** TODO Figure out exactly which characters will be allowed in vocabulary words and object names.
+      And put them in a shared place (sykosomatic.vocabulary?) that all other modules can use when
+      parsing/validating.
+**** TODO present participle support for parenthetical
+     participle-form actions should be acceptable in dialogue parentheticals. This could probably
+     support the entire action system.
+
+     Example: (laughing at X) You sure messed that up!
+
+     To support this, a participle column should be added to verbs to store the regular or irregular
+     present participle forms of each verb.
+**** TODO When no participle is present, treat parenthetical as the verb "say"
+
+**** TODO Memory-cache vocabulary
+     Start with closed classes: Keep all pronouns and adverbs in-memory.
+
+     Figure out how much memory having all verbs and adverbs in-memory would take. If it seems
+     reasonable, write them out to the database for storage, but work off the in-memory version.
+
+     That should help speed up the parser, hopefully.
+
+**** TODO FUTURE Command overrides
+     Instead of putting command associations into verbs, make a command-association table that maps
+     verbs to command names. This table should also include columns for most (if not all) of the
+     action parameters. These can then be used to create 'multimethods' of sorts: By querying for
+     specific parameters, default commands can be shadowed. For example, one could write a 'method'
+     where a certain combination of actor/direct-object will yield a specific result. In general,
+     this should not be used, but it may become handy when very-special-code is needed.
+**** TODO (maybe) Support phrasal verbs
+      "wave off", "give up", "give in"
+      This sounds like it could be particularly tricky...
+      "X waves Y off" is possible, although "X waves off Y" is good enough.
+      It may not be worthwhile to even have this. Come up with some more inspiring phrasal verbs to
+      justify the effort.
+**** TODO (maybe) Improve error reporting
+     For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
+     once we have the full game frontend. If that's the case, we can just ignore erroneous input
+     because it means the player has bypassed the standard client.
+***** TODO Do something about that ENOPARSE garbage
+***** TODO When an adverb is wrong and a verb is write, report it as such
+      If someone enters 'merrly jumps', it should properly report the error as 'merrly is not an
+      adverb', instead of 'merrly is not a verb'.
+
 *** TODO Fix timer
     It's not quite working right now, although there's a reasonable rate limit. that might be okay
     for now.
@@ -331,6 +245,9 @@
 **** TODO FUTURE "Canon" system.
     While people can tell any story they want, how about giving extra weight to stories that fit the
     game's canon, and/or are staff approved?
+*** TODO AI
+    Build a behavior tree (http://aigamedev.com/open/article/behavior-trees-part1/) system for
+    dealing with AI entities.
 ** Game Building
 *** TODO Component manager
     Parts of the game should be split into components (things like nameable, describable,
@@ -351,17 +268,10 @@
 ** Database
 *** TODO Remove s-sql patch
     Waiting until the new pomo makes it into a quicklisp release.
-*** DONE 'init db' system of some sort
-    Needs to both create all tables, insert any initial data stored elsewhere, and remind admin to
-    execute whatever external command needs to be executed post-boot (such as installing unaccent).
-**** DONE init hooks for individual modules
-**** DONE Figure out a way to remind/enforce unaccent's existence
-     A plain old init hook that queries for the extension's existence is enough. :)
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
     pooling system).
-*** DONE Fix package issues with type names in defdao
 *** TODO Figure out a cleaner way of 'passing through' s-sql stuff
 *** TODO Nameable must-refresh-full-name constraint?
     Is it possible to put in a constraint that prevents updates of nameable if a new full-name is
@@ -412,20 +322,12 @@
 *** TODO Security logging
     https://wiki.mozilla.org/Security/Users_and_Logs (note that newlines should be escaped to
     prevent log forging)
-*** DONE sykosomatic.account:gensalt uses cl:random
-     Might be a good idea to put the openssl-based random numgen in util.lisp or something.
 ** Misc
-*** DONE Start writing unit tests
-*** TODO Write a macro to simplify one-package-per-file
-**** DONE Merge defpackage and in-package
-**** DONE Have it always :use :cl, :alexandria, and :sykosomatic.util
-**** TODO Ability to disable defaults
+*** TODO def-file-package improvements
+**** TODO Ability to disable defaults for def-file-package
 **** TODO Is it possible to extract the package name from the -filename-?
-*** DONE Write a macro to simplify one-test-per-module
-    On top of the one-package-per-file thing, it should also define the relevant suite
 *** TODO Move persistent sessions out into a separate lisp project
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
 *** TODO Actual config file system for local configs
 * Right now
-** TODO Complete enough command output stuff to C-c C-t The Test
