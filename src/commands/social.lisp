@@ -11,25 +11,20 @@
                         (format s " ~A" (verb-third-person *verb*))
                         (when (eql 1 *adverb-position*)
                           (format s " ~A" *adverb*))
-                        (cond (*preposition*
-                               (when *direct-objects* (princ " " s))
-                               (format s *english-list-format-string* (mapcar #'full-name
-                                                                              *direct-objects*))
-                               (when (eql 2 *adverb-position*)
-                                 (format s " ~A" *adverb*))
-                               (format s " ~A" *preposition*)
-                               (when *indirect-objects* (princ " " s))
-                               (format s *english-list-format-string* (mapcar #'full-name
-                                                                              *indirect-objects*)))
-                              (t
-                               (when *indirect-objects* (princ " " s))
-                               (format s *english-list-format-string* (mapcar #'full-name
-                                                                              *indirect-objects*))
-                               (when *direct-objects* (princ " " s))
-                               (format s *english-list-format-string* (mapcar #'full-name
-                                                                              *direct-objects*))
-                               (when (eql 2 *adverb-position*)
-                                 (format s " ~A" *adverb*))))
+                        (when (null *preposition*)
+                          (when *indirect-objects* (princ " " s))
+                          (format s *english-list-format-string* (mapcar #'full-name
+                                                                         *indirect-objects*)))
+                        (when *direct-objects* (princ " " s))
+                        (format s *english-list-format-string* (mapcar #'full-name
+                                                                       *direct-objects*))
+                        (when (eql 2 *adverb-position*)
+                          (format s " ~A" *adverb*))
+                        (when *preposition*
+                          (format s " ~A" *preposition*)
+                          (when *indirect-objects* (princ " " s))
+                          (format s *english-list-format-string* (mapcar #'full-name
+                                                                         *indirect-objects*)))
                         (when (eql 3 *adverb-position*)
                           (format s " ~A" *adverb*))
                         (princ "." s))))
