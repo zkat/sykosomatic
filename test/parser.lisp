@@ -30,7 +30,8 @@
                 (setf results
                       (list :actor *actor*
                             :verb *verb*
-                            :adverbs *adverbs*
+                            :adverb *adverb*
+                            :adverb-position *adverb-position*
                             :do (mapcar #'full-name *direct-objects*)
                             :io (mapcar #'full-name *indirect-objects*)
                             :preposition *preposition*)))
@@ -50,11 +51,11 @@
   (with-verb-and-nameables (results "testsmiles" "one" "two" :intransitivep t
                                     :prepositions '("at" "with"))
     (finishes (parse-action 1 "testsmiles"))
-    (is (equalp '(:actor 1 :verb "testsmiles" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testsmiles" :adverb nil :adverb-position nil
                   :do nil :io nil :preposition nil)
                 results))
     (finishes (parse-action 1 "testsmiles at one"))
-    (is (equalp '(:actor 1 :verb "testsmiles" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testsmiles" :adverb nil :adverb-position nil
                   :do nil :io ("one") :preposition "at")
                 results))
     (signals error (parse-action 1 "testsmiles one two"))
@@ -66,19 +67,19 @@
                                     :intransitivep t :transitivep t
                                     :prepositions '("at" "to" "with"))
     (finishes (parse-action 1 "testwaves"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
                   :do nil :io nil :preposition nil)
                 results))
     (finishes (parse-action 1 "testwaves at one"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
                   :do nil :io ("one") :preposition "at")
                 results))
     (finishes (parse-action 1 "testwaves one"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
                   :do ("one") :io nil :preposition nil)
                 results))
     (finishes (parse-action 1 "testwaves one to two"))
-    (is (equalp '(:actor 1 :verb "testwaves" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testwaves" :adverb nil :adverb-position nil
                   :do ("one") :io ("two") :preposition "to")
                 results))
     (signals error (parse-action 1 "testwaves one two"))
@@ -90,11 +91,11 @@
     (signals error (parse-action 1 "testpunches"))
     (signals error (parse-action 1 "testpunches at one"))
     (finishes (parse-action 1 "testpunches one"))
-    (is (equalp '(:actor 1 :verb "testpunches" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testpunches" :adverb nil :adverb-position nil
                   :do ("one") :io nil :preposition nil)
                 results))
     (finishes (parse-action 1 "testpunches one with two"))
-    (is (equalp '(:actor 1 :verb "testpunches" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testpunches" :adverb nil :adverb-position nil
                   :do ("one") :io ("two") :preposition "with")
                 results))
     (signals error (parse-action 1 "testpunches one two"))
@@ -109,11 +110,11 @@
     (signals error (parse-action 1 "testgives two at one"))
     (signals error (parse-action 1 "testgives one"))
     (finishes (parse-action 1 "testgives one to two"))
-    (is (equalp '(:actor 1 :verb "testgives" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testgives" :adverb nil :adverb-position nil
                   :do ("one") :io ("two") :preposition "to")
                 results))
     (finishes (parse-action 1 "testgives one two"))
-    (is (equalp '(:actor 1 :verb "testgives" :adverbs (nil nil nil nil)
+    (is (equalp '(:actor 1 :verb "testgives" :adverb nil :adverb-position nil
                   :do ("two") :io ("one") :preposition nil)
                 results))
     (signals error (parse-action 1 "testgives at one with two"))))
@@ -152,29 +153,45 @@
     (signals error (parse-action 1 "teststands to one"))))
 
 (test action-parse-adverbs
+  ;; Basic test
   (with-verb-and-nameables (results "teststands" "one" "two"
                                     :intransitivep t
                                     :prepositions '("on")
                                     :adverbs '("testly"))
     (finishes (parse-action 1 "teststands testly"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))
+    (is (string-equal "testly" (getf results :adverb)))
     (finishes (parse-action 1 "teststands testly on one"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal)))
+    (is (string-equal "testly" (getf results :adverb))))
+  ;; All adverb positions, including between do and io
   (with-verb-and-nameables (results "testsits" "one" "two"
                                     :intransitivep t
                                     :transitivep t
                                     :prepositions '("on")
                                     :adverbs '("testly"))
+    (finishes (parse-action 1 "testly testsits"))
+    (is (string-equal "testly" (getf results :adverb)))
+    (is (= 0 (getf results :adverb-position)))
     (finishes (parse-action 1 "testsits testly"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))
+    (is (string-equal "testly" (getf results :adverb)))
+    (is (= 1 (getf results :adverb-position)))
     (finishes (parse-action 1 "testsits testly one on two"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))
+    (is (string-equal "testly" (getf results :adverb)))
     (finishes (parse-action 1 "testsits one on two testly"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))
+    (is (string-equal "testly" (getf results :adverb)))
     (finishes (parse-action 1 "testsits one testly on two"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))
+    (is (string-equal "testly" (getf results :adverb)))
+    (is (= 2 (getf results :adverb-position)))
     (finishes (parse-action 1 "testly testsits one on two"))
-    (is (find "testly" (getf results :adverbs) :test #'string-equal))))
+    (is (string-equal "testly" (getf results :adverb)))
+    (finishes (parse-action 1 "testsits one on two testly"))
+    (is (string-equal "testly" (getf results :adverb)))
+    (is (= 3 (getf results :adverb-position)))
+    ;; Only one adverb allowed.
+    (signals error (parse-action 1 "testly testsits testly one testly on two testly"))
+    (signals error (parse-action 1 "testly testsits testly one testly on two"))
+    (signals error (parse-action 1 "testly testsits testly one on two"))
+    (signals error (parse-action 1 "testsits testly one testly on two testly"))
+    (signals error (parse-action 1 "testsits one testly on two testly"))))
 
 (test action-parse-multiple
   (with-verb-and-nameables (results "testpokes" "one" "two"

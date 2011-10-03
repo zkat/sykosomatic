@@ -5,7 +5,8 @@
   (unwind-protect
        (let ((success (gensym)))
          (defcommand test ()
-           (list *actor* *verb* *adverbs* *direct-objects* *indirect-objects* *preposition*)
+           (list *actor* *verb* *adverb* *adverb-position*
+                 *direct-objects* *indirect-objects* *preposition*)
            success)
          (add-verb-command "smiles" 'test)
          (is (eq success (invoke-verb-command :verb "smiles"))))

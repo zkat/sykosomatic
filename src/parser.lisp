@@ -130,13 +130,20 @@
           (adverb2 (maybe (=and (ws) (adverb)) 'error))
           (verb-args (verb-args verb))
           (adverb3 (maybe (=and (ws) (adverb)) 'error)))
-    (result `(:sentence
-              ,@(remove :adverb verb-args :key #'car)
-              (:adverbs . ,(list (cdr adverb1)
-                                 (cdr adverb2)
-                                 (cdr (assoc :adverb verb-args))
-                                 (cdr adverb3)))
-              (:verb . ,(verb-third-person verb))))))
+    (let* ((all-adverbs (list (cdr adverb1)
+                              (cdr adverb2)
+                              (cdr (assoc :adverb verb-args))
+                              (cdr adverb3)))
+           (adverb-position (position-if-not #'null all-adverbs))
+           (adverb (when adverb-position (elt all-adverbs adverb-position))))
+      (cond ((< 1 (count-if #'stringp all-adverbs))
+             (error "Too many adverbs. There can at most be one adverb."))
+            (t
+             (result `(:sentence
+                       ,@(remove :adverb verb-args :key #'car)
+                       (:adverb . ,adverb)
+                       (:adverb-position . ,adverb-position)
+                       (:verb . ,(verb-third-person verb)))))))))
 
 ;;; Commands
 (defun parse-action (actor message)
