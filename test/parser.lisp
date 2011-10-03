@@ -4,7 +4,7 @@
         :sykosomatic.vocabulary
         :sykosomatic.command
         :sykosomatic.db
-        :sykosomatic.game-objects.nameable))
+        :sykosomatic.components.nameable))
 
 (defmacro with-verb-and-nameables ((result-var verb-third-person name1 name2 &key
                                     transitivep intransitivep ditransitivep

@@ -23,7 +23,7 @@
              (:file "entity")
              (:file "vocabulary")
              (:file "account")
-             (:module game-objects
+             (:module components
                       :components
                       ((:file "nameable")
                        (:file "describable")))
