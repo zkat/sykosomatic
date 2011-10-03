@@ -1,4 +1,4 @@
-(util:def-file-package #:sykosomatic.game-objects.describable
+(util:def-file-package #:sykosomatic.components.describable
   (:use :sykosomatic.db
    :sykosomatic.entity))
 

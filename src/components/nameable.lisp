@@ -1,4 +1,4 @@
-(util:def-file-package #:sykosomatic.game-objects.nameable
+(util:def-file-package #:sykosomatic.components.nameable
   (:use :sykosomatic.db
         :sykosomatic.entity)
   (:export :add-name :base-name :full-name :find-by-full-name

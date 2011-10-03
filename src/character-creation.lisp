@@ -3,7 +3,7 @@
         :sykosomatic.db
         :sykosomatic.entity
         :sykosomatic.account
-        :sykosomatic.game-objects.nameable)
+        :sykosomatic.components.nameable)
   (:export :create-character
            :cc-features :cc-adjectives
            :cc-location-description

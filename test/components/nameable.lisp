@@ -1,7 +1,7 @@
-(test:def-test-package game-objects.nameable
+(test:def-test-package components.nameable
   (:use :sykosomatic.entity
         :sykosomatic.db
-        :sykosomatic.game-objects.nameable))
+        :sykosomatic.components.nameable))
 
 (defun gen-full-name (full-name-arg-alist)
   (let ((e (create-entity)))

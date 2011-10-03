@@ -1,7 +1,7 @@
 (util:def-file-package #:sykosomatic.command.social
   (:use :sykosomatic.command
         :sykosomatic.vocabulary
-        :sykosomatic.game-objects.nameable))
+        :sykosomatic.components.nameable))
 
 (defcommand social ()
   (tell-local *actor* (with-output-to-string (s)

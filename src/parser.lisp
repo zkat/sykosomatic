@@ -2,7 +2,7 @@
   (:use :smug
         :sykosomatic.vocabulary
         :sykosomatic.command
-        :sykosomatic.game-objects.nameable)
+        :sykosomatic.components.nameable)
   (:export :parse-action-completions :parse-dialogue :parse-action))
 
 ;;;

@@ -1,7 +1,7 @@
 (util:def-file-package #:sykosomatic.handler.stage
   (:use :hunchentoot
         :sykosomatic.account
-        :sykosomatic.game-objects.nameable
+        :sykosomatic.components.nameable
         :sykosomatic.websocket
         :sykosomatic.session
         :sykosomatic.handler)

@@ -3,7 +3,7 @@
         :sykosomatic.db
         :sykosomatic.handler
         :sykosomatic.session
-        :sykosomatic.game-objects.nameable
+        :sykosomatic.components.nameable
         :sykosomatic.account)
   (:export :role))
 

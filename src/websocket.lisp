@@ -3,7 +3,7 @@
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
-        :sykosomatic.game-objects.nameable
+        :sykosomatic.components.nameable
         :sykosomatic.account
         :sykosomatic.scene)
   (:export
