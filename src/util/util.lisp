@@ -5,6 +5,7 @@
            :logit
            :dbg
            :continuable
+           :*english-list-format-string*
            :random-string
            :random-byte-array
            ;; Timer
@@ -37,6 +38,9 @@
   "helper macro since we use continue restarts a lot
  (remember to hit C in slime or pick the restart so errors don't kill the app)"
   `(with-simple-restart (continue "Continue") ,@body))
+
+(defparameter *english-list-format-string*
+  "~{~#[~;~a~;~a and ~a~:;~@{~a~#[~;, and ~:;, ~]~}~]~}")
 
 (defun logit (format-string &rest format-args)
   (format t "~&~A~%" (apply #'format nil format-string format-args)))
