@@ -68,11 +68,11 @@
                                  `((lambda () ,@head)))))))
 
 (defun jquery-libs ()
-  (<:link :rel "stylesheet" :type "text/css" :href "res/css/smoothness/jquery-ui-1.8.14.custom.css")
-  (<:link :rel "stylesheet" :type "text/css" :href "res/css/chosen.css")
-  (<:script :type "text/javascript" :src "res/js/jquery-1.5.1.min.js")
-  (<:script :type "text/javascript" :src "res/js/chosen.jquery.min.js")
-  (<:script :type "text/javascript" :src "res/js/jquery-ui-1.8.14.custom.min.js"))
+  (<:link :rel "stylesheet" :type "text/css" :href "res/css/lib/smoothness/jquery-ui-1.8.14.custom.css")
+  (<:link :rel "stylesheet" :type "text/css" :href "res/css/lib/chosen.css")
+  (<:script :type "text/javascript" :src "res/js/lib/jquery-1.5.1.min.js")
+  (<:script :type "text/javascript" :src "res/js/lib/chosen.jquery.min.js")
+  (<:script :type "text/javascript" :src "res/js/lib/jquery-ui-1.8.14.custom.min.js"))
 
 (defun logout-button ()
   (<:form :class "logout-button" :action "/logout" :method "post"
@@ -140,9 +140,9 @@
 (defun gameplay-js-libs ()
   ;; When you feel like figuring out why optional loading fails, take the following
   ;; two lines out...
-  (<:script :type "text/javascript" :src "res/js/swfobject.js")
-  (<:script :type "text/javascript" :src "res/js/web_socket.js")
-  (<:script :type "text/javascript" :src "res/js/json2.js")
+  (<:script :type "text/javascript" :src "res/js/lib/swfobject.js")
+  (<:script :type "text/javascript" :src "res/js/lib/web_socket.js")
+  (<:script :type "text/javascript" :src "res/js/lib/json2.js")
   (<:script :type "text/javascript" :src "res/js/client.js"))
 
 (defun chat-area (char-name)
