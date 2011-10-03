@@ -9,7 +9,7 @@
            (list *actor* *verb* *adverb* *adverb-position*
                  *direct-objects* *indirect-objects* *preposition*)
            success)
-         (add-verb-command "smiles" 'test)
-         (is (eq success (invoke-verb-command :verb (find-verb "smiles")))))
-    (remove-verb-command "smiles")
+         (add-verb-command "smile" 'test)
+         (is (eq success (invoke-verb-command :verb (find-verb "smile")))))
+    (remove-verb-command "smile")
     (remove-command 'test)))

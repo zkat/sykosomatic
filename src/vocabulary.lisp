@@ -8,6 +8,7 @@
    ;; Verbs
    :add-verb :remove-verb :find-verb
    :verb-third-person
+   :verb-bare
    :verb-transitive-p
    :verb-intransitive-p
    :verb-ditransitive-p
@@ -106,18 +107,18 @@
                                 '(:raw "ARRAY[]::text[]"))))
   t)
 
-(defun remove-verb (third-person)
-  (db-query (:delete-from 'verb :where (:= 'third-person third-person)))
+(defun remove-verb (bare)
+  (db-query (:delete-from 'verb :where (:= 'bare bare)))
   t)
 
 (defun verb-completions (incomplete-verb &optional (limit 50))
-  (db-query (:limit (:select 'third-person :from 'verb :where
-                             (:ilike 'third-person (format nil "%~A%" incomplete-verb)))
+  (db-query (:limit (:select 'bare :from 'verb :where
+                             (:ilike 'bare (format nil "%~A%" incomplete-verb)))
                     limit)
             :column))
 
-(defun find-verb (third-person)
-  (db-query (:select :* :from 'verb :where (:ilike 'third-person third-person))
+(defun find-verb (bare)
+  (db-query (:select :* :from 'verb :where (:ilike 'bare bare))
             :plist))
 
 (defun verb-transitive-p (verb)
@@ -130,6 +131,8 @@
   (getf verb :prepositions))
 (defun verb-third-person (verb)
   (getf verb :third-person))
+(defun verb-bare (verb)
+  (getf verb :bare))
 
 ;;; Testing
 (defparameter *test-data*
