@@ -176,6 +176,14 @@
 
      That should help speed up the parser, hopefully.
 
+**** TODO Support compound verbs
+      "wave off", "give up", "give in", "pick up"
+      "X waves Y off" is possible, although "X waves off Y" is good enough.
+      "pick up" is definitely desirable. "up" is just an adverb, though.
+
+      For more ideas on how to deal with these:
+
+      https://secure.wikimedia.org/wikipedia/en/wiki/Phrasal_verb
 **** TODO FUTURE Command overrides
      Instead of putting command associations into verbs, make a command-association table that maps
      verbs to command names. This table should also include columns for most (if not all) of the
@@ -183,12 +191,6 @@
      specific parameters, default commands can be shadowed. For example, one could write a 'method'
      where a certain combination of actor/direct-object will yield a specific result. In general,
      this should not be used, but it may become handy when very-special-code is needed.
-**** TODO (maybe) Support phrasal verbs
-      "wave off", "give up", "give in"
-      This sounds like it could be particularly tricky...
-      "X waves Y off" is possible, although "X waves off Y" is good enough.
-      It may not be worthwhile to even have this. Come up with some more inspiring phrasal verbs to
-      justify the effort.
 **** TODO (maybe) Improve error reporting
      For what it's worth... this may be a waste of time, if all input has to be fully 'completed'
      once we have the full game frontend. If that's the case, we can just ignore erroneous input
@@ -198,6 +200,12 @@
       If someone enters 'merrly jumps', it should properly report the error as 'merrly is not an
       adverb', instead of 'merrly is not a verb'.
 
+*** TODO Commands
+**** DONE Write defcommand social
+     This command, when attached to a verb, will simply reconstruct the sentence using the dynamic
+     variable parameters for commands.
+**** TODO Write unit tests for defcommand social
+     ...Somehow, but it'll define the framework for testing other defcommands!
 *** TODO Fix timer
     It's not quite working right now, although there's a reasonable rate limit. that might be okay
     for now.
@@ -330,4 +338,48 @@
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
 *** TODO Actual config file system for local configs
-* Right now
+* TODO The generated.html Challenge™
+  The point of this challenge is to have enough of a working system to render the contents of
+  generated.html *AS IT LOOKS*. That includes the scene header, highlighting objects,
+  parentheticals, complex verbs, and proper styling. Additionally, all *bold* words should
+  correspond to actual game objects that, when clicked, make a description request to the server
+  (which does not need to return anything useful right now -- the client just needs to be able to
+  have enough semantic information about the object to ask the server about it).
+  
+  All verbs can be purely social for now.
+
+  Can safely ignore the inputs area. Don't worry about completion, better input fields, etc.
+
+  Bonus points: Have all objects reside in an actual location, although transitioning between
+  locations is not necessary yet.
+
+*** TODO Semantic output
+**** TODO Semantic markup from social command
+     Have social command output a marked-up string that annotates any words of interest in the
+     sentence with their roles. For now mark the verb and individual objects.
+**** TODO Use semantic markup when rendering client-side
+     Instead of spitting out a markup-filled string, parse the action output and generate
+     appropriate html markup with the right classes. No description links yet.
+**** TODO Add description onclicks
+     When you click a game object, the client should ask the server for that object's description
+     and render the description in a popup.
+*** TODO Update parenthetical parsing
+    There's TODO items involving parsing parentheticals as special kinds of actions. Get those items
+    wrapped up.
+
+*** TODO complex verbs
+    "sits down" must be supported. Whatever it takes.
+
+*** TODO Pronouns
+    Play around with using pronouns for multiple consecutive actions by the same actor.
+*** TODO Make it look right
+    Update the stylesheets
+**** TODO Spacing between dialogues
+**** TODO Colors/emphasis for objects in actions
+**** TODO Colors/emphasis for stuff in parentheticals
+*** TODO Scene headers
+**** TODO Protocol
+     Add a scene-header protocol thing for requesting and receiving information required to render a
+     location's header image and description.
+**** TODO Render it
+     Make it render right.
