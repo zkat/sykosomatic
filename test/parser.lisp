@@ -38,6 +38,7 @@
               (add-verb-command ,verb-var 'test)
               ,@body)
          (remove-command 'test)
+         (remove-verb-command ,verb-var)
          (remove-verb ,verb-var)
          (map nil #'remove-adverb ,adverbs-var)
          (db-query (:delete-from 'nameable :where (:or
