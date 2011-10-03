@@ -4,14 +4,10 @@
   (:export :add-name :base-name :full-name :find-by-full-name
            :recalculate-full-name :refresh-all-full-names))
 
-;; Thank you, PCL
-(defparameter *english-list*
-  "~{~#[~;~a~;~a and ~a~:;~@{~a~#[~;, and ~:;, ~]~}~]~}")
-
 (defun calculate-full-name (base-name use-article-p adjectives titles first-name suffix suffix-titles)
   (with-output-to-string (s)
     (when use-article-p (princ "a " s))
-    (when adjectives (format s *english-list* (coerce adjectives 'list)) (princ " " s))
+    (when adjectives (format s *english-list-format-string* (coerce adjectives 'list)) (princ " " s))
     (when titles (map nil (curry #'format s "~A ") titles))
     (when first-name (format s "~A " first-name))
     (princ base-name s)
