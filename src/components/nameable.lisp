@@ -1,7 +1,7 @@
 (util:def-file-package #:sykosomatic.components.nameable
   (:use :sykosomatic.db
         :sykosomatic.entity)
-  (:export :add-name :base-name :full-name :find-by-full-name
+  (:export :add-name :delete-name :base-name :full-name :find-by-full-name
            :recalculate-full-name :refresh-all-full-names))
 
 (defun calculate-full-name (base-name use-article-p adjectives titles first-name suffix suffix-titles)
@@ -23,7 +23,8 @@
    (first-name (or db-null text))
    (suffix (or db-null text))
    (suffix-titles (or db-null text[]))
-   (full-name text)))
+   (full-name text))
+  (:unique entity-id))
 
 (defun add-name (entity base-name &key
                  use-article-p adjectives titles
@@ -45,6 +46,9 @@
                     :full-name (calculate-full-name
                                 base-name use-article-p adjectives titles
                                 first-name suffix suffix-titles))))))
+
+(defun delete-name (entity)
+  (db-query (:delete-from 'nameable :where (:= 'entity-id entity))))
 
 (defun base-name (entity)
   (db-query (:select 'base-name :from 'nameable :where (:= 'entity-id entity))

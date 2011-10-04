@@ -18,8 +18,8 @@
                            :key #'car)))
            
            (full-name e))
-      (db-query (:delete-from 'nameable :where (:= 'entity-id e)))
-      (db-query (:delete-from 'entity :where (:= 'id e))))))
+      (delete-name e)
+      (delete-entities e))))
 
 (test full-name
   (macrolet ((test-case (expected arg-alist)
