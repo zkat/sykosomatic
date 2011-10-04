@@ -79,7 +79,7 @@
    (account-id bigint)
    (activep boolean :col-default t))
   (:keys entity-id account-id)
-  (:unique entity-id account-id)
+  (:unique (entity-id account-id))
   (:unique-index entity-id account-id))
 
 (defun add-body (entity-id account-id)
