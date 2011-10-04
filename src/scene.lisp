@@ -9,8 +9,7 @@
   ((account-id bigint))
   (:keys id))
 (defun create-scene (account-id)
-  (with-db ()
-    (make-dao 'scene :account-id account-id)))
+  (insert-row 'scene :account-id account-id))
 
 (defdao scene-action ()
   ((scene-id bigint)
@@ -19,11 +18,10 @@
    (timestamp timestamp :col-default (:now)))
   (:keys id))
 (defun add-action (scene-id actor-id action-txt)
-  (with-db ()
-    (make-dao 'scene-action
+  (insert-row 'scene-action
               :scene-id scene-id
               :actor-id actor-id
-              :action action-txt)))
+              :action action-txt))
 
 (defdao scene-dialogue ()
   ((scene-id bigint)
@@ -33,12 +31,11 @@
    (timestamp timestamp :col-default (:now)))
   (:keys id))
 (defun add-dialogue (scene-id actor-id dialogue parenthetical)
-  (with-db ()
-    (make-dao 'scene-dialogue
+  (insert-row 'scene-dialogue
               :scene-id scene-id
               :actor-id actor-id
               :dialogue (or dialogue :null)
-              :parenthetical (or parenthetical :null))))
+              :parenthetical (or parenthetical :null)))
 
 (defdao scene-upvote ()
   ((scene-id bigint)
@@ -48,7 +45,7 @@
 (defun scene-upvote (scene-id account-id)
   (with-transaction ()
     (unless (account-voted-p scene-id account-id)
-      (make-dao 'scene-upvote))
+      (insert-row 'scene-upvote :scene-id scene-id :account-id account-id))
     t))
 
 (defun scene-id (scene)

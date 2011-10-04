@@ -60,7 +60,7 @@
   (with-transaction ()
     (if-let (verb-id (db-query (:select 'id :from 'verb :where (:= 'bare verb))
                                :single))
-      (id (make-dao 'verb-command :verb-id verb-id :command-name (string command-name)))
+      (insert-row 'verb-command :verb-id verb-id :command-name (string command-name))
       (error "Unknown verb: ~S" verb))))
 (defun remove-verb-command (verb)
   (with-transaction ()

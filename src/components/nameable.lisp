@@ -33,19 +33,18 @@
            (if (vectorp maybe-vec)
                maybe-vec
                (coerce maybe-vec 'vector))))
-    (with-db ()
-      (id (make-dao 'nameable
-                    :entity-id entity
-                    :base-name base-name
-                    :use-article-p use-article-p
-                    :adjectives (if adjectives (ensure-vector adjectives) :null)
-                    :titles (if titles (ensure-vector titles) :null)
-                    :first-name (or first-name :null)
-                    :suffix (or suffix :null)
-                    :suffix-titles (if suffix-titles (ensure-vector suffix-titles) :null)
-                    :full-name (calculate-full-name
-                                base-name use-article-p adjectives titles
-                                first-name suffix suffix-titles))))))
+    (insert-row 'nameable
+                :entity-id entity
+                :base-name base-name
+                :use-article-p use-article-p
+                :adjectives (if adjectives (ensure-vector adjectives) :null)
+                :titles (if titles (ensure-vector titles) :null)
+                :first-name (or first-name :null)
+                :suffix (or suffix :null)
+                :suffix-titles (if suffix-titles (ensure-vector suffix-titles) :null)
+                :full-name (calculate-full-name
+                            base-name use-article-p adjectives titles
+                            first-name suffix suffix-titles))))
 
 (defun delete-name (entity)
   (db-query (:delete-from 'nameable :where (:= 'entity-id entity))))

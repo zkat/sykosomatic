@@ -27,9 +27,9 @@
 (defun move-to-container (entity target-container)
   (with-transaction ()
     (remove-from-container entity)
-    (make-dao 'container-content
-              :content-id entity
-              :container-id target-container)))
+    (insert-row 'container-content
+                :content-id entity
+                :container-id target-container)))
 
 (defun others-in-container (entity)
   (db-query (:select 'c1.content-id :from (:as 'container-content 'c1)

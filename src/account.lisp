@@ -83,10 +83,9 @@
   (:unique-index entity-id account-id))
 
 (defun add-body (entity-id account-id)
-  (with-db ()
-    (id (make-dao 'account-body
-                  :entity-id entity-id
-                  :account-id account-id))))
+  (insert-row 'account-body
+              :entity-id entity-id
+              :account-id account-id))
 
 (defun remove-body (entity-id account-id)
   (db-query (:delete-from 'account-body
@@ -153,9 +152,9 @@
         (validate-new-account email display-name password confirmation)
       (if validp
           (let ((salt (gensalt)))
-            (make-dao 'account
-                      :email email
-                      :display-name display-name
-                      :password (hash-password password salt)
-                      :salt salt))
+            (insert-row 'account
+                        :email email
+                        :display-name display-name
+                        :password (hash-password password salt)
+                        :salt salt))
           (values nil errors)))))

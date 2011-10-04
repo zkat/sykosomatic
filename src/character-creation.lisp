@@ -36,27 +36,27 @@
           (let ((entity (create-entity)))
             (add-name entity last-name :first-name first-name)
             (add-body entity account-id)
-            (let ((cc-values-id (id (make-dao 'cc-values
-                                              :entity-id entity
-                                              :pronoun  pronoun
-                                              :first-name first-name
-                                              :nickname nickname
-                                              :last-name last-name
-                                              :origin origin
-                                              :parents parents
-                                              :siblings siblings
-                                              :situation situation
-                                              :friends friends
-                                              :so so
-                                              :where where))))
+            (let ((cc-values-id (insert-row 'cc-values
+                                            :entity-id entity
+                                            :pronoun  pronoun
+                                            :first-name first-name
+                                            :nickname nickname
+                                            :last-name last-name
+                                            :origin origin
+                                            :parents parents
+                                            :siblings siblings
+                                            :situation situation
+                                            :friends friends
+                                            :so so
+                                            :where where)))
               (loop for (career . years-spent) in career-info
                  when years-spent
-                 do (make-dao 'cc-career-info :cc-values-id cc-values-id
-                              :career career :years-spent years-spent))
+                 do (insert-row 'cc-career-info :cc-values-id cc-values-id
+                                :career career :years-spent years-spent))
               (loop for (feature . adjective) in feature-info
                  when adjective
-                 do (make-dao 'cc-feature-info :cc-values-id cc-values-id
-                              :feature feature :adjective adjective)))
+                 do (insert-row 'cc-feature-info :cc-values-id cc-values-id
+                                :feature feature :adjective adjective)))
             entity)
           (values nil errors)))))
 
@@ -132,20 +132,20 @@
          do (loop for (category adjectives) in cat-and-adjs
                do (loop for adjective in adjectives
                      do (ignore-some-conditions (cl-postgres-error:unique-violation)
-                          (make-dao 'cc-adjective
-                                    :feature feature
-                                    :category category
-                                    :adjective adjective)
+                          (insert-row 'cc-adjective
+                                      :feature feature
+                                      :category category
+                                      :adjective adjective)
                           (incf insert-count))))))
     insert-count))
 
 (defun import-from-data (category data)
   (with-db ()
     (loop for (short displayed details) in data
-       do (make-dao 'cc-option :category category
-                    :short short
-                    :displayed displayed
-                    :details (or details :null)))))
+       do (insert-row 'cc-option :category category
+                      :short short
+                      :displayed displayed
+                      :details (or details :null)))))
 
 (defparameter *test-data*
   '(("pronoun" . (("she" "She")

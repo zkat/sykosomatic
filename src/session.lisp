@@ -63,7 +63,7 @@
 
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
-      (let ((session (with-db () (make-dao 'persistent-session :account-id account-id))))
+      (let ((session (insert-row 'persistent-session :account-id account-id)))
         (set-cookie (session-cookie-name *acceptor*)
                     :value (session-cookie-value session)
                     :path "/"
