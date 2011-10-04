@@ -10,6 +10,7 @@
             ((:file "test")
              (:module components
                       :components
-                      ((:file "nameable")))
+                      ((:file "nameable")
+                       (:file "container")))
              (:file "command")
              (:file "parser")))))
