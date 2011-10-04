@@ -2,7 +2,10 @@
   (:use :hunchentoot
         :sykosomatic.config
         :sykosomatic.session)
-  (:export :init-hunchentoot :teardown-hunchentoot :with-form-errors))
+  (:export :init-hunchentoot
+           :teardown-hunchentoot
+           :with-form-errors
+           :ensure-logged-in))
 
 ;;;
 ;;; HT
@@ -28,3 +31,8 @@
   `(let ((templ:*errors* (session-errors)))
      (unwind-protect (progn ,@body)
        (setf (session-errors) nil))))
+
+(defun ensure-logged-in ()
+  (unless *session*
+    (push-error "You must be logged in to access that page.")
+    (redirect "/login")))
