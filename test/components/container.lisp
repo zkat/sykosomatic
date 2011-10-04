@@ -7,8 +7,7 @@
   `(let ,(mapcar (rcurry #'list '(create-entity))
                  entity-vars)
      (unwind-protect (progn ,@body)
-       (db-query (:delete-from 'entity
-                               :where (:in 'id (:set (list ,@entity-vars))))))))
+       (delete-entities ,@entity-vars))))
 
 (test container-contents
   (with-entities (e1 e2 container)

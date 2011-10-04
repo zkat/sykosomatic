@@ -2,7 +2,7 @@
   (:use :sykosomatic.db)
   (:export :init-entity-system :teardown-entity-system
            :list-systems :register-system :unregister-system
-           :list-modifiers :add-modifier :create-entity
+           :list-modifiers :add-modifier :create-entity :delete-entities
            :modifier-value :multiple-modifier-values :entity-oid
            :find-by-modifier-value :find-entity-by-oid
            :event-execution :expire-modifier
@@ -49,6 +49,9 @@
 
 (defun create-entity (&key comment)
   (id (with-db () (make-dao 'entity :comment (or comment :null)))))
+
+(defun delete-entities (&rest entities)
+  (db-query (:delete-from 'entity :where (:in 'id (:set entities)))))
 
 ;;;
 ;;; Modifiers

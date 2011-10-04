@@ -41,12 +41,9 @@
          (remove-verb-command ,verb-var)
          (remove-verb ,verb-var)
          (map nil #'remove-adverb ,adverbs-var)
-         (db-query (:delete-from 'nameable :where (:or
-                                                   (:= 'entity-id e1)
-                                                   (:= 'entity-id e2))))
-         (db-query (:delete-from 'entity :where (:or
-                                                 (:= 'id e1)
-                                                 (:= 'id e2))))))))
+         (delete-name e1)
+         (delete-name e2)
+         (delete-entities e1 e2)))))
 
 (test action-parse-intransitive
   (with-verb-and-nameables (results "testsmile" "one" "two" :intransitivep t
