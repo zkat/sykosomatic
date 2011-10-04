@@ -25,6 +25,7 @@
              (:module components
                       :components
                       ((:file "nameable")
+                       (:file "container")
                        (:file "describable")))
              (:file "account")
              (:file "character-creation")
