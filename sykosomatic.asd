@@ -20,13 +20,13 @@
                        (:file "timer")))
              (:file "config")
              (:file "db")
-             (:file "entity")
              (:file "vocabulary")
-             (:file "account")
+             (:file "entity")
              (:module components
                       :components
                       ((:file "nameable")
                        (:file "describable")))
+             (:file "account")
              (:file "character-creation")
              (:file "scene")
              (:file "session")
