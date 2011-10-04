@@ -8,6 +8,7 @@
             :serial t
             :components
             ((:file "test")
+             (:file "entity")
              (:module components
                       :components
                       ((:file "nameable")
