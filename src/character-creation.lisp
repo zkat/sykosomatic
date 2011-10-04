@@ -93,14 +93,14 @@
    (displayed text)
    (details (or db-null text)))
   (:keys id)
-  (:unique category short))
+  (:unique (category short)))
 
 (defdao cc-adjective ()
   ((feature text)
    (category text)
    (adjective text))
   (:keys id)
-  (:unique feature category adjective))
+  (:unique (feature category adjective)))
 
 (defun cc-features ()
   (db-query (:select 'feature :distinct :from 'cc-adjective)
