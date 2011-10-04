@@ -3,11 +3,11 @@
   (:shadow :with-transaction)
   (:export
    ;; DAO
-   :id :defdao :get-dao :select-dao
+   :id :defdao :get-dao :select-dao :make-dao
    ;; Misc sql
    :defprepared
    ;; Querying
-   :query :make-dao :db-query :doquery
+   :query :db-query :doquery :insert-row
    ;; Connections
    :with-db :with-transaction
    :get-connection
@@ -107,6 +107,9 @@
   `(with-db ()
      (pomo:with-transaction (,@(when name `(,name)))
        ,@body)))
+
+(defun insert-row (class-name &rest initargs)
+  (with-db () (id (apply #'make-dao class-name initargs))))
 
 ;;;
 ;;; DB booting

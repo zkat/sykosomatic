@@ -48,7 +48,7 @@
   entity)
 
 (defun create-entity (&key comment)
-  (id (with-db () (make-dao 'entity :comment (or comment :null)))))
+  (insert-row 'entity :comment (or comment :null)))
 
 (defun delete-entities (&rest entities)
   (db-query (:delete-from 'entity :where (:in 'id (:set entities)))))
@@ -84,19 +84,18 @@
 (defun add-modifier (entity name value &key
                      (precedence 0) (description :null))
   (assert (symbolp name) (name) "Modifier names must be symbols. Got ~S instead." name)
-  (with-db ()
-    (apply #'make-dao 'modifier
-           :entity-id (entity-id entity)
-           :package (package-name (symbol-package name))
-           :name (symbol-name name)
-           :description description
-           :precedence precedence
-           (etypecase value
-             (number (list :numeric-value value))
-             (string (list :text-value value))
-             (vector (list :text-array-value value))
-             (boolean (list :boolean-value value))
-             (symbol (list :text-value (princ-to-string value)))))))
+  (apply #'insert-row 'modifier
+         :entity-id (entity-id entity)
+         :package (package-name (symbol-package name))
+         :name (symbol-name name)
+         :description description
+         :precedence precedence
+         (etypecase value
+           (number (list :numeric-value value))
+           (string (list :text-value value))
+           (vector (list :text-array-value value))
+           (boolean (list :boolean-value value))
+           (symbol (list :text-value (princ-to-string value))))))
 
 (defun delete-modifier (modifier-id)
   (db-query (:delete-from 'modifier :where (:= 'id modifier-id))))
@@ -192,11 +191,11 @@
 
 (defun expire-modifier (modifier-id &key (expiration (get-universal-time)))
   (with-transaction ()
-    (let ((removal (make-dao 'ev-remove-modifier :modifier-id modifier-id)))
-      (make-dao 'event-execution :type "remove-modifier"
-                :event-id (id removal)
-                :execution-time (local-time:to-rfc3339-timestring
-                                 (local-time:universal-to-timestamp expiration))))))
+    (let ((removal (insert-row 'ev-remove-modifier :modifier-id modifier-id)))
+      (insert-row 'event-execution :type "remove-modifier"
+                  :event-id removal
+                  :execution-time (local-time:to-rfc3339-timestring
+                                   (local-time:universal-to-timestamp expiration))))))
 
 (defun clear-expired-modifiers ()
   (flet ((process-penalty (p)

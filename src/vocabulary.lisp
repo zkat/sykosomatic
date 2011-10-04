@@ -29,11 +29,10 @@
   (:unique subjective))
 
 (defun add-pronoun (subjective objective possessive &optional pluralp)
-  (with-db ()
-    (make-dao 'pronoun
+  (insert-row 'pronoun
               :pluralp pluralp
               :possessive possessive
-              :subjective subjective :objective objective))
+              :subjective subjective :objective objective)
   t)
 
 (defun remove-pronoun (text-id)
@@ -48,7 +47,7 @@
   (:unique text))
 
 (defun add-adverb (adverb)
-  (with-db () (make-dao 'adverb :text adverb))
+  (insert-row 'adverb :text adverb)
   t)
 (defun remove-adverb (adverb)
   (db-query (:delete-from 'adverb :where (:= 'text adverb)))
@@ -86,8 +85,7 @@
 
 (defun add-verb (bare &key third-person preterite prepositions
                  transitivep intransitivep ditransitivep)
-  (with-db ()
-    (make-dao 'verb
+  (insert-row 'verb
               :bare bare
               :third-person (cond (third-person)
                                   ((or (ends-with #\x bare)
@@ -104,7 +102,7 @@
               :intransitivep intransitivep
               :prepositions (if prepositions
                                 (coerce prepositions 'array)
-                                '(:raw "ARRAY[]::text[]"))))
+                                '(:raw "ARRAY[]::text[]")))
   t)
 
 (defun remove-verb (bare)
