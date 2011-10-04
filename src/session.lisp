@@ -3,13 +3,23 @@
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.account)
-  (:export :sykosomatic-acceptor :persistent-session-request :persistent-session
-           :current-account :ensure-logged-in :start-persistent-session
-           :generate-session-string :session-string
-           :verify-persistent-session :persistent-session-gc :end-session :session-cleanup
-           :register-session-finalizer :unregister-session-finalizer
-           :transient-session-value
-           :push-error :session-errors :session-websocket-clients))
+  (:export
+   ;; Classes for hunchentoot
+   :sykosomatic-acceptor
+   :persistent-session-request
+   ;; Session utilities
+   :current-account
+   :session-string
+   :start-persistent-session
+   :persistent-session-gc
+   :end-session
+   :verify-persistent-session
+   ;; Finalizers
+   :register-session-finalizer :unregister-session-finalizer
+   ;; Transient values
+   :transient-session-value :remove-transient-session-values
+   ;; Errors
+   :push-error :session-errors))
 
 (defclass sykosomatic-acceptor (acceptor)
   ())
@@ -44,11 +54,6 @@
                      :where (:= 'id session))
             :single))
 
-(defun ensure-logged-in ()
-  (unless *session*
-    (push-error "You must be logged in to access that page.")
-    (redirect "/login")))
-
 (defmethod session-cookie-name ((acceptor sykosomatic-acceptor))
   "sykosomatic-session")
 
@@ -59,7 +64,7 @@
                        :where (:< (:+ 'last-seen 'max-time)
                                   (:now))))
         (old-id)
-      (with-db (:reusep nil) (session-cleanup old-id)))))
+      (with-db (:reusep nil) (end-session old-id)))))
 
 (defun start-persistent-session (account-id)
   (or (when (eql account-id (current-account *session*)) *session*)
@@ -91,7 +96,7 @@
           session-info
         (when session-id
           (if expiredp
-              (session-cleanup session-id)
+              (end-session session-id)
               (db-query (:update 'persistent-session
                                  :set 'last-seen (:now)
                                  'last-remote-addr remote-addr
@@ -107,7 +112,7 @@
                (not (emptyp session-identifier)))
       (verify-persistent-session session-identifier (user-agent request) (remote-addr request)))))
 
-(defun end-session (session-id)
+(defun session-cleanup (session-id)
   (with-transaction ()
     (let ((account-id (current-account session-id)))
       (when account-id
@@ -115,9 +120,8 @@
       (map nil (rcurry #'funcall session-id) (all-finalizers))
       (db-query (:delete-from 'persistent-session :where (:= 'id session-id))))))
 
-(defun session-cleanup (session-id)
-  (logit "Session timed out. Logging it out.")
-  (end-session session-id))
+(defun end-session (session-id)
+  (session-cleanup session-id))
 
 ;;; Session finalizers
 ;;; - When end-session is called, it will execute all registered finalizers, in no particular order,
