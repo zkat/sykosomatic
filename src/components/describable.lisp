@@ -10,7 +10,8 @@
            :list-features
            :nickname
            :base-description
-           :short-description))
+           :short-description
+           :find-by-short-description))
 
 ;;;
 ;;; Nouns
@@ -233,3 +234,22 @@
                                        (:= 'n.observer-id observer))
                              :where (:= 'd.entity-id entity))
                     :single)))
+
+(defun find-by-short-description (observer short-desc)
+  (values (db-query (:select 'd.entity-id :from (:as 'cached-base-description 'd)
+                             :inner-join (:as 'entity 'e)
+                             :on (:= 'e.id 'd.entity-id)
+                             :left-join (:as 'nickname 'n)
+                             :on (:and (:= 'n.entity-id 'd.entity-id)
+                                       (:= 'n.observer-id observer))
+                             :where (:or
+                                     (:ilike (:unaccent 'n.nickname)
+                                             (:unaccent (format nil "%~A%" short-desc)))
+                                     (:and
+                                      (:is-null 'n.id)
+                                      (:ilike (:unaccent 'd.description)
+                                              (:unaccent (format nil "%~A%" short-desc))))))
+                    :column)))
+
+(defun reset ()
+  (map nil #'rebuild-table '(noun adjective feature cached-base-description nickname)))
