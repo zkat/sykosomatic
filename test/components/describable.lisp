@@ -15,6 +15,23 @@
     (is (null (setf (noun e) nil)))
     (is (null (noun e)))))
 
+(test plural-noun
+  (with-entities (e)
+    (setf (noun e) "teapot")
+    (is (string= "teapots" (plural-noun e)))
+    (setf (noun e) '("teapot" "teapotses"))
+    (is (string= "teapot" (noun e)))
+    (is (string= "teapotses" (plural-noun e)))))
+
+(test pluralize
+  (is (string= "teapots" (pluralize "teapot")))
+  (is (string= "flies" (pluralize "fly")))
+  (is (string= "boys" (pluralize "boy")))
+  (is (string= "kisses" (pluralize "kiss")))
+  (is (string= "witches" (pluralize "witch")))
+  (is (string= "wishes" (pluralize "wish")))
+  (is (string= "heroes" (pluralize "hero"))))
+
 (test adjectives
   (with-entities (e)
     (is (null (adjectives e)))
