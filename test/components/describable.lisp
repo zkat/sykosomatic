@@ -156,3 +156,23 @@
           (noun e2) nil
           (nickname o e1) nil
           (nickname o e2) nil)))
+
+(test partial-short-description
+  (with-entities (o e1 e2)
+    (setf (noun e1) "testteapot")
+    (setf (noun e2) "testteacup")
+    (is (null (set-difference (list "a testteapot" "a testteacup")
+                              (partial-short-description o "testtea")
+                              :test #'equalp)))
+    (is (null (set-difference (list "a testteapot" "a testteacup")
+                              (partial-short-description o "a testtea")
+                              :test #'equalp)))
+    (is (equalp (list "a testteapot") (partial-short-description o "testteap")))
+    (is (equalp (list "a testteacup") (partial-short-description o "testteac")))
+    (setf (nickname o e1) "Mrs. Potts")
+    (is (null (partial-short-description o "testteapot")))
+    (is (equalp (list "Mrs. Potts") (partial-short-description o "rs. Pot")))
+    (setf (noun e1) nil
+          (noun e2) nil
+          (nickname o e1) nil
+          (nickname o e2) nil)))
