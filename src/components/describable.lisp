@@ -23,7 +23,8 @@
           ((noun entity)
            (db-query (:update 'noun :set 'noun new-value :where (:= 'entity-id entity))))
           (t
-           (insert-row 'noun :entity-id entity :noun new-value))))
+           (insert-row 'noun :entity-id entity :noun new-value)))
+    (cache-base-description entity :update-featured t))
   new-value)
 
 (defdao adjective ()
@@ -37,7 +38,8 @@
   (with-transaction ()
     (db-query (:delete-from 'adjective :where (:= 'entity-id entity)))
     (map nil (lambda (new-adj) (insert-row 'adjective :entity-id entity :adjective new-adj))
-         new-value))
+         new-value)
+    (cache-base-description entity :update-featured t))
   new-value)
 
 (defdao feature ()
@@ -49,15 +51,49 @@
     (unless (db-query (:select t :from 'feature :where (:and (:= 'entity-id entity)
                                                              (:= 'feature-id feature)))
                       :single)
-      (insert-row 'feature :feature-id feature :entity-id entity))))
+      (insert-row 'feature :feature-id feature :entity-id entity)
+      (cache-base-description entity))))
 (defun remove-feature (entity feature)
-  (db-query (:delete-from 'feature :where (:and (:= 'entity-id entity)
-                                                (:= 'feature-id feature)))))
+  (with-transaction ()
+    (db-query (:delete-from 'feature :where (:and (:= 'entity-id entity)
+                                                  (:= 'feature-id feature))))
+    (cache-base-description entity)))
 (defun list-features (entity)
   (db-query (:select 'feature-id :from 'feature :where (:= 'entity-id entity))
             :column))
 
-(defun base-description (entity &key (include-features-p t))
+(defdao cached-base-description ()
+  ((entity-id bigint)
+   (description text)))
+
+(defun base-description (entity)
+  (values (db-query (:select 'description :from 'cached-base-description
+                             :where (:= 'entity-id entity))
+                    :single)))
+
+(defun cache-base-description (entity &key update-featured)
+  (let ((new-description (calculate-base-description entity)))
+    (cond ((null new-description)
+           (db-query (:delete-from 'cached-base-description
+                                   :where (:= 'entity-id entity))))
+          ((db-query (:for-update
+                      (:select t :from 'cached-base-description
+                               :where (:= 'entity-id entity)))
+                     :single)
+           (db-query (:update 'cached-base-description
+                              :set 'description (calculate-base-description entity)
+                              :where (:= 'entity-id entity))))
+          (t
+           (insert-row 'cached-base-description
+                       :entity-id entity
+                       :description (calculate-base-description entity)))))
+  (when update-featured
+    (map nil #'cache-base-description (db-query (:select 'entity-id
+                                                         :from 'feature
+                                                         :where (:= 'feature-id entity))
+                                                :column))))
+
+(defun calculate-base-description (entity &key (include-features-p t))
   (when-let (result (db-query (:select 'n.noun
                                        ;; Pray for proper ordering. :(
                                        (:raw "array_agg(DISTINCT a.adjective)")
@@ -79,8 +115,9 @@
         (when include-features-p
           (when-let (feature-descs (loop for feature across features
                                       for feature-desc = (unless (eq :null feature)
-                                                           (base-description feature
-                                                                             :include-features-p nil))
+                                                           (calculate-base-description
+                                                            feature
+                                                            :include-features-p nil))
                                       when feature-desc
                                       collect feature-desc))
             (format s " with ")
@@ -121,5 +158,13 @@
             :plists))
 
 (defun short-description (observer entity)
-  (or (nickname observer entity)
-      (base-description entity)))
+  (values (db-query (:select (:as (:case ((:not-null 'n.id)
+                                          'n.nickname)
+                                    (t 'd.description))
+                                  'short-description)
+                             :from (:as 'cached-base-description 'd)
+                             :left-join (:as 'nickname 'n)
+                             :on (:and (:= 'n.entity-id 'd.entity-id)
+                                       (:= 'n.observer-id observer))
+                             :where (:= 'd.entity-id entity))
+                    :single)))
