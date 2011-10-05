@@ -148,6 +148,7 @@
     (is (null (find-by-short-description o "teapot")))
     (is (equal (list e1) (find-by-short-description o "rs. Pot")))
     ;; The following test fails, but I'm pretty sure it's just Eos' fault.
+    ;; Executing this manually in the REPL -does- work.
     ;; (setf (nickname o e2) "Chíp")
     ;; (is (equal (list e2) (find-by-short-description o "hip")))
     (setf (noun e1) nil
