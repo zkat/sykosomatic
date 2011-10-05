@@ -2,6 +2,8 @@
   (:use :sykosomatic.db
         :sykosomatic.entity)
   (:export :noun
+           :plural-noun
+           :pluralize
            :adjectives
            :add-feature
            :remove-feature
@@ -12,18 +14,45 @@
 
 (defdao noun ()
   ((entity-id bigint)
-   (noun text)))
+   (singular text)
+   (plural text)))
 
 (defun noun (entity)
-  (db-query (:select 'noun :from 'noun :where (:= 'entity-id entity)) :single))
+  (values (db-query (:select 'singular :from 'noun :where (:= 'entity-id entity)) :single)))
+(defun plural-noun (entity)
+  (values (db-query (:select 'plural :from 'noun :where (:= 'entity-id entity)) :single)))
+(defun pluralize (word)
+  (cond ((or
+          (ends-with-subseq "ch" word :test #'equal)
+          (ends-with-subseq "sh" word :test #'equal)
+          (ends-with-subseq "s" word :test #'equal))
+         (format nil "~Aes" word))
+        ((and (equal #\y (last-elt word))
+              (> (length word) 2)
+              (not (find (elt word (- (length word) 2))
+                         "aeiou")))
+         (format nil "~Aies" (subseq word 0 (1- (length word)))))
+        ((and (equal #\o (last-elt word))
+              (> (length word) 2)
+              (not (find (elt word (- (length word) 2))
+                         "aeiou")))
+         (format nil "~Aoes" (subseq word 0 (1- (length word)))))
+        (t (format nil "~As" word))))
+
 (defun (setf noun) (new-value entity)
   (with-transaction ()
     (cond ((null new-value)
            (db-query (:delete-from 'noun :where (:= 'entity-id entity))))
           ((noun entity)
-           (db-query (:update 'noun :set 'noun new-value :where (:= 'entity-id entity))))
+           (db-query (:update 'noun :set
+                              'singular (if (consp new-value) (car new-value) new-value)
+                              'plural (if (consp new-value) (cadr new-value) (pluralize new-value))
+                              :where (:= 'entity-id entity))))
           (t
-           (insert-row 'noun :entity-id entity :noun new-value)))
+           (insert-row 'noun
+                       :entity-id entity
+                       :singular (if (consp new-value) (car new-value) new-value)
+                       :plural (if (consp new-value) (cadr new-value) (pluralize new-value)))))
     (cache-base-description entity :update-featured t))
   new-value)
 
@@ -94,7 +123,7 @@
                                                 :column))))
 
 (defun calculate-base-description (entity &key (include-features-p t))
-  (when-let (result (db-query (:select 'n.noun
+  (when-let (result (db-query (:select 'n.singular
                                        ;; Pray for proper ordering. :(
                                        (:raw "array_agg(DISTINCT a.adjective)")
                                        (:raw "array_agg(DISTINCT f.feature_id)")
@@ -104,7 +133,7 @@
                                        :left-join (:as 'feature 'f)
                                        :on (:= 'f.entity-id 'n.entity-id)
                                        :where (:= 'n.entity-id entity)
-                                       :group-by 'noun)
+                                       :group-by 'n.singular)
                               :row))
     (destructuring-bind (noun adjectives features) result
       (with-output-to-string (s)
