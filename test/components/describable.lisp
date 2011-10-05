@@ -10,21 +10,22 @@
 
 (test noun
   (with-entities (e)
-    (is (string= "teapot" (setf (noun e) "teapot")))
-    (is (string= "teapot" (noun e)))
+    (is (string= "testteapot" (setf (noun e) "testteapot")))
+    (is (string= "testteapot" (noun e)))
     (is (null (setf (noun e) nil)))
     (is (null (noun e)))))
 
 (test plural-noun
   (with-entities (e)
-    (setf (noun e) "teapot")
-    (is (string= "teapots" (plural-noun e)))
-    (setf (noun e) '("teapot" "teapotses"))
-    (is (string= "teapot" (noun e)))
-    (is (string= "teapotses" (plural-noun e)))))
+    (setf (noun e) "testteapot")
+    (is (string= "testteapots" (plural-noun e)))
+    (setf (noun e) '("testteapot" "testteapotses"))
+    (is (string= "testteapot" (noun e)))
+    (is (string= "testteapotses" (plural-noun e)))))
 
 (test pluralize
-  (is (string= "teapots" (pluralize "teapot")))
+  ;; TODO - test unnacented pluralisation... need to fix Eos first, though.
+  (is (string= "testteapots" (pluralize "testteapot")))
   (is (string= "flies" (pluralize "fly")))
   (is (string= "boys" (pluralize "boy")))
   (is (string= "kisses" (pluralize "kiss")))
@@ -60,25 +61,25 @@
 
 (test base-description
   (with-entities (e f1 f2 f3)
-    (setf (noun e) "teapot")
-    (is (string= "a teapot" (base-description e)))
+    (setf (noun e) "testteapot")
+    (is (string= "a testteapot" (base-description e)))
     (setf (adjectives e) '("short" "stout"))
-    (is (string= "a short and stout teapot" (base-description e)))
+    (is (string= "a short and stout testteapot" (base-description e)))
     (setf (noun f1) "handle")
     (setf (noun f2) "spout")
     (add-feature e f1)
-    (is (string= "a short and stout teapot with a handle" (base-description e)))
+    (is (string= "a short and stout testteapot with a handle" (base-description e)))
     (add-feature e f2)
-    (is (string= "a short and stout teapot with a handle and a spout" (base-description e)))
+    (is (string= "a short and stout testteapot with a handle and a spout" (base-description e)))
     (setf (noun f3) "curvature")
     (add-feature f1 f3)
     (is (string= "a handle with a curvature" (base-description f1)))
-    (is (string= "a short and stout teapot with a handle and a spout" (base-description e)))
+    (is (string= "a short and stout testteapot with a handle and a spout" (base-description e)))
     (setf (noun f1) "handyhandle")
     (setf (adjectives f1) '("handy"))
-    (is (string= "a short and stout teapot with a handy handyhandle and a spout" (base-description e)))
+    (is (string= "a short and stout testteapot with a handy handyhandle and a spout" (base-description e)))
     (remove-feature e f2)
-    (is (string= "a short and stout teapot with a handy handyhandle" (base-description e)))
+    (is (string= "a short and stout testteapot with a handy handyhandle" (base-description e)))
     (setf (noun e) nil
           (adjectives e) nil
           (noun f1) nil
@@ -123,29 +124,29 @@
 (test short-description
   (with-entities (e f o)
     (is (null (short-description o e)))
-    (setf (noun e) "teapot")
+    (setf (noun e) "testteapot")
     (setf (adjectives e) '("short" "stout"))
     (setf (noun f) "handle")
     (add-feature e f)
-    (is (string= "a short and stout teapot with a handle" (short-description o e)))
+    (is (string= "a short and stout testteapot with a handle" (short-description o e)))
     (setf (nickname o e) "Mrs. Potts")
     (is (string= "Mrs. Potts" (short-description o e)))
     (setf (nickname o e) nil)
-    (is (string= "a short and stout teapot with a handle" (short-description o e)))
+    (is (string= "a short and stout testteapot with a handle" (short-description o e)))
     (setf (noun e) nil
           (noun f) nil)
     (remove-feature e f)))
 
 (test find-by-short-description
   (with-entities (o e1 e2)
-    (setf (noun e1) "teapot")
-    (setf (noun e2) "teacup")
-    (is (null (set-difference (list e1 e2) (find-by-short-description o "tea"))))
-    (is (null (set-difference (list e1 e2) (find-by-short-description o "a tea"))))
-    (is (equal (list e1) (find-by-short-description o "teap")))
-    (is (equal (list e2) (find-by-short-description o "teac")))
+    (setf (noun e1) "testteapot")
+    (setf (noun e2) "testteacup")
+    (is (null (set-difference (list e1 e2) (find-by-short-description o "testtea"))))
+    (is (null (set-difference (list e1 e2) (find-by-short-description o "a testtea"))))
+    (is (equal (list e1) (find-by-short-description o "testteap")))
+    (is (equal (list e2) (find-by-short-description o "testteac")))
     (setf (nickname o e1) "Mrs. Potts")
-    (is (null (find-by-short-description o "teapot")))
+    (is (null (find-by-short-description o "testteapot")))
     (is (equal (list e1) (find-by-short-description o "rs. Pot")))
     ;; The following test fails, but I'm pretty sure it's just Eos' fault.
     ;; Executing this manually in the REPL -does- work.
