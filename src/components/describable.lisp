@@ -12,6 +12,9 @@
            :base-description
            :short-description))
 
+;;;
+;;; Nouns
+;;;
 (defdao noun ()
   ((entity-id bigint)
    (singular text)
@@ -56,6 +59,9 @@
     (cache-base-description entity :update-featured t))
   new-value)
 
+;;;
+;;; Adjectives
+;;;
 (defdao adjective ()
   ((entity-id bigint)
    (adjective text)))
@@ -71,6 +77,12 @@
     (cache-base-description entity :update-featured t))
   new-value)
 
+;;;
+;;; Features
+;;;
+;;; - Features are basically regular entities, with their own nouns, adjectives, and features, that
+;;;   are treated as 'details' for this entity.
+;;;
 (defdao feature ()
   ((entity-id bigint)
    (feature-id bigint)))
@@ -91,14 +103,19 @@
   (db-query (:select 'feature-id :from 'feature :where (:= 'entity-id entity))
             :column))
 
+;;;
+;;; Base description
+;;;
+;;; - The base description for an entity is what it will look like when not given a nickname. For
+;;;   example, 'a teapot', or 'a tall person'.
+;;;
+;;;   We cache these base descriptions to make lookups fast. These caches are updated whenever a
+;;;   feature, noun, or adjective changes. In the case of nouns and adjectives, any entities that
+;;;   use the current entity as a feature also have their cache updated. This system needs to go no
+;;;   deeper than a single level because base-description does not recursively 'render' features.
 (defdao cached-base-description ()
   ((entity-id bigint)
    (description text)))
-
-(defun base-description (entity)
-  (values (db-query (:select 'description :from 'cached-base-description
-                             :where (:= 'entity-id entity))
-                    :single)))
 
 (defun cache-base-description (entity &key update-featured)
   (let ((new-description (calculate-base-description entity)))
@@ -152,6 +169,20 @@
             (format s " with ")
             (format s *english-list-format-string* feature-descs)))))))
 
+(defun base-description (entity)
+  (values (db-query (:select 'description :from 'cached-base-description
+                             :where (:= 'entity-id entity))
+                    :single)))
+
+;;;
+;;; Nicknames
+;;;
+;;; - Nicknames are a system of altering the way an object is displayed to individual players.
+;;;   These are associated at the entity-level, so:
+;;;   1. Anyone who takes control of the entity will see (and be able to change) nicknames
+;;;   associated with that character.
+;;;   2. A player will have to create a nickname list for each character they control.
+;;;
 (defdao nickname ()
   ((entity-id bigint)
    (observer-id bigint)
@@ -186,6 +217,11 @@
                      :where (:= 'entity-id entity))
             :plists))
 
+;;;
+;;; Short Description
+;;;
+;;; - This is what is/should be used by the game as the basic display component for entities.
+;;;
 (defun short-description (observer entity)
   (values (db-query (:select (:as (:case ((:not-null 'n.id)
                                           'n.nickname)
