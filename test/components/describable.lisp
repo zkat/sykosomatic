@@ -119,3 +119,22 @@
     (setf (noun e) nil
           (noun f) nil)
     (remove-feature e f)))
+
+(test find-by-short-description
+  (with-entities (o e1 e2)
+    (setf (noun e1) "teapot")
+    (setf (noun e2) "teacup")
+    (is (null (set-difference (list e1 e2) (find-by-short-description o "tea"))))
+    (is (null (set-difference (list e1 e2) (find-by-short-description o "a tea"))))
+    (is (equal (list e1) (find-by-short-description o "teap")))
+    (is (equal (list e2) (find-by-short-description o "teac")))
+    (setf (nickname o e1) "Mrs. Potts")
+    (is (null (find-by-short-description o "teapot")))
+    (is (equal (list e1) (find-by-short-description o "rs. Pot")))
+    (setf (nickname o e2) "Chíp")
+    ;; WAT. Y U FAIL, POMO? Y?!
+    (is (equal (list e2) (find-by-short-description o "hip")))
+    (setf (noun e1) nil
+          (noun e2) nil
+          (nickname o e1) nil
+          (nickname o e2) nil)))
