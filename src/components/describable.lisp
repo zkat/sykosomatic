@@ -140,6 +140,11 @@
                                                          :where (:= 'feature-id entity))
                                                 :column))))
 
+(defun indefinite-article (word)
+  (if (find (first-elt word) "aoeui" :test #'equal)
+      "an"
+      "a"))
+
 (defun calculate-base-description (entity &key (include-features-p t))
   (when-let (result (db-query (:select 'n.singular
                                        ;; Pray for proper ordering. :(
@@ -155,9 +160,10 @@
                               :row))
     (destructuring-bind (noun adjectives features) result
       (with-output-to-string (s)
-        (princ "a " s)
-        (when-let (adjs (coerce (remove :null adjectives) 'list))
-          (format s (concatenate 'string *english-list-format-string* " ") adjs))
+        (if-let (adjs (coerce (remove :null adjectives) 'list))
+          (format s (concatenate 'string "~A " *english-list-format-string* " ")
+                  (indefinite-article (car adjs)) adjs)
+          (format s "~A " (indefinite-article noun)))
         (princ noun s)
         (when include-features-p
           (when-let (feature-descs (loop for feature across features

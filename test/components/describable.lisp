@@ -86,7 +86,22 @@
           (noun f3) nil)
     (remove-feature e f1)
     (remove-feature e f2)
-    (remove-feature f1 f3)))
+    (remove-feature f1 f3))
+  (with-entities (e1 e2)
+    ;; a/an articles
+    (setf (noun e1) "article"
+          (noun e2) "test")
+    (is (string= "an article" (base-description e1)))
+    (is (string= "a test" (base-description e2)))
+    (setf (adjectives e1) '("long" "arduous"))
+    (setf (adjectives e2) '("arduous" "long"))
+    ;; Adjective ordering issues strike again :(
+    (is (string= "a long and arduous article" (base-description e1)))
+    (is (string= "an arduous and long test" (base-description e2)))
+    (setf (noun e1) nil
+          (noun e2) nil
+          (adjectives e1) nil
+          (adjectives e2) nil)))
 
 (test nickname
   (with-entities (e o)
