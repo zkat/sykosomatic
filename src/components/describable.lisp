@@ -3,6 +3,9 @@
         :sykosomatic.entity)
   (:export :noun
            :adjectives
+           :add-feature
+           :remove-feature
+           :list-features
            :nickname
            :base-description
            :short-description))
@@ -41,20 +44,47 @@
   ((entity-id bigint)
    (feature-id bigint)))
 
-(defun base-description (entity)
-  (when-let (result (db-query (:select 'n.noun (:array-agg 'a.adjective)
+(defun add-feature (entity feature)
+  (with-transaction ()
+    (unless (db-query (:select t :from 'feature :where (:and (:= 'entity-id entity)
+                                                             (:= 'feature-id feature)))
+                      :single)
+      (insert-row 'feature :feature-id feature :entity-id entity))))
+(defun remove-feature (entity feature)
+  (db-query (:delete-from 'feature :where (:and (:= 'entity-id entity)
+                                                (:= 'feature-id feature)))))
+(defun list-features (entity)
+  (db-query (:select 'feature-id :from 'feature :where (:= 'entity-id entity))
+            :column))
+
+(defun base-description (entity &key (include-features-p t))
+  (when-let (result (db-query (:select 'n.noun
+                                       ;; Pray for proper ordering. :(
+                                       (:raw "array_agg(DISTINCT a.adjective)")
+                                       (:raw "array_agg(DISTINCT f.feature_id)")
                                        :from (:as 'noun 'n)
                                        :left-join (:as 'adjective 'a)
                                        :on (:= 'a.entity-id 'n.entity-id)
+                                       :left-join (:as 'feature 'f)
+                                       :on (:= 'f.entity-id 'n.entity-id)
                                        :where (:= 'n.entity-id entity)
                                        :group-by 'noun)
                               :row))
-    (destructuring-bind (noun adjectives) result
+    (destructuring-bind (noun adjectives features) result
       (with-output-to-string (s)
         (princ "a " s)
         (when-let (adjs (coerce (remove :null adjectives) 'list))
           (format s (concatenate 'string *english-list-format-string* " ") adjs))
-        (princ noun s)))))
+        (princ noun s)
+        (when include-features-p
+          (when-let (feature-descs (loop for feature across features
+                                      for feature-desc = (unless (eq :null feature)
+                                                           (base-description feature
+                                                                             :include-features-p nil))
+                                      when feature-desc
+                                      collect feature-desc))
+            (format s " with ")
+            (format s *english-list-format-string* feature-descs)))))))
 
 (defdao nickname ()
   ((entity-id bigint)
