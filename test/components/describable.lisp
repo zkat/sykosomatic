@@ -58,6 +58,11 @@
     (add-feature f1 f3)
     (is (string= "a handle with a curvature" (base-description f1)))
     (is (string= "a short and stout teapot with a handle and a spout" (base-description e)))
+    (setf (noun f1) "handyhandle")
+    (setf (adjectives f1) '("handy"))
+    (is (string= "a short and stout teapot with a handy handyhandle and a spout" (base-description e)))
+    (remove-feature e f2)
+    (is (string= "a short and stout teapot with a handy handyhandle" (base-description e)))
     (setf (noun e) nil
           (adjectives e) nil
           (noun f1) nil
