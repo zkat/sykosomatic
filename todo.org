@@ -203,6 +203,10 @@
 *** TODO Use a couple of lisps with single-threaded-taskmaster instances
 ** Game
 *** TODO Parser
+**** DONE Periods
+     Allow having a period at the end of action input.
+**** TODO Handle objective pronouns
+     Allow 'me' to resolve to *actor*
 **** TODO Possessives
      Allow chained possessives parsing.
 
@@ -261,6 +265,8 @@
 *** TODO Fix timer
     It's not quite working right now, although there's a reasonable rate limit. that might be okay
     for now.
+*** DONE Containers
+**** DONE New component that allows putting entities 'in' other entities
 *** TODO Cleaner es-thread shutdown
     Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
 *** TODO Add concept of a 'location'
@@ -383,6 +389,8 @@
     https://wiki.mozilla.org/Security/Users_and_Logs (note that newlines should be escaped to
     prevent log forging)
 ** Misc
+*** DONE src/game-objects -> src/components
+    That directory is more meant for ES components than just 'game objects'
 *** TODO def-file-package improvements
 **** TODO Ability to disable defaults for def-file-package
 **** TODO Is it possible to extract the package name from the -filename-?
@@ -402,6 +410,49 @@
 *** TODO entity.lisp
 *** TODO components.nameable
     Only full-name is tested. Test the rest of the interface.
+* New name system
+** DONE Sit with waifu and design name/identifier system
+** TODO Implement name/identifier system
+*** DONE base noun
+*** DONE Adjectives
+*** DONE Features
+*** DONE Nicknames
+*** DONE Nickname-shadowed short description
+*** DONE Deal with plural nouns
+    Do it like verbs: By default, they should be auto-calculated, but allow setting the irregular
+    plural form.
+*** TODO Deal with articles
+    Not everything uses articles. You don't say "a long hair" when referring to a lot of hair.
+*** TODO Accent support
+    Get unaccent() in there so accented words match unaccented ones match. This only needs to be
+    done for the matching system. Note: The auto-pluralisation system may need to be updated.
+*** DONE See if identifiers need to be cached.
+    Will probably be necessary for completion to work efficiently.
+    Caching is also complicated for two reasons:
+    1. We build up base-descriptions lisp-side, and building them DB-side would be a massive pain.
+    2. We can't simply put refresh code on adjectives and nouns... if features change, all their
+       dependent objects must have their cached identifiers refreshed, as well.
+
+    NOTE: The caching currently updates up one feature level, since that's as deep as we actually
+    render.
+*** TODO partial completion system
+    Will need partial completion across the entire describable/name system.
+*** TODO adjective/feature ordering
+    Should be able to control what order adjectives and features are rendered in base-description.
+*** TODO Hook up name/identifier system to current chat client
+**** TODO Use short-description to describe objects to individual clients
+**** TODO Implement the click-menu for assigning and changing nicknames on objects
+**** TODO Use short-description when performing actions through the parser
+**** TODO Change character creation to accept a single 'Name' field
+     This will be the character's first nickname, and will be assigned from/to itself.
+     It will be used when displaying the character's short-description to itself, and to the player
+     when choosing characters in the character selection screen.
+*** TODO Configure which adjectives can be in the base-description
+*** TODO Configure which features can be in the base-description
+*** TODO visible feature/adjective limits
+*** TODO opaque method of communicating object ids with client
+    Don't leak the internal IDs of objects. Use an external UID or something like that.
+*** TODO subterfuge system
 * TODO The generated.html Challenge™
   The point of this challenge is to have enough of a working system to render the contents of
   generated.html *AS IT LOOKS*. That includes the scene header, highlighting objects,
@@ -417,6 +468,8 @@
   Bonus points: Have all objects reside in an actual location, although transitioning between
   locations is not necessary yet.
 
+*** DONE Bare-form verb input
+    Parse verbs in their bare form
 *** TODO Semantic output
 **** TODO Semantic markup from social command
      Have social command output a marked-up string that annotates any words of interest in the
@@ -436,6 +489,8 @@
 
 *** TODO Pronouns
     Play around with using pronouns for multiple consecutive actions by the same actor.
+*** TODO Possessives
+    Need support for 'He munches on *his pancakes*'.
 *** TODO Make it look right
     Update the stylesheets
 **** TODO Spacing between dialogues
