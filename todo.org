@@ -421,11 +421,38 @@
 *** DONE Deal with plural nouns
     Do it like verbs: By default, they should be auto-calculated, but allow setting the irregular
     plural form.
+*** TODO Implement builder interface for naming entities
+**** TODO Sit with waifu and design this interface before continuing
+**** TODO Base noun
+     Allowed characters: #\', #\., #\-, #\,, A-Z, 0-9, #\space
+**** TODO Adjectives
+     This should be a ± list using the same validation as base nouns. Can only have one, or two.
+**** TODO Features
+     This should be a ± list of entity IDs. We'll deal with more user-friendly input later. Maximum
+     of two allowed. Only existing entities can be set as features.
+**** TODO Adjective/feature limits
+     Only two adjectives/features can be present (2 adjs, 0 features; 1 feature, 1 adj; etc)
+**** TODO base-description preview
+     The editor should show a preview of what the base-description will be.
+**** TODO Feature creator
+     The feature field, when clicked, should pop up a window that allows you to create a new feature
+     entity right there.
+     Question: A window? What about recursively setting features in features, editing other aspects
+     of the feature, etc?
+***** TODO Figure out the desired workflow for object building
+*** TODO Better noun-setting interface than (setf noun)
+    setf is not very natural for creating something with multiple arguments.
 *** TODO Deal with articles
-    Not everything uses articles. You don't say "a long hair" when referring to a lot of hair.
-*** TODO Accent support
-    Get unaccent() in there so accented words match unaccented ones match. This only needs to be
-    done for the matching system. Note: The auto-pluralisation system may need to be updated.
+**** DONE a/an
+     What a bitch to figure out... just use the first character in the string to start.
+**** TODO optional articles
+     Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
+     other kinds of objects would not have articles attached to them?
+**** TODO article exceptions
+     Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
+     vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
+     These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
+     separately?
 *** DONE See if identifiers need to be cached.
     Will probably be necessary for completion to work efficiently.
     Caching is also complicated for two reasons:
@@ -435,7 +462,13 @@
 
     NOTE: The caching currently updates up one feature level, since that's as deep as we actually
     render.
-*** TODO partial completion system
+*** DONE find-by-short-description
+*** DONE Accent folding
+    Get unaccent() in there so accented words match unaccented ones match. This only needs to be
+    done for the matching system. Note: The auto-pluralisation system may need to be updated.
+*** TODO Thorough tests for accent folding
+    ...are gonna have to wait until Eos gets fixed.
+*** DONE partial completion system
     Will need partial completion across the entire describable/name system.
 *** TODO adjective/feature ordering
     Should be able to control what order adjectives and features are rendered in base-description.
@@ -450,6 +483,12 @@
 *** TODO Configure which adjectives can be in the base-description
 *** TODO Configure which features can be in the base-description
 *** TODO visible feature/adjective limits
+*** TODO legal characters
+    Alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
+    allowed in nouns, adjectives, and nicknames.
+*** TODO Character-collapsing
+    When defining nouns, adjectives, and nicknames, multiple spaces, dashes, and apostrophes should
+    be collapsed into one.
 *** TODO opaque method of communicating object ids with client
     Don't leak the internal IDs of objects. Use an external UID or something like that.
 *** TODO subterfuge system
