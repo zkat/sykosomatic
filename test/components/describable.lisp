@@ -21,15 +21,51 @@
     (let ((new-adjs '("short")))
       (is (eql new-adjs (setf (adjectives e) new-adjs)))
       (is (equalp new-adjs (adjectives e))))
+    (let ((new-adjs '("short" "stout")))
+      (is (eql new-adjs (setf (adjectives e) new-adjs)))
+      (is (equalp new-adjs (adjectives e))))
     (is (null (setf (adjectives e) nil)))
     (is (null (adjectives e)))))
 
+(test features
+  (with-entities (e f1 f2 f3)
+    (is (null (list-features e)))
+    (finishes (add-feature e f1))
+    (is (equal (list f1) (list-features e)))
+    (finishes (add-feature e f2))
+    (is (null (set-difference (list f1 f2) (list-features e))))
+    (finishes (add-feature f1 f3))
+    (is (null (set-difference (list f1 f2) (list-features e))))
+    (is (equal (list f3) (list-features f1)))
+    (finishes (remove-feature e f1))
+    (finishes (remove-feature e f2))
+    (finishes (remove-feature f1 f3))))
+
 (test base-description
-  (with-entities (e)
+  (with-entities (e f1 f2 f3)
     (setf (noun e) "teapot")
     (is (string= "a teapot" (base-description e)))
     (setf (adjectives e) '("short" "stout"))
-    (is (string= "a short and stout teapot" (base-description e)))))
+    ;; Why the hell is this out of order?
+    (is (string= "a short and stout teapot" (base-description e)))
+    (setf (noun f1) "handle")
+    (setf (noun f2) "spout")
+    (add-feature e f1)
+    (is (string= "a short and stout teapot with a handle" (base-description e)))
+    (add-feature e f2)
+    (is (string= "a short and stout teapot with a handle and a spout" (base-description e)))
+    (setf (noun f3) "curvature")
+    (add-feature f1 f3)
+    (is (string= "a handle with a curvature" (base-description f1)))
+    (is (string= "a short and stout teapot with a handle and a spout" (base-description e)))
+    (setf (noun e) nil
+          (adjectives e) nil
+          (noun f1) nil
+          (noun f2) nil
+          (noun f3) nil)
+    (remove-feature e f1)
+    (remove-feature e f2)
+    (remove-feature f1 f3)))
 
 (test nickname
   (with-entities (e o)
@@ -47,12 +83,17 @@
     (is (string= "Tomato" (nickname o1 e)))))
 
 (test short-description
-  (with-entities (e o)
+  (with-entities (e f o)
     (is (null (short-description o e)))
     (setf (noun e) "teapot")
     (setf (adjectives e) '("short" "stout"))
-    (is (string= "a short and stout teapot" (short-description o e)))
+    (setf (noun f) "handle")
+    (add-feature e f)
+    (is (string= "a short and stout teapot with a handle" (short-description o e)))
     (setf (nickname o e) "Mrs. Potts")
     (is (string= "Mrs. Potts" (short-description o e)))
     (setf (nickname o e) nil)
-    (is (string= "a short and stout teapot" (short-description o e)))))
+    (is (string= "a short and stout teapot with a handle" (short-description o e)))
+    (setf (noun e) nil
+          (noun f) nil)
+    (remove-feature e f)))
