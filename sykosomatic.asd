@@ -16,6 +16,7 @@
                       :serial t
                       :components
                       ((:file "util")
+                       (:file "form")
                        (:file "smug")
                        (:file "timer")))
              (:file "config")
