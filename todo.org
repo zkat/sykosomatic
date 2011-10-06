@@ -136,9 +136,7 @@
 **** TODO Log out all sessions on username or password change
 *** TODO Email system
     Need a way to send emails out to people. Various things in the site will need this.
-*** TODO Form builder
-    Need a form builder that supports validation, error reporting, rendering, and CSRF tokens. This
-    can be an independent library. freiksenet says he'll do it.
+*** DONE Form builder
 **** DONE Basic form builder
      Need: string-param-binding support, simple definition form, validation support, raw and
      validated values, error string reporting, form-valid-p.
@@ -155,15 +153,22 @@
 ***** DONE Initial form state
       If the form hasn't received any parameters, it should not display any errors.
 ***** DONE Password confirmation needs access to password field
-**** TODO Test run form builder with newchar
-     This will require support for array parameter-types. Can probably just be cribbed from
-     hunchentoot.
-*** TODO Logging system
-    Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
+**** DONE Test run form builder with newchar
+***** DONE list parameter type for deform
+***** DONE array parameter type for deform
+      Simply use the same method as hunchentoot to collect elements into an array. Let the validators
+      do any integer parsing that we might want to do.
+***** DONE Figure out full repopulation
+      This one might get a little tricky... but various builder screens will have a similar
+      interface, so it's important to figure this one out.
+      Eh. It's probably easy enough. For features, may need a bit of javascript to force the AJAX
+      requests for adjectives.
 *** TODO Use 'real' templates
     Enough of yaclml. Maybe using yaclml is okay for a limited subset of generated components, but
     most templates should be in their own files, organized by webpage names. Give tal a shot for
     this. Whatever ends up being used, it may need to be extended in order to support the form builder.
+*** TODO Logging system
+    Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
 *** TODO Figure out how to put the server behind stud
     URL: https://github.com/bumptech/stud
 *** TODO Figure out how to configure two lisp processes running behind HAProxy
