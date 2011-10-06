@@ -3,8 +3,9 @@
         :sykosomatic.db
         :sykosomatic.entity
         :sykosomatic.account
-        :sykosomatic.components.nameable)
-  (:export :create-character
+        :sykosomatic.components.nameable
+        :sykosomatic.util.form)
+  (:export :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
@@ -25,40 +26,57 @@
     (assert-required "Nickname" name)
     (assert-validation (valid-character-name-p name) "Invalid nickname.")))
 
-(defun create-character (account-id &key
-                         pronoun first-name nickname last-name
-                         origin parents siblings situation friends
-                         so career-info feature-info where)
+(defun field-required (validator)
+  (lambda (&rest args)
+    (check-field (not (emptyp (car args))) "Field is required.")
+    (apply validator args)))
+
+(deform newchar ()
+  ((:pronoun #'identity)
+   (:first-name (field-required #'identity))
+   (:nickname (field-required #'identity))
+   (:last-name (field-required #'identity))
+   (:origin #'identity)
+   (:parents #'identity)
+   (:siblings #'identity)
+   (:situation #'identity)
+   (:friends #'identity)
+   (:so #'identity)
+   ((:careers array) #'identity)
+   ((:career-times array) #'identity)
+   ((:features array) #'identity)
+   ((:feature-adjs array) #'identity)
+   (:where #'identity)))
+
+(defun create-character (account-id form)
   (with-transaction ()
-    (multiple-value-bind (validp errors)
-        (validate-new-character nickname)
-      (if validp
-          (let ((entity (create-entity)))
-            (add-name entity last-name :first-name first-name)
-            (add-body entity account-id)
-            (let ((cc-values-id (insert-row 'cc-values
-                                            :entity-id entity
-                                            :pronoun  pronoun
-                                            :first-name first-name
-                                            :nickname nickname
-                                            :last-name last-name
-                                            :origin origin
-                                            :parents parents
-                                            :siblings siblings
-                                            :situation situation
-                                            :friends friends
-                                            :so so
-                                            :where where)))
-              (loop for (career . years-spent) in career-info
-                 when years-spent
-                 do (insert-row 'cc-career-info :cc-values-id cc-values-id
-                                :career career :years-spent years-spent))
-              (loop for (feature . adjective) in feature-info
-                 when adjective
-                 do (insert-row 'cc-feature-info :cc-values-id cc-values-id
-                                :feature feature :adjective adjective)))
-            entity)
-          (values nil errors)))))
+    (let ((entity (create-entity)))
+      (add-name entity (field-value form :last-name)
+                :first-name (field-value form :first-name))
+      (add-body entity account-id)
+      #+nil
+      (let ((cc-values-id (insert-row 'cc-values
+                                      :entity-id entity
+                                      :pronoun  pronoun
+                                      :first-name first-name
+                                      :nickname nickname
+                                      :last-name last-name
+                                      :origin origin
+                                      :parents parents
+                                      :siblings siblings
+                                      :situation situation
+                                      :friends friends
+                                      :so so
+                                      :where where)))
+        (loop for (career . years-spent) in career-info
+           when years-spent
+           do (insert-row 'cc-career-info :cc-values-id cc-values-id
+                          :career career :years-spent years-spent))
+        (loop for (feature . adjective) in feature-info
+           when adjective
+           do (insert-row 'cc-feature-info :cc-values-id cc-values-id
+                          :feature feature :adjective adjective)))
+      entity)))
 
 ;; newchar parameter storage
 (defdao cc-values ()

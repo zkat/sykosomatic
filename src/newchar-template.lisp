@@ -3,22 +3,23 @@
 (defun newchar-js ()
   (<:script :type "text/javascript" :src "res/js/newchar.js"))
 
-(defpage newchar (&key pronouns origins parents siblings situations
-                       friends so careers
-                       location-opts features)
+(defpage newchar (form select-plist)
     ((newchar-js))
     "Create a character"
   (error-messages)
   #+nil(<:p :id "preview" "This is an experiment")
-  (<:form :name "character-creation" :action "/newchar" :method "post"
-   (<:div
-    :id "creation-forms"
-    (cc-identity pronouns)
-    (cc-early-life origins parents siblings situations)
-    (cc-later-life friends so careers)
-    (cc-appearance features)
-    (cc-here-and-now location-opts)
-    (cc-confirm))))
+  (flet ((sel (keyword)
+           (getf select-plist keyword)))
+    (<:form :name "character-creation" :action "/newchar" :method "post"
+            (<:div
+             :id "creation-forms"
+             (cc-identity form (sel :pronouns))
+             (cc-early-life (sel :origins) (sel :parents)
+                            (sel :siblings) (sel :situations))
+             (cc-later-life (sel :friends) (sel :so) (sel :careers))
+             (cc-appearance (sel :features))
+             (cc-here-and-now (sel :location-opts))
+             (cc-confirm)))))
 
 (defun load-opts (opts)
   (map nil (lambda (opt)
@@ -32,7 +33,7 @@
                          (load-opts (optgroup-options optgroup))))
        optgroups))
 
-(defun cc-identity (genders)
+(defun cc-identity (form genders)
   (<:div
    :id "identity"
    (<:fieldset
@@ -43,9 +44,15 @@
                      (load-opts genders))))
    (<:fieldset
     (<:legend "Name")
-    (text-input-field "first-name" "First Name")
-    (text-input-field "nickname" "Nickname" :max-length 24)
-    (text-input-field "last-name" "Last Name"))))
+    (text-input-field "first-name" "First Name"
+                      :value (field-raw-value form :first-name)
+                      :error (field-error form :first-name))
+    (text-input-field "nickname" "Nickname" :max-length 24
+                      :value (field-raw-value form :nickname)
+                      :error (field-error form :nickname))
+    (text-input-field "last-name" "Last Name"
+                      :value (field-raw-value form :last-name)
+                      :error (field-error form :last-name)))))
 
 (defun cc-early-life (origins parents siblings situations)
    (<:div :id "early-life"
