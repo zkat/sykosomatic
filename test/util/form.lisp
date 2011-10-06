@@ -45,6 +45,21 @@
       (make-form 'test-form '(("field" . "expected")))
       (is (string= "second" last-check-field)))))
 
+(test *form*
+  (is (null (boundp '*form*)))
+  (flet ((password-confirm (val)
+           (check-field (string= val (field-raw-value *form* 'password))
+                        "Confirmation does not match password.")
+           val))
+    (deform test-form ()
+      ((password #'identity)
+       (confirmation #'password-confirm)))
+    (is (form-valid-p (make-form 'test-form '(("password" . "foo")
+                                              ("confirmation" . "foo")))))
+    (is (equalp '((confirmation . "Confirmation does not match password."))
+                (form-errors (make-form 'test-form '(("password" . "foo")
+                                                     ("confirmation" . "bar"))))))))
+
 (test make-form
   (flet ((field-test (val)
            (check-field (string= "expected" val) "~A was unexpected." val)
