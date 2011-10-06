@@ -76,7 +76,7 @@
                     :http-only t)
         (setf (session *request*) session)
         #+nil(persistent-session-gc)
-        (setf *session* (id session)))))
+        (setf *session* session))))
 
 (defmethod session-cookie-value ((session-id integer))
   (db-query (:select 'cookie-value :from 'persistent-session
