@@ -1,5 +1,6 @@
 (util:def-file-package :sykosomatic.util.form
   (:export :deform
+           :*form*
            :check-field
            :make-form
            :form-valid-p
@@ -32,18 +33,22 @@
                                                              (list ,@validator-args))))))))
 
 (defparameter *validp* (gensym "VALIDP"))
-
+(defvar *form*)
 (defun bind-form (form-def form bindings)
   (setf (gethash *validp* form) t)
   (maphash (lambda (name field-def)
              (destructuring-bind (validator validator-arg-function) field-def
                (let ((raw-value (cdr (assoc name bindings :key #'string :test #'string-equal))))
                  (setf (gethash name form)
+                       (list raw-value nil nil))
+                 (setf (gethash name form)
                        (multiple-value-bind (validated-value error)
-                           (handler-case (apply validator (if validator-arg-function
-                                                              (cons raw-value
-                                                                    (funcall validator-arg-function))
-                                                              (list raw-value)))
+                           (handler-case
+                               (let ((*form* form))
+                                 (apply validator (if validator-arg-function
+                                                      (cons raw-value
+                                                            (funcall validator-arg-function))
+                                                      (list raw-value))))
                              (validation-error (e)
                                (values nil (validation-error-message e))))
                          (when error
