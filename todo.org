@@ -139,6 +139,25 @@
 *** TODO Form builder
     Need a form builder that supports validation, error reporting, rendering, and CSRF tokens. This
     can be an independent library. freiksenet says he'll do it.
+**** DONE Basic form builder
+     Need: string-param-binding support, simple definition form, validation support, raw and
+     validated values, error string reporting, form-valid-p.
+**** DONE Test run form builder with signup
+***** DONE Convert validation in account.lisp
+***** DONE How do I deal with packages?
+      Should field values be package-dependent, or ignore packages altogether? They're already bound
+      in a package-independent way. Pomo doesn't bother with packages, either.
+      LOL JUST USE KEYWORDS DUH :D :D :D
+***** DONE Hook it up to handlers/signup.lisp
+***** DONE Update the signup template to use the form object
+****** DONE Repopulate based on form object raw-values
+****** DONE Display errors in-line with form fields
+***** DONE Initial form state
+      If the form hasn't received any parameters, it should not display any errors.
+***** DONE Password confirmation needs access to password field
+**** TODO Test run form builder with newchar
+     This will require support for array parameter-types. Can probably just be cribbed from
+     hunchentoot.
 *** TODO Logging system
     Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
 *** TODO Use 'real' templates
