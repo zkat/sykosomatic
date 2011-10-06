@@ -139,6 +139,10 @@
 *** TODO Form builder
     Need a form builder that supports validation, error reporting, rendering, and CSRF tokens. This
     can be an independent library. freiksenet says he'll do it.
+**** DONE Basic form builder
+     Need: string-param-binding support, simple definition form, validation support, raw and
+     validated values, error string reporting, form-valid-p.
+**** TODO Test run form builder with newchar
 *** TODO Logging system
     Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
 *** TODO Use 'real' templates
