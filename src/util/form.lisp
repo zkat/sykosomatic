@@ -58,10 +58,12 @@
   (unless test
     (error 'validation-error :msg (apply #'format nil error-format error-format-args))))
 
-(defun make-form (form-class &optional binding-alist)
+(defun make-form (form-class &optional (binding-alist nil got-bindings-p))
   (let ((def (find-form-def form-class))
         (form (make-hash-table :test #'eq)))
-    (bind-form def form binding-alist)
+    (if got-bindings-p
+        (bind-form def form binding-alist)
+        (setf (gethash *validp* form) nil))
     form))
 
 (defun field-raw-value (form field-name)
