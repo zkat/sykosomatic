@@ -106,6 +106,10 @@
     font-size: 0.8em !important;
 }
 
+.error {
+    margin-left: 1em;
+    color:red;
+}
 .errors {
     color:red;
     list-style-type:none;
