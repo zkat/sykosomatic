@@ -2,22 +2,21 @@
   (:use :hunchentoot
         :sykosomatic.handler
         :sykosomatic.session
-        :sykosomatic.account)
+        :sykosomatic.account
+        :sykosomatic.util.form)
   (:export :signup))
 
-(define-easy-handler (signup :uri "/signup") (email display-name password confirmation)
+(define-easy-handler (signup :uri "/signup") ()
   (case (request-method*)
     (:post
-     (multiple-value-bind (account-created-p errors)
-         (create-account email display-name password confirmation)
-       (if account-created-p
-           (progn
-             (logit "Account created: ~A" email)
-             (push-error "Please log in.")
-             (redirect "/login"))
-           (progn
-             (appendf (session-errors) errors)
-             (redirect "/signup")))))
+     (let ((form (make-form 'signup (post-parameters*))))
+       (cond ((form-valid-p form)
+              (create-account form)
+              (logit "Account created: ~A" (field-value form :email))
+              (push-error "Please log in.")
+              (redirect "/login"))
+             (t
+              (templ:render-template "signup" form)))))
     (:get
      (with-form-errors
-       (templ:render-template "signup")))))
+       (templ:render-template "signup" (make-form 'signup))))))

@@ -1,5 +1,6 @@
 (util:def-file-package :sykosomatic.template
-  (:use :yaclml :string-case)
+  (:use :yaclml :string-case
+        :sykosomatic.util.form)
   (:nicknames :templ)
   (:export :not-found :index :login :stage :role
            :scenes :view-scene :signup :newchar
@@ -84,10 +85,13 @@
     (<:ul :class "errors"
           (mapc (lambda (err) (<:li (<:ah err))) *errors*))))
 
-(defun text-input-field (name label &key (type "text") max-length)
+(defun text-input-field (name label &key (type "text") max-length value error)
   (<:div :class "field"
     (<:label :for name (<:ah label))
-    (<:input :name name :id name :type type :maxlength max-length)))
+    (<:input :name name :id name :type type :maxlength max-length
+             :value value)
+    (when error
+      (<:span :class "error" (<:ah error)))))
 
 (defun mk-select (name opts default-opt-label &key (id name) class)
   (<:select :id id :name name :class class
@@ -255,17 +259,24 @@
          (sykosomatic.scene::find-scene-entries id))))
 
 ;;; /signup
-(defpage signup () ()
+(defpage signup (form) ()
     "Sign up"
   (error-messages)
-  (signup-component))
+  (signup-component form))
 
-(defun signup-component ()
+(defun signup-component (form)
   (<:form :name "signup" :action "/signup" :method "post"
           (<:fieldset
            (<:legend "Sign up!")
-           (text-input-field "email" "Email")
-           (text-input-field "display-name" "Display Name" :max-length 32)
-           (text-input-field "password" "Password" :type "password")
-           (text-input-field "confirmation" "Confirm password" :type "password"))
+           (text-input-field "email" "Email"
+                             :value (field-raw-value form :email)
+                             :error (field-error form :email))
+           (text-input-field "display-name" "Display Name"
+                             :max-length 32
+                             :value (field-raw-value form :display-name)
+                             :error (field-error form :display-name))
+           (text-input-field "password" "Password" :type "password"
+                             :error (field-error form :password))
+           (text-input-field "confirmation" "Confirm password" :type "password"
+                             :error (field-error form :confirmation)))
           (<:submit :value "Submit")))

@@ -1,9 +1,10 @@
 (util:def-file-package #:sykosomatic.account
   (:use :cl-ppcre
-        :sykosomatic.db)
+        :sykosomatic.db
+        :sykosomatic.util.form)
   (:export :create-account :find-account :find-account-by-email :validate-account
            :add-body :remove-body :deactivate-body :activate-body :account-bodies
-           :account-email :account-display-name))
+           :account-email :account-display-name :signup))
 
 ;;;
 ;;; Utils
@@ -119,42 +120,43 @@
 (defparameter *display-name-regex* (create-scanner "^[A-Z0-9._.-]+$"
                                                    :case-insensitive-mode t))
 
-(defun valid-email-p (email)
-  (when (scan *email-regex* email)
-    t))
+(defun field-required (validator)
+  (lambda (&rest args)
+    (check-field (not (emptyp (car args))) "Field is required.")
+    (apply validator args)))
 
-(defun valid-password-p (password)
-  (and (>= (length password) 6)
-       (every #'standard-char-p password)))
+(defun valid-email (email)
+  (check-field (scan *email-regex* email) "Invalid email.")
+  (check-field (not (find-account-by-email email)) "Account already exists.")
+  email)
 
-(defun valid-display-name-p (display-name)
-  (when (and (>= (length display-name) 4)
-             (<= (length display-name) 32)
-             (scan *display-name-regex* display-name))
-    t))
+(defun valid-password (password)
+  (check-field (>= (length password) 6) "Must be at least 6 characters long.")
+  password)
+(defun valid-confirmation (confirm)
+  (check-field (string= confirm (field-raw-value *form* :password))
+               "Confirmation and password must match.")
+  confirm)
 
-(defun validate-new-account (email display-name password confirmation)
-  (with-validation
-    (assert-required "Email" email)
-    (assert-required "Display Name" display-name)
-    (assert-required "Password" password)
-    (assert-required "Confirmation" confirmation)
-    (assert-validation (valid-email-p email) "Invalid email.")
-    (assert-validation (not (find-account-by-email email)) "Account already exists.")
-    (assert-validation (valid-password-p password) "Password must be at least 6 characters long and can't contain funky characters.")
-    (assert-validation (valid-display-name-p display-name) "Invalid display name. Display name must be between 4 and 32 alphanumeric characters.")
-    (assert-validation (not (display-name-exists-p display-name)) "Display name already in use.")
-    (assert-validation (string= password confirmation) "Password confirmation does not match.")))
+(defun valid-display-name (display-name)
+  (check-field (and (>= (length display-name) 4)
+                    (<= (length display-name) 32))
+               "Must be between 4 and 32 characters long.")
+  (check-field (scan *display-name-regex* display-name)
+               "Only alphabetic characters, digits, and the characters '.', '_', and '-' are allowed.")
+  display-name)
 
-(defun create-account (email display-name password confirmation)
-  (with-transaction ()
-    (multiple-value-bind (validp errors)
-        (validate-new-account email display-name password confirmation)
-      (if validp
-          (let ((salt (gensalt)))
-            (insert-row 'account
-                        :email email
-                        :display-name display-name
-                        :password (hash-password password salt)
-                        :salt salt))
-          (values nil errors)))))
+(deform signup ()
+  ((:email (field-required 'valid-email))
+   (:display-name (field-required 'valid-display-name))
+   (:password (field-required 'valid-password))
+   (:confirmation (field-required (compose 'valid-confirmation 'valid-password)))))
+
+(defun create-account (form)
+  (assert (form-valid-p form) () "Invalid form passed to CREATE-ACCOUNT.")
+  (let ((salt (gensalt)))
+    (insert-row 'account
+                :email (field-value form :email)
+                :display-name (field-value form :display-name)
+                :password (hash-password (field-value form :password) salt)
+                :salt salt)))
