@@ -133,6 +133,10 @@
 (defun valid-password (password)
   (check-field (>= (length password) 6) "Must be at least 6 characters long.")
   password)
+(defun valid-confirmation (confirm)
+  (check-field (string= confirm (field-raw-value *form* :password))
+               "Confirmation and password must match.")
+  confirm)
 
 (defun valid-display-name (display-name)
   (check-field (and (>= (length display-name) 4)
@@ -146,7 +150,7 @@
   ((:email (field-required 'valid-email))
    (:display-name (field-required 'valid-display-name))
    (:password (field-required 'valid-password))
-   (:confirmation (field-required 'valid-password))))
+   (:confirmation (field-required (compose 'valid-confirmation 'valid-password)))))
 
 (defun create-account (form)
   (assert (form-valid-p form) () "Invalid form passed to CREATE-ACCOUNT.")
