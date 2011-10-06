@@ -1,4 +1,5 @@
 (util:def-file-package :sykosomatic.util.form
+  (:use :cl-ppcre)
   (:export :deform
            :*form*
            :check-field
@@ -13,9 +14,9 @@
 (defun ensure-form (name field-definitions)
   (setf (gethash name *form-definitions*)
         (let ((form-hash (make-hash-table :test #'equalp)))
-          (loop for (field-name validator validator-args) in field-definitions
+          (loop for (field-name validator validator-args type) in field-definitions
              do (setf (gethash field-name form-hash)
-                      (list validator validator-args)))
+                      (list validator validator-args type)))
           form-hash))
   name)
 (defun find-form-def (name)
@@ -28,17 +29,56 @@
   `(ensure-form ',name
                 (list
                  ,@(loop for (name validator . validator-args) in field-defs
-                      collect `(list ',name ,validator ,(when validator-args
-                                                          `(lambda ()
-                                                             (list ,@validator-args))))))))
+                      collect `(list ',(if (consp name) (car name) name) ,validator
+                                     ,(when validator-args
+                                            `(lambda ()
+                                               (list ,@validator-args)))
+                                     ',(if (consp name) (second name) 'atom))))))
+
+;; These two are pretty much taken from hunchentoot.
+(defun collect-list-parameter (target-name parameter-alist)
+
+  (loop for (name . value) in parameter-alist
+     when (string-equal name target-name)
+     collect value))
+
+(defun collect-array-parameter (target-name parameter-alist)
+  "Retrieves all parameters from PARAMETERS which are named like
+\"PARAMETER-NAME[N]\" \(where N is a non-negative integer),
+converts them to TYPE, and returns an array where the Nth element
+is the corresponding value."
+  ;; see <http://common-lisp.net/pipermail/tbnl-devel/2006-September/000660.html>
+  #+:sbcl (declare (sb-ext:muffle-conditions warning))
+  (let* ((index-value-list
+          (loop for (full-name . value) in parameter-alist
+             for index = (register-groups-bind (name index-string)
+                             ("^(.*)\\[(\\d+)\\]$" full-name)
+                           (when (string-equal name target-name)
+                             (let (*read-eval*)
+                               (ignore-some-conditions (parse-error)
+                                 (parse-integer index-string)))))
+             when index
+             collect (cons index value)))
+         (array (make-array (1+ (reduce #'max index-value-list
+                                        :key #'car
+                                        :initial-value -1))
+                            :initial-element nil)))
+    (loop for (index . value) in index-value-list
+          do (setf (aref array index) value))
+    array))
 
 (defparameter *validp* (gensym "VALIDP"))
 (defvar *form*)
 (defun bind-form (form-def form bindings)
   (setf (gethash *validp* form) t)
   (maphash (lambda (name field-def)
-             (destructuring-bind (validator validator-arg-function) field-def
-               (let ((raw-value (cdr (assoc name bindings :key #'string :test #'string-equal))))
+             (destructuring-bind (validator validator-arg-function type) field-def
+               (let ((raw-value (case type
+                                  (array (collect-array-parameter name bindings))
+                                  (list (collect-list-parameter name bindings))
+                                  (atom
+                                   (cdr (assoc name bindings :test #'string-equal)))
+                                  (otherwise (error "Unknown parameter type: ~A" type)))))
                  (setf (gethash name form)
                        (list raw-value nil nil))
                  (setf (gethash name form)
