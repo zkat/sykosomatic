@@ -1,0 +1,7 @@
+{{ TMPL_IF error-list }}
+<ul class="error-list">
+  {{ TMPL_LOOP error-list }}
+  <li>{{ TMPL_VAR error }}</li>
+  {{ /TMPL_LOOP }}
+</ul>
+{{ /TMPL_IF }}

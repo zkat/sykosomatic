@@ -1,0 +1,31 @@
+<div id="main-game-panel">
+  <div id="game-panel">
+    <div class="scene-display" id="scene-display">
+      <img id="loading-spinner" src="res/loading.gif" />
+    </div>
+    <div id="game-input">
+      <ul>
+        <li><a href="#dialogue-tab">Dialogue</a></li>
+        <li><a href="#action-tab">Action</a></li>
+        <li><a href="#ooc-tab">OOC</a></li>
+        <li><a href="#emit-tab">Emit</a></li>
+      </ul>
+      <div id="dialogue-tab">
+        <form id="dialogue-input">
+          <div>
+            <p class="character">{{ TMPL_VAR char-name }}</p>
+            <textarea class="dialogue"></textarea>
+          </div>
+        </form>
+      </div>
+      <div id="action-tab">
+        <form id="action-input">What do you do? <input /></form>
+      </div>
+      <div id="ooc-tab">
+        <form id="ooc-input">OOC - <input /></form>
+      </div>
+      <div id="emit-tab">
+        <form id="emit-input"><input /></form>
+      </div></div></div></div>
+<div id="ooc-panel"><div id="ooc-display"></div></div>
+<p style="visibility:hidden;overflow:hidden;" id="wstoken">{{ TMPL_VAR websocket-session-token }}</p>

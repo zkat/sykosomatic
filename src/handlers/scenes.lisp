@@ -8,6 +8,7 @@
 
 (define-easy-handler (scenes :uri "/scenes") ()
   (ensure-logged-in)
+  #+nil
   (with-form-errors
     (templ:render-template "scenes" (mapcar #'scene-id (find-scenes-by-account-id (current-account))))))
 
