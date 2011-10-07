@@ -135,7 +135,7 @@
      sessions.
 **** TODO Log out all sessions on username or password change
 *** TODO Email system
-    Need a way to send emails out to people. Various things in the site will need this.
+    cl-smtp should be good enough, but it requires a mail server to already be running.
 *** DONE Form builder
 **** DONE Basic form builder
      Need: string-param-binding support, simple definition form, validation support, raw and
@@ -183,7 +183,7 @@
 ***** TODO (later) view-scene
 **** DONE Go through all the pages and make sure titles are in.
      That should -really- just go in render-page, along with error-list stuff.
-**** TODO Abstract away error-list
+**** DONE Abstract away error-list
      All pages will want to render it. Having to remember :error-list (pop-error-list) shitsux.
 **** TODO JS/CSS includes
      shouldn't these just go in templates, instead of requiring the programmer to pass them in?
@@ -192,7 +192,9 @@
      manually be written up like they are now. Newchar was -awful-
 **** TODO Test it!
 *** TODO Logging system
-    Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
+    Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly
+    way. Do this after the config system is in place so it's easy to configure which log files to
+    use.
 *** TODO Fix 404
     404 stuff is currently uncommented due to dependency issues.
 *** TODO Figure out how to put the server behind stud
@@ -388,6 +390,8 @@
 *** TODO Move timer.lisp into an external project
 *** TODO Merge smug.lisp changes into mainline smug and use that version instead
 *** TODO Actual config file system for local configs
+    As in, get config values reloaded on startup, instead of whatever their values were when the
+    application was compiled/loaded.
 *** TODO Entity GC
     Might be a bit of a pain, but it might be nice to be able to go through the database and clear
     out any entities that aren't being used by anything. An offline is GC is more than good enough,
