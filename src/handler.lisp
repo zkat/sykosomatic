@@ -1,12 +1,13 @@
 (util:def-file-package #:sykosomatic.handler
   (:use :hunchentoot
         :sykosomatic.config
+        :sykosomatic.template
         :sykosomatic.session)
   (:export :init-hunchentoot
            :teardown-hunchentoot
            :with-form-errors
            :ensure-logged-in
-           :pop-error-list))
+           :render-page))
 
 ;;;
 ;;; HT
@@ -37,3 +38,14 @@
   (loop for error in (session-errors)
      collect (list :error error)
      finally (setf (session-errors) nil)))
+
+(defparameter *page-template-relative-path* #p"page.html")
+(defparameter *site-page-path* (merge-pathnames "site-pages/" *template-path*))
+
+(defun render-page (body-template variables &key title)
+  (render-template *page-template-relative-path*
+                   (list* :page-body (list (list (merge-pathnames body-template
+                                                                  *site-page-path*)))
+                          :title title
+                          :error-list (pop-error-list)
+                          variables)))

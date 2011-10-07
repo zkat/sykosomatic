@@ -1,6 +1,6 @@
 (util:def-file-package #:sykosomatic.handler.404
   (:use :hunchentoot
-        :sykosomatic.template)
+        :sykosomatic.handler)
   (:export :404-handler))
 
 (defun 404-handler ()

@@ -1,6 +1,6 @@
 (util:def-file-package #:sykosomatic.handler.index
   (:use :hunchentoot
-        :sykosomatic.template)
+        :sykosomatic.handler)
   (:export :index))
 
 (define-easy-handler (index :uri "/") ()
