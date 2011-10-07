@@ -5,7 +5,8 @@
   (:export :init-hunchentoot
            :teardown-hunchentoot
            :with-form-errors
-           :ensure-logged-in))
+           :ensure-logged-in
+           :pop-error-list))
 
 ;;;
 ;;; HT
@@ -27,12 +28,12 @@
 (defun teardown-hunchentoot ()
   (when *server* (stop *server*) (setf *server* nil)))
 
-(defmacro with-form-errors (&body body)
-  `(let ((templ:*errors* (session-errors)))
-     (unwind-protect (progn ,@body)
-       (setf (session-errors) nil))))
-
 (defun ensure-logged-in ()
   (unless *session*
     (push-error "You must be logged in to access that page.")
     (redirect "/login")))
+
+(defun pop-error-list ()
+  (loop for error in (session-errors)
+     collect (list :error error)
+     finally (setf (session-errors) nil)))

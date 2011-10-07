@@ -169,6 +169,8 @@
     this. Whatever ends up being used, it may need to be extended in order to support the form builder.
 *** TODO Logging system
     Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly way.
+*** TODO Fix 404
+    404 stuff is currently uncommented due to dependency issues.
 *** TODO Figure out how to put the server behind stud
     URL: https://github.com/bumptech/stud
 *** TODO Figure out how to configure two lisp processes running behind HAProxy

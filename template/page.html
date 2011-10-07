@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {{ TMPL_IF title }}
+    <title>{{ TMPL_VAR title }}</title>
+    {{ /TMPL_IF }}
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="res/css/styles.css">
+    <script type="text/javascript" src="res/js/lib/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="res/js/lib/jquery-ui-1.8.14.custom.min.js"></script>
+    <link href="res/css/lib/smoothness/jquery-ui-1.8.14.custom.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="res/js/lib/chosen.jquery.min.js"></script>
+    <link href="res/css/lib/chosen.css" rel="stylesheet" type="text/css">
+    {{ TMPL_LOOP additional-css }}
+    <link rel="stylesheet" type="text/css" href="{{ TMPL_VAR stylesheet-path }}">
+    {{ /TMPL_LOOP }}
+    {{ TMPL_LOOP additional-js }}
+    <script type="text/javascript" src="{{ TMPL_VAR js-path }}"></script>
+    {{ /TMPL_LOOP }}
+  </head>
+  <body>
+    {{ TMPL_INCLUDE 'error-list.html' }}
+    {{ TMPL_CALL page-body }}
+  </body>
+</html>

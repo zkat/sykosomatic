@@ -6,7 +6,7 @@
                #:hunchentoot #:yaclml #:clws
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad #:postmodern
-               #:local-time
+               #:local-time #:html-template
                #:string-case)
   :components
   ((:module src
@@ -20,6 +20,7 @@
                        (:file "smug")
                        (:file "timer")))
              (:file "config")
+             (:file "template")
              (:file "db")
              (:file "vocabulary")
              (:file "entity")
@@ -35,8 +36,6 @@
              (:file "command")
              (:file "parser")
              (:file "websocket")
-             (:file "template")
-             (:file "newchar-template")
              (:file "handler")
              (:module handlers
                       :components

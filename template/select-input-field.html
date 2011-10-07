@@ -1,0 +1,24 @@
+<div class="field">
+  <label for="{{ TMPL_VAR field-id }}">{{ TMPL_VAR field-label }}</label>
+  <select id="{{ TMPL_VAR field-id }}" name="{{ TMPL_VAR field-name }}">
+    <option value="" {{ TMPL_UNLESS field-value }}selected="selected"{{ /TMPL_UNLESS }}>
+      {{ TMPL_VAR field-default-text }}
+    </option>
+    {{ TMPL_LOOP field-optgroups }}
+    {{ TMPL_IF field-optgroup-label }}
+    <optgroup label="{{ TMPL_VAR field-optgroup-label }}">
+    {{ /TMPL_IF }}
+      {{ TMPL_LOOP field-optgroup-options }}
+      <option value="{{ TMPL_VAR option-value }}"
+              {{ TMPL_IF option-selected-p }}
+              selected="selected"
+              {{ /TMPL_IF }}>
+        {{ TMPL_VAR option-text }}
+      </option>
+      {{ /TMPL_LOOP }}
+    {{ TMPL_IF field-optgroup-label }}
+    </optgroup>
+    {{ /TMPL_IF }}
+    {{ /TMPL_LOOP }}
+  </select>
+</div>
