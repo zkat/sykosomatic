@@ -17,7 +17,6 @@
 (defun render (character-id)
   (render-page "stage.html" (list :char-name (full-name character-id)
                                   :websocket-session-token (generate-websocket-token (session-string))
-                                  :error-list (pop-error-list)
                                   :additional-js (loop for lib in (gameplay-js-libs)
                                                     collect (list :js-path lib)))
                :title "All the World's a Stage"))

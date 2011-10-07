@@ -22,9 +22,7 @@
                                              :error (field-error form :password))
                            (text-input-field "confirmation" "Confirm password"
                                              :type "password"
-                                             :error (field-error form :confirmation)))
-                     :error-list
-                     (pop-error-list))
+                                             :error (field-error form :confirmation))))
                :title "Sign up for sykosomatic"))
 
 (define-easy-handler (signup :uri "/signup") ()

@@ -2,29 +2,19 @@
   (:use :html-template
         :sykosomatic.config)
   (:export :render-template
-           :render-page
            :text-input-field
            :select-field
            :field-optgroup))
 
 (defparameter *template-start-marker* "{{")
 (defparameter *template-end-marker* "}}")
-(defparameter *page-template-relative-path* #p"page.html")
 (defparameter *default-template-pathname* *template-path*)
-(defparameter *site-page-path* (merge-pathnames "site-pages/" *template-path*))
 
 (defun render-template (template/printer variables)
-  (with-output-to-string (*default-template-output*)
-    (fill-and-print-template template/printer
-                             variables)))
-
-(defun render-page (body-template variables &key title)
   (let ((*ignore-empty-lines* t))
-    (render-template *page-template-relative-path*
-                     (list* :page-body (list (list (merge-pathnames body-template
-                                                                    *site-page-path*)))
-                            :title title
-                            variables))))
+    (with-output-to-string (*default-template-output*)
+      (fill-and-print-template template/printer
+                               variables))))
 
 ;; Utilities
 (defun text-input-field (name label &key id max-length type value error)
