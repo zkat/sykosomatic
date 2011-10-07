@@ -13,7 +13,7 @@
 (defun init-hunchentoot ()
   (setf *dispatch-table*
         (list (create-folder-dispatcher-and-handler
-               "/res/" *sykosomatic-path*)
+               "/res/" *resource-path*)
               'dispatch-easy-handlers
               'default-dispatcher))
   ;; (setf *default-handler* 'sykosomatic.handler.404:404-handler)
