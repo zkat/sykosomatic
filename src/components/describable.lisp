@@ -2,6 +2,8 @@
   (:use :sykosomatic.db
         :sykosomatic.entity)
   (:export :noun
+           :configure-noun
+           :remove-noun
            :plural-noun
            :pluralize
            :adjectives
@@ -44,22 +46,22 @@
          (format nil "~Aoes" (subseq word 0 (1- (length word)))))
         (t (format nil "~As" word))))
 
-(defun (setf noun) (new-value entity)
+(defun configure-noun (entity singular &key plural)
   (with-transaction ()
-    (cond ((null new-value)
-           (db-query (:delete-from 'noun :where (:= 'entity-id entity))))
-          ((noun entity)
-           (db-query (:update 'noun :set
-                              'singular (if (consp new-value) (car new-value) new-value)
-                              'plural (if (consp new-value) (cadr new-value) (pluralize new-value))
-                              :where (:= 'entity-id entity))))
-          (t
-           (insert-row 'noun
-                       :entity-id entity
-                       :singular (if (consp new-value) (car new-value) new-value)
-                       :plural (if (consp new-value) (cadr new-value) (pluralize new-value)))))
+    (if (noun entity)
+        (db-query (:update 'noun :set
+                           'singular singular
+                           'plural (or plural (pluralize singular))
+                           :where (:= 'entity-id entity)))
+        (insert-row 'noun
+                    :entity-id entity
+                    :singular singular
+                    :plural (or plural (pluralize singular))))
     (cache-base-description entity :update-featured t))
-  new-value)
+  t)
+
+(defun remove-noun (entity)
+  (values (db-query (:delete-from 'noun :where (:= 'entity-id entity)))))
 
 ;;;
 ;;; Adjectives

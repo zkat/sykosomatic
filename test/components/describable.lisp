@@ -10,18 +10,19 @@
 
 (test noun
   (with-entities (e)
-    (is (string= "testteapot" (setf (noun e) "testteapot")))
+    (is (null (noun e)))
+    (finishes (configure-noun e "testteapot"))
     (is (string= "testteapot" (noun e)))
-    (is (null (setf (noun e) nil)))
-    (is (null (noun e)))))
+    (remove-noun e)))
 
-(test plural-noun
+(test configure-noun
   (with-entities (e)
-    (setf (noun e) "testteapot")
+    (configure-noun e "testteapot")
     (is (string= "testteapots" (plural-noun e)))
-    (setf (noun e) '("testteapot" "testteapotses"))
+    (configure-noun e "testteapot" :plural "testteapotses")
     (is (string= "testteapot" (noun e)))
-    (is (string= "testteapotses" (plural-noun e)))))
+    (is (string= "testteapotses" (plural-noun e)))
+    (remove-noun e)))
 
 (test pluralize
   ;; TODO - test unnacented pluralisation... need to fix Eos first, though.
@@ -61,37 +62,37 @@
 
 (test base-description
   (with-entities (e f1 f2 f3)
-    (setf (noun e) "testteapot")
+    (configure-noun e "testteapot")
     (is (string= "a testteapot" (base-description e)))
     (setf (adjectives e) '("short" "stout"))
     (is (string= "a short and stout testteapot" (base-description e)))
-    (setf (noun f1) "handle")
-    (setf (noun f2) "spout")
+    (configure-noun f1 "handle")
+    (configure-noun f2 "spout")
     (add-feature e f1)
     (is (string= "a short and stout testteapot with a handle" (base-description e)))
     (add-feature e f2)
     (is (string= "a short and stout testteapot with a handle and a spout" (base-description e)))
-    (setf (noun f3) "curvature")
+    (configure-noun f3 "curvature")
     (add-feature f1 f3)
     (is (string= "a handle with a curvature" (base-description f1)))
     (is (string= "a short and stout testteapot with a handle and a spout" (base-description e)))
-    (setf (noun f1) "handyhandle")
+    (configure-noun f1 "handyhandle")
     (setf (adjectives f1) '("handy"))
     (is (string= "a short and stout testteapot with a handy handyhandle and a spout" (base-description e)))
     (remove-feature e f2)
     (is (string= "a short and stout testteapot with a handy handyhandle" (base-description e)))
-    (setf (noun e) nil
-          (adjectives e) nil
-          (noun f1) nil
-          (noun f2) nil
-          (noun f3) nil)
+    (remove-noun e)
+    (remove-noun f1)
+    (remove-noun f2)
+    (remove-noun f3)
+    (setf (adjectives e) nil)
     (remove-feature e f1)
     (remove-feature e f2)
     (remove-feature f1 f3))
   (with-entities (e1 e2)
     ;; a/an articles
-    (setf (noun e1) "article"
-          (noun e2) "test")
+    (configure-noun e1 "article")
+    (configure-noun e2 "test")
     (is (string= "an article" (base-description e1)))
     (is (string= "a test" (base-description e2)))
     (setf (adjectives e1) '("long" "arduous"))
@@ -99,9 +100,9 @@
     ;; Adjective ordering issues strike again :(
     (is (string= "a long and arduous article" (base-description e1)))
     (is (string= "an arduous and long test" (base-description e2)))
-    (setf (noun e1) nil
-          (noun e2) nil
-          (adjectives e1) nil
+    (remove-noun e1)
+    (remove-noun e2)
+    (setf (adjectives e1) nil
           (adjectives e2) nil)))
 
 (test nickname
@@ -124,23 +125,23 @@
 (test short-description
   (with-entities (e f o)
     (is (null (short-description o e)))
-    (setf (noun e) "testteapot")
+    (configure-noun e "testteapot")
     (setf (adjectives e) '("short" "stout"))
-    (setf (noun f) "handle")
+    (configure-noun f "handle")
     (add-feature e f)
     (is (string= "a short and stout testteapot with a handle" (short-description o e)))
     (setf (nickname o e) "Mrs. Potts")
     (is (string= "Mrs. Potts" (short-description o e)))
     (setf (nickname o e) nil)
     (is (string= "a short and stout testteapot with a handle" (short-description o e)))
-    (setf (noun e) nil
-          (noun f) nil)
+    (remove-noun e)
+    (remove-noun f)
     (remove-feature e f)))
 
 (test find-by-short-description
   (with-entities (o e1 e2)
-    (setf (noun e1) "testteapot")
-    (setf (noun e2) "testteacup")
+    (configure-noun e1 "testteapot")
+    (configure-noun e2 "testteacup")
     (is (null (set-difference (list e1 e2) (find-by-short-description o "testtea"))))
     (is (null (set-difference (list e1 e2) (find-by-short-description o "a testtea"))))
     (is (equal (list e1) (find-by-short-description o "testteap")))
@@ -152,15 +153,15 @@
     ;; Executing this manually in the REPL -does- work.
     ;; (setf (nickname o e2) "Chíp")
     ;; (is (equal (list e2) (find-by-short-description o "hip")))
-    (setf (noun e1) nil
-          (noun e2) nil
-          (nickname o e1) nil
+    (remove-noun e1)
+    (remove-noun e2)
+    (setf (nickname o e1) nil
           (nickname o e2) nil)))
 
 (test partial-short-description
   (with-entities (o e1 e2)
-    (setf (noun e1) "testteapot")
-    (setf (noun e2) "testteacup")
+    (configure-noun e1 "testteapot")
+    (configure-noun e2 "testteacup")
     (is (null (set-difference (list "a testteapot" "a testteacup")
                               (partial-short-description o "testtea")
                               :test #'equalp)))
@@ -172,7 +173,7 @@
     (setf (nickname o e1) "Mrs. Potts")
     (is (null (partial-short-description o "testteapot")))
     (is (equalp (list "Mrs. Potts") (partial-short-description o "rs. Pot")))
-    (setf (noun e1) nil
-          (noun e2) nil
-          (nickname o e1) nil
+    (remove-noun e1)
+    (remove-noun e2)
+    (setf (nickname o e1) nil
           (nickname o e2) nil)))
