@@ -4,11 +4,15 @@
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.components.nameable
-        :sykosomatic.account)
+        :sykosomatic.account
+        :sykosomatic.template)
   (:export :role))
 
 (define-easy-handler (role :uri "/role") ()
   (ensure-logged-in)
-  (with-form-errors
-    (templ:render-template "role" (mapcar #'full-name
-                                          (account-bodies (current-account))))))
+  (render-page "role.html" (list :characters (loop for entity in (account-bodies (current-account))
+                                                for i from 0
+                                                collect (list :char-name (full-name entity)
+                                                              :char-index i))
+                                 :error-list (pop-error-list))
+               :title "Pick a role to play"))

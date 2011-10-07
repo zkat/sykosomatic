@@ -136,9 +136,11 @@
             :single))
 
 (defun cc-select-options (category)
-  (db-query (:select 'short 'displayed 'details
+  (db-query (:select (:as 'short 'option-value)
+                     (:as 'displayed 'option-text)
                      :from 'cc-option
-                     :where (:= 'category category))))
+                     :where (:= 'category category))
+            :plists))
 
 ;;; Importing seed/test data.
 (defun import-adjectives ()

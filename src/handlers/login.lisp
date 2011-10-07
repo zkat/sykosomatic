@@ -3,7 +3,8 @@
         :sykosomatic.db
         :sykosomatic.handler
         :sykosomatic.session
-        :sykosomatic.account)
+        :sykosomatic.account
+        :sykosomatic.template)
   (:export :login))
 
 (define-easy-handler (login :uri "/login") (email password)
@@ -11,7 +12,11 @@
     (:get
      (when-let ((account-id (current-account)))
        (push-error "Already logged in as ~A." (account-email account-id)))
-     (with-form-errors (templ:render-template "login")))
+     (render-page "login.html" (list :login-fields (list (text-input-field "email" "Email")
+                                                         (text-input-field "password" "Password"
+                                                                           :type "password"))
+                                     :error-list (pop-error-list))
+                  :title "Login Page"))
     (:post
      (when (current-account)
        (redirect "/login"))

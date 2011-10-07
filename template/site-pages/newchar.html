@@ -1,0 +1,79 @@
+<form name="character-creation" action="/newchar" method="post">
+  <div id="creation-forms">
+    <div id="identity">
+      <fieldset>
+        {{ TMPL_CALL pronoun-field }}
+      </fieldset>
+      <fieldset>
+        <legend>Name</legend>
+        {{ TMPL_CALL first-name-field }}
+        {{ TMPL_CALL nickname-field }}
+        {{ TMPL_CALL last-name-field }}
+      </fieldset>
+    </div>
+    <div id="early-life">
+      <fieldset>
+        <legend>Place of origin</legend>
+        {{ TMPL_CALL origin-field }}
+      </fieldset>
+      <fieldset>
+        <legend>Family situation</legend>
+        {{ TMPL_CALL parents-field }}
+        {{ TMPL_CALL siblings-field }}
+        {{ TMPL_CALL situation-field }}
+      </fieldset>
+    </div>
+    <div id="later-life">
+      <fieldset>
+        <legend>Friends and More</legend>
+        {{ TMPL_CALL friends-field }}
+        {{ TMPL_CALL so-field }}
+      </fieldset>
+      <fieldset>
+        <legend id="careers-desc">Choose up to 5 careers</legend>
+        <button type="button" id="add-career" class="button">Add Career</button>
+        <div id="careers">
+          {{ TMPL_LOOP career-divs }}
+          <div class="field careers">
+            {{ TMPL_CALL career-field }} for <input class="career-times" name="{{ TMPL_VAR career-time-field-name }}" id="{{ TMPL_VAR career-time-field-id }}" /> years.
+            <button type="button" class="button">remove</button>
+          </div>
+          {{ /TMPL_LOOP }}
+        </div>
+      </fieldset>
+    </div>
+    <div id="appearance">
+      <fieldset>
+        <legend id="features-desc">Choose up to 5 distinguishing features</legend>
+        <button type="button" id="add-feature" class="button">Add a feature</button>
+        <div id="features">
+          {{ TMPL_LOOP feature-divs }}
+          <div class="field features">
+            {{ TMPL_CALL feature-field }}
+            <select id="{{ TMPL_VAR adj-field-id }}" name="{{ TMPL_VAR adj-field-name }}"
+                    class="feature-adjs">
+              <option value="" selected="selected">{{ TMPL_VAR adj-field-label }}</option>
+            </select>
+            <button type="button" class="button">remove</button>
+          </div>
+          {{ /TMPL_LOOP }}
+        </div>
+      </fieldset>
+    </div>
+    <div id="here-and-now">
+      <fieldset>
+        <legend>Current location</legend>
+        {{ TMPL_CALL where-field }}
+        <h3 id="description-header">Description</h3>
+        <p id="location-description"></p>
+      </fieldset>
+    </div>
+    <div id="confirm">
+      <fieldset>
+        <legend>Confirmation</legend>
+        <p>All done? Are you sure you wish to create this character?</p>
+        <input type="submit" class="button" value="All Done" />
+      </fieldset>
+    </div>
+  </div>
+</form>

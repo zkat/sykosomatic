@@ -1,6 +1,7 @@
 (util:def-file-package #:sykosomatic.handler.index
-  (:use :hunchentoot)
+  (:use :hunchentoot
+        :sykosomatic.template)
   (:export :index))
 
 (define-easy-handler (index :uri "/") ()
-  (templ:render-template "index"))
+  (render-page "index.html" nil :title "Sykosomatic Test Site"))

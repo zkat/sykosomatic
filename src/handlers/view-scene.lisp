@@ -5,6 +5,7 @@
         :sykosomatic.scene)
   (:export :view-scene))
 
+#+nil
 (define-easy-handler (view-scene :uri "/view-scene") ((id :parameter-type 'integer))
   (case (request-method*)
     (:get

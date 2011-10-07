@@ -1,0 +1,10 @@
+<h2>Choose a character</h2>
+<ul>
+  {{ TMPL_LOOP characters }}
+  <li>
+    <a href="/stage?char={{ TMPL_VAR char-index }}">{{ TMPL_VAR char-name }}</a>
+  </li>
+  {{ /TMPL_LOOP }}
+</ul>
+<a href="/newchar">Create a new character.</a>
+{{ TMPL_INCLUDE 'logout.html' }}

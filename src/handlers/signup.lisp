@@ -3,8 +3,29 @@
         :sykosomatic.handler
         :sykosomatic.session
         :sykosomatic.account
+        :sykosomatic.template
         :sykosomatic.util.form)
   (:export :signup))
+
+(defun render (form)
+  (render-page "signup.html"
+               (list :signup-fields
+                     (list (text-input-field "email" "Email"
+                                             :value (field-raw-value form :email)
+                                             :error (field-error form :email))
+                           (text-input-field "display-name" "Display Name"
+                                             :max-length 32
+                                             :value (field-raw-value form :display-name)
+                                             :error (field-error form :display-name))
+                           (text-input-field "password" "Password"
+                                             :type "password"
+                                             :error (field-error form :password))
+                           (text-input-field "confirmation" "Confirm password"
+                                             :type "password"
+                                             :error (field-error form :confirmation)))
+                     :error-list
+                     (pop-error-list))
+               :title "Sign up for sykosomatic"))
 
 (define-easy-handler (signup :uri "/signup") ()
   (case (request-method*)
@@ -16,7 +37,6 @@
               (push-error "Please log in.")
               (redirect "/login"))
              (t
-              (templ:render-template "signup" form)))))
+              (render form)))))
     (:get
-     (with-form-errors
-       (templ:render-template "signup" (make-form 'signup))))))
+     (render (make-form 'signup)))))
