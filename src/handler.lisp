@@ -48,4 +48,8 @@
                                                                   *site-page-path*)))
                           :title title
                           :error-list (pop-error-list)
+                          :nav-items (list (list :nav-href "/" :nav-title "Home")
+                                           (list :nav-href "/login" :nav-title "Log In")
+                                           (list :nav-href "/" :nav-title "Contact")
+                                           (list :nav-href "/" :nav-title "About"))
                           variables)))
