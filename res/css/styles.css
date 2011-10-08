@@ -61,33 +61,33 @@
 }
 */
 
-.breadcrumbs li {
-    display: inline;
-    list-style-type: none;
-    padding-right: 20px;
-}
+/* .breadcrumbs li { */
+/*     display: inline; */
+/*     list-style-type: none; */
+/*     padding-right: 20px; */
+/* } */
 
-.breadcrumb-focused {
-    color: red;
-}
+/* .breadcrumb-focused { */
+/*     color: red; */
+/* } */
 
-.breadcrumb-unfocused {
-    color: gray;
-}
+/* .breadcrumb-unfocused { */
+/*     color: gray; */
+/* } */
 
-.field label:first-child {
-    padding-right: 0.5em;;
-    text-align: right;
-    width: 15em;
-    float: left;
-}
+/* .field label:first-child { */
+/*     padding-right: 0.5em;; */
+/*     text-align: right; */
+/*     width: 15em; */
+/*     float: left; */
+/* } */
 
 .field label:first-child:after {
     content: ":";
 }
 
 .field select {
-    width: 300px;
+    width: 100%;
 }
 
 .field input {
