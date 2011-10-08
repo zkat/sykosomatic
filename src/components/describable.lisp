@@ -27,7 +27,8 @@
 (defdao noun ()
   ((entity-id bigint)
    (singular text)
-   (plural text)))
+   (plural text)
+   (use-article-p boolean)))
 
 (defun noun (entity)
   (values (db-query (:select 'singular :from 'noun :where (:= 'entity-id entity)) :single)))
@@ -51,17 +52,19 @@
          (format nil "~Aoes" (subseq word 0 (1- (length word)))))
         (t (format nil "~As" word))))
 
-(defun configure-noun (entity singular &key plural)
+(defun configure-noun (entity singular &key plural (use-article-p t))
   (with-transaction ()
     (if (noun entity)
         (db-query (:update 'noun :set
                            'singular singular
                            'plural (or plural (pluralize singular))
+                           'use-article-p use-article-p
                            :where (:= 'entity-id entity)))
         (insert-row 'noun
                     :entity-id entity
                     :singular singular
-                    :plural (or plural (pluralize singular))))
+                    :plural (or plural (pluralize singular))
+                    :use-article-p use-article-p))
     (cache-base-description entity :update-featured t))
   t)
 
@@ -179,6 +182,7 @@
 
 (defun calculate-base-description (entity &key (include-features-p t))
   (when-let (result (db-query (:select 'n.singular
+                                       'n.use-article-p
                                        ;; Pray for proper ordering. :(
                                        (:raw "array_agg(DISTINCT a.adjective)")
                                        (:raw "array_agg(DISTINCT f.feature_id)")
@@ -188,14 +192,17 @@
                                        :left-join (:as 'feature 'f)
                                        :on (:= 'f.entity-id 'n.entity-id)
                                        :where (:= 'n.entity-id entity)
-                                       :group-by 'n.singular)
+                                       :group-by 'n.singular 'n.use-article-p)
                               :row))
-    (destructuring-bind (noun adjectives features) result
+    (destructuring-bind (noun use-article-p adjectives features) result
       (with-output-to-string (s)
         (if-let (adjs (coerce (remove :null adjectives) 'list))
-          (format s (concatenate 'string "~A " *english-list-format-string* " ")
-                  (indefinite-article (car adjs)) adjs)
-          (format s "~A " (indefinite-article noun)))
+          (progn
+            (when use-article-p
+              (format s "~A " (indefinite-article (car adjs))))
+            (format s *english-list-format-string* adjs)
+            (princ " " s))
+          (when use-article-p (format s "~A " (indefinite-article noun))))
         (princ noun s)
         (when include-features-p
           (when-let (feature-descs (loop for feature across features

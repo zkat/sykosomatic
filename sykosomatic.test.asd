@@ -15,7 +15,6 @@
              (:module components
                       :components
                       ((:file "describable")
-                       (:file "nameable")
                        (:file "container")))
              (:file "session")
              (:file "command")

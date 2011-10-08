@@ -3,7 +3,7 @@
         :sykosomatic.db
         :sykosomatic.entity
         :sykosomatic.account
-        :sykosomatic.components.nameable
+        :sykosomatic.components.describable
         :sykosomatic.util.form)
   (:export :newchar :create-character
            :cc-features :cc-adjectives
@@ -51,8 +51,11 @@
 (defun create-character (account-id form)
   (with-transaction ()
     (let ((entity (create-entity)))
-      (add-name entity (field-value form :last-name)
-                :first-name (field-value form :first-name))
+      (configure-noun entity "person" :plural "people")
+      (configure-nickname entity entity (format nil "~A '~A' ~A"
+                                                (field-value form :first-name)
+                                                (field-value form :nickname)
+                                                (field-value form :last-name)))
       (add-body entity account-id)
       #+nil
       (let ((cc-values-id (insert-row 'cc-values

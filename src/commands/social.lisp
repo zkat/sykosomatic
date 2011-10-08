@@ -1,11 +1,11 @@
 (util:def-file-package #:sykosomatic.command.social
   (:use :sykosomatic.command
         :sykosomatic.vocabulary
-        :sykosomatic.components.nameable))
+        :sykosomatic.components.describable))
 
 (defcommand social ()
   (tell-local *actor* (with-output-to-string (s)
-                        (princ (full-name *actor*) s)
+                        (princ (short-description *actor* *actor*) s)
                         (when (eql 0 *adverb-position*)
                           (format s " ~A " *adverb*))
                         (format s " ~A" (verb-third-person *verb*))
@@ -13,17 +13,17 @@
                           (format s " ~A" *adverb*))
                         (when (null *preposition*)
                           (when *indirect-objects* (princ " " s))
-                          (format s *english-list-format-string* (mapcar #'full-name
+                          (format s *english-list-format-string* (mapcar #'short-description
                                                                          *indirect-objects*)))
                         (when *direct-objects* (princ " " s))
-                        (format s *english-list-format-string* (mapcar #'full-name
+                        (format s *english-list-format-string* (mapcar #'short-description
                                                                        *direct-objects*))
                         (when (eql 2 *adverb-position*)
                           (format s " ~A" *adverb*))
                         (when *preposition*
                           (format s " ~A" *preposition*)
                           (when *indirect-objects* (princ " " s))
-                          (format s *english-list-format-string* (mapcar #'full-name
+                          (format s *english-list-format-string* (mapcar #'short-description
                                                                          *indirect-objects*)))
                         (when (eql 3 *adverb-position*)
                           (format s " ~A" *adverb*))
