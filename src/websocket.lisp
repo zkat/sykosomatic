@@ -3,7 +3,7 @@
         :sykosomatic.db
         :sykosomatic.config
         :sykosomatic.session
-        :sykosomatic.components.nameable
+        :sykosomatic.components.describable
         :sykosomatic.account
         :sykosomatic.scene)
   (:export
@@ -102,7 +102,7 @@
                                      (client-account-id client)))))
     (cond ((and client-valid-p entity-id)
            (logit "Client validated: ~S.~%It's now playing as ~A."
-                  client (full-name entity-id))
+                  client (short-description entity-id entity-id))
            ;; TODO - Need to do something about clients connecting to the same entity.
            (setf (client-entity-id client) entity-id)
            (add-client res client))
@@ -212,7 +212,7 @@
        (all-clients)))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (let ((char-name (full-name actor)))
+  (let ((char-name (short-description recipient actor)))
     #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
            (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
            (add-dialogue scene-id char-name dialogue parenthetical))
@@ -257,8 +257,8 @@
 
 (defhandler obj-desc (objname)
   (logit "Got an object description request: ~S" objname)
-  (when-let (entity (find-by-full-name objname :fuzzyp t))
-    (client-write-json *client* (list "obj-desc" (full-name entity)))))
+  (when-let (entity (partial-short-description (client-entity-id *client*) objname))
+    (client-write-json *client* (list "obj-desc" (short-description (client-entity-id *client*) entity)))))
 
 (defhandler ping ()
   (client-write-json *client* (list "pong")))

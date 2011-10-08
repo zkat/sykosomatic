@@ -1,7 +1,7 @@
 (util:def-file-package #:sykosomatic.handler.stage
   (:use :hunchentoot
         :sykosomatic.account
-        :sykosomatic.components.nameable
+        :sykosomatic.components.describable
         :sykosomatic.websocket
         :sykosomatic.session
         :sykosomatic.handler
@@ -15,7 +15,7 @@
     "res/js/client.js"))
 
 (defun render (character-id)
-  (render-page "stage.html" (list :char-name (full-name character-id)
+  (render-page "stage.html" (list :char-name (short-description character-id character-id)
                                   :websocket-session-token (generate-websocket-token (session-string))
                                   :additional-js (loop for lib in (gameplay-js-libs)
                                                     collect (list :js-path lib)))

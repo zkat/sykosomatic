@@ -4,7 +4,7 @@
         :sykosomatic.vocabulary
         :sykosomatic.command
         :sykosomatic.db
-        :sykosomatic.components.nameable))
+        :sykosomatic.components.describable))
 
 (defmacro with-verb-and-nameables ((result-var verb-third-person name1 name2 &key
                                     transitivep intransitivep ditransitivep
@@ -18,8 +18,8 @@
            (,adverbs-var ,adverbs))
        (unwind-protect
             (let (,result-var)
-              (add-name e1 ,name1)
-              (add-name e2 ,name2)
+              (configure-noun e1 ,name1 :use-article-p nil)
+              (configure-noun e2 ,name2 :use-article-p nil)
               (map nil #'add-adverb ,adverbs-var)
               (add-verb ,verb-var :third-person ,verb-var
                         :transitivep ,transitivep
@@ -32,8 +32,8 @@
                             :verb *verb*
                             :adverb *adverb*
                             :adverb-position *adverb-position*
-                            :do (mapcar #'full-name *direct-objects*)
-                            :io (mapcar #'full-name *indirect-objects*)
+                            :do (mapcar (curry #'short-description *actor*) *direct-objects*)
+                            :io (mapcar (curry #'short-description *actor*) *indirect-objects*)
                             :preposition *preposition*)))
               (add-verb-command ,verb-var 'test)
               ,@body)
@@ -41,8 +41,8 @@
          (remove-verb-command ,verb-var)
          (remove-verb ,verb-var)
          (map nil #'remove-adverb ,adverbs-var)
-         (delete-name e1)
-         (delete-name e2)
+         (remove-noun e1)
+         (remove-noun e2)
          (delete-entities e1 e2)))))
 
 (test action-parse-intransitive
