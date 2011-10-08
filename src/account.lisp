@@ -144,6 +144,7 @@
                "Must be between 4 and 32 characters long.")
   (check-field (scan *display-name-regex* display-name)
                "Only alphabetic characters, digits, and the characters '.', '_', and '-' are allowed.")
+  (check-field (not (display-name-exists-p display-name)) "Display name already exists.")
   display-name)
 
 (deform signup ()
