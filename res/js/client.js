@@ -335,8 +335,6 @@ sykosomatic.client =
 
         // UI stuff
         // Not sure why this doesn't play nice with enable_input()
-        $(".btn").button();
-
         $("#game-input").tabs();
         $("#game-input .ui-tabs-nav, #game-input .ui-tabs-nav > *")
             .removeClass("ui-corner-all ui-corner-top")
@@ -377,8 +375,6 @@ sykosomatic.client =
             };
         });
         $("#game-input > div :input").get(0).focus();
-
-        $("select").chosen();
 
         // ping the server to keep the websocket alive.
         interval_id = setInterval(ping,1000*60*15);

@@ -7,9 +7,6 @@ function update_preview () {
     });
 }
 
-//update_preview();
-//$('form').change(update_preview);
-
 function prettify_ui() {
     //$('#creation-forms').accordion();
     $('.next-tab').click(function (){
@@ -99,7 +96,10 @@ function init_here_and_now() {
 }
 
 function init() {
+    //update_preview();
+    //$('form').change(update_preview);
     prettify_ui();
+    init_career_section();
     init_feature_section();
     init_here_and_now();
 }
