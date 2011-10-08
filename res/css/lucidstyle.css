@@ -1,0 +1,127 @@
+@import url(http://fonts.googleapis.com/css?family=Special+Elite);
+
+/*--------------------------------------*/
+/*STANDARD HTML TAG RESET               */
+/*--------------------------------------*/
+
+body,h1,h2,h3,h4,h5,h6,p,ul,li,form{
+border:0px;
+margin:0px;
+padding:0px;
+}
+
+/*--------------------------------------*/
+/*STANDARD HTML TAG DEFINITIONS              */
+
+html{
+height:100%;
+}
+
+body,form, input{
+font-family: 'Special Elite', cursive;
+/*Special Elite is a google web font*/
+font-size:100%;
+}
+body{
+background-color:#C0C0C0;
+height:100%;} 
+h1{font-size:200%;}
+h2{font-size:150%;}
+h3{font-size:125%;}
+h1,h2,h3{font-weight:bold;
+}
+h1,h2,h3,p{
+display:inline;}
+
+.strong{
+font-size:300%;
+}
+
+
+/*--------------------------------------*/
+/*HEADER              */
+/*Come back later and fix the logo???*/
+
+/*.header{background-color:#FFFFFF;
+width:100%;}*/
+
+.branding{
+padding:2% 15% 0% 15%;
+height:15%;
+}
+
+img.logo{
+height:100%;
+float:right;
+}
+
+.logowrapper{
+float:left;
+width:15%;
+height:100%;
+}
+.title{
+padding:1% 0% 0% 17%;
+width:85%;
+}
+
+
+
+
+/*--------------------------------------*/
+/*TOP NAVIGATION BAR            */
+.nav{
+clear:both;
+border-top-style:solid;
+border-bottom-style:solid;
+background-color:#FFFFFF;
+}
+.navwrapper{
+clear:both;
+margin-left:10%;
+padding-left:13%;
+margin-top:1%;
+margin-bottom:1%;
+}
+a.spaced{
+padding:0% 5%;
+}
+
+/*--------------------------------------*/
+/*WRAPPER           */
+
+
+
+.wrapper{
+background-color:#FFFFFF;
+margin:0% 10% 5% 10%;
+padding:2% 10% 6% 10%;
+} 
+
+
+/*--------------------------------------*/
+/*The Play-Now Widget           */
+
+
+.playnowinner{
+padding:10%;
+background-color:#FFFFFF;
+}
+.playnow{
+background-color:#C0C0C0;
+padding:10%;
+}
+
+/*--------------------------------------*/
+/*CONTENT        */
+
+.content{
+padding:5% 10%;
+}
+
+/*--------------------------------------*/
+/*FOOTER         */
+
+.footer{
+margin:5% 10% 0% 10%;
+}
