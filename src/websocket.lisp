@@ -212,7 +212,7 @@
        (all-clients)))
 
 (defun send-dialogue (recipient actor dialogue &optional parenthetical)
-  (let ((char-name (short-description recipient actor)))
+  (let ((char-name (short-description (client-entity-id recipient) actor)))
     #+nil(when-let ((scene-id (session-value 'scene-id (client-session (entity-client recipient)))))
            (logit "Saving dialogue under scene ~A: ~A sez: (~A) ~A." scene-id char-name parenthetical dialogue)
            (add-dialogue scene-id char-name dialogue parenthetical))
