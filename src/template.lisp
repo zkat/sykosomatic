@@ -9,6 +9,7 @@
 (defparameter *template-start-marker* "{{")
 (defparameter *template-end-marker* "}}")
 (defparameter *default-template-pathname* *template-path*)
+(defparameter *string-modifier* #'escape-string-minimal-plus-quotes)
 
 (defun render-template (template/printer variables)
   (let ((*ignore-empty-lines* t))
