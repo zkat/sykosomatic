@@ -127,19 +127,19 @@
 (test nickname
   (with-entities (e o)
     (is (null (nickname o e)))
-    (is (string= "John Crichton" (setf (nickname o e) "John Crichton")))
+    (finishes (configure-nickname o e "John Crichton"))
     (is (string= "John Crichton" (nickname o e)))
-    (is (null (setf (nickname o e) nil)))
+    (finishes (remove-nickname o e))
     (is (null (nickname o e))))
   (with-entities (e o1 o2)
-    (setf (nickname o1 e) "Tomato")
+    (configure-nickname o1 e "Tomato")
     (is (null (nickname o2 e)))
     (is (string= "Tomato" (nickname o1 e)))
-    (setf (nickname o2 e) "Tomawtoe")
+    (configure-nickname o2 e "Tomawtoe")
     (is (string= "Tomawtoe" (nickname o2 e)))
     (is (string= "Tomato" (nickname o1 e)))
-    (setf (nickname o1 e) nil
-          (nickname o2 e) nil)))
+    (remove-nickname o1 e)
+    (remove-nickname o2 e)))
 
 (test short-description
   (with-entities (e f o)
@@ -150,9 +150,9 @@
     (configure-noun f "handle")
     (add-feature e f)
     (is (string= "a short and stout testteapot with a handle" (short-description o e)))
-    (setf (nickname o e) "Mrs. Potts")
+    (configure-nickname o e "Mrs. Potts")
     (is (string= "Mrs. Potts" (short-description o e)))
-    (setf (nickname o e) nil)
+    (remove-nickname o e)
     (is (string= "a short and stout testteapot with a handle" (short-description o e)))
     (remove-noun e)
     (remove-noun f)
@@ -166,7 +166,7 @@
     (is (null (set-difference (list e1 e2) (find-by-short-description o "a testtea"))))
     (is (equal (list e1) (find-by-short-description o "testteap")))
     (is (equal (list e2) (find-by-short-description o "testteac")))
-    (setf (nickname o e1) "Mrs. Potts")
+    (configure-nickname o e1 "Mrs. Potts")
     (is (null (find-by-short-description o "testteapot")))
     (is (equal (list e1) (find-by-short-description o "rs. Pot")))
     ;; The following test fails, but I'm pretty sure it's just Eos' fault.
@@ -175,8 +175,8 @@
     ;; (is (equal (list e2) (find-by-short-description o "hip")))
     (remove-noun e1)
     (remove-noun e2)
-    (setf (nickname o e1) nil
-          (nickname o e2) nil)))
+    (remove-nickname o e1)
+    (remove-nickname o e2)))
 
 (test partial-short-description
   (with-entities (o e1 e2)
@@ -190,10 +190,10 @@
                               :test #'equalp)))
     (is (equalp (list "a testteapot") (partial-short-description o "testteap")))
     (is (equalp (list "a testteacup") (partial-short-description o "testteac")))
-    (setf (nickname o e1) "Mrs. Potts")
+    (configure-nickname o e1 "Mrs. Potts")
     (is (null (partial-short-description o "testteapot")))
     (is (equalp (list "Mrs. Potts") (partial-short-description o "rs. Pot")))
     (remove-noun e1)
     (remove-noun e2)
-    (setf (nickname o e1) nil
-          (nickname o e2) nil)))
+    (remove-nickname o e1)
+    (remove-nickname o e2)))

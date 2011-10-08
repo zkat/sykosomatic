@@ -14,6 +14,8 @@
            :remove-feature
            :list-features
            :nickname
+           :configure-nickname
+           :remove-nickname
            :base-description
            :short-description
            :find-by-short-description
@@ -219,23 +221,22 @@
                                   (:= 'entity-id entity)))
             :single))
 
-(defun (setf nickname) (new-value observer entity)
+(defun remove-nickname (observer entity)
+  (db-query (:delete-from 'nickname :where (:and
+                                            (:= 'observer-id observer)
+                                            (:= 'entity-id entity)))))
+
+(defun configure-nickname (observer entity nickname)
   (with-transaction ()
-    (cond ((null new-value)
-           (db-query (:delete-from 'nickname :where (:and
-                                                     (:= 'observer-id observer)
-                                                     (:= 'entity-id entity)))))
-          ((nickname observer entity)
-           (db-query (:update 'nickname :set 'nickname new-value
-                              :where (:and
-                                      (:= 'observer-id observer)
-                                      (:= 'entity-id entity)))))
-          (t
-           (insert-row 'nickname
-                       :entity-id entity
-                       :observer-id observer
-                       :nickname new-value))))
-  new-value)
+    (if (nickname observer entity)
+        (db-query (:update 'nickname :set 'nickname nickname
+                           :where (:and
+                                   (:= 'observer-id observer)
+                                   (:= 'entity-id entity))))
+        (insert-row 'nickname
+                    :entity-id entity
+                    :observer-id observer
+                    :nickname nickname))))
 
 (defun all-nicknames (entity)
   (db-query (:select 'nickname 'observer-id :from 'nickname
