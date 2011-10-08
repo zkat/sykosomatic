@@ -257,8 +257,8 @@
 
 (defhandler obj-desc (objname)
   (logit "Got an object description request: ~S" objname)
-  (when-let (entity (partial-short-description (client-entity-id *client*) objname))
-    (client-write-json *client* (list "obj-desc" (short-description (client-entity-id *client*) entity)))))
+  (when-let (desc (car (partial-short-description (client-entity-id *client*) objname)))
+    (client-write-json *client* (list "obj-desc" desc))))
 
 (defhandler ping ()
   (client-write-json *client* (list "pong")))
