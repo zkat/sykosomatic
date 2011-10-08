@@ -105,15 +105,27 @@
 ;;;
 (defdao feature ()
   ((entity-id bigint)
-   (feature-id bigint)))
+   (feature-id bigint)
+   (show-in-short-p boolean :col-default t)
+   (index numeric :col-default 0)))
 
-(defun add-feature (entity feature)
+(defun add-feature (entity feature &key (show-in-short-p t) (index 0))
   (with-transaction ()
-    (unless (db-query (:select t :from 'feature :where (:and (:= 'entity-id entity)
-                                                             (:= 'feature-id feature)))
-                      :single)
-      (insert-row 'feature :feature-id feature :entity-id entity)
-      (cache-base-description entity))))
+    (if (db-query (:select t :from 'feature :where (:and (:= 'entity-id entity)
+                                                         (:= 'feature-id feature)))
+                  :single)
+        (db-query (:update 'feature :set
+                           'show-in-short-p show-in-short-p
+                           'index index
+                           :where (:and (:= 'entity-id entity)
+                                        (:= 'feature-id feature))))
+        (insert-row 'feature
+                    :feature-id feature
+                    :entity-id entity
+                    :show-in-short-p show-in-short-p
+                    :index index))
+    (cache-base-description entity)))
+
 (defun remove-feature (entity feature)
   (with-transaction ()
     (db-query (:delete-from 'feature :where (:and (:= 'entity-id entity)
