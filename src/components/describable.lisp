@@ -7,6 +7,9 @@
            :plural-noun
            :pluralize
            :adjectives
+           :add-adjective
+           :remove-adjective
+           :remove-all-adjectives
            :add-feature
            :remove-feature
            :list-features
@@ -68,18 +71,29 @@
 ;;;
 (defdao adjective ()
   ((entity-id bigint)
-   (adjective text)))
+   (adjective text)
+   (show-in-short-p boolean :col-default t)
+   (index numeric :col-default 0)))
 
 (defun adjectives (entity)
-  (db-query (:select 'adjective :from 'adjective :where (:= 'entity-id entity))
+  (db-query (:select 'adjective :from 'adjective
+                     :where (:= 'entity-id entity))
             :column))
-(defun (setf adjectives) (new-value entity)
+
+(defun add-adjective (entity adjective &key (show-in-short-p t) (index 0))
   (with-transaction ()
-    (db-query (:delete-from 'adjective :where (:= 'entity-id entity)))
-    (map nil (lambda (new-adj) (insert-row 'adjective :entity-id entity :adjective new-adj))
-         new-value)
-    (cache-base-description entity :update-featured t))
-  new-value)
+    (insert-row 'adjective
+                :entity-id entity :adjective adjective
+                :show-in-short-p show-in-short-p
+                :index index)
+    (cache-base-description entity :update-featured t)))
+
+(defun remove-adjective (entity adjective)
+  (db-query (:delete-from 'adjective :where (:and (:= 'entity-id entity)
+                                                  (:= 'adjective adjective)))))
+
+(defun remove-all-adjectives (entity)
+  (db-query (:delete-from 'adjective :where (:= 'entity-id entity))))
 
 ;;;
 ;;; Features

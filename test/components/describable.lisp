@@ -34,16 +34,32 @@
   (is (string= "wishes" (pluralize "wish")))
   (is (string= "heroes" (pluralize "hero"))))
 
+(test add-adjective
+  (with-entities (e)
+    (finishes (add-adjective e "short"))
+    (is (equalp '("short") (adjectives e)))))
+
+(test remove-adjective
+  (with-entities (e)
+    (finishes (remove-adjective e "does-not-exist"))
+    (add-adjective e "short")
+    (finishes (remove-adjective e "short"))
+    (is (null (adjectives e)))))
+
+(test remove-all-adjectives
+  (with-entities (e)
+    (add-adjective e "short")
+    (add-adjective e "stout")
+    (finishes (remove-all-adjectives e))
+    (is (null (adjectives e)))))
+
+#+nil
 (test adjectives
   (with-entities (e)
     (is (null (adjectives e)))
-    (let ((new-adjs '("short")))
-      (is (eql new-adjs (setf (adjectives e) new-adjs)))
-      (is (equalp new-adjs (adjectives e))))
-    (let ((new-adjs '("short" "stout")))
-      (is (eql new-adjs (setf (adjectives e) new-adjs)))
-      (is (equalp new-adjs (adjectives e))))
-    (is (null (setf (adjectives e) nil)))
+    (finishes (add-adjective e "short") )
+    (is (equalp '("short") (adjectives e)))
+    (remove-adjective e "short")
     (is (null (adjectives e)))))
 
 (test features
@@ -64,7 +80,8 @@
   (with-entities (e f1 f2 f3)
     (configure-noun e "testteapot")
     (is (string= "a testteapot" (base-description e)))
-    (setf (adjectives e) '("short" "stout"))
+    (add-adjective e "short")
+    (add-adjective e "stout")
     (is (string= "a short and stout testteapot" (base-description e)))
     (configure-noun f1 "handle")
     (configure-noun f2 "spout")
@@ -77,7 +94,7 @@
     (is (string= "a handle with a curvature" (base-description f1)))
     (is (string= "a short and stout testteapot with a handle and a spout" (base-description e)))
     (configure-noun f1 "handyhandle")
-    (setf (adjectives f1) '("handy"))
+    (add-adjective f1 "handy")
     (is (string= "a short and stout testteapot with a handy handyhandle and a spout" (base-description e)))
     (remove-feature e f2)
     (is (string= "a short and stout testteapot with a handy handyhandle" (base-description e)))
@@ -85,7 +102,7 @@
     (remove-noun f1)
     (remove-noun f2)
     (remove-noun f3)
-    (setf (adjectives e) nil)
+    (remove-all-adjectives e)
     (remove-feature e f1)
     (remove-feature e f2)
     (remove-feature f1 f3))
@@ -95,15 +112,17 @@
     (configure-noun e2 "test")
     (is (string= "an article" (base-description e1)))
     (is (string= "a test" (base-description e2)))
-    (setf (adjectives e1) '("long" "arduous"))
-    (setf (adjectives e2) '("arduous" "long"))
+    (add-adjective e1 "long")
+    (add-adjective e1 "arduous")
+    (add-adjective e2 "arduous")
+    (add-adjective e2 "long")
     ;; Adjective ordering issues strike again :(
     (is (string= "a long and arduous article" (base-description e1)))
     (is (string= "an arduous and long test" (base-description e2)))
     (remove-noun e1)
     (remove-noun e2)
-    (setf (adjectives e1) nil
-          (adjectives e2) nil)))
+    (remove-all-adjectives e1)
+    (remove-all-adjectives e2)))
 
 (test nickname
   (with-entities (e o)
@@ -126,7 +145,8 @@
   (with-entities (e f o)
     (is (null (short-description o e)))
     (configure-noun e "testteapot")
-    (setf (adjectives e) '("short" "stout"))
+    (add-adjective e "short")
+    (add-adjective e "stout")
     (configure-noun f "handle")
     (add-feature e f)
     (is (string= "a short and stout testteapot with a handle" (short-description o e)))
