@@ -14,7 +14,7 @@
              (:file "entity")
              (:module components
                       :components
-                      ((:file "nameable")
+                      ((:file "describable")
                        (:file "container")))
              (:file "session")
              (:file "command")

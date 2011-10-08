@@ -2,7 +2,7 @@
   (:use :smug
         :sykosomatic.vocabulary
         :sykosomatic.command
-        :sykosomatic.components.nameable)
+        :sykosomatic.components.describable)
   (:export :parse-action-completions :parse-dialogue :parse-action))
 
 ;;;
@@ -40,9 +40,9 @@
           (other-words (zero-or-more (=and (ws) (dashed-word)) #'plus)))
     (result (format nil "~A~{ ~A~}" word other-words))))
 
-(defun local-object ()
-  (=let* ((full-name (phrase-with-spaces)))
-    (if-let (entity (find-by-full-name full-name))
+(defun local-object (observer)
+  (=let* ((identifier (phrase-with-spaces)))
+    (if-let (entity (car (find-by-short-description observer identifier)))
       (result entity)
       (fail))))
 
@@ -62,10 +62,10 @@
      (result t))
    (comma)))
 
-(defun noun-clause ()
-  (=let* ((obj (local-object))
+(defun noun-clause (observer)
+  (=let* ((obj (local-object observer))
           (more-objects (zero-or-more (=and (conjunction)
-                                            (local-object)))))
+                                            (local-object observer)))))
     (result (cons obj more-objects))))
 
 (defun preposition (verb)
@@ -74,61 +74,61 @@
         (result prep)
         (fail))))
 
-(defun transitive-verb-args (verb)
+(defun transitive-verb-args (verb observer)
   (if (not (verb-transitive-p verb))
       (fail)
       (=let* ((_ (ws))
-              (direct-objects (noun-clause))
+              (direct-objects (noun-clause observer))
               ;; Transitive verbs can have an adverb right in here.
               (adverb (maybe (=and (ws) (adverb)) 'error))
               (preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
-                                    (noun-clause)
+                                    (noun-clause observer)
                                     (result nil))))
         (result `((:adverb . ,(cdr adverb))
                   (:direct-objects . ,direct-objects)
                   (:preposition . ,preposition)
                   (:indirect-objects . ,indirect-objects))))))
 
-(defun ditransitive-verb-args (verb)
+(defun ditransitive-verb-args (verb observer)
   (if (not (verb-ditransitive-p verb))
       (fail)
       (=or
        (=let* ((_ (ws))
-               (direct-objects (noun-clause))
+               (direct-objects (noun-clause observer))
                (preposition (=prog2 (ws) (=string "to") (ws)))
-               (indirect-objects (noun-clause)))
+               (indirect-objects (noun-clause observer)))
          (result `((:direct-objects . ,direct-objects)
                    (:indirect-objects . ,indirect-objects)
                    (:preposition . ,preposition))))
        (=let* ((_ (ws))
-               (indirect-objects (noun-clause))
+               (indirect-objects (noun-clause observer))
                (_ (ws))
-               (direct-objects (noun-clause)))
+               (direct-objects (noun-clause observer)))
          (result `((:direct-objects . ,direct-objects)
                    (:indirect-objects . ,indirect-objects)))))))
 
-(defun intransitive-verb-args (verb)
+(defun intransitive-verb-args (verb observer)
   (if (not (verb-intransitive-p verb))
       (fail)
       (=let* ((preposition (maybe (=prog2 (ws) (preposition verb) (ws))))
               (indirect-objects (if preposition
-                                    (noun-clause)
+                                    (noun-clause observer)
                                     (result nil))))
         (result `((:indirect-objects . ,indirect-objects)
                   (:preposition . ,preposition))))))
 
-(defun verb-args (verb)
-  (=or (transitive-verb-args verb)
-       (ditransitive-verb-args verb)
-       (intransitive-verb-args verb)))
+(defun verb-args (verb observer)
+  (=or (transitive-verb-args verb observer)
+       (ditransitive-verb-args verb observer)
+       (intransitive-verb-args verb observer)))
 
 ;; sentence = [adverb ws] verb [ws adverb] [ws verb-args] [ws adverb]
-(defun sentence ()
+(defun sentence (observer)
   (=let* ((adverb1 (maybe (=prog1 (adverb) (ws)) 'error))
           (verb (verb))
           (adverb2 (maybe (=and (ws) (adverb)) 'error))
-          (verb-args (verb-args verb))
+          (verb-args (verb-args verb observer))
           (adverb3 (maybe (=and (ws) (adverb)) 'error))
           (_ (maybe (=and (ws) (=char #\.) (ws)))))
     (let* ((all-adverbs (list (cdr adverb1)
@@ -148,7 +148,7 @@
 
 ;;; Commands
 (defun parse-action (actor message)
-  (let ((results (invoke-parser (either (=prog1 (sentence) (no-more-input)) 'error) message)))
+  (let ((results (invoke-parser (either (=prog1 (sentence actor) (no-more-input)) 'error) message)))
     (cond ((null results)
            (error "ENOPARSE"))
           ((cdr results)

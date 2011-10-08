@@ -15,7 +15,7 @@
            :remove-command
            :get-all-messages
            :tell
-           :tell-local))
+           :do-local-entities))
 
 ;;; Command vars
 (defvar *actor*)
@@ -92,10 +92,8 @@
              &aux (message (apply #'format nil format-string format-args)))
   "Sends a message to a specific entity."
   (send-to-entity entity message))
-(defun tell-local (entity format-string &rest format-args
-                   &aux (message (apply #'format nil format-string format-args)))
-  "Sends a message to all local entities."
-  ;; Right now, just sends it to all existing entities.
-  (declare (ignore entity))
-  (map nil (rcurry #'send-to-entity message)
-       (db-query (:select 'id :from 'entity) :column)))
+(defmacro do-local-entities ((entity-var local-to) &body body)
+  (declare (ignore local-to))
+  `(map nil (lambda (,entity-var)
+              ,@body)
+        (db-query (:select 'id :from 'entity) :column)))

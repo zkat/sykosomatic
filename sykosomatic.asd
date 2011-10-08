@@ -26,9 +26,8 @@
              (:file "entity")
              (:module components
                       :components
-                      ((:file "nameable")
-                       (:file "container")
-                       (:file "describable")))
+                      ((:file "describable")
+                       (:file "container")))
              (:file "account")
              (:file "character-creation")
              (:file "scene")

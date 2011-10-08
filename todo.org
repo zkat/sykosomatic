@@ -203,6 +203,10 @@
 *** TODO Use a couple of lisps with single-threaded-taskmaster instances
 ** Game
 *** TODO Parser
+**** DONE Periods
+     Allow having a period at the end of action input.
+**** TODO Handle objective pronouns
+     Allow 'me' to resolve to *actor*
 **** TODO Possessives
      Allow chained possessives parsing.
 
@@ -261,6 +265,8 @@
 *** TODO Fix timer
     It's not quite working right now, although there's a reasonable rate limit. that might be okay
     for now.
+*** DONE Containers
+**** DONE New component that allows putting entities 'in' other entities
 *** TODO Cleaner es-thread shutdown
     Don't just murder the thread when we want to murder it. Get it to shut down cleanly.
 *** TODO Add concept of a 'location'
@@ -326,8 +332,6 @@
     using the raw component manager. You should be able to do all that this screen can do with the
     component manager, though.
 ** Database
-*** TODO Remove s-sql patch
-    Waiting until the new pomo makes it into a quicklisp release.
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
@@ -336,6 +340,8 @@
 *** TODO Nameable must-refresh-full-name constraint?
     Is it possible to put in a constraint that prevents updates of nameable if a new full-name is
     not provided? Most likely, I'll need to write a trigger that does this.
+*** TODO More database constraints/indices
+    Tune the database with FKs and indices.
 ** Security
    https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines Has a nice overview of security
    concerns and mitigations.
@@ -383,6 +389,8 @@
     https://wiki.mozilla.org/Security/Users_and_Logs (note that newlines should be escaped to
     prevent log forging)
 ** Misc
+*** DONE src/game-objects -> src/components
+    That directory is more meant for ES components than just 'game objects'
 *** TODO def-file-package improvements
 **** TODO Ability to disable defaults for def-file-package
 **** TODO Is it possible to extract the package name from the -filename-?
@@ -400,8 +408,70 @@
 *** TODO session.lisp
 *** TODO db.lisp
 *** TODO entity.lisp
-*** TODO components.nameable
-    Only full-name is tested. Test the rest of the interface.
+* New name system
+** TODO Implement name/identifier system
+*** DONE Replace components.nameable
+**** DONE Replace nameable usage in handlers
+     full-name is no longer the desired API call. short-description is.
+**** DONE Hook up name/identifier system to current chat client
+***** DONE Use short-description when performing actions through the parser
+**** DONE Fix test suite
+     All tests except the adj ordering test must pass.
+**** DONE Blow away components.nameable
+*** DONE Update tell-local to be able to handle the way short-description needs an observer
+    ...or something. After reading about SAM, I'm wondering what the right approach is. Then again,
+    the right approach is the one that is written and works :)
+    do-local-entities :)))
+*** TODO adjective/feature ordering
+    Should be able to control what order adjectives and features are rendered in base-description.
+*** TODO Configure which adjectives can be in the base-description
+*** TODO Configure which features can be in the base-description
+
+*** TODO visible feature/adjective limits
+*** TODO legal characters
+    alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
+    allowed in nouns, adjectives, and nicknames.
+*** TODO Deal with articles
+**** DONE a/an
+     What a bitch to figure out... just use the first character in the string to start.
+**** TODO optional articles
+     Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
+     other kinds of objects would not have articles attached to them?
+**** TODO definite articles
+     It's not 'a sky', it's 'the sky'
+**** TODO article exceptions
+     Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
+     vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
+     These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
+     separately?
+*** TODO Thorough tests for accent folding
+    ...are gonna have to wait until Eos gets fixed.
+*** TODO Implement the click-menu for assigning and changing nicknames on objects
+*** TODO Implement builder interface for naming entities
+**** DONE Sit with waifu and design this interface before continuing
+**** TODO Base noun
+     Allowed characters: #\', #\., #\-, #\,, A-Z, 0-9, #\space
+**** TODO Adjectives
+     This should be a ± list using the same validation as base nouns. Can only have one, or two.
+**** TODO Features
+     This should be a ± list of entity IDs. We'll deal with more user-friendly input later. Maximum
+     of two allowed. Only existing entities can be set as features.
+**** TODO Adjective/feature limits
+     Only two adjectives/features can be present (2 adjs, 0 features; 1 feature, 1 adj; etc)
+**** TODO base-description preview
+     The editor should show a preview of what the base-description will be.
+**** TODO Feature creator
+     The feature field, when clicked, should pop up a window that allows you to create a new feature
+     entity right there.
+     Question: A window? What about recursively setting features in features, editing other aspects
+     of the feature, etc?
+***** TODO Figure out the desired workflow for object building
+*** TODO (Maybe) Character-collapsing
+    When defining nouns, adjectives, and nicknames, multiple spaces, dashes, and apostrophes should
+    be collapsed into one.
+*** TODO opaque method of communicating object ids with client
+    Don't leak the internal IDs of objects. Use an external UID or something like that.
+*** TODO subterfuge system
 * TODO The generated.html Challenge™
   The point of this challenge is to have enough of a working system to render the contents of
   generated.html *AS IT LOOKS*. That includes the scene header, highlighting objects,
@@ -417,6 +487,8 @@
   Bonus points: Have all objects reside in an actual location, although transitioning between
   locations is not necessary yet.
 
+*** DONE Bare-form verb input
+    Parse verbs in their bare form
 *** TODO Semantic output
 **** TODO Semantic markup from social command
      Have social command output a marked-up string that annotates any words of interest in the
@@ -436,6 +508,8 @@
 
 *** TODO Pronouns
     Play around with using pronouns for multiple consecutive actions by the same actor.
+*** TODO Possessives
+    Need support for 'He munches on *his pancakes*'.
 *** TODO Make it look right
     Update the stylesheets
 **** TODO Spacing between dialogues
