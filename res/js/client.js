@@ -1,11 +1,11 @@
-WEB_SOCKET_SWF_LOCATION = 'res/js/lib/WebSocketMain.swf';
-WEB_SOCKET_DEBUG = true;
-if ('MozWebSocket' in window) {
-    WebSocket = MozWebSocket;
-}
-
-var sykosomatic =
+sykosomatic.client =
 (function () {
+
+    WEB_SOCKET_SWF_LOCATION = 'res/js/lib/WebSocketMain.swf';
+    WEB_SOCKET_DEBUG = true;
+    if ('MozWebSocket' in window) {
+        WebSocket = MozWebSocket;
+    }
 
     var ws;
     var pub = {};
@@ -388,5 +388,4 @@ var sykosomatic =
 
     return pub;
 })();
-
-$(document).ready(sykosomatic.init);
+sykosomatic.register_initializer(sykosomatic.client.init);
