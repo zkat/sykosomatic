@@ -332,8 +332,6 @@
     using the raw component manager. You should be able to do all that this screen can do with the
     component manager, though.
 ** Database
-*** TODO Remove s-sql patch
-    Waiting until the new pomo makes it into a quicklisp release.
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
     it might benefit from my own pooling system (and/or if it's worth using instead of my own
@@ -342,6 +340,8 @@
 *** TODO Nameable must-refresh-full-name constraint?
     Is it possible to put in a constraint that prevents updates of nameable if a new full-name is
     not provided? Most likely, I'll need to write a trigger that does this.
+*** TODO More database constraints/indices
+    Tune the database with FKs and indices.
 ** Security
    https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines Has a nice overview of security
    concerns and mitigations.
@@ -408,21 +408,47 @@
 *** TODO session.lisp
 *** TODO db.lisp
 *** TODO entity.lisp
-*** TODO components.nameable
-    Only full-name is tested. Test the rest of the interface.
 * New name system
-** DONE Sit with waifu and design name/identifier system
 ** TODO Implement name/identifier system
-*** DONE base noun
-*** DONE Adjectives
-*** DONE Features
-*** DONE Nicknames
-*** DONE Nickname-shadowed short description
-*** DONE Deal with plural nouns
-    Do it like verbs: By default, they should be auto-calculated, but allow setting the irregular
-    plural form.
+*** DONE Replace components.nameable
+**** DONE Replace nameable usage in handlers
+     full-name is no longer the desired API call. short-description is.
+**** DONE Hook up name/identifier system to current chat client
+***** DONE Use short-description when performing actions through the parser
+**** DONE Fix test suite
+     All tests except the adj ordering test must pass.
+**** DONE Blow away components.nameable
+*** DONE Update tell-local to be able to handle the way short-description needs an observer
+    ...or something. After reading about SAM, I'm wondering what the right approach is. Then again,
+    the right approach is the one that is written and works :)
+    do-local-entities :)))
+*** TODO adjective/feature ordering
+    Should be able to control what order adjectives and features are rendered in base-description.
+*** TODO Configure which adjectives can be in the base-description
+*** TODO Configure which features can be in the base-description
+
+*** TODO visible feature/adjective limits
+*** TODO legal characters
+    alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
+    allowed in nouns, adjectives, and nicknames.
+*** TODO Deal with articles
+**** DONE a/an
+     What a bitch to figure out... just use the first character in the string to start.
+**** TODO optional articles
+     Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
+     other kinds of objects would not have articles attached to them?
+**** TODO definite articles
+     It's not 'a sky', it's 'the sky'
+**** TODO article exceptions
+     Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
+     vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
+     These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
+     separately?
+*** TODO Thorough tests for accent folding
+    ...are gonna have to wait until Eos gets fixed.
+*** TODO Implement the click-menu for assigning and changing nicknames on objects
 *** TODO Implement builder interface for naming entities
-**** TODO Sit with waifu and design this interface before continuing
+**** DONE Sit with waifu and design this interface before continuing
 **** TODO Base noun
      Allowed characters: #\', #\., #\-, #\,, A-Z, 0-9, #\space
 **** TODO Adjectives
@@ -440,53 +466,7 @@
      Question: A window? What about recursively setting features in features, editing other aspects
      of the feature, etc?
 ***** TODO Figure out the desired workflow for object building
-*** TODO Better noun-setting interface than (setf noun)
-    setf is not very natural for creating something with multiple arguments.
-*** TODO Deal with articles
-**** DONE a/an
-     What a bitch to figure out... just use the first character in the string to start.
-**** TODO optional articles
-     Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
-     other kinds of objects would not have articles attached to them?
-**** TODO article exceptions
-     Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
-     vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
-     These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
-     separately?
-*** DONE See if identifiers need to be cached.
-    Will probably be necessary for completion to work efficiently.
-    Caching is also complicated for two reasons:
-    1. We build up base-descriptions lisp-side, and building them DB-side would be a massive pain.
-    2. We can't simply put refresh code on adjectives and nouns... if features change, all their
-       dependent objects must have their cached identifiers refreshed, as well.
-
-    NOTE: The caching currently updates up one feature level, since that's as deep as we actually
-    render.
-*** DONE find-by-short-description
-*** DONE Accent folding
-    Get unaccent() in there so accented words match unaccented ones match. This only needs to be
-    done for the matching system. Note: The auto-pluralisation system may need to be updated.
-*** TODO Thorough tests for accent folding
-    ...are gonna have to wait until Eos gets fixed.
-*** DONE partial completion system
-    Will need partial completion across the entire describable/name system.
-*** TODO adjective/feature ordering
-    Should be able to control what order adjectives and features are rendered in base-description.
-*** TODO Hook up name/identifier system to current chat client
-**** TODO Use short-description to describe objects to individual clients
-**** TODO Implement the click-menu for assigning and changing nicknames on objects
-**** TODO Use short-description when performing actions through the parser
-**** TODO Change character creation to accept a single 'Name' field
-     This will be the character's first nickname, and will be assigned from/to itself.
-     It will be used when displaying the character's short-description to itself, and to the player
-     when choosing characters in the character selection screen.
-*** TODO Configure which adjectives can be in the base-description
-*** TODO Configure which features can be in the base-description
-*** TODO visible feature/adjective limits
-*** TODO legal characters
-    Alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
-    allowed in nouns, adjectives, and nicknames.
-*** TODO Character-collapsing
+*** TODO (Maybe) Character-collapsing
     When defining nouns, adjectives, and nicknames, multiple spaces, dashes, and apostrophes should
     be collapsed into one.
 *** TODO opaque method of communicating object ids with client
