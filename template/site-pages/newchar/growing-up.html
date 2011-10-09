@@ -1,0 +1,16 @@
+<p>
+Your character is an adult now, but he/she/they was/were once a child. What was it like? A
+character's childhood determines a lot about their personality now. Was/were he/she/they raised
+by a single parent, along with several siblings, barely holding on?
+</p>
+<p>
+Maybe the parent had a well-paying job and finances were never a problem. Is the character one of
+several siblings? How did that impact the attention or affection he/she/they received?
+</p>
+<form name="growing-up-info" action="{{ TMPL_VAR action-page }}" method="post">
+{{ TMPL_CALL origin-select }}
+{{ TMPL_CALL parents-select }}
+{{ TMPL_CALL siblings-select }}
+{{ TMPL_CALL finances-select }}
+<input type="submit" value="Next" class="button">
+</form>
