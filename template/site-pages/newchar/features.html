@@ -16,6 +16,7 @@
   You can pick up to 5 unique features that distinguish your character from others.
 </p>
 <button type="button" id="add-feature" class="button">Add a feature</button>
+<span class="error">{{ TMPL_VAR feature-error }}</span>
 <form name="feature-info" action="{{ TMPL_VAR next-page }}" method="post">
   <div id="features">
     {{ TMPL_LOOP feature-divs }}
