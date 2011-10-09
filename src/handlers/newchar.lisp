@@ -173,21 +173,27 @@
                     (render-features form)))))))
 
 ;;; Location
-(defun render-location ()
+(defun render-location (form)
   (render-page
    "newchar/location.html"
    `(:action-page "/newchar/location"
      :additional-js ((:js-path "/res/js/newchar.js"))
      :where-field (,(select-field "where" "Where are they now?"
                                   :default-text "Choose current location..."
+                                  :error (field-error form :where)
+                                  :value (field-raw-value form :where)
                                   :optgroups (list (field-optgroup
                                                     nil
                                                     (cc-select-options "location"))))))))
 
 (define-easy-handler (newchar.location :uri "/newchar/location") ()
   (case (request-method*)
-    (:get (render-location))
-    (:post (redirect "/newchar/name-and-confirm"))))
+    (:get (render-location (make-form 'location)))
+    (:post (let ((form (make-form 'location (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid location form")
+                    (redirect "/newchar/name-and-confirm"))
+                   (t (render-location form)))))))
 
 ;;; Name and Confirm
 (defun render-name-and-confirm ()
