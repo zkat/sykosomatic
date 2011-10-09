@@ -13,12 +13,18 @@
            :features
            :*max-features*
            :location
+           :name-and-confirmation
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
 
-;; Character creation forms
+;;; Util
+(defun field-required (validator)
+  (lambda (&rest args)
+    (check-field (not (emptyp (car args))) "Field is required.")
+    (apply validator args)))
+
 (defun cc-option-validator (option &optional (error-msg "Invalid option."))
   (lambda (val)
     (check-field (find val (cc-select-options option)
@@ -27,6 +33,7 @@
                  error-msg)
     val))
 
+;; Character creation forms
 (deform pronoun ()
   ((:pronoun (field-required
               (cc-option-validator "pronoun")))))
@@ -100,9 +107,28 @@
 (deform location ()
   ((:where (field-required (cc-option-validator "location")))))
 
-;; Validation
-(defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
+(defparameter *character-name-regex* (create-scanner "^[A-Z', .\\-]+$"
                                                      :case-insensitive-mode t))
+
+(defun validate-full-name (name)
+  (check-field (and (<= 1 (length name) 30)) "Full name must be between 1 and 30 characters long.")
+  (check-field (scan *character-name-regex*
+                     (db-query (:select (:unaccent name)) :single))
+               "Invalid name.")
+  name)
+
+(defun validate-nickname (name)
+  (check-field (and (<= 1 (length name) 15)) "Nickname must be between 1 and 15 characters long.")
+  (check-field (scan *character-name-regex*
+                     (db-query (:select (:unaccent name)) :single))
+               "Invalid name.")
+  name)
+
+(deform name-and-confirmation ()
+  ((:full-name (field-required #'validate-full-name))
+   (:nickname (field-required #'validate-nickname))))
+
+;; Validation
 
 (defun valid-character-name-p (name)
   (when (and (>= (length name) 4)
@@ -115,11 +141,6 @@
   (with-validation
     (assert-required "Nickname" name)
     (assert-validation (valid-character-name-p name) "Invalid nickname.")))
-
-(defun field-required (validator)
-  (lambda (&rest args)
-    (check-field (not (emptyp (car args))) "Field is required.")
-    (apply validator args)))
 
 (deform newchar ()
   ((:pronoun #'identity)
