@@ -27,11 +27,21 @@
 (defun field-optgroup (label &optional options)
   `(:field-optgroup-label ,label :field-optgroup-options ,options))
 
-(defun select-field (name label &key optgroups default-text id class)
+(defun select-field (name label &key optgroups default-text id class error value)
   `(#p "select-input-field.html"
        :field-name ,name
        :field-label ,label
        :field-id ,id
        :field-class ,class
-       :field-optgroups ,optgroups
-       :field-default-text ,default-text))
+       :field-optgroups ,(loop for optgroup in optgroups
+                            collect (field-optgroup (getf optgroup :field-optgroup-label)
+                                                    (maybe-mark-selected value (getf optgroup :field-optgroup-options))))
+       :field-default-text ,default-text
+       :field-error ,error
+       :field-value ,value))
+
+(defun maybe-mark-selected (target-value options)
+  (loop for opt in options
+     collect (if (equal target-value (getf opt :option-value))
+                 (list* :option-selected-p t opt)
+                 opt)))
