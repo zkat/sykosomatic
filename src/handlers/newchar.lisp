@@ -67,6 +67,7 @@
                                (list (select-field (format nil "features[~A]" i)
                                                    "Feature"
                                                    :id (format nil "features-~A" i)
+                                                   :class "feature-name"
                                                    :optgroups (list (field-optgroup
                                                                      nil
                                                                      (loop for feature in (cc-features)

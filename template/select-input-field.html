@@ -1,6 +1,8 @@
 <div class="field">
   <label for="{{ TMPL_VAR field-id }}">{{ TMPL_VAR field-label }}</label>
-  <select id="{{ TMPL_VAR field-id }}" name="{{ TMPL_VAR field-name }}">
+  <select id="{{ TMPL_VAR field-id }}"
+          name="{{ TMPL_VAR field-name }}"
+          class="{{ TMPL_VAR field-class }}">
     <option value="" {{ TMPL_UNLESS field-value }}selected="selected"{{ /TMPL_UNLESS }}>
       {{ TMPL_VAR field-default-text }}
     </option>
