@@ -8,7 +8,10 @@
   (:export :pronoun
            :growing-up
            :career
+           :*max-careers*
            :relationships
+           :features
+           :*max-features*
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
@@ -35,8 +38,10 @@
 
 (defparameter *max-age* 80)
 (defparameter *start-age* 18)
+(defparameter *max-careers* 5)
 (deform career ()
   (((:careers array) (lambda (all-careers)
+                       (check-field (= *max-careers* (length all-careers)) "Huh?")
                        (check-field (some (compose #'not #'emptyp) all-careers) "Must choose at least one career.")
                        (let ((option-validator (cc-option-validator "career" "Invalid career.")))
                          (map nil (lambda (career)
@@ -65,6 +70,27 @@
 (deform relationships ()
   ((:friends (field-required (cc-option-validator "friends")))
    (:romance (field-required (cc-option-validator "significant-other")))))
+
+(defparameter *max-features* 5)
+(defun validate-features (all-features)
+  (check-field (= *max-features* (length all-features)) "Huh?")
+  (let ((cc-features (cc-features)))
+    (map nil (lambda (feature)
+               (unless (emptyp feature)
+                 (check-field (find feature cc-features :test #'string=) "Got an unexpected feature.")))
+         all-features))
+  all-features)
+(defun validate-feature-adjs (all-adjs)
+  (loop
+     for feature across (field-raw-value *form* :features)
+     for adjective across all-adjs
+     do (check-field (if (emptyp feature) t (not (emptyp adjective)))
+                     "You must select an adjective for each feature added."))
+  all-adjs)
+
+(deform features ()
+  (((:features array) #'validate-features)
+   ((:feature-adjs array) #'validate-feature-adjs)))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"

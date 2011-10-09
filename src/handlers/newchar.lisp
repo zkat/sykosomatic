@@ -87,7 +87,7 @@
      :additional-js ((:js-path "/res/js/newchar.js"))
      :career-error ,(or (field-error form :careers)
                         (field-error form :career-times))
-     :career-divs ,(loop for i below 5 collect
+     :career-divs ,(loop for i below *max-careers* collect
                         (list :career-field
                               (list (select-field (format nil "careers[~A]" i)
                                                   "Career"
@@ -140,12 +140,14 @@
                     (render-relationships form)))))))
 
 ;;; Features
-(defun render-features ()
+(defun render-features (form)
   (render-page
    "newchar/features.html"
    `(:action-page "/newchar/features"
      :additional-js ((:js-path "/res/js/newchar.js"))
-     :feature-divs ,(loop for i below 5 collect
+     :feature-error ,(or (field-error form :features)
+                         (field-error form :feature-adjs))
+     :feature-divs ,(loop for i below *max-features* collect
                          (list :feature-field
                                (list (select-field (format nil "features[~A]" i)
                                                    "Feature"
@@ -162,8 +164,13 @@
 
 (define-easy-handler (newchar.features :uri "/newchar/features") ()
   (case (request-method*)
-    (:get (render-features))
-    (:post (redirect "/newchar/location"))))
+    (:get (render-features (make-form 'features)))
+    (:post (let ((form (make-form 'features (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid features")
+                    (redirect "/newchar/location"))
+                   (t
+                    (render-features form)))))))
 
 ;;; Location
 (defun render-location ()
