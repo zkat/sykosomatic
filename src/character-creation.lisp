@@ -33,9 +33,7 @@
 
 (deform newchar ()
   ((:pronoun #'identity)
-   (:first-name (field-required #'identity))
-   (:nickname (field-required #'identity))
-   (:last-name (field-required #'identity))
+   (:name (field-required #'identity))
    (:origin #'identity)
    (:parents #'identity)
    (:siblings #'identity)
@@ -52,10 +50,7 @@
   (with-transaction ()
     (let ((entity (create-entity)))
       (configure-noun entity "person" :plural "people")
-      (configure-nickname entity entity (format nil "~A '~A' ~A"
-                                                (field-value form :first-name)
-                                                (field-value form :nickname)
-                                                (field-value form :last-name)))
+      (configure-nickname entity entity (field-value form :name))
       (add-body entity account-id)
       #+nil
       (let ((cc-values-id (insert-row 'cc-values

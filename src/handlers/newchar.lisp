@@ -10,7 +10,6 @@
   (:export :newchar))
 
 (defun render (form)
-  (declare (ignore form))
   (render-page
    "newchar.html"
    `(:additional-js ((:js-path "res/js/newchar.js"))
@@ -20,9 +19,9 @@
                                     :optgroups
                                     (list (field-optgroup "Pronouns"
                                                           (cc-select-options "pronoun")))))
-     :first-name-field (,(text-input-field "first-name" "First Name"))
-     :nickname-field (,(text-input-field "nickname" "Nickname"))
-     :last-name-field (,(text-input-field "last-name" "Last Name"))
+     :name-field (,(text-input-field "name" "Full Name"
+                                     :value (field-raw-value form :name)
+                                     :error (field-error form :name)))
      :origin-field (,(select-field "origin" "Where From?"
                                    :default-text "Choose origin..."
                                    :optgroups (list (field-optgroup
