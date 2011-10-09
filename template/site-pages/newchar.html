@@ -43,7 +43,7 @@
         <button type="button" id="add-feature" class="button">Add a feature</button>
         <div id="features">
           {{ TMPL_LOOP feature-divs }}
-          <div class="field features">
+          <div class="features">
             {{ TMPL_CALL feature-field }}
             <select id="{{ TMPL_VAR adj-field-id }}" name="{{ TMPL_VAR adj-field-name }}"
                     class="feature-adjs">
