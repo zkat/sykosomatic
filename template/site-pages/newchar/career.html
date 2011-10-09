@@ -14,6 +14,7 @@ Pick up to 5 different careers, as well as how long the character spent in them.
 <p>Character age:<span id="character-age">18</span></p>
 
 <button type="button" id="add-career" class="button">Add Career</button>
+<span class="error">{{ TMPL_VAR career-error }}</span>
 <form name="pick-careers" action="{{ TMPL_VAR action-page }}" method="post">
 <div id="careers">
   {{ TMPL_LOOP career-divs }}
