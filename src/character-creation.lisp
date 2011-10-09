@@ -8,6 +8,7 @@
   (:export :pronoun
            :growing-up
            :career
+           :relationships
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
@@ -60,6 +61,10 @@
                                                             (reduce #'+ (remove nil times)
                                                                     :initial-value 0)))
                                            "Can't create a character older than ~A years." *max-age*))))))
+
+(deform relationships ()
+  ((:friends (field-required (cc-option-validator "friends")))
+   (:romance (field-required (cc-option-validator "significant-other")))))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"

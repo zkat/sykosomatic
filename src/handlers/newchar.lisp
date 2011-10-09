@@ -109,26 +109,35 @@
                     (render-career form)))))))
 
 ;;; Relationships
-(defun render-relationships ()
+(defun render-relationships (form)
   (render-page
    "newchar/relationships.html"
    `(:action-page "/newchar/relationships"
      :additional-js ((:js-path "/res/js/newchar.js"))
      :friends-select (,(select-field "friends" "Any friends?"
                                     :default-text "Choose friends..."
+                                    :error (field-error form :friends)
+                                    :value (field-raw-value form :friends)
                                     :optgroups (list (field-optgroup
                                                       nil
                                                       (cc-select-options "friends")))))
      :romance-select (,(select-field "romance" "Special someone?"
                                      :default-text "Choose relationship..."
+                                     :error (field-error form :romance)
+                                     :value (field-raw-value form :romance)
                                      :optgroups (list (field-optgroup
                                                        nil
                                                        (cc-select-options "significant-other"))))))))
 
 (define-easy-handler (newchar.relationships :uri "/newchar/relationships") ()
   (case (request-method*)
-    (:get (render-relationships))
-    (:post (redirect "/newchar/features"))))
+    (:get (render-relationships (make-form 'relationships)))
+    (:post (let ((form (make-form 'relationships (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid relationships")
+                    (redirect "/newchar/features"))
+                   (t
+                    (render-relationships form)))))))
 
 ;;; Features
 (defun render-features ()
