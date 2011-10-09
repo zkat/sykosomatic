@@ -7,6 +7,7 @@
         :sykosomatic.util.form)
   (:export :pronoun
            :growing-up
+           :career
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
@@ -30,6 +31,35 @@
    (:parents (field-required (cc-option-validator "parents")))
    (:siblings (field-required (cc-option-validator "siblings")))
    (:finances (field-required (cc-option-validator "situation")))))
+
+(defparameter *max-age* 80)
+(defparameter *start-age* 18)
+(deform career ()
+  (((:careers array) (lambda (all-careers)
+                       (check-field (some (compose #'not #'emptyp) all-careers) "Must choose at least one career.")
+                       (let ((option-validator (cc-option-validator "career" "Invalid career.")))
+                         (map nil (lambda (career)
+                                    (unless (emptyp career)
+                                      (funcall option-validator career)))
+                              all-careers))
+                       all-careers))
+   ((:career-times array) (lambda (career-times)
+                            (let ((times
+                                   (coerce
+                                    (loop
+                                       for career across (field-raw-value *form* :careers)
+                                       for time across career-times
+                                       collect
+                                       (let ((parsed-time (ignore-some-conditions (parse-error)
+                                                            (parse-integer (string-trim '(#\space) time)))))
+                                         (check-field (if (emptyp career) t parsed-time)
+                                                      "Must select a valid time span for each selected career.")
+                                         parsed-time))
+                                    'array)))
+                              (check-field (>= *max-age* (+ *start-age*
+                                                            (reduce #'+ (remove nil times)
+                                                                    :initial-value 0)))
+                                           "Can't create a character older than ~A years." *max-age*))))))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"

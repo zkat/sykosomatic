@@ -80,11 +80,13 @@
                     (render-growing-up form)))))))
 
 ;;; Career
-(defun render-career ()
+(defun render-career (form)
   (render-page
    "newchar/career.html"
    `(:action-page "/newchar/career"
      :additional-js ((:js-path "/res/js/newchar.js"))
+     :career-error ,(or (field-error form :careers)
+                        (field-error form :career-times))
      :career-divs ,(loop for i below 5 collect
                         (list :career-field
                               (list (select-field (format nil "careers[~A]" i)
@@ -98,8 +100,13 @@
 
 (define-easy-handler (newchar.career :uri "/newchar/career") ()
   (case (request-method*)
-    (:get (render-career))
-    (:post (redirect "/newchar/relationships"))))
+    (:get (render-career (make-form 'career)))
+    (:post (let ((form (make-form 'career (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid career form")
+                    (redirect "/newchar/relationships"))
+                   (t
+                    (render-career form)))))))
 
 ;;; Relationships
 (defun render-relationships ()
