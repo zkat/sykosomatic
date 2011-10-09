@@ -196,19 +196,28 @@
                    (t (render-location form)))))))
 
 ;;; Name and Confirm
-(defun render-name-and-confirm ()
+(defun render-name-and-confirm (form)
   (render-page
    "newchar/name-and-confirm.html"
    `(:action-page "/newchar/name-and-confirm"
      :additional-js ((:js-path "/res/js/newchar.js"))
      :char-preview "«An exciting new character»"
-     :full-name-field (,(text-input-field "full-name" "Full Name"))
-     :nickname-field (,(text-input-field "nickname" "Nickname")))))
+     :full-name-field (,(text-input-field "full-name" "Full Name"
+                                          :value (field-raw-value form :full-name)
+                                          :error (field-error form :full-name)))
+     :nickname-field (,(text-input-field "nickname" "Nickname"
+                                         :value (field-raw-value form :nickname)
+                                         :error (field-error form :nickname))))))
 
 (define-easy-handler (newchar.name-and-confirm :uri "/newchar/name-and-confirm") ()
   (case (request-method*)
-    (:get (render-name-and-confirm))
-    (:post (redirect "/newchar/pronoun"))))
+    (:get (render-name-and-confirm (make-form 'name-and-confirmation)))
+    (:post (let ((form (make-form 'name-and-confirmation (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid name form! All done!")
+                    (redirect "/newchar/pronoun"))
+                   (t
+                    (render-name-and-confirm form)))))))
 
 ;;;
 ;;; Old newchar
