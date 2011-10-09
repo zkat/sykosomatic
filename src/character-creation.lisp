@@ -6,19 +6,30 @@
         :sykosomatic.components.describable
         :sykosomatic.util.form)
   (:export :pronoun
+           :growing-up
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
 
 ;; Character creation forms
+(defun cc-option-validator (option &optional (error-msg "Invalid option."))
+  (lambda (val)
+    (check-field (find val (cc-select-options option)
+                       :key #'cadr
+                       :test #'equal)
+                 error-msg)
+    val))
+
 (deform pronoun ()
   ((:pronoun (field-required
-              (lambda (val)
-                (check-field (find val (cc-select-options "pronoun")
-                                   :key #'cadr
-                                   :test #'equal) "Invalid pronoun.")
-                (string-downcase val))))))
+              (cc-option-validator "pronoun")))))
+
+(deform growing-up ()
+  ((:origin (field-required (cc-option-validator "origin")))
+   (:parents (field-required (cc-option-validator "parents")))
+   (:siblings (field-required (cc-option-validator "siblings")))
+   (:finances (field-required (cc-option-validator "situation")))))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
