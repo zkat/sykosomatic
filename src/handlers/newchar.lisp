@@ -14,20 +14,26 @@
 ;;;
 
 ;;; Pronoun
-(defun render-pronoun ()
+(defun render-pronoun (form)
   (render-page "newchar/pronoun.html"
                `(:action-page "/newchar/pronoun"
                  :pronoun-select
                  (,(select-field "pronoun" "Pronoun"
                                  :default-text "Choose pronoun..."
                                  :id "pronoun"
+                                 :error (field-error form :pronoun)
+                                 :value (field-raw-value form :pronoun)
                                  :optgroups
                                  (list (field-optgroup "Pronouns"
                                                        (cc-select-options "pronoun"))))))))
 (define-easy-handler (newchar.pronoun :uri "/newchar/pronoun") ()
   (case (request-method*)
-    (:get (render-pronoun))
-    (:post (redirect "/newchar/growing-up"))))
+    (:get (render-pronoun (make-form 'pronoun)))
+    (:post (let ((form (make-form 'pronoun (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid pronoun page")
+                    (redirect "/newchar/growing-up"))
+                   (t (render-pronoun form)))))))
 
 ;;; Growing Up
 (defun render-growing-up ()
