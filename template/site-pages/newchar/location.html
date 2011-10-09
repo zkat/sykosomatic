@@ -1,0 +1,15 @@
+<p>
+So the story goes that this character has now, somehow, made it to
+the <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Minneapolis_-_Saint_Paul">Twin
+Cities</a>. The details of how he/she/they got there are up to you. Maybe he/she/they has/have lived
+here all his/her/their life, or maybe he/she/they is/are just here on a business trip.
+</p>
+<p>
+Where in the Twin Cities is/are he/she/they?
+</p>
+<form name="where" action="{{ TMPL_VAR action-page }}" method="post">
+  {{ TMPL_CALL where-field }}
+  <h3 id="description-header">Description</h3>
+  <p id="location-description">Pick a location to read more about it.</p>
+  <input type="submit" value="Next" class="button" />
+</form>

@@ -1,0 +1,10 @@
+<p>
+Aside from family, the friend your character keeps, and the relationships he/she/they has/have
+had will have a big effect on his/her/their life. What is his/her/their social/romantic life
+like <em>now</em>?
+</p>
+<form name="relationship-info" action="{{ TMPL_VAR action-page }}" method="post">
+{{ TMPL_CALL friends-select }}
+{{ TMPL_CALL romance-select }}
+<input type="submit" value="Next" class="button" \>
+</form>

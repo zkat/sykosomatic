@@ -1,0 +1,41 @@
+<p>
+We have a clearer picture of who this character is now.
+</p>
+<p>
+{{ TMPL_VAR char-preview }}
+</p>
+
+<p>
+  Does that sound good? If so, we have one last thing left to do: Pick a name.
+</p>
+<p>
+  Names tell you a lot about who a character is. Any given name carries with it a wealth of
+  information about someone's culture, their family history, their gender, their race, their
+  class, their age. Sometimes they speak of the hopes our parents had, or they can be symbols of
+  an important story, such as someone being named after an important person in a parent's life.
+</p>
+<p>
+  Your character's name is just as important and consequential.
+</p>
+<form name="name-and-confirm" action="{{ TMPL_VAR action-page }}" method="post">
+<p>
+  First, what's his/her/their full name? The full name can have spaces, apostrophes, commas,
+  periods, as well as letters and numbers. You can even use some accents! You'll have to keep it
+  under 30 characters, though.
+</p>
+{{ TMPL_CALL full-name-field }}
+<p>
+  Now, when people refer to him/her/them, what name do they use? This name doesn't need to be
+  unique. It also doesn't have to be a single word. Something like "Col. Mustard" is perfectly
+  fine. This is the name you will see when things related to the character happen. The same rules as
+  above apply, except you'll need to keep it 15 characters or less.
+</p>
+{{ TMPL_CALL nickname-field }}
+<p>
+  Please keep the names clean, or we'll have to do something about it...
+</p>
+<p>
+  Are you satisfied with this character? If so, let the adventures begin!
+</p>
+  <input type="submit" value="Create this character" class="button" />
+</form>
