@@ -5,10 +5,20 @@
         :sykosomatic.account
         :sykosomatic.components.describable
         :sykosomatic.util.form)
-  (:export :newchar :create-character
+  (:export :pronoun
+           :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
+
+;; Character creation forms
+(deform pronoun ()
+  ((:pronoun (field-required
+              (lambda (val)
+                (check-field (find val (cc-select-options "pronoun")
+                                   :key #'cadr
+                                   :test #'equal) "Invalid pronoun.")
+                (string-downcase val))))))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
