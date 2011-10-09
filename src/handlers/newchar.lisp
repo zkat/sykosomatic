@@ -36,35 +36,48 @@
                    (t (render-pronoun form)))))))
 
 ;;; Growing Up
-(defun render-growing-up ()
+(defun render-growing-up (form)
   (render-page
    "newchar/growing-up.html"
    `(:action-page "/newchar/growing-up"
      :origin-select (,(select-field "origin" "Where From?"
                                     :default-text "Choose origin..."
+                                    :error (field-error form :origin)
+                                    :value (field-raw-value form :origin)
                                     :optgroups (list (field-optgroup
                                                       nil
                                                       (cc-select-options "origin")))))
      :parents-select (,(select-field "parents" "Number of parents"
                                      :default-text "Choose parents..."
+                                     :error (field-error form :parents)
+                                     :value (field-raw-value form :parents)
                                      :optgroups (list (field-optgroup
                                                        nil
                                                        (cc-select-options "parents")))))
      :siblings-select (,(select-field "siblings" "Number of siblings"
                                       :default-text "Choose siblings..."
+                                      :error (field-error form :siblings)
+                                      :value (field-raw-value form :siblings)
                                       :optgroups (list (field-optgroup
                                                         nil
                                                         (cc-select-options "siblings")))))
      :finances-select (,(select-field "finances" "Financial situation"
                                        :default-text "Choose financial situation..."
+                                       :error (field-error form :finances)
+                                       :value (field-raw-value form :finances)
                                        :optgroups (list (field-optgroup
                                                          nil
                                                          (cc-select-options "situation"))))))))
 
 (define-easy-handler (newchar.growing-up :uri "/newchar/growing-up") ()
   (case (request-method*)
-    (:get (render-growing-up))
-    (:post (redirect "/newchar/career"))))
+    (:get (render-growing-up (make-form 'growing-up)))
+    (:post (let ((form (make-form 'growing-up (post-parameters*))))
+             (cond ((form-valid-p form)
+                    (print "Valid growing-up")
+                    (redirect "/newchar/career"))
+                   (t
+                    (render-growing-up form)))))))
 
 ;;; Career
 (defun render-career ()
