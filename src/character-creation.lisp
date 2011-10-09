@@ -12,6 +12,7 @@
            :relationships
            :features
            :*max-features*
+           :location
            :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
@@ -85,12 +86,19 @@
      for feature across (field-raw-value *form* :features)
      for adjective across all-adjs
      do (check-field (if (emptyp feature) t (not (emptyp adjective)))
-                     "You must select an adjective for each feature added."))
+                     "You must select an adjective for each feature added.")
+       (check-field (if (emptyp adjective) t (not (emptyp feature)))
+                    "Huh?")
+       (unless (emptyp feature)
+         (check-field (cc-adjectives feature) "That adjective is not valid for that feature.")))
   all-adjs)
 
 (deform features ()
   (((:features array) #'validate-features)
    ((:feature-adjs array) #'validate-feature-adjs)))
+
+(deform location ()
+  ((:where (field-required (cc-option-validator "location")))))
 
 ;; Validation
 (defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
