@@ -17,11 +17,11 @@ Pick up to 5 different careers, as well as how long the character spent in them.
 <form name="pick-careers" action="{{ TMPL_VAR action-page }}" method="post">
 <div id="careers">
   {{ TMPL_LOOP career-divs }}
-  <p class="career-info">
-    {{ TMPL_CALL career-field }} for <input class="career-times" name="{{ TMPL_VAR
-    career-time-field-name }}" id="{{ TMPL_VAR career-time-field-id }}" /> years.
+  <div class="careers">
+    {{ TMPL_CALL career-field }} for
+    <input class="career-times" name="{{ TMPL_VAR career-time-field-name }}" id="{{ TMPL_VAR career-time-field-id }}" /> years.
     <button type="button" class="button">Remove</button>
-  </p>
+  </div>
   {{ /TMPL_LOOP }}
 </div>
 <input type="submit" value="Next" class="button" />
