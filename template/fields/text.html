@@ -1,8 +1,10 @@
 <div class="field">
   <label for="{{ TMPL_VAR field-id }}">{{ TMPL_VAR field-label }}</label>
   <input name="{{ TMPL_VAR field-name }}" id="{{ TMPL_VAR field-id }}"
-         type="{{ TMPL_IF field-type }}{{ TMPL_VAR field-type }}
-               {{ TMPL_ELSE }}text{{ /TMPL_IF }}" maxlength="{{ TMPL_VAR field-max-length }}"
-         value="{{ TMPL_VAR field-value }}">
+         type="{{ TMPL_VAR field-type }}"
+         value="{{ TMPL_VAR field-value }}"
+         {{ TMPL_IF field-max-length }}
+         maxlength="{{ TMPL_VAR field-max-length }}"
+         {{ /TMPL_IF }}>
   <span class="error">{{ TMPL_VAR field-error }}</span>
 </div>
