@@ -203,6 +203,20 @@
      :full-name-field (,(text-field form :full-name))
      :nickname-field (,(text-field form :nickname)))))
 
+;; Thinking about it...
+#+nil
+(define-form-handler name-and-confirm
+    (:uri "/newchar/name-and-confirm"
+     :render (render-page
+              "newchar/name-and-confirm.html"
+              `(:action-page "/newchar/name-and-confirm"
+                :additional-js ((:js-path "/res/js/newchar.js"))
+                :char-preview "«An exciting new character»"
+                :full-name-field (,(text-field name-and-confirm :full-name))
+                :nickname-field (,(text-field name-and-confirm :nickname)))))
+  (print "Valid name form! All done!")
+  (redirect "/newchar/pronoun"))
+
 (define-easy-handler (newchar.name-and-confirm :uri "/newchar/name-and-confirm") ()
   (case (request-method*)
     (:get (render-name-and-confirm (make-form 'name-and-confirmation)))
