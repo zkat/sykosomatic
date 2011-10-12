@@ -18,14 +18,12 @@
   (render-page "newchar/pronoun.html"
                `(:action-page "/newchar/pronoun"
                  :pronoun-select
-                 (,(select-field "pronoun" "Pronoun"
+                 (,(select-field form :pronoun
                                  :default-text "Choose pronoun..."
-                                 :id "pronoun"
-                                 :error (field-error form :pronoun)
-                                 :value (field-raw-value form :pronoun)
                                  :optgroups
                                  (list (field-optgroup "Pronouns"
                                                        (cc-select-options "pronoun"))))))))
+
 (define-easy-handler (newchar.pronoun :uri "/newchar/pronoun") ()
   (case (request-method*)
     (:get (render-pronoun (make-form 'pronoun)))
@@ -40,34 +38,31 @@
   (render-page
    "newchar/growing-up.html"
    `(:action-page "/newchar/growing-up"
-     :origin-select (,(select-field "origin" "Where From?"
+     :origin-select (,(select-field form :origin
+                                    :label "Where From?"
                                     :default-text "Choose origin..."
-                                    :error (field-error form :origin)
-                                    :value (field-raw-value form :origin)
                                     :optgroups (list (field-optgroup
                                                       nil
                                                       (cc-select-options "origin")))))
-     :parents-select (,(select-field "parents" "Number of parents"
+
+     :parents-select (,(select-field form :parents
+                                     :label "Number of parents"
                                      :default-text "Choose parents..."
-                                     :error (field-error form :parents)
-                                     :value (field-raw-value form :parents)
                                      :optgroups (list (field-optgroup
                                                        nil
                                                        (cc-select-options "parents")))))
-     :siblings-select (,(select-field "siblings" "Number of siblings"
+     :siblings-select (,(select-field form :siblings
+                                      :label "Number of siblings"
                                       :default-text "Choose siblings..."
-                                      :error (field-error form :siblings)
-                                      :value (field-raw-value form :siblings)
                                       :optgroups (list (field-optgroup
                                                         nil
                                                         (cc-select-options "siblings")))))
-     :finances-select (,(select-field "finances" "Financial situation"
-                                       :default-text "Choose financial situation..."
-                                       :error (field-error form :finances)
-                                       :value (field-raw-value form :finances)
-                                       :optgroups (list (field-optgroup
-                                                         nil
-                                                         (cc-select-options "situation"))))))))
+     :finances-select (,(select-field form :finances
+                                      :label "Financial situation"
+                                      :default-text "Choose financial situation..."
+                                      :optgroups (list (field-optgroup
+                                                        nil
+                                                        (cc-select-options "situation"))))))))
 
 (define-easy-handler (newchar.growing-up :uri "/newchar/growing-up") ()
   (case (request-method*)
@@ -89,8 +84,11 @@
                         (field-error form :career-times))
      :career-divs ,(loop for i below *max-careers* collect
                         (list :career-field
-                              (list (select-field (format nil "careers[~A]" i)
-                                                  "Career"
+                              (list (select-field form :careers
+                                                  :error nil
+                                                  :value nil
+                                                  :name (format nil "careers[~A]" i)
+                                                  :label "Career"
                                                   :id (format nil "careers-~A" i)
                                                   :optgroups (list (field-optgroup
                                                                     nil
@@ -114,17 +112,15 @@
    "newchar/relationships.html"
    `(:action-page "/newchar/relationships"
      :additional-js ((:js-path "/res/js/newchar.js"))
-     :friends-select (,(select-field "friends" "Any friends?"
-                                    :default-text "Choose friends..."
-                                    :error (field-error form :friends)
-                                    :value (field-raw-value form :friends)
-                                    :optgroups (list (field-optgroup
-                                                      nil
-                                                      (cc-select-options "friends")))))
-     :romance-select (,(select-field "romance" "Special someone?"
+     :friends-select (,(select-field form :friends
+                                     :label "Any friends?"
+                                     :default-text "Choose friends..."
+                                     :optgroups (list (field-optgroup
+                                                       nil
+                                                       (cc-select-options "friends")))))
+     :romance-select (,(select-field form :romance
+                                     :label "Special someone?"
                                      :default-text "Choose relationship..."
-                                     :error (field-error form :romance)
-                                     :value (field-raw-value form :romance)
                                      :optgroups (list (field-optgroup
                                                        nil
                                                        (cc-select-options "significant-other"))))))))
@@ -149,8 +145,11 @@
                          (field-error form :feature-adjs))
      :feature-divs ,(loop for i below *max-features* collect
                          (list :feature-field
-                               (list (select-field (format nil "features[~A]" i)
-                                                   "Feature"
+                               (list (select-field form :features
+                                                   :error nil
+                                                   :value nil
+                                                   :name (format nil "features[~A]" i)
+                                                   :label "Feature"
                                                    :id (format nil "features-~A" i)
                                                    :class "feature-name"
                                                    :optgroups (list (field-optgroup
@@ -178,10 +177,9 @@
    "newchar/location.html"
    `(:action-page "/newchar/location"
      :additional-js ((:js-path "/res/js/newchar.js"))
-     :where-field (,(select-field "where" "Where are they now?"
+     :where-field (,(select-field form :where
+                                  :label "Where are they now?"
                                   :default-text "Choose current location..."
-                                  :error (field-error form :where)
-                                  :value (field-raw-value form :where)
                                   :optgroups (list (field-optgroup
                                                     nil
                                                     (cc-select-options "location"))))))))
@@ -202,12 +200,8 @@
    `(:action-page "/newchar/name-and-confirm"
      :additional-js ((:js-path "/res/js/newchar.js"))
      :char-preview "«An exciting new character»"
-     :full-name-field (,(text-input-field "full-name" "Full Name"
-                                          :value (field-raw-value form :full-name)
-                                          :error (field-error form :full-name)))
-     :nickname-field (,(text-input-field "nickname" "Nickname"
-                                         :value (field-raw-value form :nickname)
-                                         :error (field-error form :nickname))))))
+     :full-name-field (,(text-field form :full-name))
+     :nickname-field (,(text-field form :nickname)))))
 
 (define-easy-handler (newchar.name-and-confirm :uri "/newchar/name-and-confirm") ()
   (case (request-method*)
@@ -232,9 +226,7 @@
                                     :optgroups
                                     (list (field-optgroup "Pronouns"
                                                           (cc-select-options "pronoun")))))
-     :name-field (,(text-input-field "name" "Full Name"
-                                     :value (field-raw-value form :name)
-                                     :error (field-error form :name)))
+     :name-field (,(text-field form :name :label "Full Name"))
      :origin-field (,(select-field "origin" "Where From?"
                                    :default-text "Choose origin..."
                                    :optgroups (list (field-optgroup
