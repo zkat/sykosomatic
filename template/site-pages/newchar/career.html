@@ -1,0 +1,29 @@
+<p>
+Part of growing up is seeking a career -- doing something with your life. What did he/she/they end
+up doing? How long has/have he/she/they been doing it for?
+</p>
+<p>
+Making these choices about your character will also impact their age. Is/are he/she/they a young
+hotshot just starting off an ambitious career in business? Has/have he/she/they spent the past 20
+years in the same office doing boring paperwork?
+</p>
+<p>
+Pick up to 5 different careers, as well as how long the character spent in them.
+</p>
+
+<p>Character age:<span id="character-age">18</span></p>
+
+<button type="button" id="add-career" class="button">Add Career</button>
+<span class="error">{{ TMPL_VAR career-error }}</span>
+<form name="pick-careers" action="{{ TMPL_VAR action-page }}" method="post">
+<div id="careers">
+  {{ TMPL_LOOP career-divs }}
+  <div class="careers">
+    {{ TMPL_CALL career-field }} for
+    <input class="career-times" name="{{ TMPL_VAR career-time-field-name }}" id="{{ TMPL_VAR career-time-field-id }}" /> years.
+    <button type="button" class="button">Remove</button>
+  </div>
+  {{ /TMPL_LOOP }}
+</div>
+<input type="submit" value="Next" class="button" />
+</form>

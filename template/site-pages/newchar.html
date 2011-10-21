@@ -3,12 +3,7 @@
     <div id="identity">
       <fieldset>
         {{ TMPL_CALL pronoun-field }}
-      </fieldset>
-      <fieldset>
-        <legend>Name</legend>
-        {{ TMPL_CALL first-name-field }}
-        {{ TMPL_CALL nickname-field }}
-        {{ TMPL_CALL last-name-field }}
+        {{ TMPL_CALL name-field }}
       </fieldset>
     </div>
     <div id="early-life">
@@ -48,7 +43,7 @@
         <button type="button" id="add-feature" class="button">Add a feature</button>
         <div id="features">
           {{ TMPL_LOOP feature-divs }}
-          <div class="field features">
+          <div class="features">
             {{ TMPL_CALL feature-field }}
             <select id="{{ TMPL_VAR adj-field-id }}" name="{{ TMPL_VAR adj-field-name }}"
                     class="feature-adjs">

@@ -72,15 +72,19 @@ is the corresponding value."
 (defun bind-form (form-def form bindings)
   (setf (gethash *validp* form) t)
   (maphash (lambda (name field-def)
-             (destructuring-bind (validator validator-arg-function type) field-def
-               (let ((raw-value (case type
+             (let ((type (third field-def)))
+               (setf (gethash name form)
+                     (list (case type
                                   (array (collect-array-parameter name bindings))
                                   (list (collect-list-parameter name bindings))
                                   (atom
                                    (cdr (assoc name bindings :test #'string-equal)))
-                                  (otherwise (error "Unknown parameter type: ~A" type)))))
-                 (setf (gethash name form)
-                       (list raw-value nil nil))
+                                  (otherwise (error "Unknown parameter type: ~A" type)))))))
+           form-def)
+  (maphash (lambda (name field-def)
+             (destructuring-bind (validator validator-arg-function . ig) field-def
+               (declare (ignore ig))
+               (let ((raw-value (field-raw-value form name)))
                  (setf (gethash name form)
                        (multiple-value-bind (validated-value error)
                            (handler-case

@@ -5,14 +5,130 @@
         :sykosomatic.account
         :sykosomatic.components.describable
         :sykosomatic.util.form)
-  (:export :newchar :create-character
+  (:export :pronoun
+           :growing-up
+           :career
+           :*max-careers*
+           :relationships
+           :features
+           :*max-features*
+           :location
+           :name-and-confirmation
+           :newchar :create-character
            :cc-features :cc-adjectives
            :cc-location-description
            :cc-select-options))
 
-;; Validation
-(defparameter *character-name-regex* (create-scanner "^[A-Z'-]+$"
+;;; Util
+(defun field-required (validator)
+  (lambda (&rest args)
+    (check-field (not (emptyp (car args))) "Field is required.")
+    (apply validator args)))
+
+(defun cc-option-validator (option &optional (error-msg "Invalid option."))
+  (lambda (val)
+    (check-field (find val (cc-select-options option)
+                       :key #'cadr
+                       :test #'equal)
+                 error-msg)
+    val))
+
+;; Character creation forms
+(deform pronoun ()
+  ((:pronoun (field-required
+              (cc-option-validator "pronoun")))))
+
+(deform growing-up ()
+  ((:origin (field-required (cc-option-validator "origin")))
+   (:parents (field-required (cc-option-validator "parents")))
+   (:siblings (field-required (cc-option-validator "siblings")))
+   (:finances (field-required (cc-option-validator "situation")))))
+
+(defparameter *max-age* 80)
+(defparameter *start-age* 18)
+(defparameter *max-careers* 5)
+(deform career ()
+  (((:careers array) (lambda (all-careers)
+                       (check-field (= *max-careers* (length all-careers)) "Huh?")
+                       (check-field (some (compose #'not #'emptyp) all-careers) "Must choose at least one career.")
+                       (let ((option-validator (cc-option-validator "career" "Invalid career.")))
+                         (map nil (lambda (career)
+                                    (unless (emptyp career)
+                                      (funcall option-validator career)))
+                              all-careers))
+                       all-careers))
+   ((:career-times array) (lambda (career-times)
+                            (let ((times
+                                   (coerce
+                                    (loop
+                                       for career across (field-raw-value *form* :careers)
+                                       for time across career-times
+                                       collect
+                                       (let ((parsed-time (ignore-some-conditions (parse-error)
+                                                            (parse-integer (string-trim '(#\space) time)))))
+                                         (check-field (if (emptyp career) t parsed-time)
+                                                      "Must select a valid time span for each selected career.")
+                                         parsed-time))
+                                    'array)))
+                              (check-field (>= *max-age* (+ *start-age*
+                                                            (reduce #'+ (remove nil times)
+                                                                    :initial-value 0)))
+                                           "Can't create a character older than ~A years." *max-age*))))))
+
+(deform relationships ()
+  ((:friends (field-required (cc-option-validator "friends")))
+   (:romance (field-required (cc-option-validator "significant-other")))))
+
+(defparameter *max-features* 5)
+(defun validate-features (all-features)
+  (check-field (= *max-features* (length all-features)) "Huh?")
+  (let ((cc-features (cc-features)))
+    (map nil (lambda (feature)
+               (unless (emptyp feature)
+                 (check-field (find feature cc-features :test #'string=) "Got an unexpected feature.")))
+         all-features))
+  all-features)
+(defun validate-feature-adjs (all-adjs)
+  (loop
+     for feature across (field-raw-value *form* :features)
+     for adjective across all-adjs
+     do (check-field (if (emptyp feature) t (not (emptyp adjective)))
+                     "You must select an adjective for each feature added.")
+       (check-field (if (emptyp adjective) t (not (emptyp feature)))
+                    "Huh?")
+       (unless (emptyp feature)
+         (check-field (cc-adjectives feature) "That adjective is not valid for that feature.")))
+  all-adjs)
+
+(deform features ()
+  (((:features array) #'validate-features)
+   ((:feature-adjs array) #'validate-feature-adjs)))
+
+(deform location ()
+  ((:where (field-required (cc-option-validator "location")))))
+
+(defparameter *character-name-regex* (create-scanner "^[A-Z', .\\-]+$"
                                                      :case-insensitive-mode t))
+
+(defun validate-full-name (name)
+  (check-field (and (<= 1 (length name) 30)) "Full name must be between 1 and 30 characters long.")
+  (check-field (scan *character-name-regex*
+                     (db-query (:select (:unaccent name)) :single))
+               "Invalid name.")
+  name)
+
+(defun validate-nickname (name)
+  (check-field (and (<= 1 (length name) 15)) "Nickname must be between 1 and 15 characters long.")
+  (check-field (scan *character-name-regex*
+                     (db-query (:select (:unaccent name)) :single))
+               "Invalid name.")
+  name)
+
+(deform name-and-confirmation ()
+  ((:full-name (field-required #'validate-full-name))
+   (:nickname (field-required #'validate-nickname))))
+
+;; Validation
 
 (defun valid-character-name-p (name)
   (when (and (>= (length name) 4)
@@ -26,16 +142,9 @@
     (assert-required "Nickname" name)
     (assert-validation (valid-character-name-p name) "Invalid nickname.")))
 
-(defun field-required (validator)
-  (lambda (&rest args)
-    (check-field (not (emptyp (car args))) "Field is required.")
-    (apply validator args)))
-
 (deform newchar ()
   ((:pronoun #'identity)
-   (:first-name (field-required #'identity))
-   (:nickname (field-required #'identity))
-   (:last-name (field-required #'identity))
+   (:name (field-required #'identity))
    (:origin #'identity)
    (:parents #'identity)
    (:siblings #'identity)
@@ -52,10 +161,7 @@
   (with-transaction ()
     (let ((entity (create-entity)))
       (configure-noun entity "person" :plural "people")
-      (configure-nickname entity entity (format nil "~A '~A' ~A"
-                                                (field-value form :first-name)
-                                                (field-value form :nickname)
-                                                (field-value form :last-name)))
+      (configure-nickname entity entity (field-value form :name))
       (add-body entity account-id)
       #+nil
       (let ((cc-values-id (insert-row 'cc-values
