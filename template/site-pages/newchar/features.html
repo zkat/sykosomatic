@@ -1,0 +1,34 @@
+<p>
+  Now that we have an idea of your character's history, career, and relationships -- and hopefully
+  his/her/their personality -- let's talk about what he/she/they look/looks like.
+</p>
+<p>
+  If you were setting up your character on a blind date, and you needed to tell the date how to find
+  your character in the busy bar where you arranged for them to meet up, what would you tell them?
+</p>
+<p>
+  Do/Does he/she/they have a big nose? Is/are he/she/they really tall? Or maybe he/she/they is/are
+  completely bland? Is/are he/she/they a
+  textbook <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Mary_sue">Mary Sue</a> with a
+  perfect body and purple eyes?
+</p>
+<p>
+  You can pick up to 5 unique features that distinguish your character from others.
+</p>
+<button type="button" id="add-feature" class="button">Add a feature</button>
+<span class="error">{{ TMPL_VAR feature-error }}</span>
+<form name="feature-info" action="{{ TMPL_VAR action-page }}" method="post">
+  <div id="features">
+    {{ TMPL_LOOP feature-divs }}
+    <div class="features">
+      {{ TMPL_CALL feature-field }}
+      <select id="{{ TMPL_VAR adj-field-id }}" name="{{ TMPL_VAR adj-field-name }}"
+              class="feature-adjs">
+        <option value="" selected="selected">{{ TMPL_VAR adj-field-label }}</option>
+      </select>
+      <button type="button" class="button">Remove</button>
+    </div>
+    {{ /TMPL_LOOP }}
+  </div>
+  <input type="submit" value="Next" class="button" />
+</form>

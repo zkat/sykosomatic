@@ -79,7 +79,7 @@ function init_feature_section() {
         div.hide();
     });
     $('.feature-name').change(function(){
-        var div = $(this).parent('.field');
+        var div = $(this).parent('.field').parent('.features');
         $.get('/newchar/feature-adjs',{'feature-name':$(this).val()},function(data){
             $(div).children('.feature-adjs').html(data).trigger("liszt:updated");
         });

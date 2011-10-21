@@ -1,49 +1,52 @@
 * Tasks
 ** Pages
 *** /newchar
-**** TODO Configuration UI
-     Set up a nice web interface that waifu can use to do basic CRUD on all the different character
-     creation options.
-**** TODO Create appropriate entities and modifiers
-**** TODO (Maybe) Previews
-    Each section should have an informative preview that shows how the player's selections are
-    affecting something about the character. Refer to waifu's handy-dandy notes for specifics.
-***** TODO Identity
-     Have a sentence that is auto-updated as they pick things from the dropdown and type in a name.
-     Something like "You are creating a new character. His name is Thomas Janus, also known as
-     'Wolf'."
-***** TODO Early Life
-     A sentence that gives a basic blurb about the character's family and childhood information,
-     which also includes the identity:
-     "Thomas grew up in a middle class family of three children by his two parents."
-***** TODO Later Life
-     "Now Thomas is a <age determined by career> year old. He has some acquaintances, but no one
-     really very close. He is also currently seeing someone. He has spent 10 years in Business."
-***** TODO Here and Now
-     For this one, show an interactive map of the Twin Cities. Perhaps start with a short snippet
-     about what the Twin Cities are, and maybe even some outside links to more information. There
-     should be various places marked on the map, each corresponding to a possible starting location
-     for the character. Maybe have these places marked by Google Maps-style drops/pins.  Clicking
-     on a location or choosing it from the dropdown makes it the current selection, and also
-     displays a short paragraph with more information about what the place is like -- something to
-     give the player an idea of why it sets it apart from the other locations.
-***** TODO Confirm
-     Summarize all the other stuff that was accumulated during character creation, and have the
-     player confirm their decision. The actual submit button will be in here.
-
-**** TODO Proper inputs
-    Replace the mass of text input fields with appropriate stuff like dropdowns.
-***** TODO Careers
-****** TODO Use jQuery UI 1.9's spinner widget for number input
-       meh. Maybe wait for 1.9 to get released.
-***** TODO Location
-****** TODO Draw up a map of the area
-****** TODO Highlight places in the map according to selection
-****** TODO Expand description of place according to selection
-***** TODO Headings
-      I think headings are supposed to be helpful for folks using screen readers and the like. Look
-      into this, and add them where appropriat
+**** DONE Bring the whole interface back to baseline
+**** DONE Redesign the newchar procedure
+     Fuck this big long form. Make it an experience, over various pages.
+**** TODO Create handlers for character creation
+     Each one must validate its parameters, report errors, display everything necessary. *After*
+     those are done, start working on database persistence.
+     Note: The basics are laid out. Just need to hook it up to forms now.
+***** TODO pronoun
+***** TODO growing up
+***** TODO career
+****** TODO Dynamically update 'Character age: '
+****** TODO Hide careers again
+       I seem to have broken it somehow :<
+***** TODO friends and romance
+***** TODO features
+***** TODO location
+***** TODO name and confirmation
+**** TODO update /newchar to point to /newchar/pronoun
+**** TODO Form state and entity creation
+     The state of the form should persist, associated with the web session, until the web session
+     ends (if associated with the session instead of the account, we can allow character creation
+     pre-account-creation). Form fields in each of the creation pages should be pre-populated with
+     the stored values. When 'Create this character' is clicked, all the form state should be
+     cleared from the session, and an entity with the appropriate component rows should be
+     created. If the current session has an account already, we'll toss someone to
+     /role. Otherwise... do we toss them at /signup, or do we let them play for a while without
+     having an account? Just /signup for now.
+**** TODO Pronouns
+     Use the pronoun information from /newchar/pronoun to inform the other creation forms about how
+     to render, instead of using slashes everywhere.
+**** TODO "Back"
+     Allow backwards navigation, as well
+**** TODO Breadcrumbs
+     Add a breadcrumb system
+**** TODO Make it pretty
+     Drop it on someone's lap to make the styling not suck balls
+**** TODO Re-evaluate copy
+     The copy feels a bit like a Wall of Text. If the restyling did not help enough, adjust the copy
+     so it's more concise and actually encourages people to read it.
+**** TODO Cleanup
+     Oh goodness, what a mess. Please tidy up, if appropriate.
 **** TODO Disable 'add' buttons when appropriate
+**** TODO Override 'Enter'?
+     Chee suggested that 'enter' take you to the next field, instead of the usual tab-based
+     behavior. Maybe this is better solved by having users confirm? I'm afraid of breaking user
+     expectations about web forms (where pressing enter does, in fact, submit the form).
 *** /my-account
     Need to have this page to manage account information.
 **** TODO Allow changing of display name.
@@ -60,6 +63,12 @@
      feature that allows cleaning up garbage without giving too much freedom (or requiring too much
      effort to handle formatting, and the like).
 ** Websocket client
+*** TODO opaque method of communicating object ids with client
+    Don't leak the internal IDs of objects. Use an external UID or something like that.
+*** TODO Implement a click-menu for assigning and changing nicknames on objects
+*** TODO Stop leaking errors
+    Only parser errors should be reported through the websocket interface. Other errors should be
+    logged. During dev, just allow them to signal.
 *** TODO Parser, JS-side
      See sketch on whiteboard.
 
@@ -129,6 +138,8 @@
 *** TODO FUTURE define a language-agnostic command definition protocol (a-la-couchdb)
 *** TODO FUTURE Client customization by users
 ** Misc Webapp work
+*** DONE Chosen/jqueryui across site
+    For buttons, things with .button class, and selects.
 *** TODO Sessions
 **** TODO Concurrent session/session history information
      Since sessions last a long time, have a screen where a user can log out all other active
@@ -167,18 +178,7 @@
 **** DONE Pull in html-template and give it a whirl
 **** DONE Convert home page to html-template
 **** DONE Include error display in page template
-**** TODO Convert all other pages to html-template and hook them up to the handlers
-***** DONE 404
-***** DONE Login
-****** DONE Create a text-field template
-***** DONE signup
-***** DONE Stage
-****** DONE Variables
-       This will need to use the gameplay js libs, session-token and char-name
-****** DONE Chat area / game panel
-***** DONE Role
-***** DONE newchar
-      This one's gonna be a doozy...
+**** TODO Convert remaining pages to html-template and hook them up to the handlers
 ***** TODO (later) Scenes
 ***** TODO (later) view-scene
 **** DONE Go through all the pages and make sure titles are in.
@@ -191,6 +191,8 @@
      Start thinking about wrapping form builder with rendering capabilities, so fields don't have to
      manually be written up like they are now. Newchar was -awful-
 **** TODO Test it!
+*** DONE Character encoding
+    wtf hunchentoot y u iso-8859-1?
 *** TODO Logging system
     Need to add a robust way to log server errors/notices/warnings in a more sysadmin-friendly
     way. Do this after the config system is in place so it's easy to configure which log files to
@@ -274,6 +276,7 @@
     should have a description, and should be able to 'contain' other characters. Characters can only
     interact with other characters provided they are in the same location.
 *** TODO Put characters in a location
+*** TODO subterfuge system
 *** TODO Limit dialogue/action interactions to same location
 *** TODO Location transitions
     Changing locations should have a couple of effects:
@@ -324,13 +327,59 @@
     that. Should also have entity searching features.
     Sounds like a generic component registration system is needed that includes a particular API,
     built forms, etc.
+**** TODO Description component
+***** TODO Deal with articles
+****** TODO optional articles
+       Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
+       other kinds of objects would not have articles attached to them?
+******* DONE Implement
+******* TODO Test it
+****** TODO definite articles
+       It's not 'a sky', it's 'the sky'
+****** TODO article exceptions
+       Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
+       vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
+       These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
+       separately?
+***** TODO adjective/feature ordering
+      Should be able to control what order adjectives and features are rendered in base-description.     
+***** TODO Configure which adjectives can be in the base-description
+***** TODO Configure which features can be in the base-description
+***** TODO visible feature/adjective limits
+      Can only have two, counting both.
+***** TODO legal characters
+      alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
+      allowed in nouns, adjectives, and nicknames.
+
+***** TODO Base noun
+      Allowed characters: #\', #\., #\-, #\,, A-Z, 0-9, #\space
+***** TODO Adjectives
+      This should be a ± list using the same validation as base nouns. Can only have one, or two.
+***** TODO Features
+      This should be a ± list of entity IDs. We'll deal with more user-friendly input later. Maximum
+      of two allowed. Only existing entities can be set as features.
+***** TODO Adjective/feature limits
+      Only two adjectives/features can be present (2 adjs, 0 features; 1 feature, 1 adj; etc)
+***** TODO base-description preview
+      The editor should show a preview of what the base-description will be.
+***** TODO Feature creator
+      The feature field, when clicked, should pop up a window that allows you to create a new feature
+      entity right there.
+      Question: A window? What about recursively setting features in features, editing other aspects
+      of the feature, etc?
+******** TODO Figure out the desired workflow for object building
 *** TODO Vocabulary manager
     A manager for doing CRUD on vocabulary words, configuring what commands verbs are attached to
-    (and possibly viewing the source code for the commands, or at least the documentation for them).
+    (and possibly viewing the source code for the commands, or at least the documentation for
+    them). The command system should also store the source code for the command, and a docstring, so
+    it can be reviewed while selecting.
 *** TODO Room builder
     A dedicated entity editor meant for linking together various rooms, with a nicer view than just
     using the raw component manager. You should be able to do all that this screen can do with the
     component manager, though.
+*** TODO Newchar configurator
+    Set up a nice web interface that waifu can use to do basic CRUD on all the different character
+    creation options, or at least configure the ones that exist.
 ** Database
 *** TODO Look into offering my pooling improvements to postmodern
     Postmodern already has a pooled connection system. Look at it a little closer and figure out how
@@ -408,70 +457,8 @@
 *** TODO session.lisp
 *** TODO db.lisp
 *** TODO entity.lisp
-* New name system
-** TODO Implement name/identifier system
-*** DONE Replace components.nameable
-**** DONE Replace nameable usage in handlers
-     full-name is no longer the desired API call. short-description is.
-**** DONE Hook up name/identifier system to current chat client
-***** DONE Use short-description when performing actions through the parser
-**** DONE Fix test suite
-     All tests except the adj ordering test must pass.
-**** DONE Blow away components.nameable
-*** DONE Update tell-local to be able to handle the way short-description needs an observer
-    ...or something. After reading about SAM, I'm wondering what the right approach is. Then again,
-    the right approach is the one that is written and works :)
-    do-local-entities :)))
-*** TODO adjective/feature ordering
-    Should be able to control what order adjectives and features are rendered in base-description.
-*** TODO Configure which adjectives can be in the base-description
-*** TODO Configure which features can be in the base-description
-
-*** TODO visible feature/adjective limits
-*** TODO legal characters
-    alphabetic characters, spaces, apostrophes, dashes, and periods should be the only characters
-    allowed in nouns, adjectives, and nicknames.
-*** TODO Deal with articles
-**** DONE a/an
-     What a bitch to figure out... just use the first character in the string to start.
-**** TODO optional articles
-     Not everything uses articles. You don't say "a long hair" when referring to a lot of hair. What
-     other kinds of objects would not have articles attached to them?
-**** TODO definite articles
-     It's not 'a sky', it's 'the sky'
-**** TODO article exceptions
-     Since language doesn't go by -spelling-, there are some corner cases where our basic 'is it a
-     vowel character?' test won't fly. For example: 'an hourglass', 'a European'.
-     These are probably quite rare -- perhaps a simple dictionary that they can be looked up in
-     separately?
 *** TODO Thorough tests for accent folding
     ...are gonna have to wait until Eos gets fixed.
-*** TODO Implement the click-menu for assigning and changing nicknames on objects
-*** TODO Implement builder interface for naming entities
-**** DONE Sit with waifu and design this interface before continuing
-**** TODO Base noun
-     Allowed characters: #\', #\., #\-, #\,, A-Z, 0-9, #\space
-**** TODO Adjectives
-     This should be a ± list using the same validation as base nouns. Can only have one, or two.
-**** TODO Features
-     This should be a ± list of entity IDs. We'll deal with more user-friendly input later. Maximum
-     of two allowed. Only existing entities can be set as features.
-**** TODO Adjective/feature limits
-     Only two adjectives/features can be present (2 adjs, 0 features; 1 feature, 1 adj; etc)
-**** TODO base-description preview
-     The editor should show a preview of what the base-description will be.
-**** TODO Feature creator
-     The feature field, when clicked, should pop up a window that allows you to create a new feature
-     entity right there.
-     Question: A window? What about recursively setting features in features, editing other aspects
-     of the feature, etc?
-***** TODO Figure out the desired workflow for object building
-*** TODO (Maybe) Character-collapsing
-    When defining nouns, adjectives, and nicknames, multiple spaces, dashes, and apostrophes should
-    be collapsed into one.
-*** TODO opaque method of communicating object ids with client
-    Don't leak the internal IDs of objects. Use an external UID or something like that.
-*** TODO subterfuge system
 * TODO The generated.html Challenge™
   The point of this challenge is to have enough of a working system to render the contents of
   generated.html *AS IT LOOKS*. That includes the scene header, highlighting objects,
@@ -521,3 +508,8 @@
      location's header image and description.
 **** TODO Render it
      Make it render right.
+
+* TODO New character creation
+** TODO Organize all the form fields into various pages
+** TODO Add flavor text to each page design
+** TODO Implement character creation

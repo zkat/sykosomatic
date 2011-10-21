@@ -1,0 +1,16 @@
+<h2>What makes a character?</h2>
+<p>
+Characters are more than just names and looks: They're stories in an of themselves.
+</p>
+<p>
+A good character has lived their own life -- they had a childhood, they've had relationships
+with friends, family, significant others. Maybe they've had a career of some sort.
+</p>
+<p>
+We'll explore all these questions to help you bring this new character to life, but
+first... what pronoun should we use when referring to them?
+</p>
+<form name="pick-a-pronoun" action="{{ TMPL_VAR action-page }}" method="post">
+  {{ TMPL_CALL pronoun-select }}
+  <input type="submit" value="Next" class="button">
+</form>
