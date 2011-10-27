@@ -10,19 +10,13 @@
 (defun render (form)
   (render-page "signup.html"
                (list :signup-fields
-                     (list (text-input-field "email" "Email"
-                                             :value (field-raw-value form :email)
-                                             :error (field-error form :email))
-                           (text-input-field "display-name" "Display Name"
-                                             :max-length 32
-                                             :value (field-raw-value form :display-name)
-                                             :error (field-error form :display-name))
-                           (text-input-field "password" "Password"
-                                             :type "password"
-                                             :error (field-error form :password))
-                           (text-input-field "confirmation" "Confirm password"
-                                             :type "password"
-                                             :error (field-error form :confirmation))))
+                     (list (text-field form :email)
+                           (text-field form :display-name :max-length 32)
+                           (text-field form :password :type "password"
+                                       :value nil)
+                           (text-field form :confirmation
+                                       :value nil
+                                       :type "password")))
                :title "Sign up for sykosomatic"))
 
 (define-easy-handler (signup :uri "/signup") ()
