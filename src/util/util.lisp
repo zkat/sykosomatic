@@ -24,6 +24,11 @@
 ;; Because SAFETY settings persist from libraries in CCL >:|
 (declaim (optimize (safety 1)))
 
+(rename-package (find-package :cl-form) :cl-form (cons :sykosomatic.util.form
+                                                       (remove :sykosomatic.util.form
+                                                               (package-nicknames (find-package :cl-form))
+                                                               :test #'string=)))
+
 (defmacro def-file-package (name &body defpackage-args)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (defpackage ,name
