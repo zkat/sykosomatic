@@ -45,7 +45,7 @@
 
 (defun select-field (form field-name &key
                      (name (string-downcase field-name))
-                     (label (englishify (string field-name)))
+                     (label (labelify (string field-name)))
                      (id (concatenate 'string (string-downcase field-name) "-field"))
                      class
                      (template #p"fields/select.html")
