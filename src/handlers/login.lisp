@@ -12,8 +12,8 @@
     (:get
      (when-let ((account-id (current-account)))
        (push-error "Already logged in as ~A." (account-email account-id)))
-     (render-page "login.html" (list :login-fields (list (text-input-field "email" "Email")
-                                                         (text-input-field "password" "Password"
+     (render-page "login.html" (list :login-fields (list (text-field "email" "Email")
+                                                         (text-field "password" "Password"
                                                                            :type "password")))
                   :title "Login Page"))
     (:post
