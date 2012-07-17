@@ -16,10 +16,8 @@
   (setf *dispatch-table*
         (list (create-folder-dispatcher-and-handler
                "/res/" *resource-path*)
-              'dispatch-easy-handlers
-              'default-dispatcher))
-  (setf *default-content-type* "text/html; charset=utf-8"
-        *hunchentoot-default-external-format* :utf8)
+              'dispatch-easy-handlers))
+  (setf *default-content-type* "text/html; charset=utf-8")
   ;; (setf *default-handler* 'sykosomatic.handler.404:404-handler)
   ;; (pushnew 404 *approved-return-codes*)
   (setf *rewrite-for-session-urls* nil)
