@@ -14,39 +14,36 @@
 ;;; to your server's capabilities. Do some profiling and make these numbers as high as you can
 ;;; without lagging under heavy load.
 
-(defparameter *key-derivation-iterations* 1056)
+(defparameter *key-derivation-iterations* 720)
 (defparameter *key-length* 32)
-(defun hash-password (password salt)
+(defun hash-password (password salt
+                      &key
+                        (key-iterations *key-derivation-iterations*)
+                        (key-length *key-length*))
   "Password hashing function."
   (ironclad:derive-key
    (make-instance 'ironclad:pbkdf2 :digest :sha256)
    (ironclad:ascii-string-to-byte-array password)
    salt
-   *key-derivation-iterations*
-   *key-length*))
+   key-iterations
+   key-length))
 
 (defun gensalt () (random-byte-array *key-length*))
 
 ;;;
 ;;; DB
 ;;;
-(defgeneric account-email (account))
-(defgeneric account-display-name (account))
-(defgeneric account-password (account))
-(defgeneric account-password-salt (account))
-
-(defmethod account-email ((acc-id integer))
+(defun account-email (acc-id)
   (db-query (:select 'email :from 'account :where (:= 'id acc-id))
-            :single))
-(defmethod account-display-name ((acc-id integer))
-  (db-query (:select 'display-name :from 'account :where (:= 'id acc-id))
             :single))
 
 (defdao account ()
-  ((display-name text :reader account-display-name)
-   (email text :reader account-email)
-   (password bytea :reader account-password)
-   (salt bytea :reader account-password-salt)
+  ((display-name text)
+   (email text)
+   (password bytea)
+   (salt bytea)
+   (key-iterations integer)
+   (key-length integer)
    (created-at timestamp :col-default (:now)))
   (:keys id)
   (:unique-index id)
@@ -54,23 +51,37 @@
   (:unique email)
   (:unique display-name))
 
-(defun find-account (id)
-  (with-db ()
-    (get-dao 'account id)))
-
-(defun find-account-by-email (email)
-  (with-db ()
-    (car (select-dao 'account (:= 'email (string-downcase email))))))
+(defun account-exists-p (email)
+  (values
+   (db-query (:select t :from 'account :where (:= 'email (string-downcase email)))
+             :single)))
 
 (defun validate-account (email password)
-  (when-let (account (find-account-by-email email))
-    (let ((hashed-pass (hash-password password (account-password-salt account))))
-      (when (equalp hashed-pass (account-password account))
-        account))))
+  (cmatch (db-query (:select 'id 'password 'salt 'key-iterations 'key-length
+                             :from 'account
+                             :where (:= 'email email))
+                    :row)
+    ((list id account-pass salt *key-derivation-iterations* *key-length*)
+     (when (equalp account-pass (hash-password password salt))
+       id))
+    (_
+     nil)))
 
 (defun display-name-exists-p (display-name)
-  (db-query (:select t :from 'account :where (:= 'display-name display-name))
-            :single))
+  (values
+   (db-query (:select t :from 'account :where (:= 'display-name display-name))
+             :single)))
+
+(defun change-password (account-id new-password)
+  (let ((salt (gensalt)))
+    (values
+     (db-query (:update 'account
+                        :set
+                        'salt salt
+                        'password (hash-password new-password salt)
+                        'key-iterations *key-derivation-iterations*
+                        'key-length *key-length*
+                        :where (:= 'id account-id))))))
 
 ;;;
 ;;; Bodies
@@ -127,7 +138,7 @@
 
 (defun valid-email (email)
   (check-field (scan *email-regex* email) "Invalid email.")
-  (check-field (not (find-account-by-email email)) "Account already exists.")
+  (check-field (not (account-exists-p email)) "Account already exists.")
   email)
 
 (defun valid-password (password)
@@ -160,4 +171,6 @@
                 :email (field-value form :email)
                 :display-name (field-value form :display-name)
                 :password (hash-password (field-value form :password) salt)
-                :salt salt)))
+                :salt salt
+                :key-iterations *key-derivation-iterations*
+                :key-length *key-length*)))
