@@ -7,7 +7,7 @@
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad #:postmodern
                #:local-time #:html-template
-               #:string-case #:cl-form)
+               #:string-case #:cl-form #:optima)
   :components
   ((:module src
             :serial t

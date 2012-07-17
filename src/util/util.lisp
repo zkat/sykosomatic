@@ -1,5 +1,5 @@
 (cl:defpackage #:sykosomatic.util
-  (:use :cl :alexandria :cl-speedy-queue)
+  (:use :cl :alexandria :cl-speedy-queue :optima)
   (:nicknames :util)
   (:export :def-file-package
            :logit
@@ -18,7 +18,11 @@
            :queue-full-p
            :queue-empty-p
            :enqueue
-           :dequeue))
+           :dequeue
+           ;; Pattern matching
+           :cmatch
+           :multiple-value-cmatch
+           :lambda-cmatch))
 (cl:in-package :sykosomatic.util)
 
 ;; Because SAFETY settings persist from libraries in CCL >:|
