@@ -85,32 +85,33 @@
 
 (defun verify-persistent-session (session-identifier user-agent remote-addr)
   (with-transaction ()
-    (when-let (session-info (db-query (:for-update
-                                       (:select 'id (:< (:+ 'last-seen 'max-time)
-                                                        (:now))
-                                                :from 'persistent-session
-                                                :where (:and (:= 'cookie-value session-identifier)
-                                                             (:= 'user-agent user-agent))))
-                                      :row))
-      (destructuring-bind (session-id expiredp)
-          session-info
-        (when session-id
-          (if expiredp
-              (end-session session-id)
-              (db-query (:update 'persistent-session
-                                 :set 'last-seen (:now)
-                                 'last-remote-addr remote-addr
-                                 :where (:= 'id session-id)
-                                 :returning 'id)
-                        :single)))))))
+    (cmatch (db-query (:for-update
+                       (:select 'id (:< (:+ 'last-seen 'max-time)
+                                        (:now))
+                                :from 'persistent-session
+                                :where (:and (:= 'cookie-value session-identifier)
+                                             (:= 'user-agent user-agent))))
+                      :row)
+      ((list session-id t) when session-id
+       (end-session session-id))
+      ((list session-id nil) when session-id
+       (db-query (:update 'persistent-session
+                          :set 'last-seen (:now)
+                          'last-remote-addr remote-addr
+                          :where (:= 'id session-id)
+                          :returning 'id)
+                 :single))
+      (nil))))
 
 (defmethod session-verify ((request persistent-session-request))
-  (let ((session-identifier (or (cookie-in (session-cookie-name *acceptor*) request)
-                                (get-parameter (session-cookie-name *acceptor*) request))))
-    (when (and session-identifier
-               (stringp session-identifier)
-               (not (emptyp session-identifier)))
-      (verify-persistent-session session-identifier (user-agent request) (remote-addr request)))))
+  (cmatch (or (cookie-in (session-cookie-name *acceptor*) request)
+              (get-parameter (session-cookie-name *acceptor*) request))
+    ((and session-identifier
+          (when (and session-identifier
+                     (stringp session-identifier)
+                     (not (emptyp session-identifier)))))
+     (verify-persistent-session session-identifier (user-agent request) (remote-addr request)))
+    (nil)))
 
 (defun session-cleanup (session-id)
   (with-transaction ()
