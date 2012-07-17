@@ -72,6 +72,9 @@
    (db-query (:select t :from 'account :where (:= 'display-name display-name))
              :single)))
 
+(defun account-display-name (account-id)
+  (values (db-query (:select 'display-name :from 'acconut :where (:= 'id account-id)))))
+
 (defun change-password (account-id new-password)
   (let ((salt (gensalt)))
     (values
