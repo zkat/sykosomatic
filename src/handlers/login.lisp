@@ -1,5 +1,6 @@
 (util:def-file-package #:sykosomatic.handler.login
   (:use :hunchentoot
+        :sykosomatic.util.form
         :sykosomatic.db
         :sykosomatic.template
         :sykosomatic.handler
@@ -8,20 +9,23 @@
   (:export :login))
 
 (define-easy-handler (login :uri "/login") (email password)
-  (case (request-method*)
+  (case (print (request-method*))
     (:get
      (when-let ((account-id (current-account)))
        (push-error "Already logged in as ~A." (account-email account-id)))
-     (render-page "login.html" (list :login-fields (list (text-field "email" "Email")
-                                                         (text-field "password" "Password"
-                                                                           :type "password")))
-                  :title "Login Page"))
+     (let ((form (make-form 'signup)))
+       (render-page "login.html"
+                    (list :login-fields
+                          (list (text-field form "Email")
+                                (text-field form "Password"
+                                            :type "password")))
+                    :title "Login Page")))
     (:post
      (when (current-account)
        (redirect "/login"))
-     (if-let ((account (validate-account email password)))
+     (if-let ((account-id (validate-account email password)))
        (progn
-         (start-persistent-session (id account))
+         (start-persistent-session account-id)
          (logit "~A logged in." email)
          (redirect "/role"))
        (progn
