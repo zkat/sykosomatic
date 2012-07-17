@@ -21,7 +21,7 @@
    ;; Errors
    :push-error :session-errors))
 
-(defclass sykosomatic-acceptor (acceptor)
+(defclass sykosomatic-acceptor (easy-acceptor)
   ())
 
 (defclass persistent-session-request (request)
