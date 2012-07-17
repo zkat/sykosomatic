@@ -7,7 +7,7 @@
                #:bordeaux-threads #:cl-ppcre
                #:jsown #:ironclad #:postmodern
                #:local-time #:html-template
-               #:string-case)
+               #:string-case #:cl-form)
   :components
   ((:module src
             :serial t
@@ -16,7 +16,6 @@
                       :serial t
                       :components
                       ((:file "util")
-                       (:file "form")
                        (:file "smug")
                        (:file "timer")))
              (:file "config")

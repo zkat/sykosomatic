@@ -10,7 +10,7 @@
             ((:file "test")
              (:module util
                       :components
-                      ((:file "form")))
+                      ())
              (:file "entity")
              (:module components
                       :components
