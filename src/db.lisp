@@ -11,7 +11,7 @@
    ;; Connections
    :with-db :with-transaction
    :get-connection
-   :done-with-connection
+   :return-connection
    ;; Development utilities
    :dblog :init-db :rebuild-db :rebuild-table
    :drop-table :drop-all-tables
@@ -44,7 +44,7 @@
           (dequeue *connection-pool*)))
       (apply #'connect (list *db-name* *db-user* *db-password* *db-host*))))
 
-(defun done-with-connection (connection)
+(defun return-connection (connection)
   (bt:with-lock-held (*connection-pool-lock*)
     (if (queue-full-p *connection-pool*)
         (disconnect connection)
@@ -52,8 +52,9 @@
 
 (defun clear-pooled-connections ()
   (bt:with-lock-held (*connection-pool-lock*)
-    (loop until (queue-empty-p *connection-pool*)
+    (loop
        for connection = (dequeue *connection-pool*)
+       while connection
        when (connected-p connection)
        do (disconnect connection))))
 
@@ -63,7 +64,7 @@
                           (get-connection))))
      (unwind-protect (progn ,@body)
        (unless reusing-connection-p
-         (done-with-connection *database*)))))
+         (return-connection *database*)))))
 
 (defmacro db-query (query &rest args/format)
   `(with-db () (query ,query ,@args/format)))
